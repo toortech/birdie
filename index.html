@@ -6,24 +6,33 @@
   <title>Birdie Bush Bandits</title>
   <style>
     body {
-      background-color: #007BFF;   /* blue background */
+      background-color: #007BFF;
       font-family: sans-serif;
       text-align: center;
       padding: 2rem;
       margin: 0;
-      color: white;                /* default text color */
+      color: white;
     }
     h1 {
-      color: #28A745;              /* green title */
-      font-weight: bold;           /* bold */
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;            /* increased font size */
+      color: #28A745;
+      font-weight: bold;
       margin-bottom: 0.5rem;
     }
+    h1 img {
+      width: 50px;                /* size of the golf ball icons */
+      height: auto;
+      margin: 0 10px;
+    }
     h2 {
-      font-style: italic;          /* italic subtitle */
+      font-style: italic;
       margin-top: 0;
       font-size: 1.25rem;
     }
-    img {
+    img.main-image {
       max-width: 100%;
       height: auto;
       border: 1px solid #ccc;
@@ -32,8 +41,12 @@
   </style>
 </head>
 <body>
-  <h1>Birdie Bush Bandits</h1>
+  <h1>
+    <img src="golfball.png" alt="Golf ball icon">
+    Birdie Bush Bandits
+    <img src="golfball.png" alt="Golf ball icon">
+  </h1>
   <h2>Lost &amp; Found – This site is under construction</h2>
-  <img src="golf-flag.jpeg" alt="Golfer holding the flag" />
+  <img class="main-image" src="golf-flag.jpeg" alt="Golfer holding the flag" />
 </body>
 </html>
