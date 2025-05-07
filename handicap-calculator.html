@@ -26,6 +26,7 @@
   <h2>Handicap Calculator</h2>
   <div class="calculator">
     <p>Enter up to 20 recent rounds. You need at least 3 to calculate.</p>
+
     <!-- Course & Tee Lookup -->
     <label for="course-select">Select Course</label>
     <input id="course-select" placeholder="Start typing course name..." list="courses">
@@ -40,41 +41,51 @@
   </div>
 
   <script>
-    // Bthree UK Golf Data API
+    // Use a public CORS proxy to avoid CORS errors in browser
+    const PROXY = 'https://api.allorigins.win/raw?url=';
     const API_BASE = 'https://api.bthree.uk/golf/v1';
     let courseData = {};
 
-    async function loadCoursesFromAPI() {
-      try {
-        const clubsRes = await fetch(`${API_BASE}/clubs`);
-        const clubs = await clubsRes.json();
-        for (const club of clubs) {
-          const coursesRes = await fetch(`${API_BASE}/clubs/${club.id}/courses`);
-          const courses = await coursesRes.json();
-          for (const course of courses) {
-            const name = course.name;
-            courseData[name] = {};
-            // assume course.tees is array of {color, courseRating, slopeRating}
-            for (const tee of course.tees) {
-              courseData[name][tee.color.toLowerCase()] = {
-                courseRating: tee.courseRating,
-                slopeRating: tee.slopeRating
-              };
-            }
-          }
-        }
-        // Populate datalist
-        const dl = document.getElementById('courses');
-        Object.keys(courseData).sort().forEach(name => {
-          const opt = document.createElement('option'); opt.value = name;
-          dl.appendChild(opt);
-        });
-      } catch (e) {
-        console.error('Failed to load courses:', e);
-      }
+    async function fetchJSON(url) {
+      const res = await fetch(PROXY + encodeURIComponent(url));
+      if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+      return res.json();
     }
 
-    // Initialize calculator UI
+    async function loadCourses() {
+      // Fetch clubs via proxy
+      const clubs = await fetchJSON(`${API_BASE}/clubs`);
+      for (const club of clubs) {
+        const courses = await fetchJSON(`${API_BASE}/clubs/${club.id}/courses`);
+        courses.forEach(course => {
+          const name = course.name;
+          courseData[name] = courseData[name] || {};
+          course.tees.forEach(tee => {
+            courseData[name][tee.color.toLowerCase()] = {
+              courseRating: tee.courseRating,
+              slopeRating: tee.slopeRating
+            };
+          });
+        });
+      }
+      // Populate datalist
+      const dl = document.getElementById('courses');
+      Object.keys(courseData).sort().forEach(name => {
+        const opt = document.createElement('option'); opt.value = name;
+        dl.appendChild(opt);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      try {
+        await loadCourses();
+      } catch (err) {
+        console.error('Error loading courses:', err);
+        alert('Unable to load course data. Please check your connection.');
+      }
+    });
+
+    // Calculator UI
     const container = document.getElementById('rounds-container');
     const addBtn = document.getElementById('add-round');
     const calcBtn = document.getElementById('calculate');
@@ -94,27 +105,22 @@
       `;
       return div;
     }
+
     function addRound() {
       if (container.children.length < 20) container.appendChild(createRoundInput(container.children.length));
     }
+    addBtn.addEventListener('click', addRound);
+    for (let i = 0; i < 3; i++) addRound();
 
-    // Autofill ratings on course or tee change
     function autofillRatings() {
-      const name = courseSelect.value;
-      const color = teeSelect.value;
-      if (courseData[name] && courseData[name][color]) {
-        const { courseRating, slopeRating } = courseData[name][color];
-        document.querySelectorAll('.course-rating').forEach(inp => inp.value = courseRating);
-        document.querySelectorAll('.slope-rating').forEach(inp => inp.value = slopeRating);
+      const data = courseData[courseSelect.value] && courseData[courseSelect.value][teeSelect.value];
+      if (data) {
+        document.querySelectorAll('.course-rating').forEach(inp => inp.value = data.courseRating);
+        document.querySelectorAll('.slope-rating').forEach(inp => inp.value = data.slopeRating);
       }
     }
-
-    addBtn.addEventListener('click', addRound);
     courseSelect.addEventListener('change', autofillRatings);
     teeSelect.addEventListener('change', autofillRatings);
-
-    // Preload 3 rounds
-    for (let i = 0; i < 3; i++) addRound();
 
     calcBtn.addEventListener('click', () => {
       const diffs = Array.from(container.children).map(div => {
@@ -127,13 +133,10 @@
       if (diffs.length < 3) return resultEl.textContent = 'Enter at least 3 complete rounds.';
       diffs.sort((a, b) => a - b);
       const countMap = {3:1,4:1,5:1,6:2,7:2,8:2,9:3,10:3,11:3,12:4,13:4,14:4,15:5,16:5,17:6,18:7,19:8,20:10};
-      const take = countMap[diffs.length] || Math.ceil(diffs.length / 3);
+      const take = countMap[diffs.length] || Math.ceil(diffs.length/3);
       const avg = diffs.slice(0, take).reduce((sum, v) => sum + v, 0) / take;
-      resultEl.textContent = `Your Handicap Index is ${(avg * 0.96).toFixed(1)}`;
+      resultEl.textContent = `Your Handicap Index is ${(avg*0.96).toFixed(1)}`;
     });
-
-    // Load courses on startup
-    loadCoursesFromAPI();
   </script>
 </body>
 </html>
