@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birdie Bush Bandits &ndash; Photo Gallery</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    body {
+      background-color: #007BFF;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 2rem;
+      margin: 0 auto;
+      color: white;
+      max-width: 1200px;
+      overflow: hidden;
+    }
+    h1 {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      color: #28A745;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    h1 img {
+      width: 50px;
+      margin: 0 8px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1.5rem;
+      color: #FFFFFF;
+      text-decoration: none;
+      font-weight: bold;
+      border: 2px solid #28A745;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: background-color 0.3s;
+    }
+    .back-link:hover {
+      background-color: rgba(255,255,255,0.3);
+    }
+    .upload-section {
+      margin: 1rem 0;
+    }
+    .upload-label {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background-color: #28A745;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      color: #fff;
+      transition: background-color 0.3s;
+    }
+    .upload-label:hover {
+      background-color: #218838;
+    }
+    .upload-input {
+      display: none;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    .gallery-img {
+      width: 100%;
+      height: auto;
+      border: 2px solid #28A745;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .gallery-img:hover {
+      transform: scale(1.05);
+    }
+    /* Lightbox styles */
+    .lightbox {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      align-items: center;
+      justify-content: center;
+    }
+    .lightbox-img {
+      max-width: 90%;
+      max-height: 80%;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+    .lightbox-close {
+      position: absolute;
+      top: 1rem; right: 1.5rem;
+      font-size: 2rem;
+      color: white;
+      cursor: pointer;
+    }
+    .lightbox-caption {
+      color: #ddd;
+      margin-top: 1rem;
+      font-size: 1rem;
+      text-align: center;
+    }
+    /* Password overlay */
+    #login-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+    #login-box {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 8px;
+      text-align: center;
+      max-width: 90%;
+      width: 300px;
+    }
+    #login-box input {
+      width: 100%;
+      padding: 0.5rem;
+      margin: 1rem 0;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    #login-box button {
+      padding: 0.5rem 1rem;
+      background: #28A745;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    #login-box button:hover {
+      background: #218838;
+    }
+    #error-msg {
+      color: red;
+      font-size: 0.9rem;
+      display: none;
+    }
+    @media (max-width: 480px) {
+      body { padding: 1rem; }
+      h1 { font-size: 2rem; }
+      .gallery { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Password Protection Overlay -->
+  <div id="login-overlay">
+    <div id="login-box">
+      <h2>Enter Password</h2>
+      <input type="password" id="pw-input" placeholder="Password">
+      <div id="error-msg">Incorrect password</div>
+      <button id="pw-submit">Unlock Gallery</button>
+    </div>
+  </div>
+
+  <div id="main-content" style="display:none;">
+    <h1>
+      <img src="golfball.png" alt="Golf ball icon">
+      Birdie Bush Bandits
+      <img src="golfball.png" alt="Golf ball icon">
+    </h1>
+    <div class="founded">Founded August 2020</div>
+    <a class="back-link" href="index.html">&larr; Back to Home</a>
+
+    <!-- Image Upload Section -->
+    <div class="upload-section">
+      <label for="image-upload" class="upload-label">Upload Photos</label>
+      <input type="file" id="image-upload" class="upload-input" accept="image/*" multiple>
+    </div>
+
+    <h2>Photo Gallery</h2>
+    <div class="gallery" id="gallery">
+      <!-- Preloaded images -->
+      <img src="images/photo1.jpg" alt="Band on the green" class="gallery-img">
+      <img src="images/photo2.jpg" alt="Group shot" class="gallery-img">
+      <img src="images/photo3.jpg" alt="Trophy presentation" class="gallery-img">
+      <img src="images/photo4.jpg" alt="Action shot" class="gallery-img">
+    </div>
+
+    <!-- Lightbox Modal -->
+    <div id="lightbox" class="lightbox">
+      <span class="lightbox-close">&times;</span>
+      <img class="lightbox-img" id="lightbox-img" src="" alt="">
+      <div id="lightbox-caption" class="lightbox-caption"></div>
+    </div>
+  </div>
+
+  <script>
+    // Change this to your desired password
+    const PASSWORD = 'secret123';
+    const overlay = document.getElementById('login-overlay');
+    const mainContent = document.getElementById('main-content');
+    const pwInput = document.getElementById('pw-input');
+    const pwSubmit = document.getElementById('pw-submit');
+    const errMsg = document.getElementById('error-msg');
+
+    pwSubmit.addEventListener('click', () => {
+      if (pwInput.value === PASSWORD) {
+        overlay.style.display = 'none';
+        mainContent.style.display = '';
+      } else {
+        errMsg.style.display = 'block';
+      }
+    });
+
+    pwInput.addEventListener('keypress', e => {
+      if (e.key === 'Enter') pwSubmit.click();
+    });
+
+    // Gallery & Lightbox only initialize after unlock
+    const initGallery = () => {
+      const uploadInput = document.getElementById('image-upload');
+      const gallery = document.getElementById('gallery');
+      const lightbox = document.getElementById('lightbox');
+      const lbImg     = document.getElementById('lightbox-img');
+      const lbCap     = document.getElementById('lightbox-caption');
+      const lbClose   = document.querySelector('.lightbox-close');
+
+      // Load stored uploads
+      let stored = JSON.parse(localStorage.getItem('uploadedImages') || '[]');
+      stored.forEach(url => addImage(url));
+
+      uploadInput.addEventListener('change', e => {
+        const files = Array.from(e.target.files);
+        files.forEach(file => {
+          const reader = new FileReader();
+          reader.onload = ev => {
+            const dataURL = ev.target.result;
+            addImage(dataURL);
+            stored.push(dataURL);
+            localStorage.setItem('uploadedImages', JSON.stringify(stored));
+          };
+          reader.readAsDataURL(file);
+        });
+        uploadInput.value = '';
+      });
+
+      function addImage(src) {
+        const img = document.createElement('img');
+        img.src = src;
+        img.alt = 'User uploaded photo';
+        img.className = 'gallery-img';
+        img.addEventListener('click', () => openLightbox(img));
+        gallery.appendChild(img);
+      }
+
+      function openLightbox(img) {
+        lbImg.src = img.src;
+        lbCap.textContent = img.alt;
+        lightbox.style.display = 'flex';
+      }
+
+      // Attach click for preloaded images
+      document.querySelectorAll('.gallery-img').forEach(img => {
+        img.addEventListener('click', () => openLightbox(img));
+      });
+
+      lbClose.addEventListener('click', () => lightbox.style.display = 'none');
+      lightbox.addEventListener('click', e => {
+        if (e.target === lightbox) lightbox.style.display = 'none';
+      });
+    };
+
+    // Initialize after unlocking
+    pwSubmit.addEventListener('click', initGallery);
+  </script>
+</body>
+</html>
