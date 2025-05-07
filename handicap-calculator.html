@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Birdie Bush Bandits – Handicap Calculator</title>
   <style>
     body {
@@ -92,7 +92,6 @@
       font-weight: bold;
       text-align: center;
     }
-    /* Responsive for small screens */
     @media (max-width: 600px) {
       .round {
         grid-template-columns: 1fr;
@@ -111,9 +110,14 @@
   </style>
 </head>
 <body>
-  <h1><img src="golfball.png" alt="">Birdie Bush Bandits<img src="golfball.png" alt=""></h1>
+  <h1>
+    <img src="golfball.png" alt="Golf ball icon">
+    Birdie Bush Bandits
+    <img src="golfball.png" alt="Golf ball icon">
+  </h1>
   <div class="founded">Founded August 2020</div>
   <a class="back-link" href="index.html">&larr; Back to Home</a>
+
   <h2>Handicap Calculator</h2>
   <div class="calculator">
     <p>Enter up to 20 rounds. Minimum 3 to calculate.</p>
@@ -122,6 +126,7 @@
     <button id="calculate">Calculate Handicap</button>
     <div class="result" id="handicap-result"></div>
   </div>
+
   <script>
     const courseData = {
       "Richings Park Golf Club": { white:{courseRating:70.7,slopeRating:128},yellow:{courseRating:68.3,slopeRating:121},red:{courseRating:65.9,slopeRating:115} },
@@ -138,6 +143,7 @@
     const addBtn = document.getElementById('add-round');
     const calcBtn = document.getElementById('calculate');
     const resultEl = document.getElementById('handicap-result');
+
     function createRoundInput(idx) {
       const div = document.createElement('div'); div.className='round';
       const courseLabel=document.createElement('label');courseLabel.textContent=`Round ${idx+1} Course`;
@@ -156,9 +162,11 @@
       function updateAll(){const data=courseData[courseSelect.value][teeSelect.value];crInput.value=data.courseRating;srInput.value=data.slopeRating;let s=parseFloat(scoreInput.value),cr=parseFloat(crInput.value),sr=parseFloat(srInput.value);diffInput.value=!isNaN(s)&&!isNaN(cr)&&!isNaN(sr)?((s-cr)*113/sr).toFixed(1):'';}
       [courseSelect,teeSelect].forEach(e=>e.addEventListener('change',updateAll));[scoreInput,crInput,srInput].forEach(e=>e.addEventListener('input',updateAll));updateAll();return div;
     }
+
     function addRound(){if(roundsContainer.children.length<20)roundsContainer.appendChild(createRoundInput(roundsContainer.children.length));}
     addBtn.addEventListener('click',addRound);
     for(let i=0;i<3;i++)addRound();
+
     calcBtn.addEventListener('click',()=>{const diffs=[];roundsContainer.querySelectorAll('.round').forEach(div=>{let s=parseFloat(div.querySelector('.score').value),cr=parseFloat(div.querySelector('.course-rating').value),sr=parseFloat(div.querySelector('.slope-rating').value);if(!isNaN(s)&&!isNaN(cr)&&!isNaN(sr))diffs.push((s-cr)*113/sr);});if(diffs.length<3){resultEl.textContent='Enter at least 3 complete rounds.';return;}diffs.sort((a,b)=>a-b);const countMap={3:1,4:1,5:1,6:2,7:2,8:2,9:3,10:3,11:3,12:4,13:4,14:4,15:5,16:5,17:6,18:7,19:8,20:10};let take=countMap[diffs.length]||Math.ceil(diffs.length/3);let avg=diffs.slice(0,take).reduce((sum,v)=>sum+v,0)/take;resultEl.textContent=`Your Handicap Index is ${(avg*0.96).toFixed(1)}`;});
   </script>
 </body>
