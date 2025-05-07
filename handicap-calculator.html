@@ -21,18 +21,26 @@
 <body>
   <h1><img src="golfball.png" alt="Golf ball icon">Birdie Bush Bandits<img src="golfball.png" alt="Golf ball icon"></h1>
   <div class="founded">Founded August 2020</div>
-  <a class="back-link" href="index.html">← Back to Home</a>
+  <a class="back-link" href="index.html">&larr; Back to Home</a>
 
   <h2>Handicap Calculator</h2>
   <div class="calculator">
     <p>Enter up to 20 recent rounds. You need at least 3 to calculate.</p>
 
-    <!-- Course & Tee Lookup -->
+    <!-- Manual Courses -->
     <label for="course-select">Select Course</label>
-    <input id="course-select" placeholder="Start typing course name..." list="courses">
-    <datalist id="courses"></datalist>
+    <input id="course-select" list="courses" placeholder="Choose course...">
+    <datalist id="courses">
+      <option value="Richings Park Golf Club">
+      <option value="Thorney Park Golf Club">
+    </datalist>
+
     <label for="tee-select">Select Tee Colour</label>
-    <select id="tee-select"><option value="white">White</option><option value="yellow">Yellow</option><option value="red">Red</option></select>
+    <select id="tee-select">
+      <option value="white">White</option>
+      <option value="yellow">Yellow</option>
+      <option value="red">Red</option>
+    </select>
 
     <div id="rounds-container"></div>
     <button id="add-round">Add Round</button>
@@ -41,51 +49,20 @@
   </div>
 
   <script>
-    // Use a public CORS proxy to avoid CORS errors in browser
-    const PROXY = 'https://api.allorigins.win/raw?url=';
-    const API_BASE = 'https://api.bthree.uk/golf/v1';
-    let courseData = {};
-
-    async function fetchJSON(url) {
-      const res = await fetch(PROXY + encodeURIComponent(url));
-      if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
-      return res.json();
-    }
-
-    async function loadCourses() {
-      // Fetch clubs via proxy
-      const clubs = await fetchJSON(`${API_BASE}/clubs`);
-      for (const club of clubs) {
-        const courses = await fetchJSON(`${API_BASE}/clubs/${club.id}/courses`);
-        courses.forEach(course => {
-          const name = course.name;
-          courseData[name] = courseData[name] || {};
-          course.tees.forEach(tee => {
-            courseData[name][tee.color.toLowerCase()] = {
-              courseRating: tee.courseRating,
-              slopeRating: tee.slopeRating
-            };
-          });
-        });
+    // Hard-coded course data for two courses
+    const courseData = {
+      "Richings Park Golf Club": {
+        white: { courseRating: 70.7, slopeRating: 128 },
+        yellow: { courseRating: 68.3, slopeRating: 121 },
+        red:    { courseRating: 65.9, slopeRating: 115 }
+      },
+      "Thorney Park Golf Club": {
+        white: { courseRating: 68.7, slopeRating: 120 },
+        yellow: { courseRating: 67.0, slopeRating: 117 },
+        red:    { courseRating: 69.3, slopeRating: 119 }
       }
-      // Populate datalist
-      const dl = document.getElementById('courses');
-      Object.keys(courseData).sort().forEach(name => {
-        const opt = document.createElement('option'); opt.value = name;
-        dl.appendChild(opt);
-      });
-    }
+    };
 
-    document.addEventListener('DOMContentLoaded', async () => {
-      try {
-        await loadCourses();
-      } catch (err) {
-        console.error('Error loading courses:', err);
-        alert('Unable to load course data. Please check your connection.');
-      }
-    });
-
-    // Calculator UI
     const container = document.getElementById('rounds-container');
     const addBtn = document.getElementById('add-round');
     const calcBtn = document.getElementById('calculate');
@@ -97,40 +74,53 @@
       const div = document.createElement('div');
       div.innerHTML = `
         <label>Round ${i+1} Score</label>
-        <input type="number" class="score" placeholder="Gross Score" min="0">
+        <input type="number" class="score" placeholder="Gross Score" min="0" required>
         <label>Course Rating</label>
-        <input type="number" class="course-rating" placeholder="Course Rating" step="0.1">
+        <input type="number" class="course-rating" placeholder="Course Rating" step="0.1" required>
         <label>Slope Rating</label>
-        <input type="number" class="slope-rating" placeholder="Slope Rating" min="55" max="155">
+        <input type="number" class="slope-rating" placeholder="Slope Rating" min="55" max="155" required>
       `;
       return div;
     }
 
     function addRound() {
-      if (container.children.length < 20) container.appendChild(createRoundInput(container.children.length));
+      if (container.children.length < 20) {
+        container.appendChild(createRoundInput(container.children.length));
+      }
     }
+
     addBtn.addEventListener('click', addRound);
     for (let i = 0; i < 3; i++) addRound();
 
     function autofillRatings() {
-      const data = courseData[courseSelect.value] && courseData[courseSelect.value][teeSelect.value];
+      const course = courseSelect.value;
+      const tee = teeSelect.value;
+      const data = courseData[course] && courseData[course][tee];
       if (data) {
         document.querySelectorAll('.course-rating').forEach(inp => inp.value = data.courseRating);
         document.querySelectorAll('.slope-rating').forEach(inp => inp.value = data.slopeRating);
       }
     }
+
     courseSelect.addEventListener('change', autofillRatings);
     teeSelect.addEventListener('change', autofillRatings);
 
     calcBtn.addEventListener('click', () => {
-      const diffs = Array.from(container.children).map(div => {
-        const s = parseFloat(div.querySelector('.score').value);
-        const cr = parseFloat(div.querySelector('.course-rating').value);
-        const sr = parseFloat(div.querySelector('.slope-rating').value);
-        if (isNaN(s) || isNaN(cr) || isNaN(sr)) return null;
-        return (s - cr) * 113 / sr;
-      }).filter(d => d !== null);
-      if (diffs.length < 3) return resultEl.textContent = 'Enter at least 3 complete rounds.';
+      const diffs = Array.from(container.children)
+        .map(div => {
+          const s = parseFloat(div.querySelector('.score').value);
+          const cr = parseFloat(div.querySelector('.course-rating').value);
+          const sr = parseFloat(div.querySelector('.slope-rating').value);
+          if (isNaN(s) || isNaN(cr) || isNaN(sr)) return null;
+          return (s - cr) * 113 / sr;
+        })
+        .filter(d => d !== null);
+
+      if (diffs.length < 3) {
+        resultEl.textContent = 'Enter at least 3 complete rounds.';
+        return;
+      }
+
       diffs.sort((a, b) => a - b);
       const countMap = {3:1,4:1,5:1,6:2,7:2,8:2,9:3,10:3,11:3,12:4,13:4,14:4,15:5,16:5,17:6,18:7,19:8,20:10};
       const take = countMap[diffs.length] || Math.ceil(diffs.length/3);
