@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Birdie Bush Bandits</title>
   <style>
+    /* Base Styles */
     body {
       background-color: #007BFF;
       font-family: sans-serif;
       text-align: center;
       padding: 2rem;
-      margin: 0;
+      margin: 0 auto;
       color: white;
+      max-width: 1200px;
     }
     h1 {
       display: inline-flex;
@@ -21,6 +23,7 @@
       color: #28A745;
       font-weight: bold;
       margin-bottom: 0.5rem;
+      flex-wrap: wrap;
     }
     h1 img {
       width: 65px;
@@ -39,15 +42,10 @@
       font-size: 1.25rem;
       line-height: 1.4;
     }
-    .return-text {
-      font-size: 1.25rem;
-      margin: 2rem 0 1rem;
-      font-weight: bold;
-      color: #FFFFFF;
-    }
     .nav-boxes {
       display: flex;
       justify-content: center;
+      flex-wrap: wrap;
       gap: 1rem;
       margin: 2rem 0;
     }
@@ -61,15 +59,53 @@
       font-weight: bold;
       background-color: rgba(255, 255, 255, 0.2);
       transition: background-color 0.3s;
+      flex: 1 1 150px;
+      max-width: 200px;
     }
     .nav-boxes a:hover {
       background-color: rgba(255, 255, 255, 0.4);
     }
+    .return-text {
+      font-size: 1.25rem;
+      margin: 2rem 0 1rem;
+      font-weight: bold;
+      color: #FFFFFF;
+    }
     img.main-image {
-      width: 50%;
+      width: 100%;
+      max-width: 600px;
       height: auto;
       border: 1px solid #ccc;
       margin-top: 1.5rem;
+    }
+
+    /* Responsive Breakpoints */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2.5rem;
+      }
+      .nav-boxes a {
+        padding: 0.75rem 1.5rem;
+        max-width: 150px;
+      }
+    }
+    @media (max-width: 480px) {
+      body {
+        padding: 1rem;
+      }
+      h1 {
+        font-size: 2rem;
+      }
+      .nav-boxes {
+        flex-direction: column;
+      }
+      .nav-boxes a {
+        width: 100%;
+        max-width: none;
+      }
+      img.main-image {
+        max-width: 100%;
+      }
     }
   </style>
 </head>
