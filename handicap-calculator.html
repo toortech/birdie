@@ -3,96 +3,36 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Birdie Bush Bandits &ndash; Handicap Calculator</title>
+  <title>Birdie Bush Bandits – Handicap Calculator</title>
   <style>
-    body {
-      background-color: #007BFF;
-      font-family: sans-serif;
-      text-align: center;
-      padding: 2rem;
-      margin: 0 auto;
-      color: white;
-      max-width: 800px;
-    }
-    h1 {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-      color: #28A745;
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-      flex-wrap: wrap;
-    }
-    h1 img {
-      width: 50px;
-      margin: 0 8px;
-    }
-    .back-link {
-      display: inline-block;
-      margin-bottom: 1.5rem;
-      color: #FFFFFF;
-      text-decoration: none;
-      font-weight: bold;
-      border: 2px solid #28A745;
-      padding: 0.5rem 1rem;
-      border-radius: 6px;
-      transition: background-color 0.3s;
-    }
-    .back-link:hover {
-      background-color: rgba(255,255,255,0.3);
-    }
-    .calculator {
-      background: rgba(255,255,255,0.1);
-      padding: 1.5rem;
-      border-radius: 8px;
-      margin-top: 1rem;
-      text-align: left;
-    }
-    .calculator label {
-      display: block;
-      margin: 0.5rem 0 0.2rem;
-      font-weight: bold;
-    }
-    .calculator input[type="number"] {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      margin-bottom: 1rem;
-    }
-    .calculator button {
-      padding: 0.75rem 1.5rem;
-      background: #28A745;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: bold;
-      margin-top: 0.5rem;
-    }
-    .calculator button:hover {
-      background: #218838;
-    }
-    .result {
-      font-size: 1.25rem;
-      margin-top: 1rem;
-      font-weight: bold;
-    }
+    body { background-color: #007BFF; font-family: sans-serif; text-align: center; padding: 2rem; margin: 0 auto; color: white; max-width: 800px; }
+    h1 { display: inline-flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #28A745; font-weight: bold; margin-bottom: 0.5rem; flex-wrap: wrap; }
+    h1 img { width: 50px; margin: 0 8px; }
+    .back-link { display: inline-block; margin-bottom: 1.5rem; color: #FFFFFF; text-decoration: none; font-weight: bold; border: 2px solid #28A745; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.3s; }
+    .back-link:hover { background-color: rgba(255,255,255,0.3); }
+    .calculator { background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 8px; margin-top: 1rem; text-align: left; }
+    .calculator label { display: block; margin: 0.5rem 0 0.2rem; font-weight: bold; }
+    .calculator input[type="number"], .calculator select, .calculator input[list] { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 1rem; box-sizing: border-box; }
+    .calculator button { padding: 0.75rem 1.5rem; background: #28A745; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 0.5rem; margin-right: 0.5rem; }
+    .calculator button:hover { background: #218838; }
+    .result { font-size: 1.25rem; margin-top: 1rem; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h1>
-    <img src="golfball.png" alt="Golf ball icon">
-    Birdie Bush Bandits
-    <img src="golfball.png" alt="Golf ball icon">
-  </h1>
+  <h1><img src="golfball.png" alt="Golf ball icon">Birdie Bush Bandits<img src="golfball.png" alt="Golf ball icon"></h1>
   <div class="founded">Founded August 2020</div>
-  <a class="back-link" href="index.html">&larr; Back to Home</a>
+  <a class="back-link" href="index.html">← Back to Home</a>
 
   <h2>Handicap Calculator</h2>
   <div class="calculator">
     <p>Enter up to 20 recent rounds. You need at least 3 to calculate.</p>
+    <!-- Course & Tee Lookup -->
+    <label for="course-select">Select Course</label>
+    <input id="course-select" placeholder="Start typing course name..." list="courses">
+    <datalist id="courses"></datalist>
+    <label for="tee-select">Select Tee Colour</label>
+    <select id="tee-select"><option value="white">White</option><option value="yellow">Yellow</option><option value="red">Red</option></select>
+
     <div id="rounds-container"></div>
     <button id="add-round">Add Round</button>
     <button id="calculate">Calculate Handicap</button>
@@ -100,60 +40,100 @@
   </div>
 
   <script>
+    // Bthree UK Golf Data API
+    const API_BASE = 'https://api.bthree.uk/golf/v1';
+    let courseData = {};
+
+    async function loadCoursesFromAPI() {
+      try {
+        const clubsRes = await fetch(`${API_BASE}/clubs`);
+        const clubs = await clubsRes.json();
+        for (const club of clubs) {
+          const coursesRes = await fetch(`${API_BASE}/clubs/${club.id}/courses`);
+          const courses = await coursesRes.json();
+          for (const course of courses) {
+            const name = course.name;
+            courseData[name] = {};
+            // assume course.tees is array of {color, courseRating, slopeRating}
+            for (const tee of course.tees) {
+              courseData[name][tee.color.toLowerCase()] = {
+                courseRating: tee.courseRating,
+                slopeRating: tee.slopeRating
+              };
+            }
+          }
+        }
+        // Populate datalist
+        const dl = document.getElementById('courses');
+        Object.keys(courseData).sort().forEach(name => {
+          const opt = document.createElement('option'); opt.value = name;
+          dl.appendChild(opt);
+        });
+      } catch (e) {
+        console.error('Failed to load courses:', e);
+      }
+    }
+
+    // Initialize calculator UI
     const container = document.getElementById('rounds-container');
     const addBtn = document.getElementById('add-round');
     const calcBtn = document.getElementById('calculate');
     const resultEl = document.getElementById('handicap-result');
+    const courseSelect = document.getElementById('course-select');
+    const teeSelect = document.getElementById('tee-select');
 
-    function createRoundInput(index) {
+    function createRoundInput(i) {
       const div = document.createElement('div');
       div.innerHTML = `
-        <label>Round ${index + 1} Score</label>
+        <label>Round ${i+1} Score</label>
         <input type="number" class="score" placeholder="Gross Score" min="0">
         <label>Course Rating</label>
-        <input type="number" class="course-rating" placeholder="e.g. 72.5" step="0.1">
+        <input type="number" class="course-rating" placeholder="Course Rating" step="0.1">
         <label>Slope Rating</label>
-        <input type="number" class="slope-rating" placeholder="e.g. 113" min="55" max="155">
+        <input type="number" class="slope-rating" placeholder="Slope Rating" min="55" max="155">
       `;
       return div;
     }
-
     function addRound() {
-      const count = container.children.length;
-      if (count >= 20) return;
-      container.appendChild(createRoundInput(count));
+      if (container.children.length < 20) container.appendChild(createRoundInput(container.children.length));
+    }
+
+    // Autofill ratings on course or tee change
+    function autofillRatings() {
+      const name = courseSelect.value;
+      const color = teeSelect.value;
+      if (courseData[name] && courseData[name][color]) {
+        const { courseRating, slopeRating } = courseData[name][color];
+        document.querySelectorAll('.course-rating').forEach(inp => inp.value = courseRating);
+        document.querySelectorAll('.slope-rating').forEach(inp => inp.value = slopeRating);
+      }
     }
 
     addBtn.addEventListener('click', addRound);
-    // Initialize with 3 inputs
+    courseSelect.addEventListener('change', autofillRatings);
+    teeSelect.addEventListener('change', autofillRatings);
+
+    // Preload 3 rounds
     for (let i = 0; i < 3; i++) addRound();
 
     calcBtn.addEventListener('click', () => {
-      const rounds = Array.from(container.children).map(div => {
-        const score = parseFloat(div.querySelector('.score').value);
+      const diffs = Array.from(container.children).map(div => {
+        const s = parseFloat(div.querySelector('.score').value);
         const cr = parseFloat(div.querySelector('.course-rating').value);
-        const slope = parseFloat(div.querySelector('.slope-rating').value);
-        if (isNaN(score) || isNaN(cr) || isNaN(slope)) return null;
-        // Handicap differential
-        const diff = (score - cr) * 113 / slope;
-        return diff;
+        const sr = parseFloat(div.querySelector('.slope-rating').value);
+        if (isNaN(s) || isNaN(cr) || isNaN(sr)) return null;
+        return (s - cr) * 113 / sr;
       }).filter(d => d !== null);
-
-      if (rounds.length < 3) {
-        resultEl.textContent = 'Enter at least 3 complete rounds.';
-        return;
-      }
-      // Sort differentials
-      rounds.sort((a, b) => a - b);
-      const n = rounds.length;
-      // Determine how many to average per WHS
+      if (diffs.length < 3) return resultEl.textContent = 'Enter at least 3 complete rounds.';
+      diffs.sort((a, b) => a - b);
       const countMap = {3:1,4:1,5:1,6:2,7:2,8:2,9:3,10:3,11:3,12:4,13:4,14:4,15:5,16:5,17:6,18:7,19:8,20:10};
-      const take = countMap[n] || Math.ceil(n/3);
-      const selected = rounds.slice(0, take);
-      const avg = selected.reduce((sum, d) => sum + d, 0) / take;
-      const handicapIndex = avg * 0.96;
-      resultEl.textContent = `Your Handicap Index is ${handicapIndex.toFixed(1)}`;
+      const take = countMap[diffs.length] || Math.ceil(diffs.length / 3);
+      const avg = diffs.slice(0, take).reduce((sum, v) => sum + v, 0) / take;
+      resultEl.textContent = `Your Handicap Index is ${(avg * 0.96).toFixed(1)}`;
     });
+
+    // Load courses on startup
+    loadCoursesFromAPI();
   </script>
 </body>
 </html>
