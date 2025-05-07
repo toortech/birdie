@@ -61,6 +61,7 @@
       transition: background-color 0.3s;
       flex: 1 1 150px;
       max-width: 200px;
+      text-align: center;
     }
     .nav-boxes a:hover {
       background-color: rgba(255, 255, 255, 0.4);
@@ -97,11 +98,15 @@
         font-size: 2rem;
       }
       .nav-boxes {
-        flex-direction: column;
+        flex-direction: row;
+        overflow-x: auto;
       }
       .nav-boxes a {
-        width: 100%;
+        flex: 1 1 auto;
         max-width: none;
+        padding: 0.5rem 1rem;
+        white-space: nowrap;
+        border-radius: 0;
       }
       img.main-image {
         max-width: 100%;
