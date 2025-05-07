@@ -1,268 +1,165 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Birdie Bush Bandits – Handicap Calculator</title>
   <style>
-    body { background-color: #007BFF; font-family: sans-serif; text-align: center; padding: 2rem; margin: 0 auto; color: white; max-width: 800px; }
-    h1 { display: inline-flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #28A745; font-weight: bold; margin-bottom: 0.5rem; flex-wrap: wrap; }
-    h1 img { width: 50px; margin: 0 8px; }
-    .back-link { display: inline-block; margin-bottom: 1.5rem; color: #FFFFFF; text-decoration: none; font-weight: bold; border: 2px solid #28A745; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.3s; }
-    .back-link:hover { background-color: rgba(255,255,255,0.3); }
-    .calculator { background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 8px; margin-top: 1rem; text-align: left; }
-    .calculator label { display: block; margin: 0.5rem 0 0.2rem; font-weight: bold; }
-    .calculator input[type="number"], .calculator select { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 1rem; box-sizing: border-box; }
-    .round-row { border: 1px solid rgba(255,255,255,0.3); padding: 1rem; border-radius: 6px; margin-bottom: 1rem; }
-    .calculator button { padding: 0.75rem 1.5rem; background: #28A745; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 0.5rem; margin-right: 0.5rem; }
-    .calculator button:hover { background: #218838; }
-    .result { font-size: 1.25rem; margin-top: 1rem; font-weight: bold; }
+    body {
+      background-color: #007BFF;
+      font-family: sans-serif;
+      text-align: center;
+      padding: 1rem;
+      margin: 0 auto;
+      color: white;
+      max-width: 800px;
+    }
+    h1 {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      color: #28A745;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+      flex-wrap: wrap;
+    }
+    h1 img {
+      width: 40px;
+      margin: 0 5px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 1rem;
+      color: #FFFFFF;
+      text-decoration: none;
+      font-weight: bold;
+      border: 2px solid #28A745;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      transition: background-color 0.3s;
+    }
+    .back-link:hover {
+      background-color: rgba(255,255,255,0.3);
+    }
+    .calculator {
+      background: rgba(255,255,255,0.1);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      text-align: left;
+    }
+    .round {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      background: rgba(255,255,255,0.05);
+      border-radius: 6px;
+    }
+    .round label {
+      font-weight: bold;
+      font-size: 0.9rem;
+    }
+    .round input,
+    .round select {
+      width: 100%;
+      padding: 0.4rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 0.9rem;
+    }
+    .calculator button {
+      width: 48%;
+      padding: 0.75rem;
+      background: #28A745;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 0.25rem 1%;
+      font-size: 1rem;
+    }
+    .calculator button:hover {
+      background: #218838;
+    }
+    .result {
+      font-size: 1.1rem;
+      margin-top: 1rem;
+      font-weight: bold;
+      text-align: center;
+    }
+    /* Responsive for small screens */
+    @media (max-width: 600px) {
+      .round {
+        grid-template-columns: 1fr;
+      }
+      .calculator button {
+        width: 100%;
+        margin: 0.25rem 0;
+      }
+      h1 {
+        font-size: 1.75rem;
+      }
+      .result {
+        font-size: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1><img src="golfball.png" alt="Golf ball icon">Birdie Bush Bandits<img src="golfball.png" alt="Golf ball icon"></h1>
+  <h1><img src="golfball.png" alt="">Birdie Bush Bandits<img src="golfball.png" alt=""></h1>
   <div class="founded">Founded August 2020</div>
   <a class="back-link" href="index.html">&larr; Back to Home</a>
-
   <h2>Handicap Calculator</h2>
   <div class="calculator">
-    <p>Enter up to 20 rounds. Each round choose course & tee. You need at least 3 rounds to calculate.</p>
-
+    <p>Enter up to 20 rounds. Minimum 3 to calculate.</p>
     <div id="rounds-container"></div>
     <button id="add-round">Add Round</button>
     <button id="calculate">Calculate Handicap</button>
     <div class="result" id="handicap-result"></div>
   </div>
-
   <script>
-    // Hard-coded course data
     const courseData = {
-      "Richings Park Golf Club": { white:{courseRating:70.7,slopeRating:128}, yellow:{courseRating:68.3,slopeRating:121}, red:{courseRating:65.9,slopeRating:115} },
-      "Thorney Park Golf Club": { white:{courseRating:68.7,slopeRating:120}, yellow:{courseRating:67.0,slopeRating:117}, red:{courseRating:69.3,slopeRating:119} },
-      "London Airlinks Golf Club": { white:{courseRating:63.4,slopeRating:102}, yellow:{courseRating:62.0,slopeRating:98}, red:{courseRating:61.1,slopeRating:92} },
-      "Royal Ascot Golf Club": { white:{courseRating:70.3,slopeRating:123}, yellow:{courseRating:68.5,slopeRating:118}, red:{courseRating:70.0,slopeRating:113} },
-      "Stoke Park Golf Club": { white:{courseRating:70.9,slopeRating:126}, yellow:{courseRating:69.1,slopeRating:122}, red:{courseRating:68.5,slopeRating:118} },
-      "Inspirations Golf Club": { white:{courseRating:74.3,slopeRating:128}, yellow:{courseRating:72.1,slopeRating:124}, red:{courseRating:70.5,slopeRating:120} }
+      "Richings Park Golf Club": { white:{courseRating:70.7,slopeRating:128},yellow:{courseRating:68.3,slopeRating:121},red:{courseRating:65.9,slopeRating:115} },
+      "Thorney Park Golf Club": { white:{courseRating:68.7,slopeRating:120},yellow:{courseRating:67.0,slopeRating:117},red:{courseRating:69.3,slopeRating:119} },
+      "London Airlinks Golf Club": { white:{courseRating:63.4,slopeRating:102},yellow:{courseRating:62.0,slopeRating:98},red:{courseRating:61.1,slopeRating:92} },
+      "Royal Ascot Golf Club": { white:{courseRating:70.3,slopeRating:123},yellow:{courseRating:68.5,slopeRating:118},red:{courseRating:70.0,slopeRating:113} },
+      "Stoke Park Golf Club": { white:{courseRating:70.9,slopeRating:126},yellow:{courseRating:69.1,slopeRating:122},red:{courseRating:68.5,slopeRating:118} },
+      "Inspirations Golf Club": { white:{courseRating:74.3,slopeRating:128},yellow:{courseRating:72.1,slopeRating:124},red:{courseRating:70.5,slopeRating:120} }
     };
-
-    const container = document.getElementById('rounds-container');
+    const courses = Object.keys(courseData);
+    const tees = ["white","yellow","red"];
+    const teeNames = {white:"White",yellow:"Yellow",red:"Red"};
+    const roundsContainer = document.getElementById('rounds-container');
     const addBtn = document.getElementById('add-round');
     const calcBtn = document.getElementById('calculate');
     const resultEl = document.getElementById('handicap-result');
-
-    // Create a round input row with course & tee selects
-    function createRoundInput(i) {
-      const div = document.createElement('div');
-      div.className = 'round-row';
-      div.innerHTML = `
-        <label>Round ${i+1}</label>
-        <label>Course</label>
-        <select class="course-select">
-          <option value="">Select course...</option>
-        </select>
-        <label>Tee Colour</label>
-        <select class="tee-select">
-          <option value="white">White</option>
-          <option value="yellow">Yellow</option>
-          <option value="red">Red</option>
-        </select>
-        <label>Gross Score</label>
-        <input type="number" class="score" min="0" required>
-      `;
-      // Populate course options
-      const courseSel = div.querySelector('.course-select');
-      Object.keys(courseData).forEach(name => {
-        const opt = document.createElement('option'); opt.value = name; opt.textContent = name;
-        courseSel.appendChild(opt);
-      });
-      // Attach autofill when course or tee changes
-      function autofill() {
-        const course = courseSel.value;
-        const tee = div.querySelector('.tee-select').value;
-        if (courseData[course] && courseData[course][tee]) {
-          const { courseRating, slopeRating } = courseData[course][tee];
-          div.querySelector('.course-rating')?.remove();
-          div.querySelector('.slope-rating')?.remove();
-          const crInput = document.createElement('input'); crInput.type='number'; crInput.readOnly=true; crInput.className='course-rating'; crInput.value=courseRating;
-          const srInput = document.createElement('input'); srInput.type='number'; srInput.readOnly=true; srInput.className='slope-rating'; srInput.value=slopeRating;
-          div.insertBefore(crInput, div.querySelector('.score'));
-          div.insertBefore(srInput, div.querySelector('.score'));
-        }
-      }
-      div.querySelector('.tee-select').addEventListener('change', autofill);
-      courseSel.addEventListener('change', autofill);
-      return div;
+    function createRoundInput(idx) {
+      const div = document.createElement('div'); div.className='round';
+      const courseLabel=document.createElement('label');courseLabel.textContent=`Round ${idx+1} Course`;
+      const courseSelect=document.createElement('select');courseSelect.className='course-select';courses.forEach(c=>{let o=document.createElement('option');o.value=c;o.textContent=c;courseSelect.appendChild(o);});
+      const teeLabel=document.createElement('label');teeLabel.textContent='Tee Colour';
+      const teeSelect=document.createElement('select');teeSelect.className='tee-select';tees.forEach(t=>{let o=document.createElement('option');o.value=t;o.textContent=teeNames[t];teeSelect.appendChild(o);});
+      const scoreLabel=document.createElement('label');scoreLabel.textContent='Gross Score';
+      const scoreInput=document.createElement('input');scoreInput.type='number';scoreInput.className='score';scoreInput.min=0;scoreInput.required=true;
+      const crLabel=document.createElement('label');crLabel.textContent='Course Rating';
+      const crInput=document.createElement('input');crInput.type='number';crInput.className='course-rating';crInput.step=0.1;crInput.required=true;
+      const srLabel=document.createElement('label');srLabel.textContent='Slope Rating';
+      const srInput=document.createElement('input');srInput.type='number';srInput.className='slope-rating';srInput.min=55;srInput.max=155;srInput.required=true;
+      const diffLabel=document.createElement('label');diffLabel.textContent='Differential';
+      const diffInput=document.createElement('input');diffInput.type='text';diffInput.className='differential';diffInput.readOnly=true;
+      [courseLabel,courseSelect,teeLabel,teeSelect,scoreLabel,scoreInput,crLabel,crInput,srLabel,srInput,diffLabel,diffInput].forEach(e=>div.appendChild(e));
+      function updateAll(){const data=courseData[courseSelect.value][teeSelect.value];crInput.value=data.courseRating;srInput.value=data.slopeRating;let s=parseFloat(scoreInput.value),cr=parseFloat(crInput.value),sr=parseFloat(srInput.value);diffInput.value=!isNaN(s)&&!isNaN(cr)&&!isNaN(sr)?((s-cr)*113/sr).toFixed(1):'';}
+      [courseSelect,teeSelect].forEach(e=>e.addEventListener('change',updateAll));[scoreInput,crInput,srInput].forEach(e=>e.addEventListener('input',updateAll));updateAll();return div;
     }
-
-    // Initialize with 3 rounds
-    for (let i = 0; i < 3; i++) container.appendChild(createRoundInput(i));
-
-    addBtn.addEventListener('click', () => {
-      if (container.children.length < 20) container.appendChild(createRoundInput(container.children.length));
-    });
-
-    // Calculate Handicap Index from each round's rating and score
-    calcBtn.addEventListener('click', () => {
-      const diffs = Array.from(container.children).map(div => {
-        const score = parseFloat(div.querySelector('.score').value);
-        const cr = parseFloat(div.querySelector('.course-rating').value);
-        const sr = parseFloat(div.querySelector('.slope-rating').value);
-        if (isNaN(score) || isNaN(cr) || isNaN(sr)) return null;
-        return (score - cr) * 113 / sr;
-      }).filter(d=>d!==null);
-      if (diffs.length < 3) { resultEl.textContent = 'Enter at least 3 complete rounds.'; return; }
-      diffs.sort((a,b)=>a-b);
-      const countMap={3:1,4:1,5:1,6:2,7:2,8:2,9:3,10:3,11:3,12:4,13:4,14:4,15:5,16:5,17:6,18:7,19:8,20:10};
-      const take = countMap[diffs.length]||Math.ceil(diffs.length/3);
-      const avg = diffs.slice(0,take).reduce((sum,v)=>sum+v,0)/take;
-      resultEl.textContent = `Your Handicap Index is ${(avg*0.96).toFixed(1)}`;
-    });
-  </script>
-</body>
-</html><!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Birdie Bush Bandits – Handicap Calculator</title>
-  <style>
-    body { background-color: #007BFF; font-family: sans-serif; text-align: center; padding: 2rem; margin: 0 auto; color: white; max-width: 800px; }
-    h1 { display: inline-flex; align-items: center; justify-content: center; font-size: 2.5rem; color: #28A745; font-weight: bold; margin-bottom: 0.5rem; flex-wrap: wrap; }
-    h1 img { width: 50px; margin: 0 8px; }
-    .back-link { display: inline-block; margin-bottom: 1.5rem; color: #FFFFFF; text-decoration: none; font-weight: bold; border: 2px solid #28A745; padding: 0.5rem 1rem; border-radius: 6px; transition: background-color 0.3s; }
-    .back-link:hover { background-color: rgba(255,255,255,0.3); }
-    .calculator { background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 8px; margin-top: 1rem; text-align: left; }
-    .calculator label { display: block; margin: 0.5rem 0 0.2rem; font-weight: bold; }
-    .calculator input[type="number"], .calculator select, .calculator input[list] { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 1rem; box-sizing: border-box; }
-    .calculator button { padding: 0.75rem 1.5rem; background: #28A745; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 0.5rem; margin-right: 0.5rem; }
-    .calculator button:hover { background: #218838; }
-    .result { font-size: 1.25rem; margin-top: 1rem; font-weight: bold; }
-  </style>
-</head>
-<body>
-  <h1><img src="golfball.png" alt="Golf ball icon">Birdie Bush Bandits<img src="golfball.png" alt="Golf ball icon"></h1>
-  <div class="founded">Founded August 2020</div>
-  <a class="back-link" href="index.html">&larr; Back to Home</a>
-
-  <h2>Handicap Calculator</h2>
-  <div class="calculator">
-    <p>Enter up to 20 recent rounds. You need at least 3 to calculate.</p>
-
-    <label for="course-select">Select Course</label>
-    <input id="course-select" list="courses" placeholder="Choose course...">
-    <datalist id="courses"></datalist>
-
-    <label for="tee-select">Select Tee Colour</label>
-    <select id="tee-select">
-      <option value="white">White</option>
-      <option value="yellow">Yellow</option>
-      <option value="red">Red</option>
-    </select>
-
-    <div id="rounds-container"></div>
-    <button id="add-round">Add Round</button>
-    <button id="calculate">Calculate Handicap</button>
-    <div class="result" id="handicap-result"></div>
-  </div>
-
-  <script>
-    // Hard-coded course data including Stoke Park
-    const courseData = {
-      "Richings Park Golf Club": {
-        white: { courseRating: 70.7, slopeRating: 128 },
-        yellow: { courseRating: 68.3, slopeRating: 121 },
-        red:    { courseRating: 65.9, slopeRating: 115 }
-      },
-      "Thorney Park Golf Club": {
-        white: { courseRating: 68.7, slopeRating: 120 },
-        yellow: { courseRating: 67.0, slopeRating: 117 },
-        red:    { courseRating: 69.3, slopeRating: 119 }
-      },
-      "London Airlinks Golf Club": {
-        white: { courseRating: 63.4, slopeRating: 102 },
-        yellow: { courseRating: 62.0, slopeRating: 98 },
-        red:    { courseRating: 61.1, slopeRating: 92 }
-      },
-      "Royal Ascot Golf Club": {
-        white: { courseRating: 70.3, slopeRating: 123 },
-        yellow: { courseRating: 68.5, slopeRating: 118 },
-        red:    { courseRating: 70.0, slopeRating: 113 }
-      },
-      "Stoke Park Golf Club": {
-        white: { courseRating: 70.9, slopeRating: 126 },
-        yellow: { courseRating: 69.1, slopeRating: 122 },
-        red:    { courseRating: 68.5, slopeRating: 118 }
-      }
-    };
-
-    // Populate the course list
-    function populateCourseList() {
-      const dl = document.getElementById('courses');
-      dl.innerHTML = '';
-      Object.keys(courseData).forEach(name => {
-        const opt = document.createElement('option'); opt.value = name;
-        dl.appendChild(opt);
-      });
-    }
-    document.addEventListener('DOMContentLoaded', populateCourseList);
-
-    // Elements
-    const container = document.getElementById('rounds-container');
-    const addBtn = document.getElementById('add-round');
-    const calcBtn = document.getElementById('calculate');
-    const resultEl = document.getElementById('handicap-result');
-    const courseSelect = document.getElementById('course-select');
-    const teeSelect = document.getElementById('tee-select');
-
-    // Round inputs
-    function createRoundInput(i) {
-      const div = document.createElement('div');
-      div.innerHTML = `
-        <label>Round ${i+1} Score</label>
-        <input type="number" class="score" placeholder="Gross Score" min="0" required>
-        <label>Course Rating</label>
-        <input type="number" class="course-rating" placeholder="Course Rating" step="0.1" required>
-        <label>Slope Rating</label>
-        <input type="number" class="slope-rating" placeholder="Slope Rating" min="55" max="155" required>
-      `;
-      return div;
-    }
-
-    // Initialize three rounds
-    for (let i = 0; i < 3; i++) container.appendChild(createRoundInput(i));
-    addBtn.addEventListener('click', () => {
-      if (container.children.length < 20) container.appendChild(createRoundInput(container.children.length));
-    });
-
-    // Autofill
-    function autofillRatings() {
-      const course = courseSelect.value;
-      const tee = teeSelect.value;
-      const data = courseData[course] && courseData[course][tee];
-      if (data) {
-        document.querySelectorAll('.course-rating').forEach(inp => inp.value = data.courseRating);
-        document.querySelectorAll('.slope-rating').forEach(inp => inp.value = data.slopeRating);
-      }
-    }
-    courseSelect.addEventListener('change', autofillRatings);
-    teeSelect.addEventListener('change', autofillRatings);
-
-    // Calculate
-    calcBtn.addEventListener('click', () => {
-      const diffs = Array.from(container.children).map(div => {
-        const s = parseFloat(div.querySelector('.score').value);
-        const cr = parseFloat(div.querySelector('.course-rating').value);
-        const sr = parseFloat(div.querySelector('.slope-rating').value);
-        if (isNaN(s)||isNaN(cr)||isNaN(sr)) return null;
-        return (s - cr) * 113 / sr;
-      }).filter(d=>d!==null);
-      if (diffs.length < 3) { resultEl.textContent = 'Enter at least 3 complete rounds.'; return; }
-      diffs.sort((a,b)=>a-b);
-      const countMap={3:1,4:1,5:1,6:2,7:2,8:2,9:3,10:3,11:3,12:4,13:4,14:4,15:5,16:5,17:6,18:7,19:8,20:10};
-      const take = countMap[diffs.length]||Math.ceil(diffs.length/3);
-      const avg = diffs.slice(0,take).reduce((sum,v)=>sum+v,0)/take;
-      resultEl.textContent = `Your Handicap Index is ${(avg*0.96).toFixed(1)}`;
-    });
+    function addRound(){if(roundsContainer.children.length<20)roundsContainer.appendChild(createRoundInput(roundsContainer.children.length));}
+    addBtn.addEventListener('click',addRound);
+    for(let i=0;i<3;i++)addRound();
+    calcBtn.addEventListener('click',()=>{const diffs=[];roundsContainer.querySelectorAll('.round').forEach(div=>{let s=parseFloat(div.querySelector('.score').value),cr=parseFloat(div.querySelector('.course-rating').value),sr=parseFloat(div.querySelector('.slope-rating').value);if(!isNaN(s)&&!isNaN(cr)&&!isNaN(sr))diffs.push((s-cr)*113/sr);});if(diffs.length<3){resultEl.textContent='Enter at least 3 complete rounds.';return;}diffs.sort((a,b)=>a-b);const countMap={3:1,4:1,5:1,6:2,7:2,8:2,9:3,10:3,11:3,12:4,13:4,14:4,15:5,16:5,17:6,18:7,19:8,20:10};let take=countMap[diffs.length]||Math.ceil(diffs.length/3);let avg=diffs.slice(0,take).reduce((sum,v)=>sum+v,0)/take;resultEl.textContent=`Your Handicap Index is ${(avg*0.96).toFixed(1)}`;});
   </script>
 </body>
 </html>
