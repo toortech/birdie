@@ -12,13 +12,10 @@
     .back-link:hover { background-color: rgba(255,255,255,0.3); }
     .calculator { background: rgba(255,255,255,0.1); padding: 1.5rem; border-radius: 8px; margin-top: 1rem; text-align: left; }
     .calculator label { display: block; margin: 0.5rem 0 0.2rem; font-weight: bold; }
-    .calculator input[type="number"], .calculator select, .calculator input[list], .calculator input[type="text"] { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 1rem; box-sizing: border-box; }
+    .calculator input[type="number"], .calculator select, .calculator input[list] { width: 100%; padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 1rem; box-sizing: border-box; }
     .calculator button { padding: 0.75rem 1.5rem; background: #28A745; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 0.5rem; margin-right: 0.5rem; }
     .calculator button:hover { background: #218838; }
     .result { font-size: 1.25rem; margin-top: 1rem; font-weight: bold; }
-    .members-table { width: 100%; margin-top: 1.5rem; border-collapse: collapse; }
-    .members-table th, .members-table td { border: 1px solid #fff; padding: 0.5rem; }
-    .members-table th { background: rgba(255,255,255,0.2); }
   </style>
 </head>
 <body>
@@ -30,13 +27,9 @@
   <div class="calculator">
     <p>Enter up to 20 recent rounds. You need at least 3 to calculate.</p>
 
-    <!-- Manual Courses -->
     <label for="course-select">Select Course</label>
     <input id="course-select" list="courses" placeholder="Choose course...">
-    <datalist id="courses">
-      <option value="Richings Park Golf Club">
-      <option value="Thorney Park Golf Club">
-    </datalist>
+    <datalist id="courses"></datalist>
 
     <label for="tee-select">Select Tee Colour</label>
     <select id="tee-select">
@@ -49,23 +42,10 @@
     <button id="add-round">Add Round</button>
     <button id="calculate">Calculate Handicap</button>
     <div class="result" id="handicap-result"></div>
-
-    <!-- Save Member Record -->
-    <label for="member-name">Member Name</label>
-    <input type="text" id="member-name" placeholder="Enter member name">
-    <button id="save-record">Save Record</button>
-
-    <!-- Members Table -->
-    <table class="members-table" id="members-table">
-      <thead>
-        <tr><th>Member Name</th><th>Handicap Index</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
   </div>
 
   <script>
-    // Hard-coded course data for two courses
+    // Hard-coded course data including Stoke Park
     const courseData = {
       "Richings Park Golf Club": {
         white: { courseRating: 70.7, slopeRating: 128 },
@@ -76,8 +56,34 @@
         white: { courseRating: 68.7, slopeRating: 120 },
         yellow: { courseRating: 67.0, slopeRating: 117 },
         red:    { courseRating: 69.3, slopeRating: 119 }
+      },
+      "London Airlinks Golf Club": {
+        white: { courseRating: 63.4, slopeRating: 102 },
+        yellow: { courseRating: 62.0, slopeRating: 98 },
+        red:    { courseRating: 61.1, slopeRating: 92 }
+      },
+      "Royal Ascot Golf Club": {
+        white: { courseRating: 70.3, slopeRating: 123 },
+        yellow: { courseRating: 68.5, slopeRating: 118 },
+        red:    { courseRating: 70.0, slopeRating: 113 }
+      },
+      "Stoke Park Golf Club": {
+        white: { courseRating: 70.9, slopeRating: 126 },
+        yellow: { courseRating: 69.1, slopeRating: 122 },
+        red:    { courseRating: 68.5, slopeRating: 118 }
       }
     };
+
+    // Populate the course list
+    function populateCourseList() {
+      const dl = document.getElementById('courses');
+      dl.innerHTML = '';
+      Object.keys(courseData).forEach(name => {
+        const opt = document.createElement('option'); opt.value = name;
+        dl.appendChild(opt);
+      });
+    }
+    document.addEventListener('DOMContentLoaded', populateCourseList);
 
     // Elements
     const container = document.getElementById('rounds-container');
@@ -86,9 +92,6 @@
     const resultEl = document.getElementById('handicap-result');
     const courseSelect = document.getElementById('course-select');
     const teeSelect = document.getElementById('tee-select');
-    const memberNameInput = document.getElementById('member-name');
-    const saveBtn = document.getElementById('save-record');
-    const membersTableBody = document.querySelector('#members-table tbody');
 
     // Round inputs
     function createRoundInput(i) {
@@ -104,12 +107,11 @@
       return div;
     }
 
-    function addRound() {
+    // Initialize three rounds
+    for (let i = 0; i < 3; i++) container.appendChild(createRoundInput(i));
+    addBtn.addEventListener('click', () => {
       if (container.children.length < 20) container.appendChild(createRoundInput(container.children.length));
-    }
-
-    addBtn.addEventListener('click', addRound);
-    for (let i = 0; i < 3; i++) addRound();
+    });
 
     // Autofill
     function autofillRatings() {
@@ -121,59 +123,25 @@
         document.querySelectorAll('.slope-rating').forEach(inp => inp.value = data.slopeRating);
       }
     }
-
     courseSelect.addEventListener('change', autofillRatings);
     teeSelect.addEventListener('change', autofillRatings);
 
-    // Calculate handicap
-    let lastHandicap = null;
+    // Calculate
     calcBtn.addEventListener('click', () => {
       const diffs = Array.from(container.children).map(div => {
         const s = parseFloat(div.querySelector('.score').value);
         const cr = parseFloat(div.querySelector('.course-rating').value);
         const sr = parseFloat(div.querySelector('.slope-rating').value);
-        if (isNaN(s) || isNaN(cr) || isNaN(sr)) return null;
+        if (isNaN(s)||isNaN(cr)||isNaN(sr)) return null;
         return (s - cr) * 113 / sr;
-      }).filter(d => d !== null);
-
-      if (diffs.length < 3) {
-        resultEl.textContent = 'Enter at least 3 complete rounds.';
-        return;
-      }
-
-      diffs.sort((a, b) => a - b);
-      const countMap = {3:1,4:1,5:1,6:2,7:2,8:2,9:3,10:3,11:3,12:4,13:4,14:4,15:5,16:5,17:6,18:7,19:8,20:10};
-      const take = countMap[diffs.length] || Math.ceil(diffs.length/3);
-      const avg = diffs.slice(0, take).reduce((sum, v) => sum + v, 0) / take;
-      lastHandicap = parseFloat((avg*0.96).toFixed(1));
-      resultEl.textContent = `Your Handicap Index is ${lastHandicap}`;
+      }).filter(d=>d!==null);
+      if (diffs.length < 3) { resultEl.textContent = 'Enter at least 3 complete rounds.'; return; }
+      diffs.sort((a,b)=>a-b);
+      const countMap={3:1,4:1,5:1,6:2,7:2,8:2,9:3,10:3,11:3,12:4,13:4,14:4,15:5,16:5,17:6,18:7,19:8,20:10};
+      const take = countMap[diffs.length]||Math.ceil(diffs.length/3);
+      const avg = diffs.slice(0,take).reduce((sum,v)=>sum+v,0)/take;
+      resultEl.textContent = `Your Handicap Index is ${(avg*0.96).toFixed(1)}`;
     });
-
-    // Member records
-    function loadMembers() {
-      const stored = JSON.parse(localStorage.getItem('bbbMembers') || '[]');
-      stored.forEach(rec => addMemberRow(rec.name, rec.handicap));
-    }
-
-    function addMemberRow(name, handicap) {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `<td>${name}</td><td>${handicap}</td>`;
-      membersTableBody.appendChild(tr);
-    }
-
-    saveBtn.addEventListener('click', () => {
-      const name = memberNameInput.value.trim();
-      if (!name || lastHandicap === null) return alert('Please calculate a handicap and enter a member name.');
-      const rec = { name, handicap: lastHandicap };
-      // Persist
-      const arr = JSON.parse(localStorage.getItem('bbbMembers') || '[]');
-      arr.push(rec);
-      localStorage.setItem('bbbMembers', JSON.stringify(arr));
-      addMemberRow(name, lastHandicap);
-      memberNameInput.value = '';
-    });
-
-    document.addEventListener('DOMContentLoaded', loadMembers);
   </script>
 </body>
 </html>
