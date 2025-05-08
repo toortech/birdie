@@ -18,6 +18,7 @@
     select { padding: 0.25rem; width: 100%; }
     button { padding: 0.5rem 1rem; font-size: 1rem; background: #28A745; color: white; border: none; border-radius: 4px; cursor: pointer; }
     button:hover { background: #1e7e34; }
+    #button-group { display: flex; gap: 1rem; margin-bottom: 1rem; justify-content: center; }
     @media (max-width: 768px) {
       h1 { font-size: 1.5rem; }
       .controls { flex-direction: column; }
@@ -31,6 +32,7 @@
       input[type="number"] { width: 1.5rem; }
       select, button { font-size: 0.9rem; }
       th, td { padding: 0.3rem; }
+      #button-group { flex-direction: column; align-items: center; }
     }
   </style>
 </head>
@@ -69,44 +71,55 @@
     </div>
   </div>
 
-  <button id="build">Build Scorecard</button>
+  <div id="button-group">
+    <button id="build">Build Scorecard</button>
+    <button id="reset">Reset</button>
+  </div>
+
   <div id="created-time" style="margin-top:0.5rem;font-style:italic;"></div>
   <div id="table-container"></div>
 
   <script>
-    const courses = {
-      Ritchings: { par: [4,3,5,4,4,3,4,4,4,3,4,4,4,3,4,4,5,4], si: [12,8,6,18,10,16,2,14,4,15,3,17,7,11,1,5,13,9] },
-      Thorney:   { par: [5,4,4,3,5,4,4,3,5,4,4,3,5,4,4,3,5,4], si: [9,15,1,17,5,13,3,11,7,16,2,14,6,18,4,12,8,10] }
-    };
-    const teeSlope = { white:128, yellow:121, red:115 };
+    const buildBtn = document.getElementById('build');
+    const resetBtn = document.getElementById('reset');
+    const tableContainer = document.getElementById('table-container');
+    const createdTime = document.getElementById('created-time');
 
-    document.getElementById('build').addEventListener('click', build);
+    buildBtn.addEventListener('click', () => {
+      build();
+    });
 
-    function getSelectedPlayers() {
-      return [...document.querySelectorAll('.controls input[type=checkbox]')]
-        .filter(cb => cb.checked)
-        .map(cb => cb.value)
-        .slice(0,4);
-    }
-    function getSelectedHoles() {
-      return document.querySelector('input[name=holes]:checked').value;
-    }
+    resetBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to reset the scorecard?')) {
+        tableContainer.innerHTML = '';
+        createdTime.textContent = '';
+      }
+    });
 
     function build() {
+      const courses = {
+        Ritchings: { par: [4,3,5,4,4,3,4,4,4,3,4,4,4,3,4,4,5,4], si: [12,8,6,18,10,16,2,14,4,15,3,17,7,11,1,5,13,9] },
+        Thorney:   { par: [5,4,4,3,5,4,4,3,5,4,4,3,5,4,4,3,5,4], si: [9,15,1,17,5,13,3,11,7,16,2,14,6,18,4,12,8,10] }
+      };
+      const teeSlope = { white:128, yellow:121, red:115 };
+
       const courseKey = document.getElementById('course-select').value;
       const { par, si } = courses[courseKey];
       const tee = document.getElementById('tee-select').value;
       const slope = teeSlope[tee];
-      const players = getSelectedPlayers();
-      if (!players.length) { alert('Select at least one player'); return; }
-      const holeOpt = getSelectedHoles();
+      const players = [...document.querySelectorAll('input[type=checkbox]:checked')].map(cb => cb.value);
+      const holes = document.querySelector('input[name=holes]:checked').value;
       let indices = [...Array(18).keys()];
-      if (holeOpt === '9f') indices = indices.slice(0,9);
-      if (holeOpt === '9b') indices = indices.slice(9);
+      if (holes === '9f') indices = indices.slice(0,9);
+      if (holes === '9b') indices = indices.slice(9);
 
-      document.getElementById('created-time').textContent = `Scorecard created: ${new Date().toLocaleString()}`;
-      const container = document.getElementById('table-container');
-      container.innerHTML = '';
+      if (!players.length) {
+        alert("Please select at least one player.");
+        return;
+      }
+
+      createdTime.textContent = `Scorecard created: ${new Date().toLocaleString()}`;
+      tableContainer.innerHTML = '';
 
       const table = document.createElement('table');
       const thead = document.createElement('thead');
@@ -137,9 +150,8 @@
       });
       table.appendChild(tfoot);
 
-      container.appendChild(table);
+      tableContainer.appendChild(table);
 
-      // Bind events
       players.forEach((_,i) => {
         const hcpInput = document.getElementById(`hcp-${i}`);
         const adjSpan = document.createElement('span');
@@ -155,6 +167,7 @@
         hcpInput.addEventListener('input', () => { updateAdj(); update(table,par,si,players,indices,slope); });
         updateAdj();
       });
+
       tbody.querySelectorAll('input[type=number]').forEach(inp => inp.addEventListener('input', () => update(table,par,si,players,indices,slope)));
 
       update(table,par,si,players,indices,slope);
