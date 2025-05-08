@@ -171,8 +171,8 @@ function build() {
   let hdr1 = '<tr><th>Hole</th><th>Par</th><th style="color:red;">SI</th><th>Yards</th>';
   players.forEach((p,i) => hdr1 += `<th colspan="2">${p}<br>HCP:<input id="hcp-${i}" type="number" value="0" min="1" max="36"></th>`);
   hdr1 += '</tr>';
-  let hdr2 = '<tr><th></th><th></th><th></th>';
-  players.forEach(() => hdr2 += '<th>Score</th><th>Pts</th>');
+  let hdr2 = '<tr><th></th><th></th><th></th><th></th>';
+  players.forEach(() => hdr2 += '<th>Shots</th><th>STB Score</th>');
   hdr2 += '</tr>';
   thead.innerHTML = hdr1 + hdr2;
   table.appendChild(thead);
