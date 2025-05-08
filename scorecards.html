@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stableford Scorecard – Multiple Courses</title>
   <style>
+    input.invalid-hcp { border: 2px solid red; background-color: #ffcccc; }
     body { background: #007BFF; color: white; font-family: sans-serif; padding: 1rem; margin: 0 auto; }
     h1 { color: #28A745; font-size: 2rem; text-align: center; margin-bottom: 1rem; }
     .controls { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
@@ -25,7 +26,6 @@
 </head>
 <body>
   <h1>Stableford Scorecard – Multiple Courses</h1>
-
   <div class="controls">
     <div>
       <label for="course-select">Course:</label>
@@ -64,12 +64,10 @@
       <label><input type="radio" name="holes" value="9b"> Back 9</label>
     </div>
   </div>
-
   <div id="button-group">
     <button id="build">Build Scorecard</button>
     <button id="reset">Reset</button>
   </div>
-
   <div style="text-align:center; margin-bottom: 1rem;">
     <a href="#" id="view-saved-link" style="text-decoration: underline; color: white;">📄 View Past Scorecards</a>
   </div>
@@ -78,7 +76,6 @@
   <div style="text-align:center; margin-top: 1rem;">
     <button id="save" disabled>Save Scorecard</button>
   </div>
-
   <script>
 let scorecardBuilt = false;
 const buildBtn = document.getElementById('build');
@@ -155,7 +152,7 @@ window.addEventListener('beforeunload', function (e) {
     e.returnValue = 'You have unsaved scorecard data. Are you sure you want to leave?';
   }
 });
-
+  
 
 function build() {
   const courses = {
@@ -226,24 +223,30 @@ function build() {
     adjSpan.textContent = '0';
     hcpInput.insertAdjacentText('afterend', ' Adj:');
     hcpInput.insertAdjacentElement('afterend', adjSpan);
-    function updateAdj() {
-      const raw = parseInt(hcpInput.value,10) || 0;
-      const adj = Math.round(raw * slope/113);
+
+    const updateAdj = () => {
+      const raw = parseInt(hcpInput.value, 10) || 0;
+      const adj = Math.round(raw * slope / 113);
       adjSpan.textContent = adj;
+      hcpInput.classList.toggle('invalid-hcp', hcpInput.value === '' || raw <= 0);
 
       indices.forEach(h => {
-        players.forEach((_, pi) => {
-          const strokeInfo = document.querySelector(`.stroke-info[data-player="${pi}"][data-hole="${h}"]`);
-          if (!strokeInfo) return;
-          let strokes = 0;
-          if (adj >= si[h]) strokes = 1;
-          if (adj >= si[h] + 18) strokes = 2;
-          strokeInfo.textContent = `(${strokes} stroke${strokes !== 1 ? 's' : ''})`;
-          strokeInfo.parentElement.style.backgroundColor = strokes > 0 ? 'rgba(255,165,0,0.6)' : '';
-        });
+        const strokeInfo = document.querySelector(`.stroke-info[data-player="${i}"][data-hole="${h}"]`);
+        if (!strokeInfo) return;
+        const siH = si[h];
+        let strokes = 0;
+        if (adj >= siH + 18) strokes = 2;
+        else if (adj >= siH) strokes = 1;
+        strokeInfo.textContent = `(${strokes} stroke${strokes !== 1 ? 's' : ''})`;
+        strokeInfo.parentElement.style.backgroundColor = strokes > 0 ? 'rgba(255,165,0,0.6)' : '';
       });
-    }
-    hcpInput.addEventListener('input', () => { updateAdj(); update(table,par,si,players,indices,slope); });
+    };
+
+    hcpInput.addEventListener('input', () => {
+      updateAdj();
+      update(table, par, si, players, indices, slope);
+    });
+
     updateAdj();
   });
 
@@ -277,8 +280,8 @@ function update(table, par, siArr, players, indices, slope) {
       const rawHcp = parseInt(document.getElementById(`hcp-${pi}`).value,10)||0;
       const adjHcp = Math.round(rawHcp * slope/113);
       let strokes = 0;
-      if (adjHcp >= siArr[h]) strokes = 1;
       if (adjHcp >= siArr[h] + 18) strokes = 2;
+      else if (adjHcp >= siArr[h]) strokes = 1;
       const net = sc - strokes;
 
       let pts=0;
