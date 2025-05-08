@@ -229,7 +229,10 @@ function update(table, par, siArr, players, indices, slope) {
 
       const rawHcp = parseInt(document.getElementById(`hcp-${pi}`).value,10)||0;
       const adjHcp = Math.round(rawHcp * slope/113);
-      const net = sc - (adjHcp > 18 ? 2 : 1);
+      let strokes = 0;
+      if (adjHcp >= siArr[h]) strokes = 1;
+      if (adjHcp >= siArr[h] + 18) strokes = 2;
+      const net = sc - strokes;
 
       let pts=0;
       if(net <= pr-2) pts=4;
