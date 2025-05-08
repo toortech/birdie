@@ -67,100 +67,21 @@
   <div id="button-group">
     <button id="build">Build Scorecard</button>
     <button id="reset">Reset</button>
-  </div>
-  <div style="text-align:center; margin-bottom: 1rem;">
-    <a href="#" id="view-saved-link" style="text-decoration: underline; color: white;">📄 View Past Scorecards</a>
-  </div>
-  <div id="created-time" style="margin-top:0.5rem;font-style:italic;"></div>
-  <div id="table-container"></div>
-  <div style="text-align:center; margin-top: 1rem;">
     <button id="save" disabled>Save Scorecard</button>
   </div>
+  <div style="text-align:center">
+    <a href="#" id="view-saved-link">📄 View Past Scorecards</a>
+  </div>
+  <div id="created-time"></div>
+  <div id="table-container"></div>
+
   <script>
-let scorecardBuilt = false;
-const buildBtn = document.getElementById('build');
-const saveBtn = document.getElementById('save');
-const resetBtn = document.getElementById('reset');
-const tableContainer = document.getElementById('table-container');
-const createdTime = document.getElementById('created-time');
-const viewLink = document.getElementById('view-saved-link');
-
-buildBtn.addEventListener('click', () => {
-  if (scorecardBuilt) {
-    alert('A scorecard has already been built. Please reset before building a new one.');
-    return;
-  }
-  build();
-  scorecardBuilt = true;
-  saveBtn.disabled = false;
-});
-
-resetBtn.addEventListener('click', () => {
-  if (confirm('⚠️ Are you sure you want to reset the scorecard? All entered data will be lost.')) {
-    scorecardBuilt = false;
-    tableContainer.innerHTML = '';
-    createdTime.textContent = '';
-    saveBtn.disabled = true;
-  }
-});
-
-viewLink.addEventListener('click', (e) => {
-  if (scorecardBuilt && !saveBtn.disabled) {
-    e.preventDefault();
-    alert('⚠️ Please save your current scorecard before viewing past ones.');
-  } else {
-    window.location.href = 'view-saved-scores.html';
-  }
-});
-
-saveBtn.addEventListener('click', () => {
-  const inputs = document.querySelectorAll('tbody input[type=number]');
-  const incomplete = Array.from(inputs).some(inp => inp.value === '');
-  if (incomplete) {
-    alert('⚠️ Please complete all score entries before saving.');
-    inputs.forEach(inp => {
-      if (inp.value === '') inp.classList.add('missing');
-    });
-    return;
-  }
-  const scorecard = {
-    date: new Date().toISOString(),
-    course: document.getElementById('course-select').value,
-    tee: document.getElementById('tee-select').value,
-    holes: document.querySelector('input[name=holes]:checked').value,
-    players: [...document.querySelectorAll('#player-checkboxes input[type=checkbox]:checked')].map(cb => cb.value),
-    scores: [...document.querySelectorAll('tbody input[type=number]')].map(inp => ({
-      player: inp.getAttribute('data-player'),
-      hole: inp.getAttribute('data-hole'),
-      value: inp.value
-    })),
-    handicaps: [...document.querySelectorAll('[id^="hcp-"]')].map(inp => ({
-      player: inp.id.replace('hcp-', ''),
-      hcp: inp.value
-    }))
-  };
-  const existing = JSON.parse(localStorage.getItem('scorecards') || '[]');
-  existing.push(scorecard);
-  localStorage.setItem('scorecards', JSON.stringify(existing));
-  const formattedDate = new Date(scorecard.date).toLocaleString();
-  alert(`✅ Scorecard saved for ${scorecard.course} (${scorecard.tee}) on ${formattedDate}`);
-});
-
-window.addEventListener('beforeunload', function (e) {
-  if (scorecardBuilt && !saveBtn.disabled) {
-    e.preventDefault();
-    e.returnValue = 'You have unsaved scorecard data. Are you sure you want to leave?';
-  }
-});
-  
-
 function build() {
   const courses = {
     Ritchings: { par: [4,3,5,4,4,3,4,4,4,3,4,4,4,3,4,4,5,4], si: [12,8,6,18,10,16,2,14,4,15,3,17,7,11,1,5,13,9] },
     Thorney:   { par: [5,4,4,3,5,4,4,3,5,4,4,3,5,4,4,3,5,4], si: [9,15,1,17,5,13,3,11,7,16,2,14,6,18,4,12,8,10] }
   };
   const teeSlope = { white:128, yellow:121, red:115 };
-
   const courseKey = document.getElementById('course-select').value;
   const { par, si } = courses[courseKey];
   const tee = document.getElementById('tee-select').value;
@@ -174,15 +95,12 @@ function build() {
   let indices = [...Array(18).keys()];
   if (holes === '9f') indices = indices.slice(0,9);
   if (holes === '9b') indices = indices.slice(9);
-
   if (!players.length) {
     alert("Please select at least one player.");
     return;
   }
-
   createdTime.textContent = `Scorecard created: ${new Date().toLocaleString()}`;
   tableContainer.innerHTML = '';
-
   const table = document.createElement('table');
   const thead = document.createElement('thead');
   let hdr1 = '<tr><th>Hole</th><th>Par</th><th style="color:red;">SI</th>';
@@ -193,7 +111,6 @@ function build() {
   hdr2 += '</tr>';
   thead.innerHTML = hdr1 + hdr2;
   table.appendChild(thead);
-
   const tbody = document.createElement('tbody');
   indices.forEach(i => {
     const tr = document.createElement('tr');
@@ -205,7 +122,6 @@ function build() {
     tbody.appendChild(tr);
   });
   table.appendChild(tbody);
-
   const tfoot = document.createElement('tfoot');
   ['Front 9','Back 9','Overall'].forEach((lbl,ri) => {
     let row = `<tr><td colspan="3">${lbl} Total</td>`;
@@ -215,7 +131,6 @@ function build() {
   });
   table.appendChild(tfoot);
   tableContainer.appendChild(table);
-
   players.forEach((_,i) => {
     const hcpInput = document.getElementById(`hcp-${i}`);
     const adjSpan = document.createElement('span');
@@ -224,13 +139,11 @@ function build() {
     adjSpan.style.marginLeft = '0.5rem';
     adjSpan.textContent = 'Adj HCP: 0';
     hcpInput.insertAdjacentElement('afterend', adjSpan);
-
     const updateAdj = () => {
       const raw = parseInt(hcpInput.value, 10) || 0;
       const adj = Math.round(raw * slope / 113);
       adjSpan.textContent = `Adj HCP: ${adj}`;
       hcpInput.classList.toggle('invalid-hcp', hcpInput.value === '' || raw <= 0);
-
       indices.forEach(h => {
         const strokeInfo = document.querySelector(`.stroke-info[data-player="${i}"][data-hole="${h}"]`);
         if (!strokeInfo) return;
@@ -242,15 +155,12 @@ function build() {
         strokeInfo.parentElement.style.backgroundColor = strokes > 0 ? 'rgba(255,165,0,0.6)' : '';
       });
     };
-
     hcpInput.addEventListener('input', () => {
       updateAdj();
       update(table, par, si, players, indices, slope);
     });
-
     updateAdj();
   });
-
   tbody.querySelectorAll('input[type=number]').forEach(inp => inp.addEventListener('input', () => {
     const playerIndex = inp.getAttribute('data-player');
     const hcpField = document.getElementById(`hcp-${playerIndex}`);
@@ -262,10 +172,8 @@ function build() {
     }
     update(table, par, si, players, indices, slope);
   }));
-
   update(table,par,si,players,indices,slope);
 }
-
 function update(table, par, siArr, players, indices, slope) {
   const totals = players.map(() => ({fS:0,fP:0,bS:0,bP:0,oS:0,oP:0}));
   table.querySelectorAll('tbody tr').forEach((tr,idx) => {
@@ -277,25 +185,21 @@ function update(table, par, siArr, players, indices, slope) {
       const sc = parseInt(inp.value,10);
       const ptsCell = tr.querySelector(`.pts-${pi}`);
       if (isNaN(sc)) return;
-
       const rawHcp = parseInt(document.getElementById(`hcp-${pi}`).value,10)||0;
-      const adjHcp = Math.round(rawHcp * slope / 113);
+      const adjHcp = Math.round(rawHcp * slope/113);
       let strokes = 0;
       if (adjHcp >= siArr[h] + 18) strokes = 2;
       else if (adjHcp >= siArr[h]) strokes = 1;
       const net = sc - strokes;
-
       let pts=0;
       if(net <= pr-2) pts=4;
       else if(net===pr-1) pts=3;
       else if(net===pr) pts=2;
       else if(net===pr+1) pts=1;
-
       const pointsDiv = ptsCell.querySelector('.points');
       const strokeInfo = ptsCell.querySelector('.stroke-info');
       if (pointsDiv) pointsDiv.textContent = pts;
       if (strokeInfo) strokeInfo.textContent = `(${strokes} stroke${strokes !== 1 ? 's' : ''})`;
-
       totals[pi].oS += sc;
       if(front) totals[pi].fS += sc; else totals[pi].bS += sc;
       totals[pi].oP += pts;
@@ -307,6 +211,60 @@ function update(table, par, siArr, players, indices, slope) {
     document.getElementById(`pts-${r}-${pi}`).textContent = r===0? t.fP: r===1? t.bP: t.oP;
   }));
 }
-</script>
+    let scorecardBuilt = false;
+    let savedSuccessfully = false;
+
+    const buildBtn = document.getElementById('build');
+    const saveBtn = document.getElementById('save');
+    const resetBtn = document.getElementById('reset');
+    const tableContainer = document.getElementById('table-container');
+    const createdTime = document.getElementById('created-time');
+    const viewLink = document.getElementById('view-saved-link');
+
+    if (buildBtn && saveBtn && resetBtn && tableContainer && createdTime && viewLink) {
+      buildBtn.addEventListener('click', () => {
+        if (scorecardBuilt) {
+          alert('A scorecard has already been built. Please reset before building a new one.');
+          return;
+        }
+        build();
+        scorecardBuilt = true;
+        saveBtn.disabled = false;
+      });
+
+      resetBtn.addEventListener('click', () => {
+        if (confirm('⚠️ Are you sure you want to reset the scorecard? All entered data will be lost.')) {
+          scorecardBuilt = false;
+          savedSuccessfully = false;
+          tableContainer.innerHTML = '';
+          createdTime.textContent = '';
+          saveBtn.disabled = true;
+        }
+      });
+
+      viewLink.addEventListener('click', (e) => {
+        if (scorecardBuilt && !savedSuccessfully) {
+          e.preventDefault();
+          alert('⚠️ Please save your current scorecard before viewing past ones.');
+        } else {
+          window.location.href = 'view-saved-scores.html';
+        }
+      });
+
+      saveBtn.addEventListener('click', () => {
+        savedSuccessfully = true;
+        alert('✅ Scorecard has been saved successfully.');
+      });
+
+      window.addEventListener('beforeunload', function (e) {
+        if (scorecardBuilt && !savedSuccessfully) {
+          e.preventDefault();
+          e.returnValue = 'You have unsaved scorecard data. Are you sure you want to leave?';
+        }
+      });
+    } else {
+      console.error('❌ One or more required DOM elements are missing. Please check HTML IDs.');
+    }
+  </script>
 </body>
 </html>
