@@ -34,11 +34,11 @@
       th, td { padding: 0.3rem; }
       #button-group { flex-direction: column; align-items: center; }
     }
+    .stroke-info { font-size: 0.75em; color: #ccc; margin-top: 0.25rem; }
   </style>
 </head>
 <body>
   <h1>Stableford Scorecard – Multiple Courses</h1>
-
   <div class="controls">
     <div>
       <label for="course-select">Course:</label>
@@ -76,182 +76,192 @@
     <button id="save" disabled>Save Scorecard</button>
     <button id="reset">Reset</button>
   </div>
-
   <div style="text-align:center; margin-bottom: 1rem;">
     <a href="view-saved-scores.html" style="text-decoration: underline; color: white;">📄 View Past Scorecards</a>
   </div>
-
   <div id="created-time" style="margin-top:0.5rem;font-style:italic;"></div>
   <div id="table-container"></div>
 
   <script>
-// Full JavaScript functionality
+    let scorecardBuilt = false;
 const buildBtn = document.getElementById('build');
-const saveBtn = document.getElementById('save');
-const resetBtn = document.getElementById('reset');
-const tableContainer = document.getElementById('table-container');
-const createdTime = document.getElementById('created-time');
+    const saveBtn = document.getElementById('save');
+    const resetBtn = document.getElementById('reset');
+    const tableContainer = document.getElementById('table-container');
+    const createdTime = document.getElementById('created-time');
 
-buildBtn.addEventListener('click', () => {
-  build();
-  saveBtn.disabled = false;
-});
-
-resetBtn.addEventListener('click', () => {
-  if (confirm('Are you sure you want to reset the scorecard?')) {
-    tableContainer.innerHTML = '';
-    createdTime.textContent = '';
-    saveBtn.disabled = true;
-  }
-});
-
-saveBtn.addEventListener('click', () => {
-  const scorecard = {
-    date: new Date().toISOString(),
-    course: document.getElementById('course-select').value,
-    tee: document.getElementById('tee-select').value,
-    holes: document.querySelector('input[name=holes]:checked').value,
-    players: [...document.querySelectorAll('input[type=checkbox]:checked')].map(cb => cb.value),
-    scores: [...document.querySelectorAll('tbody input[type=number]')].map(inp => ({
-      player: inp.getAttribute('data-player'),
-      hole: inp.getAttribute('data-hole'),
-      value: inp.value
-    })),
-    handicaps: [...document.querySelectorAll('[id^="hcp-"]')].map(inp => ({
-      player: inp.id.replace('hcp-', ''),
-      hcp: inp.value
-    }))
-  };
-  const existing = JSON.parse(localStorage.getItem('scorecards') || '[]');
-  existing.push(scorecard);
-  localStorage.setItem('scorecards', JSON.stringify(existing));
-  const formattedDate = new Date(scorecard.date).toLocaleString();
-  alert(`✅ Scorecard saved for ${scorecard.course} (${scorecard.tee}) on ${formattedDate}`);
-});
-
-function build() {
-  const courses = {
-    Ritchings: { par: [4,3,5,4,4,3,4,4,4,3,4,4,4,3,4,4,5,4], si: [12,8,6,18,10,16,2,14,4,15,3,17,7,11,1,5,13,9] },
-    Thorney:   { par: [5,4,4,3,5,4,4,3,5,4,4,3,5,4,4,3,5,4], si: [9,15,1,17,5,13,3,11,7,16,2,14,6,18,4,12,8,10] }
-  };
-  const teeSlope = { white:128, yellow:121, red:115 };
-
-  const courseKey = document.getElementById('course-select').value;
-  const { par, si } = courses[courseKey];
-  const tee = document.getElementById('tee-select').value;
-  const slope = teeSlope[tee];
-  const players = [...document.querySelectorAll('input[type=checkbox]:checked')].map(cb => cb.value);
-  const holes = document.querySelector('input[name=holes]:checked').value;
-  let indices = [...Array(18).keys()];
-  if (holes === '9f') indices = indices.slice(0,9);
-  if (holes === '9b') indices = indices.slice(9);
-
-  if (!players.length) {
-    alert("Please select at least one player.");
+    buildBtn.addEventListener('click', () => {
+  if (scorecardBuilt) {
+    alert('A scorecard has already been built. Please reset before building a new one.');
     return;
   }
-
-  createdTime.textContent = `Scorecard created: ${new Date().toLocaleString()}`;
-  tableContainer.innerHTML = '';
-
-  const table = document.createElement('table');
-  const thead = document.createElement('thead');
-  let hdr1 = '<tr><th>Hole</th><th>Par</th><th>SI</th>';
-  players.forEach((p,i) => hdr1 += `<th colspan="2">${p}<br>HCP:<input id="hcp-${i}" type="number" value="0" min="1" max="36"></th>`);
-  hdr1 += '</tr>';
-  let hdr2 = '<tr><th></th><th></th><th></th>';
-  players.forEach(() => hdr2 += '<th>Score</th><th>Pts</th>');
-  hdr2 += '</tr>';
-  thead.innerHTML = hdr1 + hdr2;
-  table.appendChild(thead);
-
-  const tbody = document.createElement('tbody');
-  indices.forEach(i => {
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${i+1}</td><td>${par[i]}</td><td>${si[i]}</td>`;
-    players.forEach((_,pi) => tr.innerHTML += `<td><input data-player="${pi}" data-hole="${i}" type="number" min="0"></td><td class="pts-${pi}"></td>`);
-    tbody.appendChild(tr);
-  });
-  table.appendChild(tbody);
-
-  const tfoot = document.createElement('tfoot');
-  ['Front 9','Back 9','Overall'].forEach((lbl,ri) => {
-    let row = `<tr><td colspan="3">${lbl} Total</td>`;
-    players.forEach((_,pi) => row += `<td id="str-${ri}-${pi}"></td><td id="pts-${ri}-${pi}"></td>`);
-    row += '</tr>';
-    tfoot.innerHTML += row;
-  });
-  table.appendChild(tfoot);
-
-  tableContainer.appendChild(table);
-
-  players.forEach((_,i) => {
-    const hcpInput = document.getElementById(`hcp-${i}`);
-    const adjSpan = document.createElement('span');
-    adjSpan.id = `adjhcp-${i}`;
-    adjSpan.textContent = '0';
-    hcpInput.insertAdjacentText('afterend', ' Adj:');
-    hcpInput.insertAdjacentElement('afterend', adjSpan);
-    function updateAdj() {
-      const raw = parseInt(hcpInput.value,10) || 0;
-      const adj = Math.round(raw * slope/113);
-      adjSpan.textContent = adj;
-    }
-    hcpInput.addEventListener('input', () => { updateAdj(); update(table,par,si,players,indices,slope); });
-    updateAdj();
-  });
-
-  tbody.querySelectorAll('input[type=number]').forEach(inp => inp.addEventListener('input', () => {
-    const playerIndex = inp.getAttribute('data-player');
-    const hcpField = document.getElementById(`hcp-${playerIndex}`);
-    if (!hcpField || hcpField.value === '' || isNaN(hcpField.value) || parseInt(hcpField.value, 10) <= 0) {
-      alert(`⚠️ Please enter a valid handicap for player ${players[playerIndex]} before scoring.`);
-      inp.value = '';
-      return;
-    }
-    update(table, par, si, players, indices, slope);
-  }));
-
-  update(table,par,si,players,indices,slope);
-}
-
-function update(table, par, siArr, players, indices, slope) {
-  const totals = players.map(() => ({fS:0,fP:0,bS:0,bP:0,oS:0,oP:0}));
-  table.querySelectorAll('tbody tr').forEach((tr,idx) => {
-    const h = indices[idx];
-    const pr = par[h], sidx = siArr[h];
-    const front = idx < 9;
-    players.forEach((_,pi) => {
-      const inp = tr.querySelector(`input[data-player="${pi}"][data-hole="${h}"]`);
-      const sc = parseInt(inp.value,10);
-      const ptsCell = tr.querySelector(`.pts-${pi}`);
-      if (isNaN(sc)) { ptsCell.textContent=''; return; }
-
-      const rawHcp = parseInt(document.getElementById(`hcp-${pi}`).value,10)||0;
-      const adjHcp = Math.round(rawHcp * slope/113);
-      let strokes = 0;
-      if (adjHcp >= siArr[h]) strokes = 1;
-      if (adjHcp >= siArr[h] + 18) strokes = 2;
-      const net = sc - strokes;
-
-      let pts=0;
-      if(net <= pr-2) pts=4;
-      else if(net===pr-1) pts=3;
-      else if(net===pr) pts=2;
-      else if(net===pr+1) pts=1;
-      ptsCell.textContent = pts;
-
-      totals[pi].oS += sc;
-      if(front) totals[pi].fS += sc; else totals[pi].bS += sc;
-      totals[pi].oP += pts;
-      if(front) totals[pi].fP += pts; else totals[pi].bP += pts;
+  build();
+  scorecardBuilt = true;
+      saveBtn.disabled = false;
     });
-  });
-  totals.forEach((t,pi) => [0,1,2].forEach(r => {
-    document.getElementById(`str-${r}-${pi}`).textContent = r===0? t.fS: r===1? t.bS: t.oS;
-    document.getElementById(`pts-${r}-${pi}`).textContent = r===0? t.fP: r===1? t.bP: t.oP;
-  }));
-}
-</script>
+
+    resetBtn.addEventListener('click', () => {
+  if (confirm('Are you sure you want to reset the scorecard?')) {
+    scorecardBuilt = false;
+        tableContainer.innerHTML = '';
+        createdTime.textContent = '';
+        saveBtn.disabled = true;
+      }
+    });
+
+    saveBtn.addEventListener('click', () => {
+      const scorecard = {
+        date: new Date().toISOString(),
+        course: document.getElementById('course-select').value,
+        tee: document.getElementById('tee-select').value,
+        holes: document.querySelector('input[name=holes]:checked').value,
+        players: [...document.querySelectorAll('input[type=checkbox]:checked')].map(cb => cb.value),
+        scores: [...document.querySelectorAll('tbody input[type=number]')].map(inp => ({
+          player: inp.getAttribute('data-player'),
+          hole: inp.getAttribute('data-hole'),
+          value: inp.value
+        })),
+        handicaps: [...document.querySelectorAll('[id^="hcp-"]')].map(inp => ({
+          player: inp.id.replace('hcp-', ''),
+          hcp: inp.value
+        }))
+      };
+      const existing = JSON.parse(localStorage.getItem('scorecards') || '[]');
+      existing.push(scorecard);
+      localStorage.setItem('scorecards', JSON.stringify(existing));
+      const formattedDate = new Date(scorecard.date).toLocaleString();
+      alert(`✅ Scorecard saved for ${scorecard.course} (${scorecard.tee}) on ${formattedDate}`);
+    });
+
+    function build() {
+      const courses = {
+        Ritchings: { par: [4,3,5,4,4,3,4,4,4,3,4,4,4,3,4,4,5,4], si: [12,8,6,18,10,16,2,14,4,15,3,17,7,11,1,5,13,9] },
+        Thorney:   { par: [5,4,4,3,5,4,4,3,5,4,4,3,5,4,4,3,5,4], si: [9,15,1,17,5,13,3,11,7,16,2,14,6,18,4,12,8,10] }
+      };
+      const teeSlope = { white:128, yellow:121, red:115 };
+
+      const courseKey = document.getElementById('course-select').value;
+      const { par, si } = courses[courseKey];
+      const tee = document.getElementById('tee-select').value;
+      const slope = teeSlope[tee];
+      const players = [...document.querySelectorAll('input[type=checkbox]:checked')].map(cb => cb.value);
+      const holes = document.querySelector('input[name=holes]:checked').value;
+      let indices = [...Array(18).keys()];
+      if (holes === '9f') indices = indices.slice(0,9);
+      if (holes === '9b') indices = indices.slice(9);
+
+      if (!players.length) {
+        alert("Please select at least one player.");
+        return;
+      }
+
+      createdTime.textContent = `Scorecard created: ${new Date().toLocaleString()}`;
+      tableContainer.innerHTML = '';
+
+      const table = document.createElement('table');
+      const thead = document.createElement('thead');
+      let hdr1 = '<tr><th>Hole</th><th>Par</th><th>SI</th>';
+      players.forEach((p,i) => hdr1 += `<th colspan="2">${p}<br>HCP:<input id="hcp-${i}" type="number" value="0" min="1" max="36"></th>`);
+      hdr1 += '</tr>';
+      let hdr2 = '<tr><th></th><th></th><th></th>';
+      players.forEach(() => hdr2 += '<th>Score</th><th>Pts</th>');
+      hdr2 += '</tr>';
+      thead.innerHTML = hdr1 + hdr2;
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      indices.forEach(i => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${i+1}</td><td>${par[i]}</td><td>${si[i]}</td>`;
+        players.forEach((_,pi) => {
+          tr.innerHTML += `<td><input data-player="${pi}" data-hole="${i}" type="number" min="0"></td>
+                            <td class="pts-${pi}"><div class="points"></div><div class="stroke-info" data-player="${pi}" data-hole="${i}"></div></td>`;
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+
+      const tfoot = document.createElement('tfoot');
+      ['Front 9','Back 9','Overall'].forEach((lbl,ri) => {
+        let row = `<tr><td colspan="3">${lbl} Total</td>`;
+        players.forEach((_,pi) => row += `<td id="str-${ri}-${pi}"></td><td id="pts-${ri}-${pi}"></td>`);
+        row += '</tr>';
+        tfoot.innerHTML += row;
+      });
+      table.appendChild(tfoot);
+      tableContainer.appendChild(table);
+
+      players.forEach((_,i) => {
+        const hcpInput = document.getElementById(`hcp-${i}`);
+        const adjSpan = document.createElement('span');
+        adjSpan.id = `adjhcp-${i}`;
+        adjSpan.textContent = '0';
+        hcpInput.insertAdjacentText('afterend', ' Adj:');
+        hcpInput.insertAdjacentElement('afterend', adjSpan);
+        function updateAdj() {
+          const raw = parseInt(hcpInput.value,10) || 0;
+          const adj = Math.round(raw * slope/113);
+          adjSpan.textContent = adj;
+        }
+        hcpInput.addEventListener('input', () => { updateAdj(); update(table,par,si,players,indices,slope); });
+        updateAdj();
+      });
+
+      tbody.querySelectorAll('input[type=number]').forEach(inp => inp.addEventListener('input', () => {
+        const playerIndex = inp.getAttribute('data-player');
+        const hcpField = document.getElementById(`hcp-${playerIndex}`);
+        if (!hcpField || hcpField.value === '' || isNaN(hcpField.value) || parseInt(hcpField.value, 10) <= 0) {
+          alert(`⚠️ Please enter a valid handicap for player ${players[playerIndex]} before scoring.`);
+          inp.value = '';
+          return;
+        }
+        update(table, par, si, players, indices, slope);
+      }));
+
+      update(table,par,si,players,indices,slope);
+    }
+
+    function update(table, par, siArr, players, indices, slope) {
+      const totals = players.map(() => ({fS:0,fP:0,bS:0,bP:0,oS:0,oP:0}));
+      table.querySelectorAll('tbody tr').forEach((tr,idx) => {
+        const h = indices[idx];
+        const pr = par[h], sidx = siArr[h];
+        const front = idx < 9;
+        players.forEach((_,pi) => {
+          const inp = tr.querySelector(`input[data-player="${pi}"][data-hole="${h}"]`);
+          const sc = parseInt(inp.value,10);
+          const ptsCell = tr.querySelector(`.pts-${pi}`);
+          if (isNaN(sc)) return;
+
+          const rawHcp = parseInt(document.getElementById(`hcp-${pi}`).value,10)||0;
+          const adjHcp = Math.round(rawHcp * slope/113);
+          let strokes = 0;
+          if (adjHcp >= siArr[h]) strokes = 1;
+          if (adjHcp >= siArr[h] + 18) strokes = 2;
+          const net = sc - strokes;
+
+          let pts=0;
+          if(net <= pr-2) pts=4;
+          else if(net===pr-1) pts=3;
+          else if(net===pr) pts=2;
+          else if(net===pr+1) pts=1;
+
+          const pointsDiv = ptsCell.querySelector('.points');
+          const strokeInfo = ptsCell.querySelector('.stroke-info');
+          if (pointsDiv) pointsDiv.textContent = pts;
+          if (strokeInfo) strokeInfo.textContent = `(${strokes} stroke${strokes !== 1 ? 's' : ''})`;
+
+          totals[pi].oS += sc;
+          if(front) totals[pi].fS += sc; else totals[pi].bS += sc;
+          totals[pi].oP += pts;
+          if(front) totals[pi].fP += pts; else totals[pi].bP += pts;
+        });
+      });
+      totals.forEach((t,pi) => [0,1,2].forEach(r => {
+        document.getElementById(`str-${r}-${pi}`).textContent = r===0? t.fS: r===1? t.bS: t.oS;
+        document.getElementById(`pts-${r}-${pi}`).textContent = r===0? t.fP: r===1? t.bP: t.oP;
+      }));
+    }
+  </script>
 </body>
 </html>
