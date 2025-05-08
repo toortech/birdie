@@ -3,24 +3,30 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Ritchings Park GC – Stableford Scorecard</title>
+  <title>Stableford Scorecard – Multiple Courses</title>
   <style>
-    body { background:#007BFF; color:white; font-family:sans-serif; padding:1rem; max-width:1000px; margin:0 auto; }
-    h1 { color:#28A745; font-size:2rem; text-align:center; margin-bottom:1rem; }
-    .controls { display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-bottom:1rem; }
-    .controls > div { background:rgba(255,255,255,0.1); padding:0.5rem; border-radius:6px; }
-    .controls label { font-weight:bold; display:block; margin-bottom:0.25rem; }
-    table { width:100%; border-collapse:collapse; margin-bottom:1rem; }
-    th, td { border:1px solid #fff; padding:0.5rem; text-align:center; }
-    th { background:rgba(255,255,255,0.2); }
-    input[type="number"] { width:3rem; padding:0.25rem; text-align:center; border-radius:4px; border:none; }
-    .totals, tfoot td { font-weight:bold; background:rgba(255,255,255,0.1); }
-    @media(max-width:600px){ .controls{grid-template-columns:1fr;} table,thead,tbody,th,td,tr{display:block;} thead tr{display:none;} tr{margin-bottom:1rem;} td{position:relative;padding-left:50%;} td:before{position:absolute;left:0;width:45%;padding-left:0.5rem;white-space:nowrap;} }
+    body { background: #007BFF; color: white; font-family: sans-serif; padding: 1rem; max-width: 1000px; margin: 0 auto; }
+    h1 { color: #28A745; font-size: 2rem; text-align: center; margin-bottom: 1rem; }
+    .controls { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1rem; }
+    .controls > div { background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 6px; }
+    .controls label { font-weight: bold; display: block; margin-bottom: 0.25rem; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+    th, td { border: 1px solid #fff; padding: 0.5rem; text-align: center; }
+    th { background: rgba(255,255,255,0.2); }
+    input[type="number"], select { padding: 0.25rem; text-align: center; border-radius: 4px; border: none; font-size: 0.9rem; }
+    .totals, tfoot td { font-weight: bold; background: rgba(255,255,255,0.1); }
   </style>
 </head>
 <body>
-  <h1>Ritchings Park GC – Stableford Scorecard</h1>
+  <h1>Stableford Scorecard – Multiple Courses</h1>
   <div class="controls">
+    <div>
+      <label>Select Course:</label>
+      <select id="course-select">
+        <option value="Ritchings">Richings Park Golf Club</option>
+        <option value="Thorney">Thorney Park Golf Club</option>
+      </select>
+    </div>
     <div>
       <label>Select Players (up to 4):</label>
       <label><input type="checkbox" value="Amrit"> Amrit</label>
@@ -45,10 +51,14 @@
     </div>
   </div>
   <button id="build">Build Scorecard</button>
+  <div id="created-time" style="margin-top:0.5rem;font-style:italic;"></div>
   <div id="table-container"></div>
+
   <script>
-    const par = [4,3,5,4,4,3,4,4,4,3,4,4,4,3,4,4,5,4];
-    const si  = [12,8,6,18,10,16,2,14,4,15,3,17,7,11,1,5,13,9];
+    const courses = {
+      Ritchings: { par: [4,3,5,4,4,3,4,4,4,3,4,4,4,3,4,4,5,4], si:  [12,8,6,18,10,16,2,14,4,15,3,17,7,11,1,5,13,9] },
+      Thorney:   { par: [5,4,4,3,5,4,4,3,5,4,4,3,5,4,4,3,5,4], si:  [9,15,1,17,5,13,3,11,7,16,2,14,6,18,4,12,8,10] }
+    };
     const teeRatings = { white:{rating:70.7,slope:128}, yellow:{rating:68.3,slope:121}, red:{rating:65.9,slope:115} };
 
     document.getElementById('build').addEventListener('click', build);
@@ -59,11 +69,14 @@
         .map(cb => cb.value)
         .slice(0,4);
     }
+
     function getSelectedHoles() {
       return document.querySelector('input[name=holes]:checked').value;
     }
 
     function build() {
+      const courseKey = document.getElementById('course-select').value;
+      const { par, si } = courses[courseKey];
       const players = getSelectedPlayers();
       if (!players.length) return alert('Select at least one player');
       const tee = document.getElementById('tee-select').value;
@@ -72,40 +85,44 @@
       if (holeOpt === '9f') indices = indices.slice(0,9);
       if (holeOpt === '9b') indices = indices.slice(9);
 
+      document.getElementById('created-time').textContent = `Scorecard created: ${new Date().toLocaleString()}`;
       const container = document.getElementById('table-container');
       container.innerHTML = '';
 
       const table = document.createElement('table');
       const thead = document.createElement('thead');
-      let headerRow1 = '<tr><th>Hole</th><th>Par</th><th>SI</th>';
-      players.forEach((p,pi) => {
-        headerRow1 += `<th colspan="2">${p}<br>HCP: <input type='number' id='hcp-${pi}' value='0' min='0' max='54' style='width:3rem;'></th>`;
+      let row1 = '<tr><th>Hole</th><th>Par</th><th>SI</th>';
+      players.forEach((p, pi) => {
+        row1 += `<th colspan="3">${p}<br>` +
+                `HCP: <input type="number" id="hcp-${pi}" value="0" min="0" max="54" style="width:3rem;"><br>` +
+                `Adj: <span id="adjhcp-${pi}">0</span></th>`;
       });
-      headerRow1 += '</tr>';
-      let headerRow2 = '<tr><th></th><th></th><th></th>';
-      players.forEach(() => { headerRow2 += '<th>Score</th><th>Pts</th>'; });
-      headerRow2 += '</tr>';
-      thead.innerHTML = headerRow1 + headerRow2;
+      row1 += '</tr>';
+      let row2 = '<tr><th></th><th></th><th></th>';
+      players.forEach(()=> row2 += '<th>Score</th><th>Pts</th><th></th>');
+      row2 += '</tr>';
+      thead.innerHTML = row1 + row2;
       table.appendChild(thead);
 
       const tbody = document.createElement('tbody');
-      indices.forEach(i => {
+      indices.forEach(h => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td>${i+1}</td><td>${par[i]}</td><td>${si[i]}</td>`;
+        tr.innerHTML = `<td>${h+1}</td><td>${par[h]}</td><td>${si[h]}</td>`;
         players.forEach((_, pi) => {
-          tr.innerHTML += `<td><input data-p='${pi}' data-hole='${i}' type='number' min='1'></td><td class='pts-${pi}'></td>`;
+          tr.innerHTML +=
+            `<td><input data-player="${pi}" data-hole="${h}" type="number" min="1"></td>` +
+            `<td class="pts-${pi}"></td>` +
+            `<td></td>`;
         });
         tbody.appendChild(tr);
       });
       table.appendChild(tbody);
 
       const tfoot = document.createElement('tfoot');
-      ['Front 9','Back 9','Overall'].forEach((lbl,ri) => {
+      ['Front 9','Back 9','Overall'].forEach((lbl, ri) => {
         const tr = document.createElement('tr');
         let row = `<td colspan="3">${lbl} Total</td>`;
-        players.forEach((_,pi) => {
-          row += `<td id='str-${ri}-${pi}'></td><td id='pts-${ri}-${pi}'></td>`;
-        });
+        players.forEach((_, pi)=> row += `<td id="str-${ri}-${pi}"></td><td id="pts-${ri}-${pi}"></td><td></td>`);
         tr.innerHTML = row;
         tfoot.appendChild(tr);
       });
@@ -113,34 +130,54 @@
 
       container.appendChild(table);
 
-      table.querySelectorAll('input[type=number]').forEach(input => {
-        input.addEventListener('input', () => update(table, players, tee, indices));
+      // Bind HCP input -> adjust + update
+      players.forEach((_, pi) => {
+        document.getElementById(`hcp-${pi}`).addEventListener('input', () => {
+          const rawHcp = parseInt(document.getElementById(`hcp-${pi}`).value, 10) || 0;
+          const slope = teeRatings[tee].slope;
+          const adjHcp = Math.round(rawHcp * slope / 113);
+          document.getElementById(`adjhcp-${pi}`).textContent = adjHcp;
+          update(table, par, si, tee, players, indices);
+        });
       });
-      update(table, players, tee, indices);
+
+      tbody.querySelectorAll('input[type=number]').forEach(input =>
+        input.addEventListener('input', () => update(table, par, si, tee, players, indices))
+      );
+
+      update(table, par, si, tee, players, indices);
     }
 
-    function update(table, players, tee, indices) {
-      const totals = players.map(() => ({fS:0,fP:0,bS:0,bP:0,oS:0,oP:0}));
+    function update(table, par, siArr, tee, players, indices) {
+      const totals = players.map(() => ({ fS:0, fP:0, bS:0, bP:0, oS:0, oP:0 }));
+      const slope = teeRatings[tee].slope;
       const rows = table.querySelectorAll('tbody tr');
       rows.forEach((tr, idx) => {
-        const holeIndex = indices[idx];
-        const parVal = par[holeIndex];
+        const h = indices[idx];
+        const parVal = par[h], siVal = siArr[h];
         const isFront = idx < 9;
         players.forEach((_, pi) => {
-          const scoreInput = tr.querySelector(`input[data-p='${pi}'][data-hole='${holeIndex}']`);
-          const scVal = parseInt(scoreInput.value, 10) || 0;
+          const inp = tr.querySelector(`input[data-player="${pi}"][data-hole="${h}"]`);
+          const sc = parseInt(inp.value, 10) || 0;
           const ptsCell = tr.querySelector(`.pts-${pi}`);
-          if (!scVal) { ptsCell.textContent = ''; return; }
-          totals[pi].oS += scVal;
-          if (isFront) totals[pi].fS += scVal; else totals[pi].bS += scVal;
-          const hcpVal = parseInt(document.getElementById(`hcp-${pi}`).value, 10) || 0;
-          const strokesGiven = Math.floor(hcpVal/18) + ((si[holeIndex] <= (hcpVal%18)) ? 1 : 0);
-          const net = scVal - strokesGiven;
+          if (!sc) { ptsCell.textContent = ''; return; }
+
+          totals[pi].oS += sc;
+          if (isFront) totals[pi].fS += sc; else totals[pi].bS += sc;
+
+          const rawHcp = parseInt(document.getElementById(`hcp-${pi}`).value, 10) || 0;
+          const adjHcp = Math.round(rawHcp * slope / 113);
+          const baseStrokes = Math.floor(adjHcp / 18);
+          const extraStrokes = adjHcp % 18;
+          const strokesGiven = baseStrokes + (siVal <= extraStrokes ? 1 : 0);
+          const net = sc - strokesGiven;
+
           let pts = 0;
           if (net <= parVal - 2) pts = 4;
           else if (net === parVal - 1) pts = 3;
           else if (net === parVal) pts = 2;
           else if (net === parVal + 1) pts = 1;
+
           ptsCell.textContent = pts;
           totals[pi].oP += pts;
           if (isFront) totals[pi].fP += pts; else totals[pi].bP += pts;
@@ -148,8 +185,8 @@
       });
       totals.forEach((t, pi) => {
         [0,1,2].forEach(ri => {
-          document.getElementById(`str-${ri}-${pi}`).textContent = (ri===0? t.fS : ri===1? t.bS : t.oS);
-          document.getElementById(`pts-${ri}-${pi}`).textContent = (ri===0? t.fP : ri===1? t.bP : t.oP);
+          document.getElementById(`str-${ri}-${pi}`).textContent = ri===0? t.fS : ri===1? t.bS : t.oS;
+          document.getElementById(`pts-${ri}-${pi}`).textContent = ri===0? t.fP : ri===1? t.bP : t.oP;
         });
       });
     }
