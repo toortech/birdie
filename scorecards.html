@@ -220,14 +220,15 @@ function build() {
     const hcpInput = document.getElementById(`hcp-${i}`);
     const adjSpan = document.createElement('span');
     adjSpan.id = `adjhcp-${i}`;
-    adjSpan.textContent = '0';
-    hcpInput.insertAdjacentText('afterend', ' Adj:');
+    adjSpan.style.fontWeight = 'bold';
+    adjSpan.style.marginLeft = '0.5rem';
+    adjSpan.textContent = 'Adj HCP: 0';
     hcpInput.insertAdjacentElement('afterend', adjSpan);
 
     const updateAdj = () => {
       const raw = parseInt(hcpInput.value, 10) || 0;
       const adj = Math.round(raw * slope / 113);
-      adjSpan.textContent = adj;
+      adjSpan.textContent = `Adj HCP: ${adj}`;
       hcpInput.classList.toggle('invalid-hcp', hcpInput.value === '' || raw <= 0);
 
       indices.forEach(h => {
@@ -278,7 +279,7 @@ function update(table, par, siArr, players, indices, slope) {
       if (isNaN(sc)) return;
 
       const rawHcp = parseInt(document.getElementById(`hcp-${pi}`).value,10)||0;
-      const adjHcp = Math.round(rawHcp * slope/113);
+      const adjHcp = Math.round(rawHcp * slope / 113);
       let strokes = 0;
       if (adjHcp >= siArr[h] + 18) strokes = 2;
       else if (adjHcp >= siArr[h]) strokes = 1;
