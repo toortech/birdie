@@ -163,7 +163,11 @@ function build() {
   let hdr2 = '<tr><th></th><th></th><th></th><th></th>';
   players.forEach(() => hdr2 += '<th>Shots</th><th>STB</th>');
   hdr2 += '</tr>';
-  thead.innerHTML = hdr1 + hdr2;
+  const timestampRow = document.createElement('tr');
+  timestampRow.innerHTML = `<th colspan='${4 + players.length * 2}' style='text-align:right; font-size:0.85em;'>⏱️ ${new Date().toLocaleString()}</th>`;
+  thead.innerHTML = '';
+  thead.appendChild(timestampRow);
+  thead.innerHTML += hdr1 + hdr2;
   table.appendChild(thead);
 
   const tbody = document.createElement('tbody');
