@@ -348,7 +348,13 @@ document.getElementById('download-image').addEventListener('click', () => {
     return;
   }
   import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js').then(() => {
-    html2canvas(node, { scale: 2 }).then(canvas => {
+    node.scrollIntoView({ behavior: 'instant' });
+    node.style.minWidth = '800px';
+    html2canvas(node, {
+      scale: 3,
+      backgroundColor: '#ffffff',
+      useCORS: true
+    }).then(canvas => {
       const link = document.createElement('a');
       link.download = `scorecard_${new Date().toISOString().split('T')[0]}.png`;
       link.href = canvas.toDataURL();
