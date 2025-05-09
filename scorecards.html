@@ -88,7 +88,9 @@
     <button id="reset">Reset</button>
     <button id="save" disabled>Save Scorecard</button>
   </div>
-  <div style="text-align:center">
+<div style="text-align:center">
+  <button id="download-image">📸 Save Scorecard as Image</button>
+
     <a href="#" id="view-saved-link">📄 View Past Scorecards</a>
   </div>
   <div id="created-time"></div>
@@ -209,7 +211,13 @@ function build() {
       const raw = parseInt(hcpInput.value, 10) || 0;
       const adj = Math.round(raw * slope / 113);
       adjSpan.textContent = `Adj HCP: ${adj}`;
-      hcpInput.classList.toggle('invalid-hcp', hcpInput.value === '' || raw <= 0);
+      if (hcpInput.value === '' || raw <= 0) {
+        hcpInput.classList.add('invalid-hcp');
+        hcpInput.title = 'Please enter a handicap greater than 0';
+      } else {
+        hcpInput.classList.remove('invalid-hcp');
+        hcpInput.removeAttribute('title');
+      }
       indices.forEach(h => {
         const strokeInfo = document.querySelector(`.stroke-info[data-player="${i}"][data-hole="${h}"]`);
         if (!strokeInfo) return;
@@ -320,6 +328,20 @@ function update(table, par, siArr, players, indices, slope) {
       });
 
       saveBtn.addEventListener('click', () => {
+        const allInputs = tableContainer.querySelectorAll('tbody input[type=number]');
+        let allFilled = true;
+        allInputs.forEach(inp => {
+          if (inp.value === '' || isNaN(parseInt(inp.value, 10))) {
+            inp.classList.add('missing');
+            allFilled = false;
+          } else {
+            inp.classList.remove('missing');
+          }
+        });
+        if (!allFilled) {
+          alert('⚠️ Please enter all scores before saving the scorecard.');
+          return;
+        }
         savedSuccessfully = true;
         alert('✅ Scorecard has been saved successfully.');
       });
@@ -333,6 +355,21 @@ function update(table, par, siArr, players, indices, slope) {
     } else {
       console.error('❌ One or more required DOM elements are missing. Please check HTML IDs.');
     }
-  </script>
+  document.getElementById('download-image').addEventListener('click', () => {
+  const node = document.getElementById('table-container');
+  if (!node || !node.firstChild) {
+    alert('⚠️ No scorecard found to capture.');
+    return;
+  }
+  import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js').then(() => {
+    html2canvas(node, { scale: 2 }).then(canvas => {
+      const link = document.createElement('a');
+      link.download = `scorecard_${new Date().toISOString().split('T')[0]}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  });
+});
+</script>
 </body>
 </html>
