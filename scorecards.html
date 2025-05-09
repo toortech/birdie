@@ -341,6 +341,21 @@ if (buildBtn && saveBtn && resetBtn && tableContainer && createdTime && viewLink
 } else {
   console.error('❌ One or more required DOM elements are missing. Please check HTML IDs.');
 }
+document.getElementById('download-image').addEventListener('click', () => {
+  const node = document.getElementById('table-container');
+  if (!node || !node.firstChild) {
+    alert('⚠️ No scorecard found to capture.');
+    return;
+  }
+  import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js').then(() => {
+    html2canvas(node, { scale: 2 }).then(canvas => {
+      const link = document.createElement('a');
+      link.download = `scorecard_${new Date().toISOString().split('T')[0]}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+    });
+  });
+});
 </script>
 </body>
 </html>
