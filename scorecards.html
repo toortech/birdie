@@ -183,41 +183,25 @@
       downloadBtn.addEventListener('click', () => {
         const node = tableContainer.firstElementChild;
         if (!node) return alert('No scorecard to capture.');
-        const orig = node.getAttribute('style') || '';
-        node.style.backgroundColor = 'white'; node.style.color = 'black';
-        node.querySelectorAll('th, td').forEach(c => {
-          c.style.color = 'black'; c.style.backgroundColor = 'white'; c.style.borderColor = '#000';
-        });
+        const orig = node.getAttribute('style') || ''; node.style.backgroundColor = 'white'; node.style.color = 'black';
+        node.querySelectorAll('th, td').forEach(c => { c.style.color = 'black'; c.style.backgroundColor = 'white'; c.style.borderColor = '#000'; });
         const h2c = typeof html2canvas === 'function' ? html2canvas : (html2canvas && html2canvas.default ? html2canvas.default : null);
-        if (!h2c) {
-          alert('html2canvas not found.');
-          node.setAttribute('style', orig);
-          node.querySelectorAll('th, td').forEach(c => c.removeAttribute('style'));
-          return;
-        }
-        h2c(node, { scale: 2 })
-          .then(canvas => {
-            const a = document.createElement('a');
-            a.download = `scorecard_${new Date().toISOString().split('T')[0]}.png`;
-            a.href = canvas.toDataURL(); a.click();
-          })
+        if (!h2c) { alert('html2canvas not found.'); node.setAttribute('style', orig); node.querySelectorAll('th, td').forEach(c => c.removeAttribute('style')); return; }
+        h2c(node, { scale: 2 }).then(canvas => { const a = document.createElement('a'); a.download = `scorecard_${new Date().toISOString().split('T')[0]}.png`; a.href = canvas.toDataURL(); a.click(); })
           .catch(err => { console.error(err); alert('Error capturing image: ' + err); })
-          .finally(() => {
-            node.setAttribute('style', orig);
-            node.querySelectorAll('th, td').forEach(c => c.removeAttribute('style'));
-          });
+          .finally(() => { node.setAttribute('style', orig); node.querySelectorAll('th, td').forEach(c => c.removeAttribute('style')); });
       });
 
       function build(players) {
         tableContainer.innerHTML = '';
         const table = document.createElement('table');
         const caption = document.createElement('caption');
-        caption.textContent = 'Scorecard created: ' + new Date().toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' });
+        caption.textContent = 'Scorecard created: ' + new Date().toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) + ' (H = Handicap, CH = Course Handicap)';
         table.appendChild(caption);
 
         const thead = document.createElement('thead');
         let hdr1 = '<tr><th>Hole</th><th>Par</th><th style="color:red;">SI</th><th>Yards</th>';
-        players.forEach((p,i) => hdr1 += `<th colspan="2">${p}<br>HCP:<input id="hcp-${i}" type="number" min="0" value="0"></th>`);
+        players.forEach((p,i) => hdr1 += `<th colspan="2">${p}<br>H:<input id="hcp-${i}" type="number" min="0" max="99" value="0" oninput="if(this.value.length>2) this.value=this.value.slice(0,2)"></th>`);
         hdr1 += '</tr>';
         let hdr2 = '<tr><th></th><th></th><th></th><th></th>';
         players.forEach(() => hdr2 += '<th>Shots</th><th>Pts</th>');
@@ -233,17 +217,9 @@
         idx.forEach(h => {
           const tr = document.createElement('tr');
           const c = courses[courseSelect.value];
-          tr.innerHTML = `
-            <td>${h+1}</td>
-            <td>${c.par[h]}</td>
-            <td style="color:red;">${c.si[h]}</td>
-            <td>${c.yards[teeSelect.value][h]}</td>
-          `;
+          tr.innerHTML = `<td>${h+1}</td><td>${c.par[h]}</td><td style="color:red;">${c.si[h]}</td><td>${c.yards[teeSelect.value][h]}</td>`;
           players.forEach((_,pi) => {
-            tr.innerHTML += `
-              <td><input data-player="${pi}" data-hole="${h}" type="number" min="0"></td>
-              <td class="pts-${pi}"><div class="stroke-info" data-player="${pi}" data-hole="${h}"></div><div class="points"></div></td>
-            `;
+            tr.innerHTML += `<td><input data-player="${pi}" data-hole="${h}" type="number" min="0" max="999" oninput="if(this.value.length>3) this.value=this.value.slice(0,3)"></td><td class="pts-${pi}"><div class="stroke-info" data-player="${pi}" data-hole="${h}"></div><div class="points"></div></td>`;
           });
           tbody.appendChild(tr);
         });
@@ -262,14 +238,12 @@
         // Setup handlers
         players.forEach((_,i) => {
           const hIn = document.getElementById(`hcp-${i}`);
-          const adj = document.createElement('span');
-          adj.id = `adjhcp-${i}`;
-          adj.style.marginLeft = '0.5rem';
+          const adj = document.createElement('span'); adj.id = `adjhcp-${i}`; adj.style.marginLeft = '0.5rem';
           hIn.insertAdjacentElement('afterend', adj);
           const updateAdj = () => {
-            const raw = parseInt(hIn.value, 10) || 0;
+            const raw = parseInt(hIn.value,10)||0;
             const a = Math.round(raw * teeSlope[teeSelect.value] / 113);
-            adj.textContent = `Adj HCP: ${a}`;
+            adj.textContent = 'CH: ' + a;
             idx.forEach(h => {
               const siVal = courses[courseSelect.value].si[h];
               const strokes = a >= siVal + 18 ? 2 : a >= siVal ? 1 : 0;
@@ -288,35 +262,29 @@
         function updateScores() {
           const tots = players.map(() => ({fS:0,fP:0,bS:0,bP:0,oS:0,oP:0}));
           table.querySelectorAll('tbody tr').forEach((tr, rIdx) => {
-            const h = idx[rIdx];
-            const c = courses[courseSelect.value];
-            const parVal = c.par[h], siVal = c.si[h];
-            const front = rIdx < 9;
+            const h = idx[rIdx]; const c = courses[courseSelect.value]; const parVal = c.par[h], siVal = c.si[h]; const front = rIdx < 9;
             players.forEach((_,pi) => {
               const inp = tr.querySelector(`input[data-player="${pi}"][data-hole="${h}"]`);
-              const sc = parseInt(inp.value, 10);
-              if (isNaN(sc)) return;
+              const sc = parseInt(inp.value,10); if(isNaN(sc)) return;
               const raw = parseInt(document.getElementById(`hcp-${pi}`).value,10)||0;
-              const a = Math.round(raw * teeSlope[teeSelect.value] / 113);
-              const strokes = a >= siVal + 18 ? 2 : a >= siVal ? 1 : 0;
+              const a = Math.round(raw*teeSlope[teeSelect.value]/113);
+              const strokes = a>=siVal+18?2:a>=siVal?1:0;
               const net = sc - strokes;
               let pts = 0;
-              if (net <= parVal - 3)      pts = 5;
-              else if (net === parVal - 2) pts = 4;
-              else if (net === parVal - 1) pts = 3;
-              else if (net === parVal)     pts = 2;
-              else if (net === parVal + 1) pts = 1;
+              if(net<=parVal-3)      pts=5;
+              else if(net===parVal-2) pts=4;
+              else if(net===parVal-1) pts=3;
+              else if(net===parVal)   pts=2;
+              else if(net===parVal+1) pts=1;
               tr.querySelector(`.points`).textContent = pts;
-              tots[pi].oS += sc;
-              tots[pi].oP += pts;
-              if (front) { tots[pi].fS += sc; tots[pi].fP += pts; }
-              else      { tots[pi].bS += sc; tots[pi].bP += pts; }
+              tots[pi].oS += sc; tots[pi].oP += pts;
+              if(front){ tots[pi].fS+=sc; tots[pi].fP+=pts; } else { tots[pi].bS+=sc; tots[pi].bP+=pts; }
             });
           });
           tots.forEach((t,pi) => {
-            [['shots', 'fS', 'fP'], ['shots','bS','bP'], ['shots','oS','oP']].forEach((cols,i) => {
+            [['shots','fS','fP'],['shots','bS','bP'],['shots','oS','oP']].forEach((cols,i) => {
               document.getElementById(`${cols[0]}-${i}-${pi}`).textContent = t[cols[1]];
-              document.getElementById(`pts-${i}-${pi}`).textContent    = t[cols[2]];
+              document.getElementById(`pts-${i}-${pi}`).textContent = t[cols[2]];
             });
           });
         }
