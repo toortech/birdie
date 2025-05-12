@@ -248,6 +248,12 @@
         });
         table.appendChild(tfoot);
         tableContainer.appendChild(table);
+        // Attempt to lock screen orientation to landscape on mobile
+        if (screen.orientation && screen.orientation.lock) {
+          screen.orientation.lock('landscape').catch(err => {
+            console.warn('Orientation lock failed:', err);
+          });
+        }
 
         // Setup handlers
         players.forEach((_,i) => {
