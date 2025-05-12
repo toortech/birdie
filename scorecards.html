@@ -6,25 +6,14 @@
   <title>Stableford Scorecard – Multiple Courses</title>
   <style>
     input.invalid-hcp { border: 2px solid red; background-color: #ffcccc; }
-    body {
-      background: #007BFF;
-      color: black;
-      font-family: sans-serif;
-      padding: 1rem;
-      margin: 0 auto;
-    }
+    body { background: #007BFF; color: white; font-family: sans-serif; padding: 1rem; margin: 0 auto; }
     h1 { color: #28A745; font-size: 2rem; text-align: center; margin-bottom: 1rem; }
     .controls { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
     .controls > div { background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 6px; flex: 1 1 200px; }
     label { display: block; font-weight: bold; margin-bottom: 0.25rem; }
     #table-container { overflow-x: auto; min-height: 1rem; }
     table { width: 100%; border-collapse: collapse; margin-top: 1rem; min-width: 600px; }
-    th, td {
-      border: 1px solid #fff;
-      padding: 0.5rem;
-      text-align: center;
-      color: black;
-    }
+    th, td { border: 1px solid #fff; padding: 0.5rem; text-align: center; }
     th { background: rgba(255,255,255,0.2); }
     input[type="number"] { width: 3rem; }
     select { padding: 0.25rem; width: 100%; }
@@ -53,58 +42,58 @@
 <body>
   <h1>Stableford Scorecard – Multiple Courses</h1>
   <details id="setup-controls" open>
-    <summary style="cursor:pointer; font-weight:bold; font-size:1.1em;">⚙️ Setup Options</summary>
-    <div class="controls">
-      <div>
-        <label for="course-select">Course:</label>
-        <select id="course-select">
-          <option value="Ritchings">Richings Park</option>
-          <option value="Thorney">Thorney Park</option>
-        </select>
-      </div>
-      <div>
-        <label for="tee-select">Tee Colour:</label>
-        <select id="tee-select">
-          <option value="white">White</option>
-          <option value="yellow">Yellow</option>
-          <option value="red">Red</option>
-        </select>
-      </div>
-      <div>
-        <label>Players (max 4):</label>
-        <div id="player-checkboxes" style="display:grid; grid-template-columns: repeat(2, minmax(120px, 1fr)); gap: 0.5rem; max-height: 150px; overflow-y: auto;">
-          <label><input type="checkbox" name="player" value="Amrit"> Amrit</label>
-          <label><input type="checkbox" name="player" value="Kam"> Kam</label>
-          <label><input type="checkbox" name="player" value="Vish"> Vish</label>
-          <label><input type="checkbox" name="player" value="Ravi"> Ravi</label>
-          <label><input type="checkbox" name="player" value="Bal"> Bal</label>
-          <label><input type="checkbox" name="player" value="Vick"> Vick</label>
-          <label><input type="checkbox" name="player" value="Michael"> Michael</label>
-          <label><input type="checkbox" name="player" value="Justy"> Justy</label>
-          <label><input type="checkbox" name="player" value="Phuperjee"> Phuperjee</label>
-          <label><input type="checkbox" name="player" value="Indy"> Indy</label>
-        </div>
-      </div>
-      <div>
-        <label>Holes:</label>
-        <label><input type="radio" name="holes" value="18" checked> Full 18</label>
-        <label><input type="radio" name="holes" value="9f"> Front 9</label>
-        <label><input type="radio" name="holes" value="9b"> Back 9</label>
+  <summary style="cursor:pointer; font-weight:bold; font-size:1.1em;">⚙️ Setup Options</summary>
+  <div class="controls">
+    <div>
+      <label for="course-select">Course:</label>
+      <select id="course-select">
+        <option value="Ritchings">Richings Park</option>
+        <option value="Thorney">Thorney Park</option>
+      </select>
+    </div>
+    <div>
+      <label for="tee-select">Tee Colour:</label>
+      <select id="tee-select">
+        <option value="white">White</option>
+        <option value="yellow">Yellow</option>
+        <option value="red">Red</option>
+      </select>
+    </div>
+    <div>
+      <label>Players (max 4):</label>
+      <div id="player-checkboxes" style="display:grid; grid-template-columns: repeat(2, minmax(120px, 1fr)); gap: 0.5rem; max-height: 150px; overflow-y: auto;">
+        <label><input type="checkbox" name="player" value="Amrit"> Amrit</label>
+        <label><input type="checkbox" name="player" value="Kam"> Kam</label>
+        <label><input type="checkbox" name="player" value="Vish"> Vish</label>
+        <label><input type="checkbox" name="player" value="Ravi"> Ravi</label>
+        <label><input type="checkbox" name="player" value="Bal"> Bal</label>
+        <label><input type="checkbox" name="player" value="Vick"> Vick</label>
+        <label><input type="checkbox" name="player" value="Michael"> Michael</label>
+        <label><input type="checkbox" name="player" value="Justy"> Justy</label>
+        <label><input type="checkbox" name="player" value="Phuperjee"> Phuperjee</label>
+        <label><input type="checkbox" name="player" value="Indy"> Indy</label>
       </div>
     </div>
-  </details>
-  <div id="button-group">
-    <button id="build">Build Scorecard</button>
-    <button id="reset">Reset</button>
-    <button id="save" disabled>Save Scorecard</button>
+    <div>
+      <label>Holes:</label>
+      <label><input type="radio" name="holes" value="18" checked> Full 18</label>
+      <label><input type="radio" name="holes" value="9f"> Front 9</label>
+      <label><input type="radio" name="holes" value="9b"> Back 9</label>
+    </div>
   </div>
-  <div style="text-align:center">
-    <button id="download-image">📸 Save Scorecard as Image</button>
-    <a href="#" id="view-saved-link">📄 View Past Scorecards</a>
-  </div>
-  <div id="created-time"></div>
-  <div id="table-container"></div>
-  <script>
+</details>
+<div id="button-group">
+  <button id="build">Build Scorecard</button>
+  <button id="reset">Reset</button>
+  <button id="save" disabled>Save Scorecard</button>
+</div>
+<div style="text-align:center">
+  <button id="download-image">📸 Save Scorecard as Image</button>
+  <a href="#" id="view-saved-link">📄 View Past Scorecards</a>
+</div>
+<div id="created-time"></div>
+<div id="table-container"></div>
+<script>
 let scorecardBuilt = false;
 let savedSuccessfully = false;
 
@@ -115,8 +104,117 @@ const tableContainer = document.getElementById('table-container');
 const createdTime = document.getElementById('created-time');
 const viewLink = document.getElementById('view-saved-link');
 
+buildBtn.addEventListener('click', () => {
+  const selectedPlayers = [...document.querySelectorAll('#player-checkboxes input[type=checkbox]:checked')];
+  if (selectedPlayers.length === 0) {
+    alert("⚠️ Please select at least one player.");
+    return;
+  }
+  if (selectedPlayers.length > 4) {
+    alert("⚠️ Please select no more than 4 players.");
+    return;
+  }
+
+  let allHCPValid = true;
+  selectedPlayers.forEach((cb, i) => {
+    const hcpInput = document.getElementById(`hcp-${i}`);
+    if (hcpInput && (hcpInput.value === '' || isNaN(hcpInput.value) || parseInt(hcpInput.value) <= 0)) {
+      hcpInput?.classList?.add('invalid-hcp');
+      allHCPValid = false;
+    } else {
+      hcpInput?.classList?.remove('invalid-hcp');
+    }
+  });
+
+  if (!allHCPValid) {
+    alert("⚠️ Please enter a valid handicap (greater than 0) for all selected players before building the scorecard.");
+    return;
+  }
+  if (scorecardBuilt && !confirm('Rebuilding will erase all entered scores. Continue?')) return;
+  build();
+  document.getElementById('setup-controls').open = false;
+  scorecardBuilt = true;
+  saveBtn.disabled = false;
+});
+
+resetBtn.addEventListener('click', () => {
+  if (confirm('⚠️ Are you sure you want to reset the scorecard? All entered data will be lost.')) {
+    scorecardBuilt = false;
+    savedSuccessfully = false;
+    tableContainer.innerHTML = '';
+    createdTime.textContent = '';
+    saveBtn.disabled = true;
+  }
+});
+
+viewLink.addEventListener('click', (e) => {
+  if (scorecardBuilt && !savedSuccessfully) {
+    e.preventDefault();
+    alert('⚠️ Please save your current scorecard before viewing past ones.');
+  } else {
+    window.location.href = 'view-saved-scores.html';
+  }
+});
+
+saveBtn.addEventListener('click', () => {
+  const allInputs = tableContainer.querySelectorAll('tbody input[type=number]');
+  let allFilled = true;
+  allInputs.forEach(inp => {
+    if (inp.value === '' || isNaN(parseInt(inp.value, 10))) {
+      inp.classList.add('missing');
+      allFilled = false;
+    } else {
+      inp.classList.remove('missing');
+    }
+  });
+  if (!allFilled) {
+    alert('⚠️ Please enter all scores before saving the scorecard.');
+    return;
+  }
+  savedSuccessfully = true;
+  alert('✅ Scorecard has been saved successfully.');
+});
+
+window.addEventListener('beforeunload', function (e) {
+  if (scorecardBuilt && !savedSuccessfully) {
+    e.preventDefault();
+    e.returnValue = 'You have unsaved scorecard data. Are you sure you want to leave?';
+  }
+});
+
+document.getElementById('download-image').addEventListener('click', () => {
+  const node = document.getElementById('table-container');
+  if (!node || !node.firstChild) {
+    alert('⚠️ No scorecard found to capture.');
+    return;
+  }
+  // Apply print-friendly styles
+  const originalStyles = node.getAttribute('style');
+  node.style.backgroundColor = 'white';
+  node.style.color = 'black';
+  node.querySelectorAll('th, td').forEach(cell => {
+    cell.style.color = 'black';
+    cell.style.backgroundColor = 'white';
+    cell.style.borderColor = '#000';
+  });
+
+  import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js').then(() => {
+    html2canvas(node, { scale: 2 }).then(canvas => {
+      const link = document.createElement('a');
+      link.download = `scorecard_${new Date().toISOString().split('T')[0]}.png`;
+      link.href = canvas.toDataURL();
+      link.click();
+
+      // Revert original styles
+      node.setAttribute('style', originalStyles || '');
+      node.querySelectorAll('th, td').forEach(cell => {
+        cell.removeAttribute('style');
+      });
+    });
+  });
+});
+
 function build() {
-  // FULL BUILD FUNCTION
   const courses = {
     Ritchings: {
       par: [4,3,5,4,4,3,4,4,4,3,4,4,4,3,4,4,5,4],
@@ -137,46 +235,48 @@ function build() {
       }
     }
   };
-
   const teeSlope = { white:128, yellow:121, red:115 };
+
   const courseKey = document.getElementById('course-select').value;
   const tee = document.getElementById('tee-select').value;
+  const { par, si, yards } = courses[courseKey];
   const slope = teeSlope[tee];
-  const { par, si } = courses[courseKey];
   const players = [...document.querySelectorAll('#player-checkboxes input[type=checkbox]:checked')].map(cb => cb.value);
-  const holeSetting = document.querySelector('input[name=holes]:checked').value;
-  let indices = [...Array(18).keys()];
-  if (holeSetting === '9f') indices = indices.slice(0,9);
-  if (holeSetting === '9b') indices = indices.slice(9);
-  if (players.length === 0 || players.length > 4) {
-    alert('Please select between 1 and 4 players.');
+  const holes = document.querySelector('input[name=holes]:checked').value;
+  if (players.length === 0) {
+    alert("Please select at least one player.");
+    return;
+  }
+  if (players.length > 4) {
+    alert("⚠️ Please select no more than 4 players.");
     return;
   }
 
+  let indices = [...Array(18).keys()];
+  if (holes === '9f') indices = indices.slice(0,9);
+  if (holes === '9b') indices = indices.slice(9);
+
   createdTime.textContent = `Scorecard created: ${new Date().toLocaleString()}`;
   tableContainer.innerHTML = '';
+
   const table = document.createElement('table');
   const thead = document.createElement('thead');
   let hdr1 = '<tr><th>Hole</th><th>Par</th><th style="color:red;">SI</th><th>Yards</th>';
   players.forEach((p,i) => hdr1 += `<th colspan="2">${p}<br>HCP:<input id="hcp-${i}" type="number" value="0" min="1" max="36"></th>`);
   hdr1 += '</tr>';
   let hdr2 = '<tr><th></th><th></th><th></th><th></th>';
-  players.forEach(() => hdr2 += '<th>Shots</th><th>STB</th>');
+  players.forEach(() => hdr2 += '<th>Shots</th><th>STB Score</th>');
   hdr2 += '</tr>';
-  const timestampRow = document.createElement('tr');
-  timestampRow.innerHTML = `<th colspan='${4 + players.length * 2}' style='text-align:right; font-size:0.85em;'>⏱️ ${new Date().toLocaleString()}</th>`;
-  thead.innerHTML = '';
-  thead.appendChild(timestampRow);
-  thead.innerHTML += hdr1 + hdr2;
+  thead.innerHTML = hdr1 + hdr2;
   table.appendChild(thead);
 
   const tbody = document.createElement('tbody');
   indices.forEach(i => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${i+1}</td><td>${par[i]}</td><td style=\"color:red;\">${si[i]}</td><td>${courses[courseKey].yards[tee][i]}</td>`;
+    tr.innerHTML = `<td>${i+1}</td><td>${par[i]}</td><td style="color:red;">${si[i]}</td><td>${yards[tee][i]}</td>`;
     players.forEach((_,pi) => {
       tr.innerHTML += `<td><input data-player="${pi}" data-hole="${i}" type="number" min="0"></td>
-                        <td class="pts-${pi}"><div class="points"></div><div class="stroke-info" data-player="${pi}" data-hole="${i}"></div></td>`;
+      <td class="pts-${pi}"><div class="points"></div><div class="stroke-info" data-player="${pi}" data-hole="${i}"></div></td>`;
     });
     tbody.appendChild(tr);
   });
@@ -184,16 +284,15 @@ function build() {
 
   const tfoot = document.createElement('tfoot');
   ['Front 9','Back 9','Overall'].forEach((lbl,ri) => {
-    let row = `<tr><td colspan=\"4\">${lbl} Total</td>`;
+    let row = `<tr><td colspan="4">${lbl} Total</td>`;
     players.forEach((_,pi) => row += `<td id="str-${ri}-${pi}" style="font-weight:bold;"></td><td id="pts-${ri}-${pi}" style="font-weight:bold;"></td>`);
     row += '</tr>';
     tfoot.innerHTML += row;
   });
   table.appendChild(tfoot);
   tableContainer.appendChild(table);
-  table.scrollIntoView({ behavior: 'smooth' });
-    // Handicap adjustment and scoring logic
-  players.forEach((_, i) => {
+
+  players.forEach((_,i) => {
     const hcpInput = document.getElementById(`hcp-${i}`);
     const adjSpan = document.createElement('span');
     adjSpan.id = `adjhcp-${i}`;
@@ -206,15 +305,6 @@ function build() {
       const raw = parseInt(hcpInput.value, 10) || 0;
       const adj = Math.round(raw * slope / 113);
       adjSpan.textContent = `Adj HCP: ${adj}`;
-
-      if (hcpInput.value === '' || raw <= 0) {
-        hcpInput.classList.add('invalid-hcp');
-        hcpInput.title = 'Please enter a handicap greater than 0';
-      } else {
-        hcpInput.classList.remove('invalid-hcp');
-        hcpInput.removeAttribute('title');
-      }
-
       indices.forEach(h => {
         const strokeInfo = document.querySelector(`.stroke-info[data-player="${i}"][data-hole="${h}"]`);
         if (!strokeInfo) return;
@@ -229,7 +319,7 @@ function build() {
 
     hcpInput.addEventListener('input', () => {
       updateAdj();
-      updateScores();
+      update(table, par, si, players, indices, slope);
     });
 
     updateAdj();
@@ -244,128 +334,49 @@ function build() {
       inp.value = '';
       return;
     }
-    updateScores();
+    update(table, par, si, players, indices, slope);
   }));
 
-  function updateScores() {
-    const totals = players.map(() => ({ fS: 0, fP: 0, bS: 0, bP: 0, oS: 0, oP: 0 }));
-    table.querySelectorAll('tbody tr').forEach((tr, idx) => {
-      const h = indices[idx];
-      const pr = par[h], siH = si[h];
-      const isFront = idx < 9;
-      players.forEach((_, pi) => {
-        const inp = tr.querySelector(`input[data-player="${pi}"][data-hole="${h}"]`);
-        const ptsCell = tr.querySelector(`.pts-${pi}`);
-        const sc = parseInt(inp.value, 10);
-        if (isNaN(sc)) return;
-        const rawHcp = parseInt(document.getElementById(`hcp-${pi}`).value, 10) || 0;
-        const adjHcp = Math.round(rawHcp * slope / 113);
-        let strokes = 0;
-        if (adjHcp >= siH + 18) strokes = 2;
-        else if (adjHcp >= siH) strokes = 1;
-        const net = sc - strokes;
-        let pts = 0;
-        if (net <= pr - 2) pts = 4;
-        else if (net === pr - 1) pts = 3;
-        else if (net === pr) pts = 2;
-        else if (net === pr + 1) pts = 1;
-        ptsCell.querySelector('.points').textContent = pts;
-        ptsCell.querySelector('.stroke-info').textContent = `(${strokes} stroke${strokes !== 1 ? 's' : ''})`;
-        totals[pi].oS += sc;
-        totals[pi].oP += pts;
-        if (isFront) {
-          totals[pi].fS += sc;
-          totals[pi].fP += pts;
-        } else {
-          totals[pi].bS += sc;
-          totals[pi].bP += pts;
-        }
-      });
-    });
-    totals.forEach((t, pi) => [0, 1, 2].forEach(r => {
-      document.getElementById(`str-${r}-${pi}`).textContent = r === 0 ? t.fS : r === 1 ? t.bS : t.oS;
-      document.getElementById(`pts-${r}-${pi}`).textContent = r === 0 ? t.fP : r === 1 ? t.bP : t.oP;
-    }));
-  }
-  scorecardBuilt = true;
-  saveBtn.disabled = false;
+  update(table, par, si, players, indices, slope);
 }
 
-if (buildBtn && saveBtn && resetBtn && tableContainer && createdTime && viewLink) {
-  buildBtn.addEventListener('click', () => {
-    if (scorecardBuilt && !confirm('Rebuilding will erase all entered scores. Continue?')) return;
-    build();
-    document.getElementById('setup-controls').open = false;
-  });
-
-  resetBtn.addEventListener('click', () => {
-    if (confirm('⚠️ Are you sure you want to reset the scorecard? All entered data will be lost.')) {
-      scorecardBuilt = false;
-      savedSuccessfully = false;
-      tableContainer.innerHTML = '';
-      createdTime.textContent = '';
-      saveBtn.disabled = true;
-    }
-  });
-
-  viewLink.addEventListener('click', (e) => {
-    if (scorecardBuilt && !savedSuccessfully) {
-      e.preventDefault();
-      alert('⚠️ Please save your current scorecard before viewing past ones.');
-    } else {
-      window.location.href = 'view-saved-scores.html';
-    }
-  });
-
-  saveBtn.addEventListener('click', () => {
-    const allInputs = tableContainer.querySelectorAll('tbody input[type=number]');
-    let allFilled = true;
-    allInputs.forEach(inp => {
-      if (inp.value === '' || isNaN(parseInt(inp.value, 10))) {
-        inp.classList.add('missing');
-        allFilled = false;
-      } else {
-        inp.classList.remove('missing');
-      }
+function update(table, par, siArr, players, indices, slope) {
+  const totals = players.map(() => ({fS:0,fP:0,bS:0,bP:0,oS:0,oP:0}));
+  table.querySelectorAll('tbody tr').forEach((tr,idx) => {
+    const h = indices[idx];
+    const pr = par[h], sidx = siArr[h];
+    const front = idx < 9;
+    players.forEach((_,pi) => {
+      const inp = tr.querySelector(`input[data-player="${pi}"][data-hole="${h}"]`);
+      const sc = parseInt(inp.value,10);
+      const ptsCell = tr.querySelector(`.pts-${pi}`);
+      if (isNaN(sc)) return;
+      const rawHcp = parseInt(document.getElementById(`hcp-${pi}`).value,10)||0;
+      const adjHcp = Math.round(rawHcp * slope/113);
+      let strokes = 0;
+      if (adjHcp >= sidx + 18) strokes = 2;
+      else if (adjHcp >= sidx) strokes = 1;
+      const net = sc - strokes;
+      let pts=0;
+      if(net <= pr-2) pts=4;
+      else if(net===pr-1) pts=3;
+      else if(net===pr) pts=2;
+      else if(net===pr+1) pts=1;
+      const pointsDiv = ptsCell.querySelector('.points');
+      const strokeInfo = ptsCell.querySelector('.stroke-info');
+      if (pointsDiv) pointsDiv.textContent = pts;
+      if (strokeInfo) strokeInfo.textContent = `(${strokes} stroke${strokes !== 1 ? 's' : ''})`;
+      totals[pi].oS += sc;
+      if(front) totals[pi].fS += sc; else totals[pi].bS += sc;
+      totals[pi].oP += pts;
+      if(front) totals[pi].fP += pts; else totals[pi].bP += pts;
     });
-    if (!allFilled) {
-      alert('⚠️ Please enter all scores before saving the scorecard.');
-      return;
-    }
-    savedSuccessfully = true;
-    alert('✅ Scorecard has been saved successfully.');
   });
-
-  window.addEventListener('beforeunload', function (e) {
-    if (scorecardBuilt && !savedSuccessfully) {
-      e.preventDefault();
-      e.returnValue = 'You have unsaved scorecard data. Are you sure you want to leave?';
-    }
-  });
-} else {
-  console.error('❌ One or more required DOM elements are missing. Please check HTML IDs.');
+  totals.forEach((t,pi) => [0,1,2].forEach(r => {
+    document.getElementById(`str-${r}-${pi}`).textContent = r===0? t.fS: r===1? t.bS: t.oS;
+    document.getElementById(`pts-${r}-${pi}`).textContent = r===0? t.fP: r===1? t.bP: t.oP;
+  }));
 }
-document.getElementById('download-image').addEventListener('click', () => {
-  const node = document.getElementById('table-container');
-  if (!node || !node.firstChild) {
-    alert('⚠️ No scorecard found to capture.');
-    return;
-  }
-  import('https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js').then(() => {
-    node.scrollIntoView({ behavior: 'instant' });
-    node.style.minWidth = '800px';
-    html2canvas(node, {
-      scale: 3,
-      backgroundColor: '#ffffff',
-      useCORS: true
-    }).then(canvas => {
-      const link = document.createElement('a');
-      link.download = `scorecard_${new Date().toISOString().split('T')[0]}.png`;
-      link.href = canvas.toDataURL();
-      link.click();
-    });
-  });
-});
 </script>
 </body>
 </html>
