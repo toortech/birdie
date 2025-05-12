@@ -36,7 +36,21 @@
       table { font-size: 0.8rem; }
     }
     @media (max-width: 480px) {
+      body { padding: 0.5rem; }
+      h1 { font-size: 1.5rem; }
       details#setup-controls summary { display: none; }
+      .controls { flex-direction: column; gap: 0.5rem; }
+      .controls > div { flex: 1 1 100%; }
+      #button-group { flex-direction: column; }
+      select, button { width: 100%; }
+      /* Mobile table adjustments */
+      table { min-width: none; table-layout: auto; font-size: 0.65rem; width: 100%; }
+      th, td { white-space: normal; word-wrap: break-word; padding: 0.2rem; }
+      input[type="number"] { width: 1.2rem; font-size: 0.7rem; }
+      .stroke-info, .points { font-size: 0.6em; }
+      /* Remove gradient overlay on small screens */
+      #table-container::after { display: none; }
+    }
       .controls { flex-direction: column; gap: 0.5rem; }
       .controls > div { flex: 1 1 100%; }
       #button-group { flex-direction: column; }
