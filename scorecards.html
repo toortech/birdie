@@ -6,8 +6,8 @@
   <title>Stableford Scorecard – Multiple Courses</title>
   <style>
     input.invalid-hcp { border: 2px solid red; background-color: #ffcccc; }
-    body { background: #007BFF; color: white; font-family: sans-serif; padding: 1rem; margin: 0 auto; }
-    h1 { color: #28A745; font-size: 2rem; text-align: center; margin-bottom: 1rem; }
+    body { background: #f5f5f5; color: #000000; font-family: sans-serif; padding: 1rem; margin: 0 auto; }
+    h1 { color: #003300; font-size: 2rem; text-align: center; margin-bottom: 1rem; }
     .controls { display: flex; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem; }
     .controls > div { background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 6px; flex: 1 1 200px; }
     label { display: block; font-weight: bold; margin-bottom: 0.25rem; }
@@ -17,8 +17,8 @@
     th { background: rgba(255,255,255,0.2); }
     input[type="number"] { width: 3rem; }
     select { padding: 0.25rem; width: 100%; }
-    button { padding: 0.5rem 1rem; font-size: 1rem; background: #28A745; color: white; border: none; border-radius: 4px; cursor: pointer; }
-    button:hover { background: #1e7e34; }
+    button { background: #004c99; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    button:hover { background: #003d7a; }
     #button-group { display: flex; gap: 1rem; margin-bottom: 1rem; justify-content: center; }
     input.missing { border: 2px solid red; }
     .stroke-info { font-size: 0.75em; color: #ccc; margin-top: 0.25rem; }
@@ -29,8 +29,28 @@
       .controls { flex-direction: column; }
       .controls > div { flex: 1 1 auto; }
     }
-    @media (max-width: 480px) {
-      table { font-size: 0.7rem; }
+    #table-container {
+    position: relative;
+    max-width: 100vw;
+  }
+  #table-container::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: 20px;
+    background: linear-gradient(to right, transparent, rgba(0,0,0,0.2));
+    pointer-events: none;
+  }
+  table {
+    table-layout: auto;
+    min-width: 800px;
+  }
+  th, td {
+    white-space: nowrap;
+  }
+}
       th, td { padding: 0.2rem; }
       input[type="number"] { width: 1.8rem; font-size: 0.7rem; }
       select, button { font-size: 0.8rem; }
@@ -39,8 +59,10 @@
     }
   </style>
 </head>
-<body>
-  <h1>Stableford Scorecard – Multiple Courses</h1>
+<div style="text-align: right; margin-bottom: 0.5rem;">
+    <a href="index.html" style="color: #000; font-weight: bold; text-decoration: none;">🏠 Home</a>
+  </div>
+<h1>Stableford Scorecard – Multiple Courses</h1>
   <details id="setup-controls" open>
   <summary style="cursor:pointer; font-weight:bold; font-size:1.1em;">⚙️ Setup Options</summary>
   <div class="controls">
@@ -61,18 +83,18 @@
     </div>
     <div>
       <label>Players (max 4):</label>
-      <div id="player-checkboxes" style="display:grid; grid-template-columns: repeat(2, minmax(120px, 1fr)); gap: 0.5rem; max-height: 150px; overflow-y: auto;">
-        <label><input type="checkbox" name="player" value="Amrit"> Amrit</label>
-        <label><input type="checkbox" name="player" value="Kam"> Kam</label>
-        <label><input type="checkbox" name="player" value="Vish"> Vish</label>
-        <label><input type="checkbox" name="player" value="Ravi"> Ravi</label>
-        <label><input type="checkbox" name="player" value="Bal"> Bal</label>
-        <label><input type="checkbox" name="player" value="Vick"> Vick</label>
-        <label><input type="checkbox" name="player" value="Michael"> Michael</label>
-        <label><input type="checkbox" name="player" value="Justy"> Justy</label>
-        <label><input type="checkbox" name="player" value="Phuperjee"> Phuperjee</label>
-        <label><input type="checkbox" name="player" value="Indy"> Indy</label>
-      </div>
+      <label><input type="checkbox" name="player" value="Amrit"> Amrit</label>
+<label><input type="checkbox" name="player" value="Kam"> Kam</label>
+<label><input type="checkbox" name="player" value="Vish"> Vish</label>
+<label><input type="checkbox" name="player" value="Ravi"> Ravi</label>
+<label><input type="checkbox" name="player" value="Bal"> Bal</label>
+<label><input type="checkbox" name="player" value="Vick"> Vick</label>
+<label><input type="checkbox" name="player" value="Michael"> Michael</label>
+<label><input type="checkbox" name="player" value="Justy"> Justy</label>
+<label><input type="checkbox" name="player" value="Phuperjee"> Phuperjee</label>
+<label><input type="checkbox" name="player" value="Indy"> Indy</label>
+<label><input type="checkbox" name="player" value="Maj"> Maj</label>
+<label><input type="checkbox" name="player" value="Sama"> Sama</label>
     </div>
     <div>
       <label>Holes:</label>
@@ -82,14 +104,12 @@
     </div>
   </div>
 </details>
-<div id="button-group">
+<div id="button-group" style="display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-bottom: 1rem;">
   <button id="build">Build Scorecard</button>
   <button id="reset">Reset</button>
   <button id="save" disabled>Save Scorecard</button>
-</div>
-<div style="text-align:center">
   <button id="download-image">📸 Save Scorecard as Image</button>
-  <a href="#" id="view-saved-link">📄 View Past Scorecards</a>
+  <a href="#" id="view-saved-link" style="background:#004c99;color:white;border-radius:4px;text-decoration:none;">📄 View Past Scorecards</a>
 </div>
 <div id="created-time"></div>
 <div id="table-container"></div>
