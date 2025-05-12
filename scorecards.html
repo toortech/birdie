@@ -165,6 +165,8 @@
         tableContainer.innerHTML = '';
         createdTime.textContent = '';
         saveBtn.disabled = true;
+        // Re-open setup options
+        document.getElementById('setup-controls').open = true;
       });
 
       saveBtn.addEventListener('click', () => {
