@@ -131,7 +131,7 @@
       display: flex;
       gap: 1rem;
       justify-content: center;
-      margin-top: 2rem;
+      margin: 1rem 0 1.5rem 0;
     }
     .action-btn {
       padding: 0.75rem 1.5rem;
@@ -187,15 +187,15 @@
   
   <h2>Saved Scorecards</h2>
   
+  <div class="action-buttons">
+    <a href="scorecard.html" class="action-btn">Create New Scorecard</a>
+  </div>
+  
   <div class="message">
     Scorecards are automatically saved when you complete and save them in the <a href="scorecard.html">Scorecard Builder</a>.
   </div>
   
   <div id="scorecards-container"></div>
-  
-  <div class="action-buttons">
-    <a href="scorecard.html" class="action-btn">Create New Scorecard</a>
-  </div>
 
   <script>
     function loadScorecards() {
