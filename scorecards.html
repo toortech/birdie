@@ -117,7 +117,6 @@
       <button id="reset">Reset</button>
       <button id="save" disabled>Save Scorecard</button>
       <button id="download-image">📸 Save Scorecard as Image</button>
-      <a href="view-saved-scores.html" class="home-link">View Past Scorecards</a>
     </div>
     <div id="table-container"></div>
   </main>
@@ -177,173 +176,214 @@
       };
       const teeSlope = { white:128, yellow:121, red:115 };
 
+      // Try-catch wrapper for localStorage operations
+      function safeLocalStorage(operation, key, data) {
+        try {
+          if (operation === 'get') {
+            return localStorage.getItem(key);
+          } else if (operation === 'set') {
+            localStorage.setItem(key, data);
+            return true;
+          }
+        } catch (error) {
+          console.error("LocalStorage error:", error);
+          return operation === 'get' ? null : false;
+        }
+      }
+
       // Save to local storage
       function saveToLocalStorage() {
         if (!scorecardBuilt) return;
         
-        const scorecard = {
-          date: new Date().toISOString(),
-          course: courseSelect.value,
-          tee: teeSelect.value,
-          holes: [...holeRadios].find(r => r.checked).value,
-          players: [],
-          savedAt: new Date().toLocaleString('en-GB')
-        };
-        
-        // Get players and their data
-        const selectedPlayers = [...playerCheckboxes].filter(cb => cb.checked).map(cb => cb.value);
-        selectedPlayers.forEach((player, index) => {
-          const handicap = parseInt(document.getElementById(`hcp-${index}`).value, 10) || 0;
-          const scores = [];
-          const points = [];
+        try {
+          const scorecard = {
+            date: new Date().toISOString(),
+            course: courseSelect.value,
+            tee: teeSelect.value,
+            holes: [...holeRadios].find(r => r.checked).value,
+            players: [],
+            savedAt: new Date().toLocaleString('en-GB')
+          };
           
-          const holeVal = scorecard.holes;
-          let holeIndices = [...Array(18).keys()];
-          if (holeVal === '9f') holeIndices = holeIndices.slice(0, 9);
-          if (holeVal === '9b') holeIndices = holeIndices.slice(9);
-          
-          holeIndices.forEach(hole => {
-            const input = document.querySelector(`input[data-player="${index}"][data-hole="${hole}"]`);
-            const score = parseInt(input.value, 10) || 0;
-            scores.push(score);
+          // Get players and their data
+          const selectedPlayers = [...playerCheckboxes].filter(cb => cb.checked).map(cb => cb.value);
+          selectedPlayers.forEach((player, index) => {
+            const handicap = parseInt(document.getElementById(`hcp-${index}`).value, 10) || 0;
+            const scores = [];
             
-            // Get points from the adjacent cell
-            const pointsCell = document.querySelector(`.pts-${index} .points`);
-            const point = parseInt(pointsCell?.textContent || '0', 10);
-            points.push(point);
+            const holeVal = scorecard.holes;
+            let holeIndices = [...Array(18).keys()];
+            if (holeVal === '9f') holeIndices = holeIndices.slice(0, 9);
+            if (holeVal === '9b') holeIndices = holeIndices.slice(9);
+            
+            holeIndices.forEach(hole => {
+              const input = document.querySelector(`input[data-player="${index}"][data-hole="${hole}"]`);
+              const score = parseInt(input?.value, 10) || 0;
+              scores.push(score);
+            });
+            
+            // Calculate totals
+            const totalShots = scores.reduce((sum, val) => sum + val, 0);
+            
+            scorecard.players.push({
+              name: player,
+              handicap,
+              courseHandicap: Math.round(handicap * teeSlope[teeSelect.value] / 113),
+              scores,
+              totalShots
+            });
           });
           
-          // Calculate totals
-          const totalShots = scores.reduce((sum, val) => sum + val, 0);
-          const totalPoints = points.reduce((sum, val) => sum + val, 0);
+          // Get existing scorecards or initialize empty array
+          let savedScorecards;
+          try {
+            savedScorecards = JSON.parse(localStorage.getItem('golfScorecards') || '[]');
+          } catch (e) {
+            savedScorecards = [];
+          }
           
-          scorecard.players.push({
-            name: player,
-            handicap,
-            courseHandicap: Math.round(handicap * teeSlope[teeSelect.value] / 113),
-            scores,
-            points,
-            totalShots,
-            totalPoints
-          });
-        });
-        
-        // Save to localStorage
-        let savedScorecards = JSON.parse(localStorage.getItem('golfScorecards') || '[]');
-        savedScorecards.push(scorecard);
-        localStorage.setItem('golfScorecards', JSON.stringify(savedScorecards));
-        
-        showMessage('Scorecard saved successfully!', 'success');
-        savedSuccessfully = true;
+          // Add new scorecard and save
+          savedScorecards.push(scorecard);
+          localStorage.setItem('golfScorecards', JSON.stringify(savedScorecards));
+          
+          showMessage('Scorecard saved successfully!', 'success');
+          savedSuccessfully = true;
+        } catch (error) {
+          console.error("Error saving scorecard:", error);
+          showMessage('Error saving scorecard: ' + error.message, 'error');
+        }
       }
 
-      buildBtn.addEventListener('click', () => {
-        const players = [...playerCheckboxes].filter(cb => cb.checked).map(cb => cb.value);
-        if (!players.length) {
-          showMessage('Please select at least one player.', 'error');
-          return;
-        }
-        if (players.length > 4) {
-          showMessage('Please select no more than 4 players.', 'error');
-          return;
-        }
-        build(players);
-        scorecardBuilt = true;
-        document.getElementById('setup-controls').open = false;
-        saveBtn.disabled = false;
-        showMessage('Scorecard built successfully!', 'success');
-      });
-
-      resetBtn.addEventListener('click', () => {
-        if (scorecardBuilt && !confirm('Reset scorecard? All data will be lost.')) return;
-        scorecardBuilt = false;
-        savedSuccessfully = false;
-        tableContainer.innerHTML = '';
-        document.getElementById('setup-controls').open = true;
-        saveBtn.disabled = true;
-        showMessage('Scorecard reset.', 'success');
-      });
-
-      saveBtn.addEventListener('click', () => {
-        const inputs = tableContainer.querySelectorAll('tbody input[type="number"]');
-        let allFilled = true;
-        inputs.forEach(inp => {
-          if (inp.value === '' || isNaN(parseInt(inp.value, 10))) {
-            inp.classList.add('missing'); 
-            allFilled = false;
-          } else {
-            inp.classList.remove('missing');
+      buildBtn.addEventListener('click', function() {
+        try {
+          const players = [...playerCheckboxes].filter(cb => cb.checked).map(cb => cb.value);
+          if (!players.length) {
+            showMessage('Please select at least one player.', 'error');
+            return;
           }
-        });
-        if (!allFilled) {
-          showMessage('Please enter all scores before saving.', 'error');
-          return;
+          if (players.length > 4) {
+            showMessage('Please select no more than 4 players.', 'error');
+            return;
+          }
+          
+          build(players);
+          scorecardBuilt = true;
+          document.getElementById('setup-controls').open = false;
+          saveBtn.disabled = false;
+          showMessage('Scorecard built successfully!', 'success');
+        } catch (error) {
+          console.error("Error building scorecard:", error);
+          showMessage('Error building scorecard: ' + error.message, 'error');
         }
-        saveToLocalStorage();
       });
 
-      downloadBtn.addEventListener('click', () => {
-        const node = tableContainer.firstElementChild;
-        if (!node) {
-          showMessage('No scorecard to capture.', 'error');
-          return;
+      resetBtn.addEventListener('click', function() {
+        try {
+          if (scorecardBuilt && !confirm('Reset scorecard? All data will be lost.')) return;
+          scorecardBuilt = false;
+          savedSuccessfully = false;
+          tableContainer.innerHTML = '';
+          document.getElementById('setup-controls').open = true;
+          saveBtn.disabled = true;
+          showMessage('Scorecard reset.', 'success');
+        } catch (error) {
+          console.error("Error resetting scorecard:", error);
+          showMessage('Error resetting scorecard: ' + error.message, 'error');
         }
-        
-        // Apply temporary styles for image capture
-        const origStyle = node.getAttribute('style') || '';
-        node.style.backgroundColor = 'white';
-        node.style.color = 'black';
-        node.querySelectorAll('th, td').forEach(c => { 
-          c.style.color = 'black'; 
-          c.style.backgroundColor = 'white'; 
-          c.style.borderColor = '#000'; 
-        });
-        
-        const h2c = typeof html2canvas === 'function' ? html2canvas : (html2canvas && html2canvas.default ? html2canvas.default : null);
-        if (!h2c) { 
-          showMessage('html2canvas not found.', 'error');
-          // Restore original styles
-          node.setAttribute('style', origStyle);
-          node.querySelectorAll('th, td').forEach(c => c.removeAttribute('style'));
-          return;
+      });
+
+      saveBtn.addEventListener('click', function() {
+        try {
+          const inputs = tableContainer.querySelectorAll('tbody input[type="number"]');
+          let allFilled = true;
+          inputs.forEach(inp => {
+            if (inp.value === '' || isNaN(parseInt(inp.value, 10))) {
+              inp.classList.add('missing'); 
+              allFilled = false;
+            } else {
+              inp.classList.remove('missing');
+            }
+          });
+          
+          if (!allFilled) {
+            showMessage('Please enter all scores before saving.', 'error');
+            return;
+          }
+          
+          saveToLocalStorage();
+        } catch (error) {
+          console.error("Error in save button handler:", error);
+          showMessage('Error saving: ' + error.message, 'error');
         }
-        
-        // Create an overlay to show loading
-        const loadingOverlay = document.createElement('div');
-        loadingOverlay.style.position = 'fixed';
-        loadingOverlay.style.top = '0';
-        loadingOverlay.style.left = '0';
-        loadingOverlay.style.width = '100%';
-        loadingOverlay.style.height = '100%';
-        loadingOverlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
-        loadingOverlay.style.display = 'flex';
-        loadingOverlay.style.justifyContent = 'center';
-        loadingOverlay.style.alignItems = 'center';
-        loadingOverlay.style.color = 'white';
-        loadingOverlay.style.fontSize = '1.5rem';
-        loadingOverlay.style.zIndex = '9999';
-        loadingOverlay.textContent = 'Generating image...';
-        document.body.appendChild(loadingOverlay);
-        
-        // Capture the table
-        h2c(node, { scale: 2 })
-          .then(canvas => { 
-            const a = document.createElement('a');
-            a.download = `scorecard_${courseSelect.value}_${new Date().toISOString().split('T')[0]}.png`;
-            a.href = canvas.toDataURL();
-            a.click();
-            showMessage('Image downloaded successfully!', 'success');
-          })
-          .catch(err => { 
-            console.error(err);
-            showMessage('Error capturing image: ' + err, 'error');
-          })
-          .finally(() => { 
-            // Restore original styles and remove loading overlay
+      });
+
+      downloadBtn.addEventListener('click', function() {
+        try {
+          const node = tableContainer.firstElementChild;
+          if (!node) {
+            showMessage('No scorecard to capture.', 'error');
+            return;
+          }
+          
+          // Apply temporary styles for image capture
+          const origStyle = node.getAttribute('style') || '';
+          node.style.backgroundColor = 'white';
+          node.style.color = 'black';
+          node.querySelectorAll('th, td').forEach(c => { 
+            c.style.color = 'black'; 
+            c.style.backgroundColor = 'white'; 
+            c.style.borderColor = '#000'; 
+          });
+          
+          const h2c = typeof html2canvas === 'function' ? html2canvas : (html2canvas && html2canvas.default ? html2canvas.default : null);
+          if (!h2c) { 
+            showMessage('html2canvas not found.', 'error');
+            // Restore original styles
             node.setAttribute('style', origStyle);
             node.querySelectorAll('th, td').forEach(c => c.removeAttribute('style'));
-            document.body.removeChild(loadingOverlay);
-          });
+            return;
+          }
+          
+          // Create an overlay to show loading
+          const loadingOverlay = document.createElement('div');
+          loadingOverlay.style.position = 'fixed';
+          loadingOverlay.style.top = '0';
+          loadingOverlay.style.left = '0';
+          loadingOverlay.style.width = '100%';
+          loadingOverlay.style.height = '100%';
+          loadingOverlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
+          loadingOverlay.style.display = 'flex';
+          loadingOverlay.style.justifyContent = 'center';
+          loadingOverlay.style.alignItems = 'center';
+          loadingOverlay.style.color = 'white';
+          loadingOverlay.style.fontSize = '1.5rem';
+          loadingOverlay.style.zIndex = '9999';
+          loadingOverlay.textContent = 'Generating image...';
+          document.body.appendChild(loadingOverlay);
+          
+          // Capture the table
+          h2c(node, { scale: 2 })
+            .then(canvas => { 
+              const a = document.createElement('a');
+              a.download = `scorecard_${courseSelect.value}_${new Date().toISOString().split('T')[0]}.png`;
+              a.href = canvas.toDataURL();
+              a.click();
+              showMessage('Image downloaded successfully!', 'success');
+            })
+            .catch(err => { 
+              console.error(err);
+              showMessage('Error capturing image: ' + err, 'error');
+            })
+            .finally(() => { 
+              // Restore original styles and remove loading overlay
+              node.setAttribute('style', origStyle);
+              node.querySelectorAll('th, td').forEach(c => c.removeAttribute('style'));
+              document.body.removeChild(loadingOverlay);
+            });
+        } catch (error) {
+          console.error("Error in download button handler:", error);
+          showMessage('Error downloading image: ' + error.message, 'error');
+        }
       });
 
       function build(players) {
@@ -389,23 +429,22 @@
         });
         table.appendChild(tfoot);
         tableContainer.appendChild(table);
-        
-        // Attempt to lock screen orientation to landscape on mobile
-        if (screen.orientation && screen.orientation.lock) {
-          screen.orientation.lock('landscape').catch(err => {
-            console.warn('Orientation lock failed:', err);
-          });
-        }
 
         // Setup handlers
         players.forEach((_,i) => {
           const hIn = document.getElementById(`hcp-${i}`);
-          const adj = document.createElement('span'); adj.id = `adjhcp-${i}`; adj.style.marginLeft = '0.5rem';
+          if (!hIn) return; // Safety check
+          
+          const adj = document.createElement('span'); 
+          adj.id = `adjhcp-${i}`; 
+          adj.style.marginLeft = '0.5rem';
           hIn.insertAdjacentElement('afterend', adj);
+          
           const updateAdj = () => {
-            const raw = parseInt(hIn.value,10)||0;
+            const raw = parseInt(hIn.value, 10) || 0;
             const a = Math.round(raw * teeSlope[teeSelect.value] / 113);
             adj.textContent = 'CH: ' + a;
+            
             idx.forEach(h => {
               const siVal = courses[courseSelect.value].si[h];
               const strokes = a >= siVal + 18 ? 2 : a >= siVal ? 1 : 0;
@@ -413,6 +452,7 @@
               if (info) info.textContent = `(${strokes} stroke${strokes!==1?'s':''})`;
             });
           };
+          
           hIn.addEventListener('input', () => { 
             if (hIn.value === '' || isNaN(parseInt(hIn.value, 10)) || parseInt(hIn.value, 10) < 0) {
               hIn.classList.add('invalid-hcp');
@@ -422,188 +462,84 @@
               debounce(updateScores)();
             }
           });
+          
           updateAdj();
         });
 
-        table.querySelectorAll('tbody input[type="number"]').forEach(inp =>
+        // Add input handlers to all score inputs
+        const scoreInputs = table.querySelectorAll('tbody input[type="number"]');
+        scoreInputs.forEach(inp => {
           inp.addEventListener('input', () => { 
             inp.classList.remove('missing'); 
             debounce(updateScores)(); 
-          })
-        );
+          });
+        });
 
         function updateScores() {
-          const tots = players.map(() => ({fS:0,fP:0,bS:0,bP:0,oS:0,oP:0}));
-          table.querySelectorAll('tbody tr').forEach((tr, rIdx) => {
-            const h = idx[rIdx]; 
-            const c = courses[courseSelect.value]; 
-            const parVal = c.par[h];
-            const siVal = c.si[h]; 
-            const front = h < 9;
+          try {
+            const tots = players.map(() => ({fS:0, fP:0, bS:0, bP:0, oS:0, oP:0}));
             
-            players.forEach((_,pi) => {
-              const inp = tr.querySelector(`input[data-player="${pi}"][data-hole="${h}"]`);
-              const sc = parseInt(inp.value,10); 
-              if(isNaN(sc)) return;
+            table.querySelectorAll('tbody tr').forEach((tr, rIdx) => {
+              if (rIdx >= idx.length) return; // Safety check
               
-              const raw = parseInt(document.getElementById(`hcp-${pi}`).value,10)||0;
-              const a = Math.round(raw*teeSlope[teeSelect.value]/113);
-              const strokes = a>=siVal+18?2:a>=siVal?1:0;
-              const net = sc - strokes;
-              let pts = 0;
+              const h = idx[rIdx]; 
+              const c = courses[courseSelect.value]; 
+              const parVal = c.par[h];
+              const siVal = c.si[h]; 
+              const front = h < 9;
               
-              if(net<=parVal-3)      pts=5;
-              else if(net===parVal-2) pts=4;
-              else if(net===parVal-1) pts=3;
-              else if(net===parVal)   pts=2;
-              else if(net===parVal+1) pts=1;
-              
-              const pointsDiv = tr.querySelector(`.pts-${pi} .points`);
-              if (pointsDiv) pointsDiv.textContent = pts;
-              
-              tots[pi].oS += sc; 
-              tots[pi].oP += pts;
-              
-              if(front) { 
-                tots[pi].fS += sc; 
-                tots[pi].fP += pts; 
-              } else { 
-                tots[pi].bS += sc; 
-                tots[pi].bP += pts; 
-              }
+              players.forEach((_, pi) => {
+                const inp = tr.querySelector(`input[data-player="${pi}"][data-hole="${h}"]`);
+                if (!inp) return; // Safety check
+                
+                const sc = parseInt(inp.value, 10); 
+                if (isNaN(sc)) return;
+                
+                const hcpInput = document.getElementById(`hcp-${pi}`);
+                if (!hcpInput) return; // Safety check
+                
+                const raw = parseInt(hcpInput.value, 10) || 0;
+                const a = Math.round(raw * teeSlope[teeSelect.value] / 113);
+                const strokes = a >= siVal + 18 ? 2 : a >= siVal ? 1 : 0;
+                const net = sc - strokes;
+                let pts = 0;
+                
+                if (net <= parVal - 3)       pts = 5;
+                else if (net === parVal - 2)  pts = 4;
+                else if (net === parVal - 1)  pts = 3;
+                else if (net === parVal)      pts = 2;
+                else if (net === parVal + 1)  pts = 1;
+                
+                const pointsDiv = tr.querySelector(`.pts-${pi} .points`);
+                if (pointsDiv) pointsDiv.textContent = pts;
+                
+                tots[pi].oS += sc; 
+                tots[pi].oP += pts;
+                
+                if (front) { 
+                  tots[pi].fS += sc; 
+                  tots[pi].fP += pts; 
+                } else { 
+                  tots[pi].bS += sc; 
+                  tots[pi].bP += pts; 
+                }
+              });
             });
-          });
-          
-          tots.forEach((t,pi) => {
-            [['shots','fS','fP'],['shots','bS','bP'],['shots','oS','oP']].forEach((cols,i) => {
-              const shotsEl = document.getElementById(`${cols[0]}-${i}-${pi}`);
-              const ptsEl = document.getElementById(`pts-${i}-${pi}`);
-              
-              if (shotsEl) shotsEl.textContent = t[cols[1]];
-              if (ptsEl) ptsEl.textContent = t[cols[2]];
+            
+            // Update totals in footer
+            tots.forEach((t, pi) => {
+              [['shots', 'fS', 'fP'], ['shots', 'bS', 'bP'], ['shots', 'oS', 'oP']].forEach((cols, i) => {
+                const shotsEl = document.getElementById(`${cols[0]}-${i}-${pi}`);
+                const ptsEl = document.getElementById(`pts-${i}-${pi}`);
+                
+                if (shotsEl) shotsEl.textContent = t[cols[1]];
+                if (ptsEl) ptsEl.textContent = t[cols[2]];
+              });
             });
-          });
+          } catch (error) {
+            console.error("Error updating scores:", error);
+          }
         }
-      }
-
-      // Initialize view-saved-scores page if it doesn't exist
-      if (!localStorage.getItem('scorecardsViewPageCreated')) {
-        const viewPage = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>View Saved Scorecards</title>
-  <style>
-    body { font-family: sans-serif; max-width: 1200px; margin: 0 auto; padding: 1rem; background: #f5f5f5; }
-    h1 { color: #003300; text-align: center; }
-    nav { text-align: right; margin-bottom: 1rem; }
-    .home-link { font-weight: bold; text-decoration: none; color: #000; }
-    .scorecard { background: white; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .scorecard-header { display: flex; justify-content: space-between; margin-bottom: 1rem; }
-    .scorecard-header h3 { margin: 0; }
-    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
-    th, td { border: 1px solid #ddd; padding: 0.5rem; text-align: center; }
-    th { background: #eee; }
-    .actions { display: flex; gap: 0.5rem; justify-content: flex-end; }
-    button { background: #004c99; color: white; border: none; border-radius: 4px; padding: 0.5rem 1rem; cursor: pointer; }
-    button:hover { background: #003d7a; }
-    button.delete { background: #cc0000; }
-    button.delete:hover { background: #aa0000; }
-    .empty-state { text-align: center; padding: 2rem; background: white; border-radius: 4px; }
-  </style>
-</head>
-<body>
-  <nav><a href="index.html" class="home-link">🏠 Home</a></nav>
-  <h1>View Saved Scorecards</h1>
-  <div id="scorecards-container"></div>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const container = document.getElementById('scorecards-container');
-      loadScorecards();
-      
-      function loadScorecards() {
-        const scorecards = JSON.parse(localStorage.getItem('golfScorecards') || '[]');
-        
-        if (scorecards.length === 0) {
-          container.innerHTML = '<div class="empty-state">No saved scorecards found.</div>';
-          return;
-        }
-        
-        // Sort by date, newest first
-        scorecards.sort((a, b) => new Date(b.date) - new Date(a.date));
-        
-        container.innerHTML = '';
-        scorecards.forEach((card, index) => {
-          const scorecard = document.createElement('div');
-          scorecard.className = 'scorecard';
-          
-          const header = document.createElement('div');
-          header.className = 'scorecard-header';
-          
-          const title = document.createElement('h3');
-          const date = new Date(card.date).toLocaleDateString('en-GB');
-          title.textContent = \`\${card.course} - \${date} (\${card.tee} tees)\`;
-          
-          const info = document.createElement('div');
-          info.textContent = card.holes === '18' ? 'Full 18' : card.holes === '9f' ? 'Front 9' : 'Back 9';
-          
-          header.appendChild(title);
-          header.appendChild(info);
-          scorecard.appendChild(header);
-          
-          // Create table
-          const table = document.createElement('table');
-          let tableHTML = '<thead><tr><th>Player</th><th>Handicap</th><th>CH</th><th>Total Shots</th><th>Total Points</th></tr></thead><tbody>';
-          
-          card.players.forEach(player => {
-            tableHTML += \`
-              <tr>
-                <td>\${player.name}</td>
-                <td>\${player.handicap}</td>
-                <td>\${player.courseHandicap}</td>
-                <td>\${player.totalShots}</td>
-                <td>\${player.totalPoints}</td>
-              </tr>
-            \`;
-          });
-          
-          tableHTML += '</tbody>';
-          table.innerHTML = tableHTML;
-          scorecard.appendChild(table);
-          
-          // Actions
-          const actions = document.createElement('div');
-          actions.className = 'actions';
-          
-          const deleteBtn = document.createElement('button');
-          deleteBtn.className = 'delete';
-          deleteBtn.textContent = 'Delete';
-          deleteBtn.addEventListener('click', function() {
-            if (confirm('Are you sure you want to delete this scorecard?')) {
-              deleteScorecard(index);
-            }
-          });
-          
-          actions.appendChild(deleteBtn);
-          scorecard.appendChild(actions);
-          container.appendChild(scorecard);
-        });
-      }
-      
-      function deleteScorecard(index) {
-        const scorecards = JSON.parse(localStorage.getItem('golfScorecards') || '[]');
-        scorecards.splice(index, 1);
-        localStorage.setItem('golfScorecards', JSON.stringify(scorecards));
-        loadScorecards();
-      }
-    });
-  </script>
-</body>
-</html>`;
-        localStorage.setItem('viewSavedScores', viewPage);
-        localStorage.setItem('scorecardsViewPageCreated', 'true');
       }
     })();
   </script>
