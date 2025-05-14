@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Birdie Bush Bandits &ndash; Photo Gallery</title>
+  <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
   <style>
     body, html {
       margin: 0;
@@ -19,7 +20,28 @@
       color: #000;
       max-width: 1200px;
       overflow: hidden;
+      position: relative;
     }
+    
+    /* Logo in top-right corner */
+    .top-bar {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 10;
+    }
+    
+    .corner-logo {
+      width: 80px;
+      height: 80px;
+      display: block;
+    }
+    
+    header {
+      margin-bottom: 1rem;
+      padding-top: 80px; /* Space for logo */
+    }
+    
     h1 {
       display: inline-flex;
       align-items: center;
@@ -30,15 +52,18 @@
       margin-bottom: 0.5rem;
       flex-wrap: wrap;
     }
+    
     h1 img {
       width: 50px;
       margin: 0 8px;
     }
+    
     h2 {
       color: #003300;
       font-weight: bold;
       margin: 1rem 0;
     }
+    
     .founded {
       font-size: 1rem;
       margin-top: 0.25rem;
@@ -46,6 +71,7 @@
       font-style: italic;
       color: #333;
     }
+    
     .back-link {
       display: inline-block;
       margin-bottom: 1.5rem;
@@ -58,12 +84,15 @@
       transition: background-color 0.3s;
       border: none;
     }
+    
     .back-link:hover {
       background-color: #003d7a;
     }
+    
     .upload-section {
       margin: 1rem 0;
     }
+    
     .upload-label {
       display: inline-block;
       padding: 0.5rem 1rem;
@@ -75,18 +104,22 @@
       transition: background-color 0.3s;
       border: none;
     }
+    
     .upload-label:hover {
       background-color: #003d7a;
     }
+    
     .upload-input {
       display: none;
     }
+    
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
       gap: 1rem;
       margin-top: 1rem;
     }
+    
     .gallery-img {
       width: 100%;
       height: auto;
@@ -95,9 +128,11 @@
       cursor: pointer;
       transition: transform 0.2s;
     }
+    
     .gallery-img:hover {
       transform: scale(1.05);
     }
+    
     /* Lightbox styles */
     .lightbox {
       display: none;
@@ -109,11 +144,13 @@
       align-items: center;
       justify-content: center;
     }
+    
     .lightbox-img {
       max-width: 90%;
       max-height: 80%;
       box-shadow: 0 0 20px rgba(0,0,0,0.5);
     }
+    
     .lightbox-close {
       position: absolute;
       top: 1rem; right: 1.5rem;
@@ -121,12 +158,14 @@
       color: white;
       cursor: pointer;
     }
+    
     .lightbox-caption {
       color: #ddd;
       margin-top: 1rem;
       font-size: 1rem;
       text-align: center;
     }
+    
     /* Password overlay */
     #login-overlay {
       position: fixed;
@@ -138,6 +177,7 @@
       justify-content: center;
       z-index: 2000;
     }
+    
     #login-box {
       background: #fff;
       padding: 2rem;
@@ -146,10 +186,12 @@
       max-width: 90%;
       width: 300px;
     }
+    
     #login-box h2 {
       color: #003300;
       margin: 0 0 1rem 0;
     }
+    
     #login-box input {
       width: 100%;
       padding: 0.5rem;
@@ -158,6 +200,7 @@
       border-radius: 4px;
       box-sizing: border-box;
     }
+    
     #login-box button {
       padding: 0.5rem 1rem;
       background: #004c99;
@@ -167,19 +210,50 @@
       cursor: pointer;
       font-weight: bold;
     }
+    
     #login-box button:hover {
       background: #003d7a;
     }
+    
     #error-msg {
       color: red;
       font-size: 0.9rem;
       display: none;
       margin-top: 0.5rem;
     }
+    
+    @media (max-width: 768px) {
+      header {
+        padding-top: 70px;
+      }
+      
+      .corner-logo {
+        width: 70px;
+        height: 70px;
+      }
+    }
+    
     @media (max-width: 480px) {
-      body { padding: 1rem; }
-      h1 { font-size: 2rem; }
-      .gallery { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); }
+      body { 
+        padding: 1rem; 
+      }
+      
+      header {
+        padding-top: 70px;
+      }
+      
+      .corner-logo {
+        width: 65px;
+        height: 65px;
+      }
+      
+      h1 { 
+        font-size: 2rem; 
+      }
+      
+      .gallery { 
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
+      }
     }
   </style>
 </head>
@@ -195,8 +269,12 @@
   </div>
 
   <div id="main-content" style="display:none;">
+    <div class="top-bar">
+      <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="corner-logo">
+    </div>
+    
     <header>
-      <nav style="text-align: right; margin-bottom: 0.5rem;">
+      <nav style="text-align: left; margin-bottom: 0.5rem;">
         <a href="index.html" style="color: #000; font-weight: bold; text-decoration: none;">🏠 Home</a>
       </nav>
     </header>
