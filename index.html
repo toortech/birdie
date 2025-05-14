@@ -11,18 +11,19 @@
   <meta property="og:title" content="Birdie Bush Bandits - Golf Group">
   <meta property="og:description" content="A golf group founded in August 2020. View photo galleries, scorecards, calculate handicaps, and meet our members.">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="bbb-logo.png">
+  <meta property="og:image" content="golf-flag.jpeg">
   
   <style>
     /* Base Styles */
     body {
       background-color: #f5f5f5;
-      font-family: sans-serif;
+      font-family: Arial, sans-serif;
       text-align: center;
       padding: 2rem;
       margin: 0 auto;
       color: #000;
       max-width: 1200px;
+      line-height: 1.6;
     }
     
     /* Header Styles */
@@ -34,13 +35,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      gap: 1.5rem;
+      flex-direction: row;
     }
     
     .logo {
       width: 120px;
       height: 120px;
-      margin: 0 1rem;
+      order: 2;
     }
     
     h1 {
@@ -48,14 +51,16 @@
       color: #003300;
       font-weight: bold;
       margin: 0;
+      order: 1;
     }
     
     .founded {
-      font-size: 1rem;
-      margin-top: 0.25rem;
+      font-size: 1.1rem;
+      margin-top: 0.5rem;
       margin-bottom: 1.5rem;
       font-style: italic;
-      color: #333;
+      color: #666;
+      font-family: Georgia, serif;
     }
     
     /* Main Content Styles */
@@ -84,24 +89,27 @@
       display: inline-block;
       padding: 1rem 2rem;
       border: none;
-      border-radius: 4px;
+      border-radius: 8px;
       text-decoration: none;
       color: #ffffff;
       font-weight: bold;
       background-color: #004c99;
-      transition: background-color 0.3s;
+      transition: all 0.3s ease;
       flex: 1 1 150px;
       max-width: 200px;
       text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
     
     .nav-boxes a:hover {
       background-color: #003d7a;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
     }
     
     /* Accessibility - Focus styles */
     .nav-boxes a:focus {
-      outline: 2px solid #003300;
+      outline: 3px solid #003300;
       outline-offset: 2px;
     }
     
@@ -119,6 +127,8 @@
       height: auto;
       border: 1px solid #ccc;
       margin-top: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     }
     
     /* Skip to main content link (accessibility) */
@@ -131,6 +141,7 @@
       padding: 8px;
       text-decoration: none;
       z-index: 100;
+      border-radius: 0 0 4px 0;
     }
     
     .skip-link:focus {
@@ -141,16 +152,20 @@
     @media (max-width: 768px) {
       .logo-header {
         flex-direction: column;
+        gap: 1rem;
       }
       
       .logo {
-        width: 100px;
-        height: 100px;
-        margin: 0.5rem 0;
+        width: 120px;
+        height: 120px;
       }
       
       h1 {
         font-size: 2.5rem;
+      }
+      
+      .tagline {
+        font-size: 1.3rem;
       }
       
       .nav-boxes a {
@@ -165,25 +180,27 @@
       }
       
       .logo {
-        width: 80px;
-        height: 80px;
+        width: 100px;
+        height: 100px;
       }
       
       h1 {
         font-size: 2rem;
       }
       
+      .tagline {
+        font-size: 1.1rem;
+      }
+      
       .nav-boxes {
-        flex-direction: row;
-        overflow-x: auto;
+        flex-direction: column;
+        width: 100%;
       }
       
       .nav-boxes a {
         flex: 1 1 auto;
-        max-width: none;
-        padding: 0.5rem 1rem;
-        white-space: nowrap;
-        border-radius: 0;
+        max-width: 100%;
+        padding: 0.75rem 1rem;
       }
       
       img.main-image {
@@ -198,6 +215,9 @@
       }
       .nav-boxes {
         display: none;
+      }
+      .logo {
+        filter: none;
       }
     }
   </style>
