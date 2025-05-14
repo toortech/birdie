@@ -47,13 +47,21 @@
     }
     
     h1 {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       font-size: 3rem;
       color: #003300;
       font-weight: bold;
       margin: 0;
       margin-bottom: 0.5rem;
-      text-align: center;
-      padding: 0; /* Remove right padding since BBB is short */
+      flex-wrap: wrap;
+    }
+    
+    h1 img {
+      width: 65px;
+      height: auto;
+      margin: 0 10px;
     }
     
     .founded {
@@ -159,7 +167,11 @@
       
       h1 {
         font-size: 2.5rem;
-        padding: 0; /* Remove padding for center alignment */
+      }
+      
+      h1 img {
+        width: 50px;
+        margin: 0 8px;
       }
       
       .corner-logo {
@@ -184,8 +196,12 @@
       
       h1 {
         font-size: 1.8rem;
-        padding: 0; /* Remove padding for center alignment */
         line-height: 1.2;
+      }
+      
+      h1 img {
+        width: 40px;
+        margin: 0 5px;
       }
       
       .corner-logo {
@@ -235,7 +251,11 @@
     <div class="top-bar">
       <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="corner-logo">
     </div>
-    <h1>BBB</h1>
+    <h1>
+      <img src="golfball.png" alt="" aria-hidden="true">
+      Birdie Bush Bandits
+      <img src="golfball.png" alt="" aria-hidden="true">
+    </h1>
     <div class="founded">Founded August 2020</div>
   </header>
   
