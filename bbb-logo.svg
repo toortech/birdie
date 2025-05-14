@@ -26,7 +26,7 @@
   
   <!-- Golf flag -->
   <path d="M 202 120 L 260 140 L 260 180 L 202 160 Z" fill="#004c99" stroke="#003366" stroke-width="2"/>
-  <text x="225" y="155" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white">B</text>
+  <text x="231" y="159" font-family="Helvetica, Arial, sans-serif" font-size="36" font-weight="900" fill="white" text-anchor="middle">B</text>
   
   <!-- Golf ball -->
   <circle cx="140" cy="260" r="18" fill="white" stroke="#ccc" stroke-width="1"/>
@@ -34,8 +34,8 @@
   <circle cx="145" cy="255" r="2" fill="#ddd"/>
   <circle cx="140" cy="264" r="2" fill="#ddd"/>
   
-  <!-- Birdie (stylized bird) -->
-  <g id="birdie" transform="translate(260, 100)">
+  <!-- Birdie (stylized bird - BIGGER) -->
+  <g id="birdie" transform="translate(260, 100) scale(1.5)">
     <path d="M 0 0 Q -10 -5 -15 0 Q -10 5 0 0" fill="#FFD700" stroke="#FFA500" stroke-width="1"/>
     <circle cx="-5" cy="0" r="8" fill="#FFD700"/>
     <circle cx="-7" cy="-2" r="2" fill="#000"/>
@@ -44,15 +44,15 @@
   </g>
   
   <!-- Text: BIRDIE BUSH -->
-  <text x="200" y="80" font-family="Arial, sans-serif" font-size="32" font-weight="bold" 
-        text-anchor="middle" fill="#003300">BIRDIE BUSH</text>
+  <text x="200" y="80" font-family="Helvetica, Arial, sans-serif" font-size="32" font-weight="900" 
+        text-anchor="middle" fill="#003300" letter-spacing="1">BIRDIE BUSH</text>
   
   <!-- Text: BANDITS -->
-  <text x="200" y="350" font-family="Arial, sans-serif" font-size="36" font-weight="bold" 
-        text-anchor="middle" fill="#003300">BANDITS</text>
+  <text x="200" y="360" font-family="Impact, Arial Black, sans-serif" font-size="38" font-weight="bold" 
+        text-anchor="middle" fill="#003300" letter-spacing="2">BANDITS</text>
   
   <!-- Established date -->
-  <text x="200" y="375" font-family="Arial, sans-serif" font-size="16" font-style="italic" 
+  <text x="200" y="385" font-family="Georgia, Times, serif" font-size="16" font-style="italic" 
         text-anchor="middle" fill="#666">Est. 2020</text>
   
   <!-- Decorative golf tees -->
