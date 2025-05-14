@@ -1,68 +1,145 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-  <!-- Background circle -->
-  <circle cx="200" cy="200" r="190" fill="#f5f5f5" stroke="#003300" stroke-width="4"/>
+  <!-- Gradient Definitions -->
+  <defs>
+    <!-- Gold gradient for premium feel -->
+    <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFC300;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFB300;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Green gradient for depth -->
+    <radialGradient id="greenGradient" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" style="stop-color:#004d00;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#003300;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Flag gradient -->
+    <linearGradient id="flagGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0066cc;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#004499;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#003377;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Metal gradient for tees -->
+    <linearGradient id="metalGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#B8860B;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#8B4513;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#654321;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- Shadow filter -->
+    <filter id="dropShadow">
+      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.3"/>
+    </filter>
+  </defs>
   
-  <!-- Golf green/bushes background MOVED UP -->
-  <ellipse cx="200" cy="240" rx="160" ry="80" fill="#004d00" opacity="0.3"/>
+  <!-- Outer decorative ring -->
+  <circle cx="200" cy="200" r="195" fill="url(#goldGradient)" opacity="0.2"/>
+  <circle cx="200" cy="200" r="190" fill="white"/>
   
-  <!-- Bush elements MOVED UP -->
-  <g id="bushes">
-    <!-- Left bush -->
-    <path d="M 50 270 Q 70 250 90 270 Q 110 250 130 270 Q 120 290 100 300 Q 80 290 50 270" 
-          fill="#003300" opacity="0.8"/>
-    <!-- Right bush -->
-    <path d="M 270 270 Q 290 250 310 270 Q 330 250 350 270 Q 340 290 320 300 Q 300 290 270 270" 
-          fill="#003300" opacity="0.8"/>
-    <!-- Center bushes -->
-    <circle cx="150" cy="280" r="25" fill="#003300" opacity="0.6"/>
-    <circle cx="170" cy="275" r="22" fill="#003300" opacity="0.7"/>
-    <circle cx="230" cy="275" r="22" fill="#003300" opacity="0.7"/>
-    <circle cx="250" cy="280" r="25" fill="#003300" opacity="0.6"/>
+  <!-- Main circle border with gradient -->
+  <circle cx="200" cy="200" r="185" fill="none" stroke="url(#greenGradient)" stroke-width="8"/>
+  
+  <!-- Inner circle with subtle pattern -->
+  <circle cx="200" cy="200" r="175" fill="#f0f9f0"/>
+  
+  <!-- Golf course with realistic green -->
+  <ellipse cx="200" cy="240" rx="130" ry="60" fill="url(#greenGradient)" opacity="0.4"/>
+  
+  <!-- No bushes -->
+  
+  <!-- Golf hole with depth -->
+  <ellipse cx="200" cy="250" rx="12" ry="6" fill="#1a1a1a"/>
+  <ellipse cx="200" cy="248" rx="10" ry="4" fill="#000000"/>
+  
+  <!-- Enhanced flag pole with texture - CENTERED -->
+  <rect x="198" y="100" width="4" height="130" fill="url(#metalGradient)" filter="url(#dropShadow)"/>
+  <circle cx="200" cy="100" r="5" fill="#8B4513"/> <!-- Pole top -->
+  
+  <!-- Premium flag with gradient and shadow - CENTERED -->
+  <g filter="url(#dropShadow)">
+    <path d="M 202 100 L 280 120 L 280 165 L 202 145 Z" fill="url(#flagGradient)"/>
+    <path d="M 202 100 L 280 120 L 280 165 L 202 145 Z" fill="none" stroke="#003366" stroke-width="2"/>
   </g>
   
-  <!-- Golf flag pole MOVED UP -->
-  <rect x="198" y="110" width="4" height="160" fill="#8B4513"/>
+  <!-- Flag emblem - BBB fits better -->
+  <text x="241" y="140" font-family="Impact, Arial Black, sans-serif" font-size="28" font-weight="900" 
+        fill="white" text-anchor="middle">BBB</text>
   
-  <!-- Golf flag MOVED UP -->
-  <path d="M 202 110 L 260 130 L 260 170 L 202 150 Z" fill="#004c99" stroke="#003366" stroke-width="2"/>
-  <text x="231" y="149" font-family="Impact, Arial Black, sans-serif" font-size="36" font-weight="bold" fill="white" text-anchor="middle">B</text>
-  
-  <!-- Golf ball MOVED UP -->
-  <circle cx="140" cy="250" r="18" fill="white" stroke="#ccc" stroke-width="1"/>
-  <circle cx="135" cy="245" r="2" fill="#ddd"/>
-  <circle cx="145" cy="245" r="2" fill="#ddd"/>
-  <circle cx="140" cy="254" r="2" fill="#ddd"/>
-  
-  <!-- Birdie (stylized bird - BIGGER) MOVED UP -->
-  <g id="birdie" transform="translate(260, 90) scale(1.5)">
-    <path d="M 0 0 Q -10 -5 -15 0 Q -10 5 0 0" fill="#FFD700" stroke="#FFA500" stroke-width="1"/>
-    <circle cx="-5" cy="0" r="8" fill="#FFD700"/>
-    <circle cx="-7" cy="-2" r="2" fill="#000"/>
-    <path d="M -13 0 L -18 -3 L -18 3 Z" fill="#FFA500"/>
-    <path d="M 3 0 Q 8 -3 10 0 Q 8 3 3 0" fill="#FFD700"/>
+  <!-- Premium golf ball - MOVED LEFT -->
+  <g transform="translate(140, 235)">
+    <circle cx="0" cy="0" r="15" fill="white" stroke="#cccccc" stroke-width="1"/>
+    <!-- Dimple pattern -->
+    <circle cx="-5" cy="-5" r="2" fill="#e6e6e6"/>
+    <circle cx="0" cy="-6" r="2" fill="#e6e6e6"/>
+    <circle cx="5" cy="-5" r="2" fill="#e6e6e6"/>
+    <circle cx="-6" cy="0" r="2" fill="#e6e6e6"/>
+    <circle cx="6" cy="0" r="2" fill="#e6e6e6"/>
+    <circle cx="-5" cy="5" r="2" fill="#e6e6e6"/>
+    <circle cx="0" cy="6" r="2" fill="#e6e6e6"/>
+    <circle cx="5" cy="5" r="2" fill="#e6e6e6"/>
   </g>
   
-  <!-- Text: BIRDIE BUSH -->
-  <text x="200" y="70" font-family="Impact, Arial Black, sans-serif" font-size="32" font-weight="bold" 
-        text-anchor="middle" fill="#003300">BIRDIE BUSH</text>
-  
-  <!-- Text: BANDITS -->
-  <text x="200" y="350" font-family="Impact, Arial Black, sans-serif" font-size="36" font-weight="bold" 
-        text-anchor="middle" fill="#003300">BANDITS</text>
-  
-  <!-- Established date -->
-  <text x="200" y="375" font-family="Impact, Arial Black, sans-serif" font-size="16" font-weight="bold" font-style="italic" 
-        text-anchor="middle" fill="#666">Est. 2020</text>
-  
-  <!-- Decorative golf tees -->
-  <g id="left-tee" transform="translate(80, 340)">
-    <rect x="-2" y="0" width="4" height="15" fill="#8B4513"/>
-    <circle cx="0" cy="0" r="4" fill="#8B4513"/>
+  <!-- Enhanced birdie with gradient -->
+  <g id="birdie" transform="translate(280, 110) scale(1.5)" filter="url(#dropShadow)">
+    <!-- Body with gradient -->
+    <ellipse cx="0" cy="0" rx="10" ry="8" fill="url(#goldGradient)"/>
+    <!-- Head -->
+    <circle cx="-6" cy="-3" r="6" fill="url(#goldGradient)"/>
+    <!-- Beak -->
+    <path d="M -12 -3 L -16 -3 L -14 -1 Z" fill="#FF8C00"/>
+    <!-- Eye with highlight -->
+    <circle cx="-8" cy="-4" r="2" fill="#000000"/>
+    <circle cx="-8.5" cy="-4.5" r="0.8" fill="#ffffff"/>
+    <!-- Wing with detail -->
+    <path d="M 5 0 Q 12 -3 15 0 Q 12 3 5 0" fill="#FFC700" stroke="#FFA500" stroke-width="1"/>
+    <!-- Tail feathers -->
+    <path d="M 8 2 L 12 0 L 12 4 Z" fill="#FFA500"/>
   </g>
   
-  <g id="right-tee" transform="translate(320, 340)">
-    <rect x="-2" y="0" width="4" height="15" fill="#8B4513"/>
-    <circle cx="0" cy="0" r="4" fill="#8B4513"/>
+  <!-- Premium text - MOVED UP 10 PIXELS -->
+  <text x="200" y="90" font-family="Impact, Arial Black, sans-serif" font-size="36" font-weight="900" 
+        text-anchor="middle" fill="#003300" letter-spacing="2">BIRDIE BUSH</text>
+  
+  <text x="200" y="340" font-family="Impact, Arial Black, sans-serif" font-size="36" font-weight="900" 
+        text-anchor="middle" fill="#003300" letter-spacing="3">BANDITS</text>
+  
+  <!-- Established date - MOVED UP -->
+  <g id="established">
+    <text x="200" y="360" font-family="Impact, Arial Black, sans-serif" font-size="14" font-weight="900" 
+          text-anchor="middle" fill="#666666">EST. 2020</text>
+  </g>
+  
+  <!-- Corner golf tees with gold accents - REPOSITIONED -->
+  <g id="corner-tees">
+    <!-- Top left -->
+    <g transform="translate(40, 40)">
+      <circle cx="0" cy="0" r="5" fill="url(#goldGradient)"/>
+      <rect x="-2" y="0" width="4" height="12" fill="url(#metalGradient)"/>
+      <circle cx="0" cy="13" r="2.5" fill="#654321"/>
+    </g>
+    
+    <!-- Top right -->
+    <g transform="translate(360, 40)">
+      <circle cx="0" cy="0" r="5" fill="url(#goldGradient)"/>
+      <rect x="-2" y="0" width="4" height="12" fill="url(#metalGradient)"/>
+      <circle cx="0" cy="13" r="2.5" fill="#654321"/>
+    </g>
+    
+    <!-- Bottom left -->
+    <g transform="translate(40, 360)">
+      <circle cx="0" cy="0" r="5" fill="url(#goldGradient)"/>
+      <rect x="-2" y="0" width="4" height="12" fill="url(#metalGradient)"/>
+      <circle cx="0" cy="13" r="2.5" fill="#654321"/>
+    </g>
+    
+    <!-- Bottom right -->
+    <g transform="translate(360, 360)">
+      <circle cx="0" cy="0" r="5" fill="url(#goldGradient)"/>
+      <rect x="-2" y="0" width="4" height="12" fill="url(#metalGradient)"/>
+      <circle cx="0" cy="13" r="2.5" fill="#654321"/>
+    </g>
   </g>
 </svg>
