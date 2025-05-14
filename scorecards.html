@@ -4,20 +4,99 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stableford Scorecard – Multiple Courses</title>
+  <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
   <style>
     /* Validation & utility */
     .invalid-hcp, .missing { border: 2px solid red; background-color: #ffcccc; }
+    
     /* Base styles */
-    body { background: #f5f5f5; color: #000; font-family: sans-serif; padding: 1rem; margin: 0 auto; max-width: 1200px; }
-    h1 { color: #003300; font-size: 2rem; text-align: center; margin-bottom: 1rem; }
-    nav { text-align: right; margin-bottom: 0.5rem; }
-    .home-link { color: #000; font-weight: bold; text-decoration: none; }
+    body { 
+      background: #f5f5f5; 
+      color: #000; 
+      font-family: sans-serif; 
+      padding: 1rem; 
+      margin: 0 auto; 
+      max-width: 1200px;
+      position: relative;
+    }
+    
+    /* Logo in top-right corner */
+    .top-bar {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 10;
+    }
+    
+    .corner-logo {
+      width: 80px;
+      height: 80px;
+      display: block;
+    }
+    
+    h1 { 
+      color: #003300; 
+      font-size: 2rem; 
+      text-align: center; 
+      margin-bottom: 1rem; 
+    }
+    
+    header { 
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 1rem;
+      z-index: 5;
+    }
+    
+    .home-link { 
+      color: #000; 
+      font-weight: bold; 
+      text-decoration: none;
+      display: inline-block;
+      padding: 0.5rem 0.75rem;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 4px;
+      transition: background-color 0.3s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .home-link:hover {
+      background-color: rgba(255, 255, 255, 1);
+    }
+    
+    /* Main content wrapper */
+    main {
+      padding-top: 80px;
+    }
+    
     /* Controls */
     details#setup-controls { margin-bottom: 1rem; }
     .controls { display: flex; flex-wrap: wrap; gap: 1rem; }
     .controls > div { background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 6px; flex: 1 1 200px; }
     .controls label { display: block; margin-bottom: 0.25rem; font-weight: bold; }
     .controls label.checkbox { display: inline-block; margin-right: 0.5rem; }
+    
+    /* Player selects styling */
+    .player-select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: white;
+      cursor: pointer;
+    }
+    
+    #player-selects label {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    #player-selects > div > div {
+      margin-bottom: 0.5rem;
+    }
+    
     /* Buttons */
     #button-group { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem; }
     select, button { padding: 0.5rem 1rem; cursor: pointer; }
@@ -25,12 +104,14 @@
     button:hover { background: #003d7a; }
     button:active { opacity: 0.8; transform: scale(0.98); }
     button:disabled { background: #cccccc; cursor: not-allowed; }
+    
     /* Table */
     #table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 1rem; }
     table { width: 100%; border-collapse: collapse; min-width: 600px; }
     caption { caption-side: top; text-align: left; padding: 0.5rem; font-weight: bold; background: #eef; }
     th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: center; white-space: nowrap; }
     th { background: #ddd; }
+    
     /* Status messages */
     #status-message { 
       padding: 1rem;
@@ -41,14 +122,48 @@
     }
     .success { background-color: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
     .error { background-color: #ffcdd2; color: #b71c1c; border: 1px solid #ef9a9a; }
+    
     /* Responsive */
     @media (max-width: 768px) {
+      header {
+        padding: 0.75rem;
+      }
+      
+      main {
+        padding-top: 70px;
+      }
+      
+      .corner-logo {
+        width: 70px;
+        height: 70px;
+      }
+      
       .controls { flex-direction: column; }
       #button-group { flex-direction: column; }
       table { font-size: 0.8rem; }
     }
+    
     @media (max-width: 480px) {
       body { padding: 0.5rem; }
+      
+      header {
+        padding: 0.5rem;
+      }
+      
+      main {
+        padding-top: 65px;
+      }
+      
+      .corner-logo {
+        width: 65px;
+        height: 65px;
+      }
+      
+      .home-link {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.9rem;
+      }
+      
       h1 { font-size: 1.5rem; }
       .controls { flex-direction: column; gap: 0.5rem; }
       .controls > div { flex: 1 1 100%; }
@@ -63,9 +178,14 @@
   </style>
 </head>
 <body>
+  <div class="top-bar">
+    <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="corner-logo">
+  </div>
+  
   <header>
     <nav><a href="index.html" class="home-link">🏠 Home</a></nav>
   </header>
+  
   <main>
     <h1>Stableford Scorecard – Multiple Courses</h1>
     <div id="status-message"></div>
@@ -87,21 +207,81 @@
             <option value="red">Red</option>
           </select>
         </div>
-        <div id="player-checkboxes">
-          <label>Players (max 4):</label>
-          <div>
-            <label class="checkbox"><input type="checkbox" name="player" value="Amrit"> Amrit</label>
-            <label class="checkbox"><input type="checkbox" name="player" value="Kam"> Kam</label>
-            <label class="checkbox"><input type="checkbox" name="player" value="Vish"> Vish</label>
-            <label class="checkbox"><input type="checkbox" name="player" value="Ravi"> Ravi</label>
-            <label class="checkbox"><input type="checkbox" name="player" value="Bal"> Bal</label>
-            <label class="checkbox"><input type="checkbox" name="player" value="Vick"> Vick</label>
-            <label class="checkbox"><input type="checkbox" name="player" value="Michael"> Michael</label>
-            <label class="checkbox"><input type="checkbox" name="player" value="Justy"> Justy</label>
-            <label class="checkbox"><input type="checkbox" name="player" value="Phuperjee"> Phuperjee</label>
-            <label class="checkbox"><input type="checkbox" name="player" value="Indy"> Indy</label>
-            <label class="checkbox"><input type="checkbox" name="player" value="Maj"> Maj</label>
-            <label class="checkbox"><input type="checkbox" name="player" value="Sama"> Sama</label>
+        <div id="player-selects">
+          <label>Players:</label>
+          <div style="display: grid; gap: 0.5rem;">
+            <div>
+              <label for="player-1">Player 1:</label>
+              <select id="player-1" class="player-select">
+                <option value="">-- Select Player --</option>
+                <option value="Amrit">Amrit</option>
+                <option value="Kam">Kam</option>
+                <option value="Vish">Vish</option>
+                <option value="Ravi">Ravi</option>
+                <option value="Bal">Bal</option>
+                <option value="Vick">Vick</option>
+                <option value="Michael">Michael</option>
+                <option value="Justy">Justy</option>
+                <option value="Phuperjee">Phuperjee</option>
+                <option value="Indy">Indy</option>
+                <option value="Maj">Maj</option>
+                <option value="Sama">Sama</option>
+              </select>
+            </div>
+            <div>
+              <label for="player-2">Player 2:</label>
+              <select id="player-2" class="player-select">
+                <option value="">-- Select Player --</option>
+                <option value="Amrit">Amrit</option>
+                <option value="Kam">Kam</option>
+                <option value="Vish">Vish</option>
+                <option value="Ravi">Ravi</option>
+                <option value="Bal">Bal</option>
+                <option value="Vick">Vick</option>
+                <option value="Michael">Michael</option>
+                <option value="Justy">Justy</option>
+                <option value="Phuperjee">Phuperjee</option>
+                <option value="Indy">Indy</option>
+                <option value="Maj">Maj</option>
+                <option value="Sama">Sama</option>
+              </select>
+            </div>
+            <div>
+              <label for="player-3">Player 3:</label>
+              <select id="player-3" class="player-select">
+                <option value="">-- Select Player --</option>
+                <option value="Amrit">Amrit</option>
+                <option value="Kam">Kam</option>
+                <option value="Vish">Vish</option>
+                <option value="Ravi">Ravi</option>
+                <option value="Bal">Bal</option>
+                <option value="Vick">Vick</option>
+                <option value="Michael">Michael</option>
+                <option value="Justy">Justy</option>
+                <option value="Phuperjee">Phuperjee</option>
+                <option value="Indy">Indy</option>
+                <option value="Maj">Maj</option>
+                <option value="Sama">Sama</option>
+              </select>
+            </div>
+            <div>
+              <label for="player-4">Player 4:</label>
+              <select id="player-4" class="player-select">
+                <option value="">-- Select Player --</option>
+                <option value="Amrit">Amrit</option>
+                <option value="Kam">Kam</option>
+                <option value="Vish">Vish</option>
+                <option value="Ravi">Ravi</option>
+                <option value="Bal">Bal</option>
+                <option value="Vick">Vick</option>
+                <option value="Michael">Michael</option>
+                <option value="Justy">Justy</option>
+                <option value="Phuperjee">Phuperjee</option>
+                <option value="Indy">Indy</option>
+                <option value="Maj">Maj</option>
+                <option value="Sama">Sama</option>
+              </select>
+            </div>
           </div>
         </div>
         <div>
@@ -132,10 +312,38 @@
       const courseSelect = document.getElementById('course-select');
       const teeSelect = document.getElementById('tee-select');
       const holeRadios = document.querySelectorAll('input[name="holes"]');
-      const playerCheckboxes = document.querySelectorAll('input[name="player"]');
+      const playerSelects = document.querySelectorAll('.player-select');
       const statusMessage = document.getElementById('status-message');
       let scorecardBuilt = false;
       let savedSuccessfully = false;
+
+      // Prevent duplicate player selection
+      function updatePlayerOptions() {
+        const selectedPlayers = [];
+        playerSelects.forEach(select => {
+          if (select.value) selectedPlayers.push(select.value);
+        });
+        
+        playerSelects.forEach(select => {
+          const currentValue = select.value;
+          const options = select.querySelectorAll('option');
+          
+          options.forEach(option => {
+            if (option.value && option.value !== currentValue && selectedPlayers.includes(option.value)) {
+              option.disabled = true;
+              option.style.color = '#999';
+            } else {
+              option.disabled = false;
+              option.style.color = '#000';
+            }
+          });
+        });
+      }
+
+      // Add event listeners to player selects
+      playerSelects.forEach(select => {
+        select.addEventListener('change', updatePlayerOptions);
+      });
 
       function debounce(fn, delay = 200) {
         let timer;
@@ -206,7 +414,11 @@
           };
           
           // Get players and their data
-          const selectedPlayers = [...playerCheckboxes].filter(cb => cb.checked).map(cb => cb.value);
+          const selectedPlayers = [];
+          playerSelects.forEach(select => {
+            if (select.value) selectedPlayers.push(select.value);
+          });
+          
           selectedPlayers.forEach((player, index) => {
             const handicap = parseInt(document.getElementById(`hcp-${index}`).value, 10) || 0;
             const scores = [];
@@ -256,13 +468,13 @@
 
       buildBtn.addEventListener('click', function() {
         try {
-          const players = [...playerCheckboxes].filter(cb => cb.checked).map(cb => cb.value);
+          const players = [];
+          playerSelects.forEach(select => {
+            if (select.value) players.push(select.value);
+          });
+          
           if (!players.length) {
             showMessage('Please select at least one player.', 'error');
-            return;
-          }
-          if (players.length > 4) {
-            showMessage('Please select no more than 4 players.', 'error');
             return;
           }
           
