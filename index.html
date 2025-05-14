@@ -1,40 +1,134 @@
+<!-- HEADER SNIPPET FOR ALL PAGES -->
+<!-- Add this CSS to your page's <style> section -->
+<style>
+  /* Logo Header Styles */
+  .page-header {
+    position: relative;
+    padding-top: 80px; /* Space for logo */
+    margin-bottom: 2rem;
+  }
+  
+  .corner-logo-link {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+  }
+  
+  .corner-logo {
+    width: 80px;
+    height: 80px;
+    display: block;
+    transition: transform 0.3s ease;
+  }
+  
+  .corner-logo:hover {
+    transform: scale(1.1);
+  }
+  
+  .page-title {
+    text-align: center;
+    font-size: 2.5rem;
+    color: #003300;
+    font-weight: bold;
+    margin: 0;
+    margin-bottom: 1rem;
+    padding-right: 90px; /* Prevent overlap with logo */
+  }
+  
+  /* Navigation back to home */
+  .back-home {
+    display: inline-block;
+    margin-bottom: 1rem;
+    color: #003300;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.3s ease;
+  }
+  
+  .back-home:hover {
+    color: #004c99;
+  }
+  
+  /* Mobile Responsive */
+  @media (max-width: 768px) {
+    .page-header {
+      padding-top: 70px;
+    }
+    
+    .corner-logo {
+      width: 70px;
+      height: 70px;
+    }
+    
+    .page-title {
+      font-size: 2rem;
+      padding-right: 80px;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .page-header {
+      padding-top: 70px;
+    }
+    
+    .corner-logo {
+      width: 65px;
+      height: 65px;
+    }
+    
+    .corner-logo-link {
+      top: 0;
+      right: 0;
+    }
+    
+    .page-title {
+      font-size: 1.75rem;
+      padding-right: 70px;
+      line-height: 1.2;
+    }
+  }
+</style>
+
+<!-- Add this HTML to your page's <body> section -->
+<header class="page-header">
+  <a href="index.html" class="corner-logo-link" aria-label="Birdie Bush Bandits Home">
+    <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="corner-logo">
+  </a>
+  <nav>
+    <a href="index.html" class="back-home">← Back to Home</a>
+  </nav>
+  <h1 class="page-title">Page Title Here</h1>
+</header>
+
+<!-- EXAMPLE USAGE FOR A COMPLETE PAGE -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Birdie Bush Bandits - Golf Group Since 2020</title>
-  <meta name="description" content="Birdie Bush Bandits - A golf group founded in August 2020. View photo galleries, scorecards, calculate handicaps, and meet our members.">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Birdie Bush Bandits - Photo Gallery</title>
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
   
-  <!-- Open Graph tags for social sharing -->
-  <meta property="og:title" content="Birdie Bush Bandits - Golf Group">
-  <meta property="og:description" content="A golf group founded in August 2020. View photo galleries, scorecards, calculate handicaps, and meet our members.">
-  <meta property="og:type" content="website">
-  <meta property="og:image" content="golf-flag.jpeg">
-  
   <style>
-    /* Base Styles */
     body {
       background-color: #f5f5f5;
       font-family: Arial, sans-serif;
-      text-align: center;
       padding: 2rem;
       margin: 0 auto;
-      color: #000;
       max-width: 1200px;
-      line-height: 1.6;
     }
     
-    /* Header Styles */
-    header {
-      margin-bottom: 2rem;
+    /* Logo Header Styles */
+    .page-header {
       position: relative;
+      padding-top: 1rem;
+      margin-bottom: 2rem;
     }
     
-    .top-bar {
+    .corner-logo-link {
       position: absolute;
-      top: -1rem;
+      top: 0;
       right: 0;
       z-index: 10;
     }
@@ -43,126 +137,44 @@
       width: 60px;
       height: 60px;
       display: block;
+      transition: transform 0.3s ease;
     }
     
-    h1 {
-      font-size: 3rem;
+    .corner-logo:hover {
+      transform: scale(1.1);
+    }
+    
+    .page-title {
+      text-align: center;
+      font-size: 2.5rem;
       color: #003300;
       font-weight: bold;
       margin: 0;
-      margin-bottom: 0.5rem;
-      text-align: center;
+      margin-bottom: 1rem;
     }
     
-    .founded {
-      font-size: 1.1rem;
-      margin-top: 0.5rem;
-      margin-bottom: 1.5rem;
-      font-style: italic;
-      color: #666;
-      font-family: Georgia, serif;
-      text-align: center;
-    }
-    
-    /* Main Content Styles */
-    main {
-      margin-top: 2rem;
-    }
-    
-    h2 {
-      font-style: italic;
-      margin-top: 0;
-      font-size: 1.25rem;
-      line-height: 1.4;
-      color: #333;
-    }
-    
-    /* Navigation Styles */
-    .nav-boxes {
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-      margin: 2rem 0;
-    }
-    
-    .nav-boxes a {
+    .back-home {
       display: inline-block;
-      padding: 1rem 2rem;
-      border: none;
-      border-radius: 8px;
-      text-decoration: none;
-      color: #ffffff;
-      font-weight: bold;
-      background-color: #004c99;
-      transition: all 0.3s ease;
-      flex: 1 1 150px;
-      max-width: 200px;
-      text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    
-    .nav-boxes a:hover {
-      background-color: #003d7a;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    }
-    
-    /* Accessibility - Focus styles */
-    .nav-boxes a:focus {
-      outline: 3px solid #003300;
-      outline-offset: 2px;
-    }
-    
-    /* Content Styles */
-    .return-text {
-      font-size: 1.25rem;
-      margin: 2rem 0 1rem;
-      font-weight: bold;
+      margin-bottom: 1rem;
       color: #003300;
-    }
-    
-    img.main-image {
-      width: 100%;
-      max-width: 600px;
-      height: auto;
-      border: 1px solid #ccc;
-      margin-top: 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-    
-    /* Skip to main content link (accessibility) */
-    .skip-link {
-      position: absolute;
-      top: -40px;
-      left: 0;
-      background: #003300;
-      color: white;
-      padding: 8px;
       text-decoration: none;
-      z-index: 100;
-      border-radius: 0 0 4px 0;
+      font-weight: bold;
+      transition: color 0.3s ease;
     }
     
-    .skip-link:focus {
-      top: 0;
+    .back-home:hover {
+      color: #004c99;
     }
-
-    /* Responsive Breakpoints */
+    
+    /* Mobile Responsive */
     @media (max-width: 768px) {
-      h1 {
-        font-size: 2.5rem;
-      }
-      
       .corner-logo {
         width: 50px;
         height: 50px;
       }
       
-      .nav-boxes a {
-        padding: 0.75rem 1.5rem;
-        max-width: 150px;
+      .page-title {
+        font-size: 2rem;
       }
     }
     
@@ -171,77 +183,36 @@
         padding: 1rem;
       }
       
-      h1 {
-        font-size: 2rem;
-      }
-      
       .corner-logo {
         width: 40px;
         height: 40px;
       }
       
-      .top-bar {
+      .corner-logo-link {
         top: -0.5rem;
         right: -0.5rem;
       }
       
-      .nav-boxes {
-        flex-direction: column;
-        width: 100%;
-      }
-      
-      .nav-boxes a {
-        flex: 1 1 auto;
-        max-width: 100%;
-        padding: 0.75rem 1rem;
-      }
-      
-      img.main-image {
-        max-width: 100%;
-      }
-    }
-    
-    /* Print Styles */
-    @media print {
-      body {
-        background-color: white;
-      }
-      .nav-boxes {
-        display: none;
-      }
-      .logo {
-        filter: none;
+      .page-title {
+        font-size: 1.75rem;
+        padding-right: 50px;
       }
     }
   </style>
 </head>
 <body>
-  <a href="#main" class="skip-link">Skip to main content</a>
-  
-  <header>
-    <div class="top-bar">
+  <header class="page-header">
+    <a href="index.html" class="corner-logo-link" aria-label="Birdie Bush Bandits Home">
       <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="corner-logo">
-    </div>
-    <h1>Birdie Bush Bandits</h1>
-    <div class="founded">Founded August 2020</div>
+    </a>
+    <nav>
+      <a href="index.html" class="back-home">← Back to Home</a>
+    </nav>
+    <h1 class="page-title">Photo Gallery</h1>
   </header>
   
-  <main id="main">
-    <h2>This site is under construction</h2>
-    
-    <nav class="nav-boxes" role="navigation" aria-label="Main navigation">
-      <a href="photo-gallery.html">Photo Gallery</a>
-      <a href="view-saved-scores.html">Scorecards</a>
-      <a href="handicap-calculator.html">Handicap Calculator</a>
-      <a href="members.html">Members</a>
-    </nav>
-    
-    <p class="return-text">If found please return to BBB Headquarters</p>
-    
-    <img class="main-image" 
-         src="golf-flag.jpeg" 
-         alt="Golfer holding the flag on a golf course" 
-         loading="lazy" />
+  <main>
+    <!-- Page content goes here -->
   </main>
 </body>
 </html>
