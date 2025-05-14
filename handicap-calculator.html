@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Birdie Bush Bandits – Handicap Calculator</title>
+  <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
   <style>
     body {
       background-color: #f5f5f5;
@@ -13,16 +14,35 @@
       margin: 0 auto;
       color: #000;
       max-width: 800px;
+      position: relative;
     }
+    
+    /* Logo in top-right corner */
+    .top-bar {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 10;
+    }
+    
+    .corner-logo {
+      width: 80px;
+      height: 80px;
+      display: block;
+    }
+    
     header {
       text-align: left;
       margin-bottom: 1rem;
+      padding-top: 60px; /* Space for logo */
     }
+    
     .home-link {
       color: #000;
       font-weight: bold;
       text-decoration: none;
     }
+    
     h1 {
       display: inline-flex;
       align-items: center;
@@ -33,15 +53,18 @@
       margin-bottom: 0.5rem;
       flex-wrap: wrap;
     }
+    
     h1 img {
       width: 40px;
       margin: 0 5px;
     }
+    
     h2 {
       color: #003300;
       font-weight: bold;
       margin: 1rem 0;
     }
+    
     .founded {
       font-size: 1rem;
       margin-top: 0.25rem;
@@ -49,6 +72,7 @@
       font-style: italic;
       color: #333;
     }
+    
     .back-link {
       display: inline-block;
       margin-bottom: 1rem;
@@ -61,9 +85,11 @@
       transition: background-color 0.3s;
       border: none;
     }
+    
     .back-link:hover {
       background-color: #003d7a;
     }
+    
     .calculator {
       background: rgba(0,0,0,0.05);
       padding: 1.5rem;
@@ -72,11 +98,13 @@
       text-align: left;
       border: 1px solid #ccc;
     }
+    
     .calculator p {
       text-align: center;
       color: #333;
       margin-bottom: 1rem;
     }
+    
     .round {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -87,11 +115,13 @@
       border-radius: 6px;
       border: 1px solid #ddd;
     }
+    
     .round label {
       font-weight: bold;
       font-size: 0.9rem;
       color: #333;
     }
+    
     .round input,
     .round select {
       width: 100%;
@@ -103,9 +133,11 @@
       background: #fff;
       color: #000;
     }
+    
     .round input[readonly] {
       background: #f0f0f0;
     }
+    
     .calculator button {
       width: 48%;
       padding: 0.75rem;
@@ -118,9 +150,11 @@
       margin: 0.25rem 1%;
       font-size: 1rem;
     }
+    
     .calculator button:hover {
       background: #003d7a;
     }
+    
     .result {
       font-size: 1.1rem;
       margin-top: 1rem;
@@ -128,20 +162,45 @@
       text-align: center;
       color: #003300;
     }
+    
+    @media (max-width: 768px) {
+      header {
+        padding-top: 70px;
+      }
+      
+      .corner-logo {
+        width: 70px;
+        height: 70px;
+      }
+    }
+    
     @media (max-width: 600px) {
       body {
         padding: 1rem;
       }
+      
+      header {
+        padding-top: 70px;
+      }
+      
+      .corner-logo {
+        width: 65px;
+        height: 65px;
+      }
+      
       .round {
         grid-template-columns: 1fr;
       }
+      
       .calculator button {
         width: 100%;
         margin: 0.25rem 0;
       }
+      
       h1 {
         font-size: 1.75rem;
       }
+      
       .result {
         font-size: 1rem;
       }
@@ -149,6 +208,10 @@
   </style>
 </head>
 <body>
+  <div class="top-bar">
+    <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="corner-logo">
+  </div>
+  
   <header>
     <nav><a href="index.html" class="home-link">🏠 Home</a></nav>
   </header>
