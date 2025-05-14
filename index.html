@@ -3,7 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Birdie Bush Bandits</title>
+  <title>Birdie Bush Bandits - Golf Group Since 2020</title>
+  <meta name="description" content="Birdie Bush Bandits - A golf group founded in August 2020. View photo galleries, scorecards, calculate handicaps, and meet our members.">
+  <link rel="icon" type="image/png" href="golfball.png">
+  
+  <!-- Open Graph tags for social sharing -->
+  <meta property="og:title" content="Birdie Bush Bandits - Golf Group">
+  <meta property="og:description" content="A golf group founded in August 2020. View photo galleries, scorecards, calculate handicaps, and meet our members.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="golf-flag.jpeg">
+  
   <style>
     /* Base Styles */
     body {
@@ -15,6 +24,12 @@
       color: #000;
       max-width: 1200px;
     }
+    
+    /* Header Styles */
+    header {
+      margin-bottom: 2rem;
+    }
+    
     h1 {
       display: inline-flex;
       align-items: center;
@@ -25,11 +40,13 @@
       margin-bottom: 0.5rem;
       flex-wrap: wrap;
     }
+    
     h1 img {
       width: 65px;
       height: auto;
       margin: 0 10px;
     }
+    
     .founded {
       font-size: 1rem;
       margin-top: 0.25rem;
@@ -37,6 +54,12 @@
       font-style: italic;
       color: #333;
     }
+    
+    /* Main Content Styles */
+    main {
+      margin-top: 2rem;
+    }
+    
     h2 {
       font-style: italic;
       margin-top: 0;
@@ -44,6 +67,8 @@
       line-height: 1.4;
       color: #333;
     }
+    
+    /* Navigation Styles */
     .nav-boxes {
       display: flex;
       justify-content: center;
@@ -51,6 +76,7 @@
       gap: 1rem;
       margin: 2rem 0;
     }
+    
     .nav-boxes a {
       display: inline-block;
       padding: 1rem 2rem;
@@ -65,21 +91,47 @@
       max-width: 200px;
       text-align: center;
     }
+    
     .nav-boxes a:hover {
       background-color: #003d7a;
     }
+    
+    /* Accessibility - Focus styles */
+    .nav-boxes a:focus {
+      outline: 2px solid #003300;
+      outline-offset: 2px;
+    }
+    
+    /* Content Styles */
     .return-text {
       font-size: 1.25rem;
       margin: 2rem 0 1rem;
       font-weight: bold;
       color: #003300;
     }
+    
     img.main-image {
       width: 100%;
       max-width: 600px;
       height: auto;
       border: 1px solid #ccc;
       margin-top: 1.5rem;
+    }
+    
+    /* Skip to main content link (accessibility) */
+    .skip-link {
+      position: absolute;
+      top: -40px;
+      left: 0;
+      background: #003300;
+      color: white;
+      padding: 8px;
+      text-decoration: none;
+      z-index: 100;
+    }
+    
+    .skip-link:focus {
+      top: 0;
     }
 
     /* Responsive Breakpoints */
@@ -92,6 +144,7 @@
         max-width: 150px;
       }
     }
+    
     @media (max-width: 480px) {
       body {
         padding: 1rem;
@@ -114,23 +167,46 @@
         max-width: 100%;
       }
     }
+    
+    /* Print Styles */
+    @media print {
+      body {
+        background-color: white;
+      }
+      .nav-boxes {
+        display: none;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>
-    <img src="golfball.png" alt="Golf ball icon">
-    Birdie Bush Bandits
-    <img src="golfball.png" alt="Golf ball icon">
-  </h1>
-  <div class="founded">Founded August 2020</div>
-  <h2>This site is under construction</h2>
-  <div class="nav-boxes">
-    <a href="photo-gallery.html">Photo Gallery</a>
-    <a href="view-saved-scores.html">Scorecards</a>
-    <a href="handicap-calculator.html">Handicap Calculator</a>
-    <a href="members.html">Members</a>
-  </div>
-  <div class="return-text">If found please return to BBB Headquarters</div>
-  <img class="main-image" src="golf-flag.jpeg" alt="Golfer holding the flag" />
+  <a href="#main" class="skip-link">Skip to main content</a>
+  
+  <header>
+    <h1>
+      <img src="golfball.png" alt="" aria-hidden="true">
+      Birdie Bush Bandits
+      <img src="golfball.png" alt="" aria-hidden="true">
+    </h1>
+    <div class="founded">Founded August 2020</div>
+  </header>
+  
+  <main id="main">
+    <h2>This site is under construction</h2>
+    
+    <nav class="nav-boxes" role="navigation" aria-label="Main navigation">
+      <a href="photo-gallery.html">Photo Gallery</a>
+      <a href="view-saved-scores.html">Scorecards</a>
+      <a href="handicap-calculator.html">Handicap Calculator</a>
+      <a href="members.html">Members</a>
+    </nav>
+    
+    <p class="return-text">If found please return to BBB Headquarters</p>
+    
+    <img class="main-image" 
+         src="golf-flag.jpeg" 
+         alt="Golfer holding the flag on a golf course" 
+         loading="lazy" />
+  </main>
 </body>
 </html>
