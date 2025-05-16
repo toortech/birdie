@@ -646,3 +646,93 @@ caption {
     page-break-after: avoid;
   }
 }
+/* Button styles to add to your CSS */
+.btn, button.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #004c99;
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  min-width: 160px;
+}
+
+.btn:hover, button.btn:hover {
+  background-color: #003d7a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.btn:active, button.btn:active {
+  transform: translateY(0);
+}
+
+.btn-sm, button.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  min-width: 120px;
+}
+
+.btn-lg, button.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.25rem;
+  min-width: 200px;
+}
+
+.btn-danger, button.btn-danger {
+  background-color: #dc3545;
+}
+
+.btn-danger:hover, button.btn-danger:hover {
+  background-color: #c82333;
+}
+
+.btn-success, button.btn-success {
+  background-color: #28a745;
+}
+
+.btn-success:hover, button.btn-success:hover {
+  background-color: #218838;
+}
+
+.btn-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.card-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin-top: 1rem;
+}
+
+/* Apply consistent margins */
+.action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.action-buttons .btn {
+  flex: 0 0 auto;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .btn-group, .card-actions, .action-buttons {
+    flex-direction: column;
+  }
+  
+  .btn, button.btn, .btn-sm, button.btn-sm, .btn-lg, button.btn-lg {
+    width: 100%;
+  }
+}
