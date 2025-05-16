@@ -736,3 +736,110 @@ caption {
     width: 100%;
   }
 }
+/* Button styles with centering */
+.btn, button.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  background-color: #004c99;
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  min-width: 160px;
+}
+
+.btn:hover, button.btn:hover {
+  background-color: #003d7a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.btn:active, button.btn:active {
+  transform: translateY(0);
+}
+
+.btn-sm, button.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  min-width: 120px;
+}
+
+.btn-lg, button.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.25rem;
+  min-width: 200px;
+}
+
+.btn-danger, button.btn-danger {
+  background-color: #dc3545;
+}
+
+.btn-danger:hover, button.btn-danger:hover {
+  background-color: #c82333;
+}
+
+.btn-success, button.btn-success {
+  background-color: #28a745;
+}
+
+.btn-success:hover, button.btn-success:hover {
+  background-color: #218838;
+}
+
+/* Centered button groups */
+.btn-group, 
+#button-group, 
+.button-group, 
+.action-buttons,
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center; /* Center horizontally */
+  margin: 1.5rem auto;
+  width: 100%;
+  text-align: center;
+}
+
+/* Individual buttons in groups */
+.btn-group .btn, 
+.btn-group button, 
+#button-group .btn, 
+#button-group button,
+.button-group .btn,
+.button-group button,
+.action-buttons .btn,
+.action-buttons button,
+.card-actions .btn,
+.card-actions button {
+  flex: 0 0 auto;
+}
+
+/* For card actions which often have left and right buttons */
+.card-actions {
+  justify-content: space-around; /* Evenly spaced in the container */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .btn-group, 
+  #button-group, 
+  .button-group, 
+  .action-buttons,
+  .card-actions {
+    flex-direction: column;
+    align-items: center; /* Center items in column layout */
+  }
+  
+  .btn, button.btn, 
+  .btn-sm, button.btn-sm, 
+  .btn-lg, button.btn-lg {
+    width: 100%;
+    max-width: 300px; /* Limit width on mobile */
+  }
+}
