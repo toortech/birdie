@@ -3,390 +3,515 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Birdie Bush Bandits &ndash; Photo Gallery</title>
+  <title>Birdie Bush Bandits – Photo Gallery</title>
+  <meta name="description" content="View photos from Birdie Bush Bandits golf outings and events.">
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
-  <style>
-    body, html {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-    }
-    body {
-      background-color: #f5f5f5;
-      font-family: sans-serif;
-      text-align: center;
-      padding: 2rem;
-      margin: 0 auto;
-      color: #000;
-      max-width: 1200px;
-      overflow: hidden;
-      position: relative;
-    }
-    
-    /* Logo in top-right corner */
-    .top-bar {
-      position: absolute;
-      top: 0;
-      right: 0;
-      z-index: 10;
-    }
-    
-    .corner-logo {
-      width: 80px;
-      height: 80px;
-      display: block;
-    }
-    
-    header {
-      margin-bottom: 1rem;
-      padding-top: 80px; /* Space for logo */
-    }
-    
-    h1 {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-      color: #003300;
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-      flex-wrap: wrap;
-    }
-    
-    h1 img {
-      width: 50px;
-      margin: 0 8px;
-    }
-    
-    h2 {
-      color: #003300;
-      font-weight: bold;
-      margin: 1rem 0;
-    }
-    
-    .founded {
-      font-size: 1rem;
-      margin-top: 0.25rem;
-      margin-bottom: 1.5rem;
-      font-style: italic;
-      color: #333;
-    }
-    
-    .back-link {
-      display: inline-block;
-      margin-bottom: 1.5rem;
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-      background-color: #004c99;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      transition: background-color 0.3s;
-      border: none;
-    }
-    
-    .back-link:hover {
-      background-color: #003d7a;
-    }
-    
-    .upload-section {
-      margin: 1rem 0;
-    }
-    
-    .upload-label {
-      display: inline-block;
-      padding: 0.5rem 1rem;
-      background-color: #004c99;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      color: #fff;
-      transition: background-color 0.3s;
-      border: none;
-    }
-    
-    .upload-label:hover {
-      background-color: #003d7a;
-    }
-    
-    .upload-input {
-      display: none;
-    }
-    
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1rem;
-      margin-top: 1rem;
-    }
-    
-    .gallery-img {
-      width: 100%;
-      height: auto;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: transform 0.2s;
-    }
-    
-    .gallery-img:hover {
-      transform: scale(1.05);
-    }
-    
-    /* Lightbox styles */
-    .lightbox {
-      display: none;
-      position: fixed;
-      z-index: 1000;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.8);
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .lightbox-img {
-      max-width: 90%;
-      max-height: 80%;
-      box-shadow: 0 0 20px rgba(0,0,0,0.5);
-    }
-    
-    .lightbox-close {
-      position: absolute;
-      top: 1rem; right: 1.5rem;
-      font-size: 2rem;
-      color: white;
-      cursor: pointer;
-    }
-    
-    .lightbox-caption {
-      color: #ddd;
-      margin-top: 1rem;
-      font-size: 1rem;
-      text-align: center;
-    }
-    
-    /* Password overlay */
-    #login-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 2000;
-    }
-    
-    #login-box {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 8px;
-      text-align: center;
-      max-width: 90%;
-      width: 300px;
-    }
-    
-    #login-box h2 {
-      color: #003300;
-      margin: 0 0 1rem 0;
-    }
-    
-    #login-box input {
-      width: 100%;
-      padding: 0.5rem;
-      margin: 1rem 0;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-    
-    #login-box button {
-      padding: 0.5rem 1rem;
-      background: #004c99;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    
-    #login-box button:hover {
-      background: #003d7a;
-    }
-    
-    #error-msg {
-      color: red;
-      font-size: 0.9rem;
-      display: none;
-      margin-top: 0.5rem;
-    }
-    
-    @media (max-width: 768px) {
-      header {
-        padding-top: 70px;
-      }
-      
-      .corner-logo {
-        width: 70px;
-        height: 70px;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      body { 
-        padding: 1rem; 
-      }
-      
-      header {
-        padding-top: 70px;
-      }
-      
-      .corner-logo {
-        width: 65px;
-        height: 65px;
-      }
-      
-      h1 { 
-        font-size: 2rem; 
-      }
-      
-      .gallery { 
-        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); 
-      }
-    }
-  </style>
+  
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Core Modules -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
 </head>
 <body>
-  <!-- Password Protection Overlay -->
-  <div id="login-overlay">
-    <div id="login-box">
-      <h2>Enter Password</h2>
-      <input type="password" id="pw-input" placeholder="Password">
-      <div id="error-msg">Incorrect password</div>
-      <button id="pw-submit">Unlock Gallery</button>
-    </div>
-  </div>
-
-  <div id="main-content" style="display:none;">
-    <div class="top-bar">
-      <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="corner-logo">
-    </div>
-    
-    <header>
-      <nav style="text-align: left; margin-bottom: 0.5rem;">
-        <a href="index.html" style="color: #000; font-weight: bold; text-decoration: none;">🏠 Home</a>
-      </nav>
-    </header>
-    
-    <h1>
-      <img src="golfball.png" alt="Golf ball icon">
-      Birdie Bush Bandits
-      <img src="golfball.png" alt="Golf ball icon">
-    </h1>
-    <div class="founded">Founded August 2020</div>
-
-    <!-- Image Upload Section -->
-    <div class="upload-section">
-      <label for="image-upload" class="upload-label">Upload Photos</label>
-      <input type="file" id="image-upload" class="upload-input" accept="image/*" multiple>
-    </div>
-
-    <h2>Photo Gallery</h2>
-    <div class="gallery" id="gallery">
-      <!-- Preloaded images -->
-      <img src="images/photo1.jpg" alt="Band on the green" class="gallery-img">
-      <img src="images/photo2.jpg" alt="Group shot" class="gallery-img">
-      <img src="images/photo3.jpg" alt="Trophy presentation" class="gallery-img">
-      <img src="images/photo4.jpg" alt="Action shot" class="gallery-img">
-    </div>
-
-    <!-- Lightbox Modal -->
-    <div id="lightbox" class="lightbox">
-      <span class="lightbox-close">&times;</span>
-      <img class="lightbox-img" id="lightbox-img" src="" alt="">
-      <div id="lightbox-caption" class="lightbox-caption"></div>
-    </div>
-  </div>
-
+  <a href="#main" class="skip-link">Skip to main content</a>
+  
+  <main id="main"></main>
+  
   <script>
-    // Change this to your desired password
-    const PASSWORD = 'secret123';
-    const overlay = document.getElementById('login-overlay');
-    const mainContent = document.getElementById('main-content');
-    const pwInput = document.getElementById('pw-input');
-    const pwSubmit = document.getElementById('pw-submit');
-    const errMsg = document.getElementById('error-msg');
-
-    pwSubmit.addEventListener('click', () => {
-      if (pwInput.value === PASSWORD) {
-        overlay.style.display = 'none';
-        mainContent.style.display = '';
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize modules
+      BBB_AUTH.init({
+        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+      });
+      
+      BBB_DB.init({
+        useCloudflare: BBB_CONFIG.cloudflareEnabled,
+        localStoragePrefix: 'bbb_'
+      });
+      
+      // First check if the user is already authenticated for gallery access
+      const hasGalleryAccess = BBB_AUTH.isAuthenticated && 
+        (BBB_AUTH.hasRole('gallery') || BBB_AUTH.hasRole('admin') || BBB_AUTH.hasRole('member'));
+      
+      if (!hasGalleryAccess) {
+        // Show login overlay
+        showGalleryLogin();
       } else {
-        errMsg.style.display = 'block';
+        // Already authenticated, initialize gallery
+        initializeGallery();
       }
-    });
-
-    pwInput.addEventListener('keypress', e => {
-      if (e.key === 'Enter') pwSubmit.click();
-    });
-
-    // Gallery & Lightbox only initialize after unlock
-    const initGallery = () => {
-      const uploadInput = document.getElementById('image-upload');
-      const gallery = document.getElementById('gallery');
-      const lightbox = document.getElementById('lightbox');
-      const lbImg     = document.getElementById('lightbox-img');
-      const lbCap     = document.getElementById('lightbox-caption');
-      const lbClose   = document.querySelector('.lightbox-close');
-
-      // Load stored uploads
-      let stored = JSON.parse(localStorage.getItem('uploadedImages') || '[]');
-      stored.forEach(url => addImage(url));
-
-      uploadInput.addEventListener('change', e => {
-        const files = Array.from(e.target.files);
-        files.forEach(file => {
-          const reader = new FileReader();
-          reader.onload = ev => {
-            const dataURL = ev.target.result;
-            addImage(dataURL);
-            stored.push(dataURL);
-            localStorage.setItem('uploadedImages', JSON.stringify(stored));
-          };
-          reader.readAsDataURL(file);
+      
+      /**
+       * Show gallery login overlay
+       */
+      function showGalleryLogin() {
+        const loginOverlay = document.createElement('div');
+        loginOverlay.id = 'login-overlay';
+        
+        const loginBox = document.createElement('div');
+        loginBox.id = 'login-box';
+        
+        const title = document.createElement('h2');
+        title.textContent = 'Enter Password';
+        
+        const passwordInput = document.createElement('input');
+        passwordInput.type = 'password';
+        passwordInput.id = 'pw-input';
+        passwordInput.placeholder = 'Password';
+        
+        const errorMsg = document.createElement('div');
+        errorMsg.id = 'error-msg';
+        errorMsg.textContent = 'Incorrect password';
+        errorMsg.style.color = 'red';
+        errorMsg.style.fontSize = '0.9rem';
+        errorMsg.style.display = 'none';
+        errorMsg.style.marginTop = '0.5rem';
+        
+        const submitBtn = document.createElement('button');
+        submitBtn.id = 'pw-submit';
+        submitBtn.textContent = 'Unlock Gallery';
+        submitBtn.className = 'btn';
+        submitBtn.style.marginTop = '1rem';
+        
+        loginBox.appendChild(title);
+        loginBox.appendChild(passwordInput);
+        loginBox.appendChild(errorMsg);
+        loginBox.appendChild(submitBtn);
+        
+        loginOverlay.appendChild(loginBox);
+        document.body.appendChild(loginOverlay);
+        
+        // Focus password input
+        setTimeout(() => passwordInput.focus(), 100);
+        
+        // Handle login events
+        submitBtn.addEventListener('click', handleLogin);
+        passwordInput.addEventListener('keypress', e => {
+          if (e.key === 'Enter') handleLogin();
         });
-        uploadInput.value = '';
-      });
-
-      function addImage(src) {
-        const img = document.createElement('img');
-        img.src = src;
-        img.alt = 'User uploaded photo';
-        img.className = 'gallery-img';
-        img.addEventListener('click', () => openLightbox(img));
-        gallery.appendChild(img);
+        
+        function handleLogin() {
+          const password = passwordInput.value;
+          
+          BBB_AUTH.login('gallery', password)
+            .then(() => {
+              // Login successful
+              loginOverlay.remove();
+              initializeGallery();
+            })
+            .catch(err => {
+              // Login failed
+              console.error('Login error:', err);
+              errorMsg.style.display = 'block';
+            });
+        }
       }
-
-      function openLightbox(img) {
-        lbImg.src = img.src;
-        lbCap.textContent = img.alt;
-        lightbox.style.display = 'flex';
+      
+      /**
+       * Initialize gallery after authentication
+       */
+      function initializeGallery() {
+        // Create header
+        const headerElements = BBB_UI.createHeader({
+          fixed: true,
+          showHomeLinkText: true
+        });
+        
+        document.body.insertBefore(headerElements.header, document.body.firstChild);
+        
+        // Get main content element
+        const main = document.getElementById('main');
+        main.appendChild(headerElements.mainWrapper);
+        
+        // Create page content
+        const mainContent = document.createElement('div');
+        
+        // Create page title
+        const titleContainer = BBB_UI.createPageTitle({
+          title: 'Birdie Bush Bandits',
+          showFoundedText: true,
+          showGolfballs: true
+        });
+        mainContent.appendChild(titleContainer);
+        
+        // Add page subtitle
+        const subtitle = document.createElement('h2');
+        subtitle.textContent = 'Photo Gallery';
+        mainContent.appendChild(subtitle);
+        
+        // Create status message container
+        const statusMessage = BBB_UI.createStatusMessage();
+        mainContent.appendChild(statusMessage);
+        
+        // Image upload section
+        const uploadSection = document.createElement('div');
+        uploadSection.className = 'upload-section';
+        
+        const uploadLabel = document.createElement('label');
+        uploadLabel.htmlFor = 'image-upload';
+        uploadLabel.className = 'upload-label btn';
+        uploadLabel.textContent = 'Upload Photos';
+        
+        const uploadInput = document.createElement('input');
+        uploadInput.type = 'file';
+        uploadInput.id = 'image-upload';
+        uploadInput.className = 'upload-input';
+        uploadInput.setAttribute('accept', 'image/*');
+        uploadInput.setAttribute('multiple', 'true');
+        uploadInput.style.display = 'none';
+        
+        uploadSection.appendChild(uploadLabel);
+        uploadSection.appendChild(uploadInput);
+        mainContent.appendChild(uploadSection);
+        
+        // Gallery container
+        const galleryContainer = document.createElement('div');
+        galleryContainer.id = 'gallery';
+        galleryContainer.className = 'gallery';
+        mainContent.appendChild(galleryContainer);
+        
+        // Lightbox for image viewing
+        const lightbox = document.createElement('div');
+        lightbox.id = 'lightbox';
+        lightbox.className = 'lightbox';
+        
+        const lightboxClose = document.createElement('span');
+        lightboxClose.className = 'lightbox-close';
+        lightboxClose.innerHTML = '&times;';
+        
+        const lightboxImg = document.createElement('img');
+        lightboxImg.className = 'lightbox-img';
+        lightboxImg.id = 'lightbox-img';
+        lightboxImg.setAttribute('src', '');
+        lightboxImg.setAttribute('alt', '');
+        
+        const lightboxCaption = document.createElement('div');
+        lightboxCaption.id = 'lightbox-caption';
+        lightboxCaption.className = 'lightbox-caption';
+        
+        lightbox.appendChild(lightboxClose);
+        lightbox.appendChild(lightboxImg);
+        lightbox.appendChild(lightboxCaption);
+        mainContent.appendChild(lightbox);
+        
+        // Add content to main wrapper
+        headerElements.mainWrapper.appendChild(mainContent);
+        
+        // Load gallery images
+        loadGalleryImages();
+        
+        // Setup event handlers
+        setupEventHandlers();
+        
+        /**
+         * Load gallery images from database and preloaded sources
+         */
+        function loadGalleryImages() {
+          // First load from database
+          BBB_DB.getGalleryImages()
+            .then(galleryData => {
+              const dbImages = galleryData.images || [];
+              
+              // Add preloaded images (from original site)
+              const preloadedImages = [
+                { id: 'pre_1', src: 'images/photo1.jpg', alt: 'Band on the green' },
+                { id: 'pre_2', src: 'images/photo2.jpg', alt: 'Group shot' },
+                { id: 'pre_3', src: 'images/photo3.jpg', alt: 'Trophy presentation' },
+                { id: 'pre_4', src: 'images/photo4.jpg', alt: 'Action shot' }
+              ];
+              
+              // Merge database images with preloaded images
+              const allImages = [...preloadedImages, ...dbImages];
+              
+              // Render gallery
+              renderGallery(allImages);
+              
+              // Check if we migrated stored images from localStorage
+              migrateLocalStorageImages();
+            })
+            .catch(err => {
+              console.error('Error loading gallery images:', err);
+              BBB_UTILS.showMessage('Error loading gallery images', 'error');
+              
+              // Still try to render preloaded images
+              const preloadedImages = [
+                { id: 'pre_1', src: 'images/photo1.jpg', alt: 'Band on the green' },
+                { id: 'pre_2', src: 'images/photo2.jpg', alt: 'Group shot' },
+                { id: 'pre_3', src: 'images/photo3.jpg', alt: 'Trophy presentation' },
+                { id: 'pre_4', src: 'images/photo4.jpg', alt: 'Action shot' }
+              ];
+              
+              renderGallery(preloadedImages);
+            });
+        }
+        
+        /**
+         * Render gallery with images
+         * @param {Array} images - Array of image objects
+         */
+        function renderGallery(images) {
+          const galleryElement = document.getElementById('gallery');
+          galleryElement.innerHTML = '';
+          
+          // Create gallery
+          images.forEach(image => {
+            const img = document.createElement('img');
+            img.src = image.src;
+            img.alt = image.alt || 'Gallery image';
+            img.className = 'gallery-img';
+            img.dataset.id = image.id;
+            
+            // Add click handler for lightbox
+            img.addEventListener('click', () => {
+              openLightbox(img);
+            });
+            
+            galleryElement.appendChild(img);
+          });
+          
+          // If no images, show message
+          if (images.length === 0) {
+            const noImages = document.createElement('p');
+            noImages.textContent = 'No images in gallery yet. Upload some photos!';
+            noImages.style.textAlign = 'center';
+            noImages.style.padding = '2rem';
+            noImages.style.backgroundColor = 'white';
+            noImages.style.borderRadius = '8px';
+            
+            galleryElement.appendChild(noImages);
+          }
+        }
+        
+        /**
+         * Setup event handlers for gallery
+         */
+        function setupEventHandlers() {
+          // Upload handler
+          const uploadInput = document.getElementById('image-upload');
+          uploadInput.addEventListener('change', handleImageUpload);
+          
+          // Lightbox close
+          const lightboxClose = document.querySelector('.lightbox-close');
+          lightboxClose.addEventListener('click', () => {
+            document.getElementById('lightbox').style.display = 'none';
+          });
+          
+          // Click outside lightbox to close
+          document.getElementById('lightbox').addEventListener('click', e => {
+            if (e.target === document.getElementById('lightbox')) {
+              document.getElementById('lightbox').style.display = 'none';
+            }
+          });
+          
+          // ESC key to close lightbox
+          document.addEventListener('keyup', e => {
+            if (e.key === 'Escape') {
+              document.getElementById('lightbox').style.display = 'none';
+            }
+          });
+        }
+        
+        /**
+         * Open lightbox with image
+         * @param {HTMLElement} img - Image element to show in lightbox
+         */
+        function openLightbox(img) {
+          const lightbox = document.getElementById('lightbox');
+          const lightboxImg = document.getElementById('lightbox-img');
+          const lightboxCaption = document.getElementById('lightbox-caption');
+          
+          lightboxImg.src = img.src;
+          lightboxCaption.textContent = img.alt;
+          lightbox.style.display = 'flex';
+        }
+        
+        /**
+         * Handle image upload
+         * @param {Event} e - Change event
+         */
+        function handleImageUpload(e) {
+          const files = Array.from(e.target.files);
+          
+          if (files.length === 0) {
+            return;
+          }
+          
+          // Show status message
+          if (files.length > 1) {
+            BBB_UTILS.showMessage(`Uploading ${files.length} images...`, 'info');
+          } else {
+            BBB_UTILS.showMessage('Uploading image...', 'info');
+          }
+          
+          let uploadedCount = 0;
+          const failedUploads = [];
+          
+          files.forEach(file => {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+              failedUploads.push({ file, error: 'Not an image file' });
+              return;
+            }
+            
+            // Validate file size
+            if (file.size > BBB_CONFIG.gallery.maxUploadSize) {
+              failedUploads.push({ 
+                file, 
+                error: `File too large (max ${BBB_CONFIG.gallery.maxUploadSize / 1000000}MB)` 
+              });
+              return;
+            }
+            
+            // Read file as data URL
+            const reader = new FileReader();
+            
+            reader.onload = function(event) {
+              const dataURL = event.target.result;
+              
+              // Generate unique ID
+              const imageId = `img_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+              
+              // Create image object
+              const imageData = {
+                id: imageId,
+                src: dataURL,
+                alt: file.name || 'User uploaded photo',
+                uploadedAt: new Date().toISOString()
+              };
+              
+              // Save to database
+              BBB_DB.saveGalleryImage(imageData)
+                .then(() => {
+                  uploadedCount++;
+                  
+                  // Check if all uploads complete
+                  if (uploadedCount + failedUploads.length === files.length) {
+                    finishUploads();
+                  }
+                })
+                .catch(err => {
+                  console.error('Error saving image:', err);
+                  failedUploads.push({ file, error: 'Failed to save' });
+                  
+                  // Check if all uploads complete
+                  if (uploadedCount + failedUploads.length === files.length) {
+                    finishUploads();
+                  }
+                });
+            };
+            
+            reader.onerror = function() {
+              failedUploads.push({ file, error: 'Failed to read file' });
+              
+              // Check if all uploads complete
+              if (uploadedCount + failedUploads.length === files.length) {
+                finishUploads();
+              }
+            };
+            
+            reader.readAsDataURL(file);
+          });
+          
+          // Reset file input
+          e.target.value = '';
+          
+          function finishUploads() {
+            // Reload gallery
+            loadGalleryImages();
+            
+            // Show status message
+            if (failedUploads.length === 0) {
+              if (uploadedCount > 1) {
+                BBB_UTILS.showMessage(`Successfully uploaded ${uploadedCount} images`, 'success');
+              } else {
+                BBB_UTILS.showMessage('Image uploaded successfully', 'success');
+              }
+            } else {
+              if (uploadedCount > 0) {
+                BBB_UTILS.showMessage(`Uploaded ${uploadedCount} images, ${failedUploads.length} failed`, 'warning');
+              } else {
+                BBB_UTILS.showMessage(`Failed to upload ${failedUploads.length} images`, 'error');
+              }
+            }
+          }
+        }
+        
+        /**
+         * Migrate images from localStorage (original site) to new system
+         */
+        function migrateLocalStorageImages() {
+          try {
+            // Check if we have already migrated
+            const migrated = localStorage.getItem('bbb_gallery_migrated');
+            if (migrated === 'true') {
+              return;
+            }
+            
+            // Get stored images from original code
+            const storedImages = JSON.parse(localStorage.getItem('uploadedImages') || '[]');
+            
+            if (storedImages.length === 0) {
+              // No images to migrate
+              localStorage.setItem('bbb_gallery_migrated', 'true');
+              return;
+            }
+            
+            // Show migration message
+            BBB_UTILS.showMessage(`Migrating ${storedImages.length} existing images...`, 'info');
+            
+            // Convert and save each image
+            let migrationCount = 0;
+            
+            storedImages.forEach((dataURL, index) => {
+              // Create image object
+              const imageData = {
+                id: `migrated_${Date.now()}_${index}`,
+                src: dataURL,
+                alt: 'Migrated image',
+                uploadedAt: new Date().toISOString()
+              };
+              
+              // Save to database
+              BBB_DB.saveGalleryImage(imageData)
+                .then(() => {
+                  migrationCount++;
+                  
+                  // Check if all migrations complete
+                  if (migrationCount === storedImages.length) {
+                    finishMigration();
+                  }
+                })
+                .catch(err => {
+                  console.error('Error migrating image:', err);
+                  
+                  // Continue with next image
+                  if (migrationCount === storedImages.length) {
+                    finishMigration();
+                  }
+                });
+            });
+            
+            function finishMigration() {
+              // Mark as migrated
+              localStorage.setItem('bbb_gallery_migrated', 'true');
+              
+              // Reload gallery
+              loadGalleryImages();
+              
+              // Show status message
+              BBB_UTILS.showMessage(`Successfully migrated ${migrationCount} images`, 'success');
+            }
+          } catch (err) {
+            console.error('Error during gallery migration:', err);
+          }
+        }
       }
-
-      // Attach click for preloaded images
-      document.querySelectorAll('.gallery-img').forEach(img => {
-        img.addEventListener('click', () => openLightbox(img));
-      });
-
-      lbClose.addEventListener('click', () => lightbox.style.display = 'none');
-      lightbox.addEventListener('click', e => {
-        if (e.target === lightbox) lightbox.style.display = 'none';
-      });
-    };
-
-    // Initialize after unlocking
-    pwSubmit.addEventListener('click', initGallery);
+    });
   </script>
 </body>
 </html>

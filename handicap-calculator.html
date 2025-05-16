@@ -4,307 +4,317 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Birdie Bush Bandits – Handicap Calculator</title>
+  <meta name="description" content="Calculate your golf handicap using the World Handicap System standard.">
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
-  <style>
-    body {
-      background-color: #f5f5f5;
-      font-family: sans-serif;
-      text-align: center;
-      padding: 2rem;
-      margin: 0 auto;
-      color: #000;
-      max-width: 800px;
-      position: relative;
-    }
-    
-    /* Logo in top-right corner */
-    .top-bar {
-      position: absolute;
-      top: 0;
-      right: 0;
-      z-index: 10;
-    }
-    
-    .corner-logo {
-      width: 80px;
-      height: 80px;
-      display: block;
-    }
-    
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      padding: 1rem;
-      z-index: 5;
-      background-color: transparent;
-    }
-    
-    .home-link {
-      color: #000;
-      font-weight: bold;
-      text-decoration: none;
-      display: inline-block;
-      padding: 0.5rem;
-      background-color: rgba(255, 255, 255, 0.9);
-      border-radius: 4px;
-      transition: background-color 0.3s;
-    }
-    
-    .home-link:hover {
-      background-color: rgba(255, 255, 255, 1);
-    }
-    
-    /* Add padding to prevent content from going under fixed header */
-    .main-content {
-      padding-top: 80px;
-    }
-    
-    h1 {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2rem;
-      color: #003300;
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-      flex-wrap: wrap;
-    }
-    
-    h1 img {
-      width: 40px;
-      margin: 0 5px;
-    }
-    
-    h2 {
-      color: #003300;
-      font-weight: bold;
-      margin: 1rem 0;
-    }
-    
-    .founded {
-      font-size: 1rem;
-      margin-top: 0.25rem;
-      margin-bottom: 1.5rem;
-      font-style: italic;
-      color: #333;
-    }
-    
-    .back-link {
-      display: inline-block;
-      margin-bottom: 1rem;
-      color: #fff;
-      text-decoration: none;
-      font-weight: bold;
-      background-color: #004c99;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      transition: background-color 0.3s;
-      border: none;
-    }
-    
-    .back-link:hover {
-      background-color: #003d7a;
-    }
-    
-    .calculator {
-      background: rgba(0,0,0,0.05);
-      padding: 1.5rem;
-      border-radius: 8px;
-      margin-top: 1rem;
-      text-align: left;
-      border: 1px solid #ccc;
-    }
-    
-    .calculator p {
-      text-align: center;
-      color: #333;
-      margin-bottom: 1rem;
-    }
-    
-    .round {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
-      padding: 0.75rem;
-      background: #fff;
-      border-radius: 6px;
-      border: 1px solid #ddd;
-    }
-    
-    .round label {
-      font-weight: bold;
-      font-size: 0.9rem;
-      color: #333;
-    }
-    
-    .round input,
-    .round select {
-      width: 100%;
-      padding: 0.4rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      box-sizing: border-box;
-      font-size: 0.9rem;
-      background: #fff;
-      color: #000;
-    }
-    
-    .round input[readonly] {
-      background: #f0f0f0;
-    }
-    
-    .calculator button {
-      width: 48%;
-      padding: 0.75rem;
-      background: #004c99;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      margin: 0.25rem 1%;
-      font-size: 1rem;
-    }
-    
-    .calculator button:hover {
-      background: #003d7a;
-    }
-    
-    .result {
-      font-size: 1.1rem;
-      margin-top: 1rem;
-      font-weight: bold;
-      text-align: center;
-      color: #003300;
-    }
-    
-    @media (max-width: 768px) {
-      header {
-        padding: 0.75rem;
-      }
-      
-      .main-content {
-        padding-top: 70px;
-      }
-      
-      .corner-logo {
-        width: 70px;
-        height: 70px;
-      }
-    }
-    
-    @media (max-width: 600px) {
-      body {
-        padding: 1rem;
-      }
-      
-      header {
-        padding: 0.5rem;
-      }
-      
-      .main-content {
-        padding-top: 70px;
-      }
-      
-      .corner-logo {
-        width: 65px;
-        height: 65px;
-      }
-      
-      .home-link {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.9rem;
-      }
-      
-      .round {
-        grid-template-columns: 1fr;
-      }
-      
-      .calculator button {
-        width: 100%;
-        margin: 0.25rem 0;
-      }
-      
-      h1 {
-        font-size: 1.75rem;
-      }
-      
-      .result {
-        font-size: 1rem;
-      }
-    }
-  </style>
+  
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Core Modules (loaded in specific order) -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
 </head>
 <body>
-  <div class="top-bar">
-    <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="corner-logo">
-  </div>
+  <a href="#main" class="skip-link">Skip to main content</a>
   
-  <header>
-    <nav><a href="index.html" class="home-link">🏠 Home</a></nav>
-  </header>
+  <main id="main"></main>
   
-  <div class="main-content">
-    <h1>
-      <img src="golfball.png" alt="Golf ball icon">
-      Birdie Bush Bandits
-      <img src="golfball.png" alt="Golf ball icon">
-    </h1>
-    <div class="founded">Founded August 2020</div>
-
-    <h2>Handicap Calculator</h2>
-    <div class="calculator">
-      <p>Enter up to 20 rounds. Minimum 3 to calculate.</p>
-      <div id="rounds-container"></div>
-      <button id="add-round">Add Round</button>
-      <button id="calculate">Calculate Handicap</button>
-      <div class="result" id="handicap-result"></div>
-    </div>
-  </div>
-
   <script>
-    const courseData = {
-      "Richings Park Golf Club": { white:{courseRating:70.7,slopeRating:128},yellow:{courseRating:68.3,slopeRating:121},red:{courseRating:65.9,slopeRating:115} },
-      "Thorney Park Golf Club": { white:{courseRating:68.7,slopeRating:120},yellow:{courseRating:67.0,slopeRating:117},red:{courseRating:69.3,slopeRating:119} },
-      "London Airlinks Golf Club": { white:{courseRating:63.4,slopeRating:102},yellow:{courseRating:62.0,slopeRating:98},red:{courseRating:61.1,slopeRating:92} },
-      "Royal Ascot Golf Club": { white:{courseRating:70.3,slopeRating:123},yellow:{courseRating:68.5,slopeRating:118},red:{courseRating:70.0,slopeRating:113} },
-      "Stoke Park Golf Club": { white:{courseRating:70.9,slopeRating:126},yellow:{courseRating:69.1,slopeRating:122},red:{courseRating:68.5,slopeRating:118} },
-      "Inspirations Golf Club": { white:{courseRating:74.3,slopeRating:128},yellow:{courseRating:72.1,slopeRating:124},red:{courseRating:70.5,slopeRating:120} }
-    };
-    const courses = Object.keys(courseData);
-    const tees = ["white","yellow","red"];
-    const teeNames = {white:"White",yellow:"Yellow",red:"Red"};
-    const roundsContainer = document.getElementById('rounds-container');
-    const addBtn = document.getElementById('add-round');
-    const calcBtn = document.getElementById('calculate');
-    const resultEl = document.getElementById('handicap-result');
-
-    function createRoundInput(idx) {
-      const div = document.createElement('div'); div.className='round';
-      const courseLabel=document.createElement('label');courseLabel.textContent=`Round ${idx+1} Course`;
-      const courseSelect=document.createElement('select');courseSelect.className='course-select';courses.forEach(c=>{let o=document.createElement('option');o.value=c;o.textContent=c;courseSelect.appendChild(o);});
-      const teeLabel=document.createElement('label');teeLabel.textContent='Tee Colour';
-      const teeSelect=document.createElement('select');teeSelect.className='tee-select';tees.forEach(t=>{let o=document.createElement('option');o.value=t;o.textContent=teeNames[t];teeSelect.appendChild(o);});
-      const scoreLabel=document.createElement('label');scoreLabel.textContent='Gross Score';
-      const scoreInput=document.createElement('input');scoreInput.type='number';scoreInput.className='score';scoreInput.min=0;scoreInput.required=true;
-      const crLabel=document.createElement('label');crLabel.textContent='Course Rating';
-      const crInput=document.createElement('input');crInput.type='number';crInput.className='course-rating';crInput.step=0.1;crInput.required=true;
-      const srLabel=document.createElement('label');srLabel.textContent='Slope Rating';
-      const srInput=document.createElement('input');srInput.type='number';srInput.className='slope-rating';srInput.min=55;srInput.max=155;srInput.required=true;
-      const diffLabel=document.createElement('label');diffLabel.textContent='Differential';
-      const diffInput=document.createElement('input');diffInput.type='text';diffInput.className='differential';diffInput.readOnly=true;
-      [courseLabel,courseSelect,teeLabel,teeSelect,scoreLabel,scoreInput,crLabel,crInput,srLabel,srInput,diffLabel,diffInput].forEach(e=>div.appendChild(e));
-      function updateAll(){const data=courseData[courseSelect.value][teeSelect.value];crInput.value=data.courseRating;srInput.value=data.slopeRating;let s=parseFloat(scoreInput.value),cr=parseFloat(crInput.value),sr=parseFloat(srInput.value);diffInput.value=!isNaN(s)&&!isNaN(cr)&&!isNaN(sr)?((s-cr)*113/sr).toFixed(1):'';}
-      [courseSelect,teeSelect].forEach(e=>e.addEventListener('change',updateAll));[scoreInput,crInput,srInput].forEach(e=>e.addEventListener('input',updateAll));updateAll();return div;
-    }
-
-    function addRound(){if(roundsContainer.children.length<20)roundsContainer.appendChild(createRoundInput(roundsContainer.children.length));}
-    addBtn.addEventListener('click',addRound);
-    for(let i=0;i<3;i++)addRound();
-
-    calcBtn.addEventListener('click',()=>{const diffs=[];roundsContainer.querySelectorAll('.round').forEach(div=>{let s=parseFloat(div.querySelector('.score').value),cr=parseFloat(div.querySelector('.course-rating').value),sr=parseFloat(div.querySelector('.slope-rating').value);if(!isNaN(s)&&!isNaN(cr)&&!isNaN(sr))diffs.push((s-cr)*113/sr);});if(diffs.length<3){resultEl.textContent='Enter at least 3 complete rounds.';return;}diffs.sort((a,b)=>a-b);const countMap={3:1,4:1,5:1,6:2,7:2,8:2,9:3,10:3,11:3,12:4,13:4,14:4,15:5,16:5,17:6,18:7,19:8,20:10};let take=countMap[diffs.length]||Math.ceil(diffs.length/3);let avg=diffs.slice(0,take).reduce((sum,v)=>sum+v,0)/take;resultEl.textContent=`Your Handicap Index is ${(avg*0.96).toFixed(1)}`;});
+    // Initialize modules
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize auth system
+      BBB_AUTH.init({
+        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+      });
+      
+      // Initialize database
+      BBB_DB.init({
+        useCloudflare: BBB_CONFIG.cloudflareEnabled,
+        localStoragePrefix: 'bbb_'
+      });
+      
+      // Create header
+      const headerElements = BBB_UI.createHeader({
+        fixed: true,
+        showHomeLinkText: true
+      });
+      
+      document.body.insertBefore(headerElements.header, document.body.firstChild);
+      
+      // Get main content element
+      const main = document.getElementById('main');
+      main.appendChild(headerElements.mainWrapper);
+      
+      // Create page content
+      const mainContent = document.createElement('div');
+      
+      // Create page title
+      const titleContainer = BBB_UI.createPageTitle({
+        title: 'Birdie Bush Bandits',
+        showFoundedText: true,
+        showGolfballs: true
+      });
+      mainContent.appendChild(titleContainer);
+      
+      // Add page subtitle
+      const subtitle = document.createElement('h2');
+      subtitle.textContent = 'Handicap Calculator';
+      mainContent.appendChild(subtitle);
+      
+      // Create status message container
+      const statusMessage = BBB_UI.createStatusMessage();
+      mainContent.appendChild(statusMessage);
+      
+      // Create handicap calculator
+      const calculator = document.createElement('div');
+      calculator.className = 'calculator';
+      
+      // Instructions text
+      const instructions = document.createElement('p');
+      instructions.textContent = 'Enter up to 20 rounds. Minimum 3 to calculate.';
+      calculator.appendChild(instructions);
+      
+      // Rounds container
+      const roundsContainer = document.createElement('div');
+      roundsContainer.id = 'rounds-container';
+      calculator.appendChild(roundsContainer);
+      
+      // Create buttons
+      const addButton = BBB_UI.createButton({
+        text: 'Add Round',
+        id: 'add-round',
+        onClick: function() {
+          if (roundsContainer.children.length < 20) {
+            addRound();
+          } else {
+            BBB_UTILS.showMessage('Maximum 20 rounds allowed.', 'warning');
+          }
+        }
+      });
+      
+      const calculateButton = BBB_UI.createButton({
+        text: 'Calculate Handicap',
+        id: 'calculate',
+        onClick: calculateHandicap
+      });
+      
+      // Button container
+      const buttonContainer = document.createElement('div');
+      buttonContainer.style.marginTop = '1rem';
+      buttonContainer.appendChild(addButton);
+      buttonContainer.appendChild(document.createTextNode(' '));
+      buttonContainer.appendChild(calculateButton);
+      calculator.appendChild(buttonContainer);
+      
+      // Result display
+      const resultDisplay = document.createElement('div');
+      resultDisplay.className = 'result';
+      resultDisplay.id = 'handicap-result';
+      calculator.appendChild(resultDisplay);
+      
+      // Add calculator to page
+      mainContent.appendChild(calculator);
+      
+      // Add content to main
+      headerElements.mainWrapper.appendChild(mainContent);
+      
+      // Add initial rounds
+      for (let i = 0; i < 3; i++) {
+        addRound();
+      }
+      
+      // Function to create a new round input
+      function createRoundInput(idx) {
+        const div = document.createElement('div');
+        div.className = 'round';
+        
+        // Course selection
+        const courseLabel = document.createElement('label');
+        courseLabel.textContent = `Round ${idx + 1} Course`;
+        
+        const courseSelect = document.createElement('select');
+        courseSelect.className = 'course-select';
+        
+        // Add course options from config
+        Object.keys(BBB_CONFIG.courses).forEach(courseName => {
+          const option = document.createElement('option');
+          option.value = courseName;
+          option.textContent = courseName;
+          courseSelect.appendChild(option);
+        });
+        
+        // Tee selection
+        const teeLabel = document.createElement('label');
+        teeLabel.textContent = 'Tee Colour';
+        
+        const teeSelect = document.createElement('select');
+        teeSelect.className = 'tee-select';
+        
+        // Add tee options from config
+        Object.keys(BBB_CONFIG.teeColors).forEach(teeValue => {
+          const option = document.createElement('option');
+          option.value = teeValue;
+          option.textContent = BBB_CONFIG.teeColors[teeValue];
+          teeSelect.appendChild(option);
+        });
+        
+        // Score input
+        const scoreLabel = document.createElement('label');
+        scoreLabel.textContent = 'Gross Score';
+        
+        const scoreInput = document.createElement('input');
+        scoreInput.type = 'number';
+        scoreInput.className = 'score';
+        scoreInput.min = 0;
+        scoreInput.required = true;
+        
+        // Course Rating display
+        const crLabel = document.createElement('label');
+        crLabel.textContent = 'Course Rating';
+        
+        const crInput = document.createElement('input');
+        crInput.type = 'number';
+        crInput.className = 'course-rating';
+        crInput.step = 0.1;
+        crInput.required = true;
+        
+        // Slope Rating display
+        const srLabel = document.createElement('label');
+        srLabel.textContent = 'Slope Rating';
+        
+        const srInput = document.createElement('input');
+        srInput.type = 'number';
+        srInput.className = 'slope-rating';
+        srInput.min = 55;
+        srInput.max = 155;
+        srInput.required = true;
+        
+        // Differential display
+        const diffLabel = document.createElement('label');
+        diffLabel.textContent = 'Differential';
+        
+        const diffInput = document.createElement('input');
+        diffInput.type = 'text';
+        diffInput.className = 'differential';
+        diffInput.readOnly = true;
+        
+        // Add all elements to div
+        div.appendChild(courseLabel);
+        div.appendChild(courseSelect);
+        div.appendChild(teeLabel);
+        div.appendChild(teeSelect);
+        div.appendChild(scoreLabel);
+        div.appendChild(scoreInput);
+        div.appendChild(crLabel);
+        div.appendChild(crInput);
+        div.appendChild(srLabel);
+        div.appendChild(srInput);
+        div.appendChild(diffLabel);
+        div.appendChild(diffInput);
+        
+        // Setup event handlers to update course/slope ratings and differential
+        function updateRatings() {
+          const selectedCourse = courseSelect.value;
+          const selectedTee = teeSelect.value;
+          
+          // Get ratings from config
+          const courseData = BBB_CONFIG.courses[selectedCourse];
+          if (courseData && courseData.tees && courseData.tees[selectedTee]) {
+            crInput.value = courseData.tees[selectedTee].courseRating;
+            srInput.value = courseData.tees[selectedTee].slopeRating;
+          }
+          
+          // Update differential
+          updateDifferential();
+        }
+        
+        function updateDifferential() {
+          const score = parseFloat(scoreInput.value);
+          const courseRating = parseFloat(crInput.value);
+          const slopeRating = parseFloat(srInput.value);
+          
+          if (!isNaN(score) && !isNaN(courseRating) && !isNaN(slopeRating)) {
+            // Calculate differential using formula: (Score - CR) * (113 / SR)
+            const differential = ((score - courseRating) * 113 / slopeRating).toFixed(1);
+            diffInput.value = differential;
+          } else {
+            diffInput.value = '';
+          }
+        }
+        
+        // Add event listeners
+        courseSelect.addEventListener('change', updateRatings);
+        teeSelect.addEventListener('change', updateRatings);
+        scoreInput.addEventListener('input', updateDifferential);
+        crInput.addEventListener('input', updateDifferential);
+        srInput.addEventListener('input', updateDifferential);
+        
+        // Initial update
+        updateRatings();
+        
+        return div;
+      }
+      
+      // Add a new round to the container
+      function addRound() {
+        const roundIndex = roundsContainer.children.length;
+        const roundElement = createRoundInput(roundIndex);
+        roundsContainer.appendChild(roundElement);
+      }
+      
+      // Calculate handicap from entered rounds
+      function calculateHandicap() {
+        const resultEl = document.getElementById('handicap-result');
+        const differentials = [];
+        
+        // Get all differentials from inputs
+        roundsContainer.querySelectorAll('.round').forEach(div => {
+          const score = parseFloat(div.querySelector('.score').value);
+          const cr = parseFloat(div.querySelector('.course-rating').value);
+          const sr = parseFloat(div.querySelector('.slope-rating').value);
+          
+          if (!isNaN(score) && !isNaN(cr) && !isNaN(sr)) {
+            const differential = (score - cr) * 113 / sr;
+            differentials.push(differential);
+          }
+        });
+        
+        // Check if we have enough rounds
+        if (differentials.length < BBB_CONFIG.handicap.minRounds) {
+          resultEl.textContent = `Enter at least ${BBB_CONFIG.handicap.minRounds} complete rounds.`;
+          BBB_UTILS.showMessage(`Please enter at least ${BBB_CONFIG.handicap.minRounds} rounds.`, 'error');
+          return;
+        }
+        
+        // Calculate handicap using util function
+        const handicapIndex = BBB_UTILS.calculateHandicapIndex(differentials);
+        resultEl.textContent = `Your Handicap Index is ${handicapIndex}`;
+        
+        // Show success message
+        BBB_UTILS.showMessage('Handicap calculated successfully!', 'success');
+        
+        // Save handicap if user is logged in
+        if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+          const handicapData = {
+            index: handicapIndex,
+            calculatedAt: new Date().toISOString(),
+            differentials: differentials,
+            rounds: differentials.length
+          };
+          
+          BBB_DB.saveMemberHandicap(BBB_AUTH.currentUser.id, handicapData)
+            .then(() => {
+              console.log('Handicap saved to database');
+            })
+            .catch(err => {
+              console.error('Error saving handicap:', err);
+            });
+        }
+      }
+    });
   </script>
 </body>
 </html>

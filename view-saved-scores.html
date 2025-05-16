@@ -4,436 +4,610 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Birdie Bush Bandits – Saved Scorecards</title>
+  <meta name="description" content="View saved golf scorecards for Birdie Bush Bandits members.">
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
-  <style>
-    body {
-      background-color: #f5f5f5;
-      font-family: sans-serif;
-      text-align: center;
-      padding: 2rem;
-      margin: 0 auto;
-      color: #000;
-      max-width: 1200px;
-      position: relative;
-    }
-    
-    /* Logo in top-right corner */
-    .top-bar {
-      position: absolute;
-      top: 0;
-      right: 0;
-      z-index: 10;
-    }
-    
-    .corner-logo {
-      width: 80px;
-      height: 80px;
-      display: block;
-    }
-    
-    header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      padding: 1rem;
-      z-index: 5;
-      background-color: transparent;
-    }
-    
-    .home-link {
-      color: #000;
-      font-weight: bold;
-      text-decoration: none;
-      display: inline-block;
-      padding: 0.5rem 0.75rem;
-      background-color: rgba(255, 255, 255, 0.9);
-      border-radius: 4px;
-      transition: background-color 0.3s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    .home-link:hover {
-      background-color: rgba(255, 255, 255, 1);
-      text-decoration: none;
-    }
-    
-    /* Main content wrapper to prevent overlap */
-    .main-content {
-      padding-top: 80px;
-    }
-    
-    h1 {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 2.5rem;
-      color: #003300;
-      font-weight: bold;
-      margin-bottom: 0.5rem;
-      flex-wrap: wrap;
-    }
-    
-    h1 img {
-      width: 50px;
-      height: 50px;
-      margin: 0 10px;
-    }
-    
-    h2 {
-      color: #003300;
-      font-weight: bold;
-      margin: 1rem 0;
-    }
-    
-    .founded {
-      font-size: 1rem;
-      margin-top: 0.25rem;
-      margin-bottom: 1.5rem;
-      font-style: italic;
-      color: #333;
-    }
-    
-    .message {
-      background: #e3f2fd;
-      padding: 1rem;
-      border-radius: 4px;
-      margin: 1rem 0;
-      color: #0d47a1;
-    }
-    
-    .scorecard-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      margin-top: 2rem;
-    }
-    
-    .scorecard-card {
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 8px;
-      padding: 1rem;
-      text-align: left;
-      position: relative;
-    }
-    
-    .scorecard-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5rem;
-    }
-    
-    .scorecard-title {
-      font-weight: bold;
-      color: #003300;
-      font-size: 1.1rem;
-    }
-    
-    .scorecard-date {
-      color: #666;
-      font-size: 0.9rem;
-    }
-    
-    .scorecard-details {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-top: 0.5rem;
-    }
-    
-    .player-info {
-      background: #f9f9f9;
-      padding: 0.5rem;
-      border-radius: 4px;
-    }
-    
-    .player-name {
-      font-weight: bold;
-      color: #004c99;
-    }
-    
-    .player-stats {
-      font-size: 0.9rem;
-      margin-top: 0.25rem;
-    }
-    
-    .delete-btn {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      background: #dc3545;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      padding: 0.25rem 0.5rem;
-      cursor: pointer;
-      font-size: 0.8rem;
-    }
-    
-    .delete-btn:hover {
-      background: #c82333;
-    }
-    
-    .no-scorecards {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 8px;
-      color: #666;
-      font-style: italic;
-    }
-    
-    .action-buttons {
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      margin: 1rem 0 1.5rem 0;
-    }
-    
-    .action-btn {
-      padding: 0.75rem 1.5rem;
-      background: #004c99;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-weight: bold;
-      text-decoration: none;
-      display: inline-block;
-    }
-    
-    .action-btn:hover {
-      background: #003d7a;
-    }
-    
-    @media (max-width: 768px) {
-      header {
-        padding: 0.75rem;
-      }
-      
-      .main-content {
-        padding-top: 70px;
-      }
-      
-      .corner-logo {
-        width: 70px;
-        height: 70px;
-      }
-      
-      h1 {
-        font-size: 2rem;
-      }
-      
-      h1 img {
-        width: 40px;
-        height: 40px;
-        margin: 0 8px;
-      }
-      
-      .scorecard-details {
-        grid-template-columns: 1fr;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      body {
-        padding: 1rem;
-      }
-      
-      header {
-        padding: 0.5rem;
-      }
-      
-      .main-content {
-        padding-top: 65px;
-      }
-      
-      .corner-logo {
-        width: 65px;
-        height: 65px;
-      }
-      
-      .home-link {
-        padding: 0.4rem 0.6rem;
-        font-size: 0.9rem;
-      }
-      
-      h1 {
-        font-size: 1.5rem;
-      }
-      
-      h1 img {
-        width: 35px;
-        height: 35px;
-        margin: 0 5px;
-      }
-      
-      .scorecard-card {
-        padding: 0.75rem;
-      }
-      
-      .delete-btn {
-        position: static;
-        margin-top: 0.5rem;
-        width: 100%;
-      }
-    }
-  </style>
+  
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Core Modules -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
 </head>
 <body>
-  <div class="top-bar">
-    <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="corner-logo">
-  </div>
+  <a href="#main" class="skip-link">Skip to main content</a>
   
-  <header>
-    <nav><a href="index.html" class="home-link">🏠 Home</a></nav>
-  </header>
+  <main id="main"></main>
   
-  <div class="main-content">
-    <h1>
-      <img src="golfball.png" alt="">
-      Birdie Bush Bandits
-      <img src="golfball.png" alt="">
-    </h1>
-    <div class="founded">Founded August 2020</div>
-    
-    <h2>Saved Scorecards</h2>
-    
-    <div class="action-buttons">
-      <a href="scorecards.html" class="action-btn">Create New Scorecard</a>
-    </div>
-    
-    <div class="message">
-      Scorecards are automatically saved when you complete and save them in the <a href="scorecards.html">Scorecard Builder</a>.
-    </div>
-    
-    <div id="scorecards-container"></div>
-  </div>
-
   <script>
-    function loadScorecards() {
-      const container = document.getElementById('scorecards-container');
-      let scorecards;
-      
-      try {
-        scorecards = JSON.parse(localStorage.getItem('golfScorecards') || '[]');
-      } catch (e) {
-        scorecards = [];
-      }
-      
-      if (scorecards.length === 0) {
-        container.innerHTML = '<div class="no-scorecards">No saved scorecards yet. Create your first scorecard!</div>';
-        return;
-      }
-      
-      container.innerHTML = '<div class="scorecard-list"></div>';
-      const list = container.querySelector('.scorecard-list');
-      
-      // Sort by date, newest first
-      scorecards.sort((a, b) => new Date(b.date) - new Date(a.date));
-      
-      scorecards.forEach((scorecard, index) => {
-        const card = createScorecardCard(scorecard, index);
-        list.appendChild(card);
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize modules
+      BBB_AUTH.init({
+        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
       });
-    }
-    
-    function createScorecardCard(scorecard, index) {
-      const card = document.createElement('div');
-      card.className = 'scorecard-card';
       
-      const date = new Date(scorecard.date);
-      const formattedDate = date.toLocaleDateString('en-GB', { 
-        day: 'numeric', 
-        month: 'short', 
-        year: 'numeric' 
+      BBB_DB.init({
+        useCloudflare: BBB_CONFIG.cloudflareEnabled,
+        localStoragePrefix: 'bbb_'
       });
       
       // Create header
-      const header = document.createElement('div');
-      header.className = 'scorecard-header';
-      
-      const title = document.createElement('div');
-      title.className = 'scorecard-title';
-      title.textContent = `${scorecard.course} - ${scorecard.tee.charAt(0).toUpperCase() + scorecard.tee.slice(1)} Tees`;
-      
-      const dateEl = document.createElement('div');
-      dateEl.className = 'scorecard-date';
-      dateEl.textContent = `${formattedDate} (${scorecard.holes === '18' ? 'Full 18' : scorecard.holes === '9f' ? 'Front 9' : 'Back 9'})`;
-      
-      header.appendChild(title);
-      header.appendChild(dateEl);
-      
-      // Create player details
-      const details = document.createElement('div');
-      details.className = 'scorecard-details';
-      
-      scorecard.players.forEach(player => {
-        const playerInfo = document.createElement('div');
-        playerInfo.className = 'player-info';
-        
-        const name = document.createElement('div');
-        name.className = 'player-name';
-        name.textContent = player.name;
-        
-        const stats = document.createElement('div');
-        stats.className = 'player-stats';
-        
-        // Calculate Stableford points
-        const points = calculateStablefordPoints(player, scorecard);
-        
-        stats.innerHTML = `
-          Handicap: ${player.handicap} (CH: ${player.courseHandicap})<br>
-          Strokes: ${player.totalShots}<br>
-          Points: ${points}
-        `;
-        
-        playerInfo.appendChild(name);
-        playerInfo.appendChild(stats);
-        details.appendChild(playerInfo);
+      const headerElements = BBB_UI.createHeader({
+        fixed: true,
+        showHomeLinkText: true
       });
       
-      // Create delete button
-      const deleteBtn = document.createElement('button');
-      deleteBtn.className = 'delete-btn';
-      deleteBtn.textContent = 'Delete';
-      deleteBtn.addEventListener('click', () => {
-        if (confirm('Are you sure you want to delete this scorecard?')) {
-          deleteScorecard(index);
-        }
+      document.body.insertBefore(headerElements.header, document.body.firstChild);
+      
+      // Get main content element
+      const main = document.getElementById('main');
+      main.appendChild(headerElements.mainWrapper);
+      
+      // Create page content
+      const mainContent = document.createElement('div');
+      
+      // Create page title
+      const titleContainer = BBB_UI.createPageTitle({
+        title: 'Birdie Bush Bandits',
+        showFoundedText: true,
+        showGolfballs: true
       });
+      mainContent.appendChild(titleContainer);
       
-      card.appendChild(header);
-      card.appendChild(details);
-      card.appendChild(deleteBtn);
+      // Add page subtitle
+      const subtitle = document.createElement('h2');
+      subtitle.textContent = 'Saved Scorecards';
+      mainContent.appendChild(subtitle);
       
-      return card;
-    }
-    
-    function calculateStablefordPoints(player, scorecard) {
-      // This is a simplified calculation
-      // In the actual scorecard.html, the points are calculated hole by hole
-      // Here we'll just show the saved total if available
-      // You could enhance this to recalculate based on the saved scores array
+      // Create status message container
+      const statusMessage = BBB_UI.createStatusMessage();
+      mainContent.appendChild(statusMessage);
       
-      // If points were saved with the scorecard, use those
-      if (player.totalPoints !== undefined) {
-        return player.totalPoints;
+      // Action buttons
+      const actionButtons = document.createElement('div');
+      actionButtons.className = 'action-buttons';
+      
+      const createNewBtn = document.createElement('a');
+      createNewBtn.href = 'scorecards.html';
+      createNewBtn.className = 'btn action-btn';
+      createNewBtn.textContent = 'Create New Scorecard';
+      
+      const exportAllBtn = document.createElement('button');
+      exportAllBtn.className = 'btn action-btn';
+      exportAllBtn.textContent = 'Export All Scorecards';
+      exportAllBtn.addEventListener('click', exportAllScorecards);
+      
+      actionButtons.appendChild(createNewBtn);
+      actionButtons.appendChild(exportAllBtn);
+      mainContent.appendChild(actionButtons);
+      
+      // Info message
+      const infoMessage = document.createElement('div');
+      infoMessage.className = 'message';
+      infoMessage.innerHTML = 'Scorecards are automatically saved when you complete and save them in the <a href="scorecards.html">Scorecard Builder</a>.';
+      mainContent.appendChild(infoMessage);
+      
+      // Scorecards container
+      const scorecardsContainer = document.createElement('div');
+      scorecardsContainer.id = 'scorecards-container';
+      mainContent.appendChild(scorecardsContainer);
+      
+      // Add content to main wrapper
+      headerElements.mainWrapper.appendChild(mainContent);
+      
+      // Check if we need to migrate scorecards from original format
+      checkForScorecardsToMigrate()
+        .then(migrated => {
+          if (migrated) {
+            BBB_UTILS.showMessage('Successfully migrated existing scorecards', 'success');
+          }
+          // Load scorecards
+          loadScorecards();
+        })
+        .catch(err => {
+          console.error('Error checking for scorecard migration:', err);
+          // Still try to load scorecards
+          loadScorecards();
+        });
+      
+      /**
+       * Load saved scorecards
+       */
+      function loadScorecards() {
+        BBB_DB.getScorecards()
+          .then(scorecards => {
+            // Convert object to array
+            const scorecardsArray = Object.values(scorecards);
+            
+            if (scorecardsArray.length === 0) {
+              scorecardsContainer.innerHTML = '<div class="no-scorecards">No saved scorecards yet. Create your first scorecard!</div>';
+              return;
+            }
+            
+            // Sort by date, newest first
+            scorecardsArray.sort((a, b) => {
+              const dateA = new Date(a.date || a.createdAt || 0);
+              const dateB = new Date(b.date || b.createdAt || 0);
+              return dateB - dateA;
+            });
+            
+            // Create scorecard list
+            const list = document.createElement('div');
+            list.className = 'scorecard-list';
+            
+            // Create cards for each scorecard
+            scorecardsArray.forEach((scorecard, index) => {
+              list.appendChild(createScorecardCard(scorecard, index));
+            });
+            
+            // Update container
+            scorecardsContainer.innerHTML = '';
+            scorecardsContainer.appendChild(list);
+          })
+          .catch(err => {
+            console.error('Error loading scorecards:', err);
+            BBB_UTILS.showMessage('Error loading scorecards', 'error');
+            scorecardsContainer.innerHTML = '<div class="no-scorecards">Error loading scorecards</div>';
+          });
       }
       
-      // Otherwise, return a placeholder
-      return 'N/A';
-    }
-    
-    function deleteScorecard(index) {
-      let scorecards = JSON.parse(localStorage.getItem('golfScorecards') || '[]');
-      scorecards.splice(index, 1);
-      localStorage.setItem('golfScorecards', JSON.stringify(scorecards));
-      loadScorecards();
-    }
-    
-    // Load scorecards on page load
-    loadScorecards();
+      /**
+       * Create a card for a scorecard
+       * @param {Object} scorecard - Scorecard data
+       * @param {number} index - Index in array
+       * @returns {HTMLElement} - Card element
+       */
+      function createScorecardCard(scorecard, index) {
+        const card = document.createElement('div');
+        card.className = 'scorecard-card';
+        
+        // Format date
+        const dateObj = new Date(scorecard.date || scorecard.createdAt || 0);
+        const formattedDate = BBB_UTILS.formatDate(dateObj, 'short');
+        
+        // Header
+        const header = document.createElement('div');
+        header.className = 'scorecard-header';
+        
+        const title = document.createElement('div');
+        title.className = 'scorecard-title';
+        
+        // Get proper tee name
+        const teeName = BBB_CONFIG.teeColors[scorecard.tee] || scorecard.tee;
+        title.textContent = `${scorecard.course} - ${teeName} Tees`;
+        
+        const dateEl = document.createElement('div');
+        dateEl.className = 'scorecard-date';
+        
+        // Format holes display
+        let holesText = 'Full 18';
+        if (scorecard.holes === '9f') holesText = 'Front 9';
+        if (scorecard.holes === '9b') holesText = 'Back 9';
+        
+        dateEl.textContent = `${formattedDate} (${holesText})`;
+        
+        header.appendChild(title);
+        header.appendChild(dateEl);
+        card.appendChild(header);
+        
+        // Player details
+        const details = document.createElement('div');
+        details.className = 'scorecard-details';
+        
+        // Check if scorecard has players
+        if (scorecard.players && scorecard.players.length > 0) {
+          scorecard.players.forEach(player => {
+            const playerInfo = document.createElement('div');
+            playerInfo.className = 'player-info';
+            
+            const name = document.createElement('div');
+            name.className = 'player-name';
+            name.textContent = player.name;
+            
+            const stats = document.createElement('div');
+            stats.className = 'player-stats';
+            
+            // Calculate points if not already included
+            const points = player.totalPoints !== undefined 
+              ? player.totalPoints 
+              : calculateTotalPoints(player, scorecard);
+            
+            stats.innerHTML = `
+              Handicap: ${player.handicap} (CH: ${player.courseHandicap || '-'})<br>
+              Strokes: ${player.totalShots || '-'}<br>
+              Points: ${points || '-'}
+            `;
+            
+            playerInfo.appendChild(name);
+            playerInfo.appendChild(stats);
+            details.appendChild(playerInfo);
+          });
+        } else {
+          const noPlayers = document.createElement('div');
+          noPlayers.textContent = 'No player data available';
+          details.appendChild(noPlayers);
+        }
+        
+        card.appendChild(details);
+        
+        // Add actions
+        const actions = document.createElement('div');
+        actions.className = 'card-actions';
+        actions.style.display = 'flex';
+        actions.style.justifyContent = 'space-between';
+        actions.style.marginTop = '1rem';
+        
+        // Download image button
+        const downloadBtn = document.createElement('button');
+        downloadBtn.className = 'btn btn-sm';
+        downloadBtn.innerHTML = '📸 Save as Image';
+        downloadBtn.addEventListener('click', () => {
+          downloadScorecardImage(scorecard);
+        });
+        
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn btn-sm btn-danger';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.addEventListener('click', () => {
+          if (confirm('Are you sure you want to delete this scorecard?')) {
+            deleteScorecard(scorecard.id || `scorecard_${index}`);
+          }
+        });
+        
+        actions.appendChild(downloadBtn);
+        actions.appendChild(deleteBtn);
+        card.appendChild(actions);
+        
+        return card;
+      }
+      
+      /**
+       * Delete a scorecard
+       * @param {string} id - Scorecard ID
+       */
+      function deleteScorecard(id) {
+        BBB_DB.deleteScorecard(id)
+          .then(() => {
+            BBB_UTILS.showMessage('Scorecard deleted successfully', 'success');
+            loadScorecards();
+          })
+          .catch(err => {
+            console.error('Error deleting scorecard:', err);
+            BBB_UTILS.showMessage('Error deleting scorecard', 'error');
+          });
+      }
+      
+      /**
+       * Download scorecard as image
+       * @param {Object} scorecard - Scorecard data
+       */
+      function downloadScorecardImage(scorecard) {
+        // Create a scorecard table for image capture
+        const container = document.createElement('div');
+        container.style.padding = '20px';
+        container.style.background = 'white';
+        container.style.position = 'fixed';
+        container.style.left = '-9999px';
+        container.style.top = '0';
+        
+        // Create title
+        const title = document.createElement('h3');
+        title.textContent = `${scorecard.course} - ${BBB_CONFIG.teeColors[scorecard.tee] || scorecard.tee} Tees`;
+        title.style.textAlign = 'center';
+        title.style.marginBottom = '10px';
+        container.appendChild(title);
+        
+        // Create date subtitle
+        const subtitle = document.createElement('div');
+        subtitle.textContent = `${BBB_UTILS.formatDate(new Date(scorecard.date || scorecard.createdAt), 'medium')}`;
+        subtitle.style.textAlign = 'center';
+        subtitle.style.marginBottom = '20px';
+        subtitle.style.fontStyle = 'italic';
+        container.appendChild(subtitle);
+        
+        // Create table
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.borderCollapse = 'collapse';
+        table.style.marginBottom = '20px';
+        
+        // Create header row with hole numbers
+        const headerRow = document.createElement('tr');
+        headerRow.appendChild(createCell('th', 'Player'));
+        
+        // Determine which holes to show based on scorecard.holes
+        let holeIndexes = [...Array(18).keys()].map(i => i + 1); // 1-18
+        
+        if (scorecard.holes === '9f') {
+          holeIndexes = holeIndexes.slice(0, 9); // 1-9
+        } else if (scorecard.holes === '9b') {
+          holeIndexes = holeIndexes.slice(9); // 10-18
+        }
+        
+        // Add hole numbers
+        holeIndexes.forEach(holeNum => {
+          headerRow.appendChild(createCell('th', holeNum.toString()));
+        });
+        
+        // Add total column
+        headerRow.appendChild(createCell('th', 'Total'));
+        table.appendChild(headerRow);
+        
+        // Add player rows
+        if (scorecard.players && scorecard.players.length > 0) {
+          scorecard.players.forEach(player => {
+            // Create player row for strokes
+            const strokesRow = document.createElement('tr');
+            strokesRow.appendChild(createCell('td', `${player.name} (Strokes)`));
+            
+            // Add scores
+            let totalStrokes = 0;
+            if (player.scores && player.scores.length > 0) {
+              player.scores.forEach(score => {
+                strokesRow.appendChild(createCell('td', score.toString()));
+                totalStrokes += score;
+              });
+            } else {
+              holeIndexes.forEach(() => {
+                strokesRow.appendChild(createCell('td', '-'));
+              });
+            }
+            
+            // Add total
+            strokesRow.appendChild(createCell('td', totalStrokes > 0 ? totalStrokes.toString() : '-'));
+            table.appendChild(strokesRow);
+            
+            // Create player row for points if available
+            if (player.points && player.points.length > 0) {
+              const pointsRow = document.createElement('tr');
+              pointsRow.appendChild(createCell('td', `${player.name} (Points)`));
+              
+              // Add points
+              let totalPoints = 0;
+              player.points.forEach(points => {
+                pointsRow.appendChild(createCell('td', points.toString()));
+                totalPoints += points;
+              });
+              
+              // Add total
+              pointsRow.appendChild(createCell('td', totalPoints.toString()));
+              table.appendChild(pointsRow);
+            }
+          });
+        } else {
+          const noDataRow = document.createElement('tr');
+          noDataRow.appendChild(createCell('td', 'No player data available'));
+          noDataRow.appendChild(createCell('td', '', holeIndexes.length + 1)); // colspan for remaining columns
+          table.appendChild(noDataRow);
+        }
+        
+        container.appendChild(table);
+        
+        // Add BBB footer
+        const footer = document.createElement('div');
+        footer.textContent = 'Birdie Bush Bandits - Founded August 2020';
+        footer.style.textAlign = 'center';
+        footer.style.fontStyle = 'italic';
+        footer.style.fontSize = '12px';
+        footer.style.marginTop = '20px';
+        container.appendChild(footer);
+        
+        // Add to document temporarily
+        document.body.appendChild(container);
+        
+        // Use html2canvas if available, otherwise show error
+        if (typeof html2canvas === 'function') {
+          // Create loading message
+          const loadingMsg = document.createElement('div');
+          loadingMsg.textContent = 'Generating image...';
+          loadingMsg.style.position = 'fixed';
+          loadingMsg.style.top = '50%';
+          loadingMsg.style.left = '50%';
+          loadingMsg.style.transform = 'translate(-50%, -50%)';
+          loadingMsg.style.padding = '20px';
+          loadingMsg.style.background = 'rgba(0,0,0,0.7)';
+          loadingMsg.style.color = 'white';
+          loadingMsg.style.borderRadius = '5px';
+          loadingMsg.style.zIndex = '9999';
+          document.body.appendChild(loadingMsg);
+          
+          // Capture the scorecard
+          html2canvas(container, { scale: 2 })
+            .then(canvas => {
+              // Create download link
+              const link = document.createElement('a');
+              link.download = `scorecard_${scorecard.course}_${BBB_UTILS.formatDate(new Date(scorecard.date || scorecard.createdAt), 'short').replace(/\//g, '-')}.png`;
+              link.href = canvas.toDataURL('image/png');
+              link.click();
+              
+              // Clean up
+              document.body.removeChild(container);
+              document.body.removeChild(loadingMsg);
+              
+              BBB_UTILS.showMessage('Scorecard image downloaded', 'success');
+            })
+            .catch(err => {
+              console.error('Error generating image:', err);
+              BBB_UTILS.showMessage('Error generating scorecard image', 'error');
+              
+              // Clean up
+              document.body.removeChild(container);
+              document.body.removeChild(loadingMsg);
+            });
+        } else {
+          // html2canvas not available
+          document.body.removeChild(container);
+          BBB_UTILS.showMessage('html2canvas library not found, cannot generate image', 'error');
+        }
+        
+        /**
+         * Helper function to create a table cell
+         * @param {string} type - Cell type (td or th)
+         * @param {string} content - Cell content
+         * @param {number} colspan - Optional colspan
+         * @returns {HTMLElement} - Cell element
+         */
+        function createCell(type, content, colspan) {
+          const cell = document.createElement(type);
+          cell.textContent = content;
+          cell.style.border = '1px solid #ccc';
+          cell.style.padding = '5px';
+          cell.style.textAlign = 'center';
+          
+          if (colspan) {
+            cell.colSpan = colspan;
+          }
+          
+          return cell;
+        }
+      }
+      
+      /**
+       * Export all scorecards as JSON file
+       */
+      function exportAllScorecards() {
+        BBB_DB.getScorecards()
+          .then(scorecards => {
+            // Convert object to array
+            const scorecardsArray = Object.values(scorecards);
+            
+            if (scorecardsArray.length === 0) {
+              BBB_UTILS.showMessage('No scorecards to export', 'warning');
+              return;
+            }
+            
+            // Create export data
+            const exportData = {
+              exportDate: new Date().toISOString(),
+              exportVersion: '1.0',
+              scorecards: scorecardsArray
+            };
+            
+            // Convert to JSON
+            const jsonData = JSON.stringify(exportData, null, 2);
+            
+            // Create download link
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `birdie-bush-bandits-scorecards-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            // Clean up
+            URL.revokeObjectURL(url);
+            
+            BBB_UTILS.showMessage(`Exported ${scorecardsArray.length} scorecards`, 'success');
+          })
+          .catch(err => {
+            console.error('Error exporting scorecards:', err);
+            BBB_UTILS.showMessage('Error exporting scorecards', 'error');
+          });
+      }
+      
+      /**
+       * Calculate total points for a player
+       * @param {Object} player - Player data
+       * @param {Object} scorecard - Scorecard data
+       * @returns {number} - Total points
+       */
+      function calculateTotalPoints(player, scorecard) {
+        // If points are included, sum them
+        if (player.points && player.points.length > 0) {
+          return player.points.reduce((sum, points) => sum + points, 0);
+        }
+        
+        // If no scores, return 0
+        if (!player.scores || player.scores.length === 0) {
+          return 0;
+        }
+        
+        // Otherwise, calculate points based on scores
+        // This is a simplified calculation as we don't have all the data
+        return 'N/A';
+      }
+      
+      /**
+       * Check for scorecards to migrate from the original format
+       * @returns {Promise<boolean>} - Promise resolving to true if migration occurred
+       */
+      function checkForScorecardsToMigrate() {
+        return new Promise((resolve, reject) => {
+          try {
+            // Check if we've already migrated
+            if (localStorage.getItem('bbb_scorecards_migrated') === 'true') {
+              resolve(false);
+              return;
+            }
+            
+            // Check for scorecards in original format
+            const oldScorecards = JSON.parse(localStorage.getItem('golfScorecards') || '[]');
+            
+            if (oldScorecards.length === 0) {
+              // No scorecards to migrate
+              localStorage.setItem('bbb_scorecards_migrated', 'true');
+              resolve(false);
+              return;
+            }
+            
+            // Show migration message
+            BBB_UTILS.showMessage(`Migrating ${oldScorecards.length} scorecards...`, 'info');
+            
+            // Convert and save each scorecard
+            let migrationCount = 0;
+            const migrationPromises = [];
+            
+            oldScorecards.forEach((oldCard, index) => {
+              // Generate ID if needed
+              const id = `migrated_${Date.now()}_${index}`;
+              
+              // Convert to new format
+              const newScorecard = {
+                id,
+                date: oldCard.date || new Date().toISOString(),
+                course: oldCard.course,
+                tee: oldCard.tee,
+                holes: oldCard.holes,
+                players: oldCard.players || [],
+                createdAt: oldCard.savedAt || new Date().toISOString(),
+                migrated: true
+              };
+              
+              // Save to database
+              migrationPromises.push(
+                BBB_DB.saveScorecard(newScorecard)
+                  .then(() => {
+                    migrationCount++;
+                  })
+                  .catch(err => {
+                    console.error('Error migrating scorecard:', err);
+                  })
+              );
+            });
+            
+            // Wait for all migrations to complete
+            Promise.all(migrationPromises)
+              .then(() => {
+                // Mark as migrated
+                localStorage.setItem('bbb_scorecards_migrated', 'true');
+                
+                resolve(true);
+              })
+              .catch(err => {
+                console.error('Error during scorecard migration:', err);
+                reject(err);
+              });
+          } catch (err) {
+            console.error('Error checking for scorecard migration:', err);
+            reject(err);
+          }
+        });
+      }
+    });
   </script>
 </body>
 </html>

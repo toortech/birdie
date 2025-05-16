@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birdie Bush Bandits - Golf Group</title>
+  <meta name="description" content="Birdie Bush Bandits - A golf group founded in August 2020. View photo galleries, scorecards, calculate handicaps, and meet our members.">
+  <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  
+  <!-- Open Graph tags for social sharing -->
+  <meta property="og:title" content="Birdie Bush Bandits - Golf Group">
+  <meta property="og:description" content="A golf group founded in August 2020. View photo galleries, scorecards, calculate handicaps, and meet our members.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="golf-flag.jpeg">
+  
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Core Modules (loaded in specific order) -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  
+  <main id="main"></main>
+  
+  <script>
+    // Initialize modules
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize auth system
+      BBB_AUTH.init({
+        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+      });
+      
+      // Initialize database
+      BBB_DB.init({
+        useCloudflare: BBB_CONFIG.cloudflareEnabled,
+        localStoragePrefix: 'bbb_'
+      });
+      
+      // Create header
+      const headerElements = BBB_UI.createHeader({
+        fixed: true,
+        showHomeLinkText: true
+      });
+      
+      document.body.insertBefore(headerElements.header, document.body.firstChild);
+      
+      // Get main content element
+      const main = document.getElementById('main');
+      main.appendChild(headerElements.mainWrapper);
+      
+      // Create page content
+      const mainContent = document.createElement('div');
+      
+      // Create page title
+      const titleContainer = BBB_UI.createPageTitle({
+        title: 'Birdie Bush Bandits',
+        showFoundedText: true,
+        showGolfballs: true
+      });
+      mainContent.appendChild(titleContainer);
+      
+      // Create status message container
+      const statusMessage = BBB_UI.createStatusMessage();
+      mainContent.appendChild(statusMessage);
+      
+      // Add construction message
+      const constructionMessage = document.createElement('h2');
+      constructionMessage.textContent = 'This site is under construction';
+      constructionMessage.style.fontStyle = 'italic';
+      constructionMessage.style.margin = '2rem 0';
+      mainContent.appendChild(constructionMessage);
+      
+      // Create main navigation
+      const mainNav = BBB_UI.createMainNavigation();
+      mainContent.appendChild(mainNav);
+      
+      // Add "if found" message
+      const returnText = document.createElement('p');
+      returnText.className = 'return-text';
+      returnText.textContent = 'If found please return to BBB Headquarters';
+      mainContent.appendChild(returnText);
+      
+      // Add main image
+      const mainImage = document.createElement('img');
+      mainImage.className = 'main-image';
+      mainImage.src = 'golf-flag.jpeg';
+      mainImage.alt = 'Golfer holding the flag on a golf course';
+      mainImage.setAttribute('loading', 'lazy');
+      mainContent.appendChild(mainImage);
+      
+      // Add auth-protected content for members
+      const memberContent = document.createElement('div');
+      memberContent.setAttribute('data-role-required', 'member,admin');
+      memberContent.style.marginTop = '2rem';
+      
+      const memberWelcome = document.createElement('h3');
+      memberWelcome.textContent = 'Welcome back!';
+      
+      const memberMessage = document.createElement('p');
+      memberMessage.textContent = 'You are logged in as a member. You have access to all features.';
+      
+      memberContent.appendChild(memberWelcome);
+      memberContent.appendChild(memberMessage);
+      mainContent.appendChild(memberContent);
+      
+      // Login link for anonymous users
+      const loginPrompt = document.createElement('div');
+      loginPrompt.setAttribute('data-auth-anonymous', 'true');
+      loginPrompt.style.marginTop = '2rem';
+      
+      const loginButton = BBB_UI.createButton({
+        text: 'Member Login',
+        onClick: function() {
+          BBB_AUTH.showLoginForm({
+            title: 'Member Login',
+            message: 'Enter your credentials to access member features',
+            onSuccess: function(user) {
+              BBB_UTILS.showMessage(`Welcome back, ${user.name}!`, 'success');
+              
+              // Refresh auth-protected elements
+              BBB_AUTH.setupProtectedElements();
+            }
+          });
+        }
+      });
+      
+      loginPrompt.appendChild(loginButton);
+      mainContent.appendChild(loginPrompt);
+      
+      // Add content to main
+      headerElements.mainWrapper.appendChild(mainContent);
+      
+      // Check for "missing" image (seen in the uploaded file)
+      // This is specific to the image in your first upload
+      const missingImageUrl = new URLSearchParams(window.location.search).get('missing');
+      if (missingImageUrl) {
+        const missingImg = document.createElement('img');
+        missingImg.src = missingImageUrl;
+        missingImg.alt = 'Missing golfer';
+        missingImg.style.maxWidth = '100%';
+        missingImg.style.marginTop = '2rem';
+        
+        const missingContainer = document.createElement('div');
+        missingContainer.appendChild(missingImg);
+        
+        mainContent.appendChild(missingContainer);
+      }
+    });
+  </script>
+</body>
+</html>

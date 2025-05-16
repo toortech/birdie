@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birdie Bush Bandits – Members</title>
+  <meta name="description" content="Meet the members of Birdie Bush Bandits golf group, view their handicaps and latest scores.">
+  <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Core Modules -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  
+  <main id="main"></main>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize modules
+      BBB_AUTH.init({
+        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+      });
+      
+      BBB_DB.init({
+        useCloudflare: BBB_CONFIG.cloudflareEnabled,
+        localStoragePrefix: 'bbb_'
+      });
+      
+      // Create header
+      const headerElements = BBB_UI.createHeader({
+        fixed: true,
+        showHomeLinkText: true
+      });
+      
+      document.body.insertBefore(headerElements.header, document.body.firstChild);
+      
+      // Get main content element
+      const main = document.getElementById('main');
+      main.appendChild(headerElements.mainWrapper);
+      
+      // Create page content
+      const mainContent = document.createElement('div');
+      
+      // Create page title
+      const titleContainer = BBB_UI.createPageTitle({
+        title: 'Birdie Bush Bandits',
+        showFoundedText: true,
+        showGolfballs: true
+      });
+      mainContent.appendChild(titleContainer);
+      
+      // Add page subtitle
+      const subtitle = document.createElement('h2');
+      subtitle.textContent = 'Members';
+      mainContent.appendChild(subtitle);
+      
+      // Create status message container
+      const statusMessage = BBB_UI.createStatusMessage();
+      mainContent.appendChild(statusMessage);
+      
+      // Intro text
+      const introText = document.createElement('p');
+      introText.className = 'intro-text';
+      introText.textContent = 'Meet our dedicated golfers who make up the Birdie Bush Bandits. From beginners to seasoned players, our diverse group enjoys friendly competition and camaraderie on the course.';
+      mainContent.appendChild(introText);
+      
+      // Create members grid
+      const membersGrid = document.createElement('div');
+      membersGrid.className = 'row';
+      membersGrid.style.marginTop = '2rem';
+      
+      // Load handicap data for all members
+      const handicapPromises = BBB_CONFIG.members.map(member => 
+        BBB_DB.getMemberHandicap(member.toLowerCase())
+          .then(data => ({ member, handicap: data }))
+          .catch(() => ({ member, handicap: null }))
+      );
+      
+      // Load scorecards to calculate recent scores
+      BBB_DB.getScorecards()
+        .then(scorecards => {
+          const scorecardsArray = Object.values(scorecards);
+          
+          // Process all handicap data
+          Promise.all(handicapPromises)
+            .then(memberData => {
+              // Create member cards
+              memberData.forEach(data => {
+                // Find recent scores for this member
+                const recentScores = findRecentScores(scorecardsArray, data.member);
+                
+                // Create member card
+                const memberCard = createMemberCard(data.member, data.handicap, recentScores);
+                membersGrid.appendChild(memberCard);
+              });
+              
+              // Add members grid to page
+              mainContent.appendChild(membersGrid);
+              
+              // Add content to main wrapper
+              headerElements.mainWrapper.appendChild(mainContent);
+            })
+            .catch(err => {
+              console.error('Error loading member data:', err);
+              BBB_UTILS.showMessage('Error loading member data', 'error');
+            });
+        })
+        .catch(err => {
+          console.error('Error loading scorecards:', err);
+          BBB_UTILS.showMessage('Error loading scorecards', 'error');
+        });
+      
+      /**
+       * Find recent scores for a member
+       * @param {Array} scorecards - Array of scorecards
+       * @param {string} memberName - Member name to find scores for
+       * @returns {Array} - Array of recent scores
+       */
+      function findRecentScores(scorecards, memberName) {
+        // Filter scorecards that include this member
+        const memberScores = [];
+        
+        scorecards.forEach(scorecard => {
+          if (scorecard.players && Array.isArray(scorecard.players)) {
+            const playerData = scorecard.players.find(player => 
+              player.name === memberName
+            );
+            
+            if (playerData) {
+              memberScores.push({
+                date: new Date(scorecard.date || scorecard.createdAt),
+                course: scorecard.course,
+                tee: scorecard.tee,
+                totalShots: playerData.totalShots || 0,
+                stablefordPoints: playerData.totalPoints || 0
+              });
+            }
+          }
+        });
+        
+        // Sort by date descending
+        memberScores.sort((a, b) => b.date - a.date);
+        
+        // Return 3 most recent
+        return memberScores.slice(0, 3);
+      }
+      
+      /**
+       * Create a member card
+       * @param {string} memberName - Member name
+       * @param {Object} handicapData - Handicap data
+       * @param {Array} recentScores - Recent scores
+       * @returns {HTMLElement} - Member card element
+       */
+      function createMemberCard(memberName, handicapData, recentScores) {
+        const col = document.createElement('div');
+        col.className = 'col-md-6 col-lg-4';
+        col.style.marginBottom = '2rem';
+        
+        const card = document.createElement('div');
+        card.className = 'card member-card';
+        
+        // Card header
+        const cardHeader = document.createElement('div');
+        cardHeader.className = 'card-header';
+        
+        const memberTitle = document.createElement('h3');
+        memberTitle.className = 'card-title';
+        memberTitle.textContent = memberName;
+        
+        cardHeader.appendChild(memberTitle);
+        card.appendChild(cardHeader);
+        
+        // Card content
+        const cardContent = document.createElement('div');
+        cardContent.className = 'card-content';
+        
+        // Handicap information
+        const handicapSection = document.createElement('div');
+        handicapSection.className = 'member-handicap';
+        
+        if (handicapData) {
+          const handicapDisplay = document.createElement('p');
+          handicapDisplay.innerHTML = `<strong>Handicap Index:</strong> ${handicapData.index}`;
+          
+          const updatedDisplay = document.createElement('p');
+          updatedDisplay.className = 'text-muted';
+          updatedDisplay.style.fontSize = '0.9rem';
+          updatedDisplay.textContent = `Last updated: ${BBB_UTILS.formatDate(handicapData.calculatedAt, 'short')}`;
+          
+          handicapSection.appendChild(handicapDisplay);
+          handicapSection.appendChild(updatedDisplay);
+        } else {
+          const noHandicap = document.createElement('p');
+          noHandicap.textContent = 'No handicap data available';
+          handicapSection.appendChild(noHandicap);
+        }
+        
+        cardContent.appendChild(handicapSection);
+        
+        // Recent scores
+        if (recentScores && recentScores.length > 0) {
+          const scoresSection = document.createElement('div');
+          scoresSection.className = 'member-scores';
+          scoresSection.style.marginTop = '1rem';
+          
+          const scoresTitle = document.createElement('h4');
+          scoresTitle.style.fontSize = '1.1rem';
+          scoresTitle.style.marginBottom = '0.5rem';
+          scoresTitle.textContent = 'Recent Scores';
+          
+          scoresSection.appendChild(scoresTitle);
+          
+          const scoresList = document.createElement('ul');
+          scoresList.style.listStyle = 'none';
+          scoresList.style.padding = '0';
+          scoresList.style.margin = '0';
+          
+          recentScores.forEach(score => {
+            const scoreItem = document.createElement('li');
+            scoreItem.style.marginBottom = '0.5rem';
+            scoreItem.style.padding = '0.5rem';
+            scoreItem.style.backgroundColor = 'rgba(0,0,0,0.03)';
+            scoreItem.style.borderRadius = '4px';
+            
+            const scoreDate = BBB_UTILS.formatDate(score.date, 'short');
+            const teeName = BBB_CONFIG.teeColors[score.tee] || score.tee;
+            
+            scoreItem.innerHTML = `
+              <div><strong>${score.course}</strong> (${teeName})</div>
+              <div>Date: ${scoreDate}</div>
+              <div>Gross: ${score.totalShots} | Points: ${score.stablefordPoints}</div>
+            `;
+            
+            scoresList.appendChild(scoreItem);
+          });
+          
+          scoresSection.appendChild(scoresList);
+          cardContent.appendChild(scoresSection);
+        }
+        
+        card.appendChild(cardContent);
+        
+        // Card footer with handicap history link
+        const cardFooter = document.createElement('div');
+        cardFooter.className = 'card-footer';
+        
+        // Add to card
+        card.appendChild(cardContent);
+        col.appendChild(card);
+        
+        return col;
+      }
+    });
+  </script>
+</body>
+</html>
