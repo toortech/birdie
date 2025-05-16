@@ -3,608 +3,512 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Birdie Bush Bandits – Scorecard Builder</title>
-  <meta name="description" content="Create and save golf scorecards for your rounds with the Birdie Bush Bandits golf group.">
+  <title>Stableford Scorecard – Birdie Bush Bandits</title>
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
-  
-  <!-- Global CSS -->
-  <link rel="stylesheet" href="css/style.css">
-  
-  <!-- Core Modules (loaded in specific order) -->
-  <script src="js/config.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/db.js"></script>
-  <script src="js/ui.js"></script>
+  <style>
+    /* Base styles */
+    body { 
+      background: #f5f5f5; 
+      color: #000; 
+      font-family: Arial, sans-serif; 
+      padding: 1rem; 
+      margin: 0 auto; 
+      max-width: 1200px;
+      position: relative;
+    }
+    
+    /* Validation & utility */
+    .invalid-hcp, .missing { border: 2px solid red; background-color: #ffcccc; }
+    
+    /* Logo in top-right corner */
+    .top-bar {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 10;
+    }
+    
+    .corner-logo {
+      width: 80px;
+      height: 80px;
+      display: block;
+    }
+    
+    h1 { 
+      color: #003300; 
+      font-size: 2rem; 
+      text-align: center; 
+      margin-bottom: 1rem; 
+    }
+    
+    header { 
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 1rem;
+      z-index: 5;
+    }
+    
+    .home-link { 
+      color: #000; 
+      font-weight: bold; 
+      text-decoration: none;
+      display: inline-block;
+      padding: 0.5rem 0.75rem;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 4px;
+      transition: background-color 0.3s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .home-link:hover {
+      background-color: rgba(255, 255, 255, 1);
+    }
+    
+    /* Main content wrapper */
+    main {
+      padding-top: 80px;
+    }
+    
+    /* Controls */
+    details#setup-controls { margin-bottom: 1rem; }
+    .controls { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .controls > div { background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 6px; flex: 1 1 200px; }
+    .controls label { display: block; margin-bottom: 0.25rem; font-weight: bold; }
+    .controls label.checkbox { display: inline-block; margin-right: 0.5rem; }
+    
+    /* Player selects styling */
+    .player-select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: white;
+      cursor: pointer;
+    }
+    
+    #player-selects label {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    #player-selects > div > div {
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Buttons */
+    #button-group { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem; }
+    select, button { padding: 0.5rem 1rem; cursor: pointer; }
+    button { background: #004c99; color: white; border: none; border-radius: 4px; }
+    button:hover { background: #003d7a; }
+    button:active { opacity: 0.8; transform: scale(0.98); }
+    button:disabled { background: #cccccc; cursor: not-allowed; }
+    
+    /* Table */
+    #table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 1rem; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    caption { caption-side: top; text-align: left; padding: 0.5rem; font-weight: bold; background: #eef; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: center; white-space: nowrap; }
+    th { background: #ddd; }
+    
+    /* Status messages */
+    #status-message { 
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+      text-align: center;
+      display: none;
+    }
+    .success { background-color: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+    .error { background-color: #ffcdd2; color: #b71c1c; border: 1px solid #ef9a9a; }
+    .warning { background-color: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
+    .info { background-color: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      header {
+        padding: 0.75rem;
+      }
+      
+      main {
+        padding-top: 70px;
+      }
+      
+      .corner-logo {
+        width: 70px;
+        height: 70px;
+      }
+      
+      .controls { flex-direction: column; }
+      #button-group { flex-direction: column; }
+      table { font-size: 0.8rem; }
+    }
+    
+    @media (max-width: 480px) {
+      body { padding: 0.5rem; }
+      
+      header {
+        padding: 0.5rem;
+      }
+      
+      main {
+        padding-top: 65px;
+      }
+      
+      .corner-logo {
+        width: 65px;
+        height: 65px;
+      }
+      
+      .home-link {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.9rem;
+      }
+      
+      h1 { font-size: 1.5rem; }
+      .controls { flex-direction: column; gap: 0.5rem; }
+      .controls > div { flex: 1 1 100%; }
+      #button-group { flex-direction: column; }
+      select, button { width: 100%; }
+      /* Mobile table adjustments */
+      table { min-width: auto; table-layout: auto; font-size: 0.65rem; width: 100%; }
+      th, td { white-space: normal; word-wrap: break-word; padding: 0.2rem; }
+      input[type="number"] { width: 1.2rem; font-size: 0.7rem; }
+      .stroke-info, .points { font-size: 0.6em; }
+    }
+  </style>
 </head>
 <body>
-  <a href="#main" class="skip-link">Skip to main content</a>
+  <div class="top-bar">
+    <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="corner-logo">
+  </div>
   
-  <main id="main"></main>
+  <header>
+    <nav><a href="index.html" class="home-link">🏠 Home</a></nav>
+  </header>
   
+  <main>
+    <h1>Stableford Scorecard – Birdie Bush Bandits</h1>
+    <div id="status-message"></div>
+    <details id="setup-controls" open>
+      <summary>⚙️ Setup Options</summary>
+      <div class="controls">
+        <div>
+          <label for="course-select">Course:</label>
+          <select id="course-select">
+            <option value="Richings">Richings Park Golf Club</option>
+            <option value="Thorney">Thorney Park Golf Club</option>
+            <option value="Airlinks">London Airlinks Golf Club</option>
+            <option value="Ascot">Royal Ascot Golf Club</option>
+            <option value="Stoke">Stoke Park Golf Club</option>
+            <option value="Inspirations">Inspirations Golf Club</option>
+          </select>
+        </div>
+        <div>
+          <label for="tee-select">Tee Colour:</label>
+          <select id="tee-select">
+            <option value="white">White</option>
+            <option value="yellow">Yellow</option>
+            <option value="red">Red</option>
+          </select>
+        </div>
+        <div id="player-selects">
+          <label>Players:</label>
+          <div style="display: grid; gap: 0.5rem;">
+            <div>
+              <label for="player-1">Player 1:</label>
+              <select id="player-1" class="player-select">
+                <option value="">-- Select Player --</option>
+                <option value="Amrit">Amrit</option>
+                <option value="Kam">Kam</option>
+                <option value="Vish">Vish</option>
+                <option value="Ravi">Ravi</option>
+                <option value="Bal">Bal</option>
+                <option value="Vick">Vick</option>
+                <option value="Michael">Michael</option>
+                <option value="Justy">Justy</option>
+                <option value="Phuperjee">Phuperjee</option>
+                <option value="Indy">Indy</option>
+                <option value="Maj">Maj</option>
+                <option value="Sama">Sama</option>
+              </select>
+            </div>
+            <div>
+              <label for="player-2">Player 2:</label>
+              <select id="player-2" class="player-select">
+                <option value="">-- Select Player --</option>
+                <option value="Amrit">Amrit</option>
+                <option value="Kam">Kam</option>
+                <option value="Vish">Vish</option>
+                <option value="Ravi">Ravi</option>
+                <option value="Bal">Bal</option>
+                <option value="Vick">Vick</option>
+                <option value="Michael">Michael</option>
+                <option value="Justy">Justy</option>
+                <option value="Phuperjee">Phuperjee</option>
+                <option value="Indy">Indy</option>
+                <option value="Maj">Maj</option>
+                <option value="Sama">Sama</option>
+              </select>
+            </div>
+            <div>
+              <label for="player-3">Player 3:</label>
+              <select id="player-3" class="player-select">
+                <option value="">-- Select Player --</option>
+                <option value="Amrit">Amrit</option>
+                <option value="Kam">Kam</option>
+                <option value="Vish">Vish</option>
+                <option value="Ravi">Ravi</option>
+                <option value="Bal">Bal</option>
+                <option value="Vick">Vick</option>
+                <option value="Michael">Michael</option>
+                <option value="Justy">Justy</option>
+                <option value="Phuperjee">Phuperjee</option>
+                <option value="Indy">Indy</option>
+                <option value="Maj">Maj</option>
+                <option value="Sama">Sama</option>
+              </select>
+            </div>
+            <div>
+              <label for="player-4">Player 4:</label>
+              <select id="player-4" class="player-select">
+                <option value="">-- Select Player --</option>
+                <option value="Amrit">Amrit</option>
+                <option value="Kam">Kam</option>
+                <option value="Vish">Vish</option>
+                <option value="Ravi">Ravi</option>
+                <option value="Bal">Bal</option>
+                <option value="Vick">Vick</option>
+                <option value="Michael">Michael</option>
+                <option value="Justy">Justy</option>
+                <option value="Phuperjee">Phuperjee</option>
+                <option value="Indy">Indy</option>
+                <option value="Maj">Maj</option>
+                <option value="Sama">Sama</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label>Holes:</label>
+          <label class="checkbox"><input type="radio" name="holes" value="18" checked> Full 18</label>
+          <label class="checkbox"><input type="radio" name="holes" value="9f"> Front 9</label>
+          <label class="checkbox"><input type="radio" name="holes" value="9b"> Back 9</label>
+        </div>
+      </div>
+    </details>
+    <div id="button-group">
+      <button id="build">Build Scorecard</button>
+      <button id="reset">Reset</button>
+      <button id="save" disabled>Save Scorecard</button>
+      <button id="download-image">📸 Save Scorecard as Image</button>
+    </div>
+    <div id="table-container"></div>
+  </main>
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize modules
-      BBB_AUTH.init({
-        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
-      });
-      
-      BBB_DB.init({
-        useCloudflare: BBB_CONFIG.cloudflareEnabled,
-        localStoragePrefix: 'bbb_'
-      });
-      
-      // Create header
-      const headerElements = BBB_UI.createHeader({
-        fixed: true,
-        showHomeLinkText: true
-      });
-      
-      document.body.insertBefore(headerElements.header, document.body.firstChild);
-      
-      // Get main content element
-      const main = document.getElementById('main');
-      main.appendChild(headerElements.mainWrapper);
-      
-      // Create page content
-      const mainContent = document.createElement('div');
-      
-      // Create page title
-      const titleContainer = BBB_UI.createPageTitle({
-        title: 'Birdie Bush Bandits',
-        showFoundedText: true,
-        showGolfballs: true
-      });
-      mainContent.appendChild(titleContainer);
-      
-      // Add page subtitle
-      const subtitle = document.createElement('h2');
-      subtitle.textContent = 'Scorecard Builder';
-      mainContent.appendChild(subtitle);
-      
-      // Create status message container
-      const statusMessage = BBB_UI.createStatusMessage();
-      mainContent.appendChild(statusMessage);
-      
-      // Create scorecard builder
-      const scorecardBuilder = createScorecardBuilder();
-      mainContent.appendChild(scorecardBuilder);
-      
-      // Add content to main wrapper
-      headerElements.mainWrapper.appendChild(mainContent);
-      
-      /**
-       * Create the scorecard builder UI
-       * @returns {HTMLElement} - Scorecard builder element
-       */
-      function createScorecardBuilder() {
-        // Create container
-        const container = document.createElement('div');
-        
-        // Create setup details section
-        const setupDetails = document.createElement('details');
-        setupDetails.id = 'setup-controls';
-        setupDetails.open = true;
-        
-        const setupSummary = document.createElement('summary');
-        setupSummary.innerHTML = '⚙️ Setup Options';
-        setupDetails.appendChild(setupSummary);
-        
-        // Setup controls
-        const controls = document.createElement('div');
-        controls.className = 'controls';
-        
-        // Course selector
-        const courseDiv = document.createElement('div');
-        const courseLabel = document.createElement('label');
-        courseLabel.setAttribute('for', 'course-select');
-        courseLabel.textContent = 'Course:';
-        
-        const courseSelect = document.createElement('select');
-        courseSelect.id = 'course-select';
-        
-        // Add course options from config
-        Object.keys(BBB_CONFIG.courses).forEach(courseName => {
-          const option = document.createElement('option');
-          option.value = BBB_CONFIG.courses[courseName].shortName;
-          option.textContent = courseName;
-          courseSelect.appendChild(option);
-        });
-        
-        courseDiv.appendChild(courseLabel);
-        courseDiv.appendChild(courseSelect);
-        controls.appendChild(courseDiv);
-        
-        // Tee color selector
-        const teeDiv = document.createElement('div');
-        const teeLabel = document.createElement('label');
-        teeLabel.setAttribute('for', 'tee-select');
-        teeLabel.textContent = 'Tee Colour:';
-        
-        const teeSelect = document.createElement('select');
-        teeSelect.id = 'tee-select';
-        
-        // Add tee options from config
-        Object.keys(BBB_CONFIG.teeColors).forEach(teeKey => {
-          const option = document.createElement('option');
-          option.value = teeKey;
-          option.textContent = BBB_CONFIG.teeColors[teeKey];
-          teeSelect.appendChild(option);
-        });
-        
-        teeDiv.appendChild(teeLabel);
-        teeDiv.appendChild(teeSelect);
-        controls.appendChild(teeDiv);
-        
-        // Player selectors
-        const playersDiv = document.createElement('div');
-        playersDiv.id = 'player-selects';
-        
-        const playersLabel = document.createElement('label');
-        playersLabel.textContent = 'Players:';
-        playersDiv.appendChild(playersLabel);
-        
-        const playersGrid = document.createElement('div');
-        playersGrid.style.display = 'grid';
-        playersGrid.style.gap = '0.5rem';
-        
-        // Create player selects
-        for (let i = 1; i <= 4; i++) {
-          const playerDiv = document.createElement('div');
-          
-          const playerLabel = document.createElement('label');
-          playerLabel.setAttribute('for', `player-${i}`);
-          playerLabel.textContent = `Player ${i}:`;
-          
-          const playerSelect = document.createElement('select');
-          playerSelect.id = `player-${i}`;
-          playerSelect.className = 'player-select';
-          
-          // Empty option
-          const emptyOption = document.createElement('option');
-          emptyOption.value = '';
-          emptyOption.textContent = '-- Select Player --';
-          playerSelect.appendChild(emptyOption);
-          
-          // Add members from config
-          BBB_CONFIG.members.forEach(member => {
-            const option = document.createElement('option');
-            option.value = member;
-            option.textContent = member;
-            playerSelect.appendChild(option);
-          });
-          
-          // Add event listener to prevent duplicate selection
-          playerSelect.addEventListener('change', updatePlayerOptions);
-          
-          playerDiv.appendChild(playerLabel);
-          playerDiv.appendChild(playerSelect);
-          playersGrid.appendChild(playerDiv);
-        }
-        
-        playersDiv.appendChild(playersGrid);
-        controls.appendChild(playersDiv);
-        
-        // Holes selection
-        const holesDiv = document.createElement('div');
-        
-        const holesLabel = document.createElement('label');
-        holesLabel.textContent = 'Holes:';
-        holesDiv.appendChild(holesLabel);
-        
-        // Create radio buttons for hole selection
-        const holeOptions = [
-          { value: '18', label: 'Full 18' },
-          { value: '9f', label: 'Front 9' },
-          { value: '9b', label: 'Back 9' }
-        ];
-        
-        holeOptions.forEach((option, index) => {
-          const radioLabel = document.createElement('label');
-          radioLabel.className = 'checkbox';
-          
-          const radioInput = document.createElement('input');
-          radioInput.type = 'radio';
-          radioInput.name = 'holes';
-          radioInput.value = option.value;
-          if (index === 0) radioInput.checked = true;
-          
-          radioLabel.appendChild(radioInput);
-          radioLabel.appendChild(document.createTextNode(' ' + option.label));
-          holesDiv.appendChild(radioLabel);
-          
-          // Add a space between options
-          if (index < holeOptions.length - 1) {
-            holesDiv.appendChild(document.createTextNode(' '));
+    (function() {
+      'use strict';
+      const buildBtn = document.getElementById('build');
+      const saveBtn = document.getElementById('save');
+      const resetBtn = document.getElementById('reset');
+      const downloadBtn = document.getElementById('download-image');
+      const tableContainer = document.getElementById('table-container');
+      const courseSelect = document.getElementById('course-select');
+      const teeSelect = document.getElementById('tee-select');
+      const holeRadios = document.querySelectorAll('input[name="holes"]');
+      const playerSelects = document.querySelectorAll('.player-select');
+      const statusMessage = document.getElementById('status-message');
+      let scorecardBuilt = false;
+      let savedSuccessfully = false;
+
+      // Course data - directly in this file instead of using external config
+      const courses = {
+        Richings: {
+          par: [4,3,5,4,4,3,4,4,4,3,4,4,4,3,4,4,5,4],
+          si:  [15,4,12,18,16,14,2,6,8,11,3,17,10,7,5,1,13,9],
+          yards: {
+            white: [287,199,545,345,335,165,397,299,388,172,417,328,356,201,420,431,423,402],
+            yellow:[265,188,534,335,322,149,383,284,364,162,373,318,344,188,391,392,513,380],
+            red:   [237,158,490,300,289,130,353,257,344,132,351,294,323,177,391,337,479,360]
+          },
+          tees: {
+            white: {courseRating: 70.7, slopeRating: 128},
+            yellow: {courseRating: 68.3, slopeRating: 121},
+            red: {courseRating: 65.9, slopeRating: 115}
           }
-        });
-        
-        controls.appendChild(holesDiv);
-        setupDetails.appendChild(controls);
-        container.appendChild(setupDetails);
-        
-        // Add button group
-        const buttonGroup = document.createElement('div');
-        buttonGroup.id = 'button-group';
-        
-        // Build scorecard button
-        const buildButton = BBB_UI.createButton({
-          id: 'build',
-          text: 'Build Scorecard',
-          onClick: buildScorecard
-        });
-        
-        // Reset button
-        const resetButton = BBB_UI.createButton({
-          id: 'reset',
-          text: 'Reset',
-          onClick: resetScorecard
-        });
-        
-        // Save button
-        const saveButton = BBB_UI.createButton({
-          id: 'save',
-          text: 'Save Scorecard',
-          onClick: saveScorecard,
-          disabled: true
-        });
-        
-        // Download image button
-        const downloadButton = BBB_UI.createButton({
-          id: 'download-image',
-          text: '📸 Save Scorecard as Image',
-          onClick: downloadScorecardImage
-        });
-        
-        buttonGroup.appendChild(buildButton);
-        buttonGroup.appendChild(resetButton);
-        buttonGroup.appendChild(saveButton);
-        buttonGroup.appendChild(downloadButton);
-        container.appendChild(buttonGroup);
-        
-        // Table container for scorecard
-        const tableContainer = document.createElement('div');
-        tableContainer.id = 'table-container';
-        container.appendChild(tableContainer);
-        
-        // State variables
-        let scorecardBuilt = false;
-        let savedSuccessfully = false;
-        
-        // Load html2canvas script for image export
-        loadScript('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js');
-        
-        /**
-         * Load external script
-         * @param {string} src - Script URL
-         */
-        function loadScript(src) {
-          const script = document.createElement('script');
-          script.src = src;
-          script.async = true;
-          document.head.appendChild(script);
-        }
-        
-        /**
-         * Update player options to prevent duplicate selections
-         */
-        function updatePlayerOptions() {
-          const selectedPlayers = [];
-          document.querySelectorAll('.player-select').forEach(select => {
-            if (select.value) selectedPlayers.push(select.value);
-          });
-          
-          document.querySelectorAll('.player-select').forEach(select => {
-            const currentValue = select.value;
-            const options = select.querySelectorAll('option');
-            
-            options.forEach(option => {
-              if (option.value && option.value !== currentValue && selectedPlayers.includes(option.value)) {
-                option.disabled = true;
-                option.style.color = '#999';
-              } else {
-                option.disabled = false;
-                option.style.color = '#000';
-              }
-            });
-          });
-        }
-        
-        /**
-         * Build scorecard table
-         */
-        function buildScorecard() {
-          // Get selected players
-          const players = [];
-          document.querySelectorAll('.player-select').forEach(select => {
-            if (select.value) players.push(select.value);
-          });
-          
-          if (!players.length) {
-            BBB_UTILS.showMessage('Please select at least one player.', 'error');
-            return;
+        },
+        Thorney: {
+          par: [5,4,4,3,5,4,4,3,5,4,4,3,5,4,4,3,5,4],
+          si:  [9,15,1,17,5,13,3,11,7,16,2,14,6,18,4,12,8,10],
+          yards: {
+            white: [475,360,410,155,495,345,375,160,500,350,370,150,480,355,385,145,505,365],
+            yellow:[460,345,395,145,480,330,360,150,485,335,355,140,465,340,370,135,490,350],
+            red:   [440,320,370,130,450,305,335,135,455,310,330,125,435,315,345,120,460,325]
+          },
+          tees: {
+            white: {courseRating: 68.7, slopeRating: 120},
+            yellow: {courseRating: 67.0, slopeRating: 117},
+            red: {courseRating: 69.3, slopeRating: 119}
           }
-          
-          // Clear table container
-          tableContainer.innerHTML = '';
-          
-          // Create table
-          const table = document.createElement('table');
-          
-          // Create caption
-          const caption = document.createElement('caption');
-          caption.textContent = 'Scorecard created: ' + new Date().toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) + 
-                               ' | Course: ' + courseSelect.options[courseSelect.selectedIndex].text + 
-                               ' | Tees: ' + teeSelect.options[teeSelect.selectedIndex].text;
-          table.appendChild(caption);
-          
-          // Create header
-          const thead = document.createElement('thead');
-          let headerRow1 = document.createElement('tr');
-          headerRow1.innerHTML = '<th>Hole</th><th>Par</th><th style="color:red;">SI</th><th>Yards</th>';
-          
-          players.forEach((player, index) => {
-            headerRow1.innerHTML += `<th colspan="2">${player}<br>H:<input id="hcp-${index}" type="number" min="0" max="99" value="0" oninput="if(this.value.length>2) this.value=this.value.slice(0,2)"></th>`;
-          });
-          
-          let headerRow2 = document.createElement('tr');
-          headerRow2.innerHTML = '<th></th><th></th><th></th><th></th>';
-          
-          players.forEach(() => {
-            headerRow2.innerHTML += '<th>Shots</th><th>Pts</th>';
-          });
-          
-          thead.appendChild(headerRow1);
-          thead.appendChild(headerRow2);
-          table.appendChild(thead);
-          
-          // Create body
-          const tbody = document.createElement('tbody');
-          const holeSelection = document.querySelector('input[name="holes"]:checked').value;
-          const courseData = getCourseData(courseSelect.value);
-          const teeColor = teeSelect.value;
-          
-          // Determine which holes to show
-          let holes = Array.from({ length: 18 }, (_, i) => i);
-          if (holeSelection === '9f') holes = holes.slice(0, 9);
-          if (holeSelection === '9b') holes = holes.slice(9);
-          
-          // Create rows for each hole
-          holes.forEach(holeIndex => {
-            const row = document.createElement('tr');
-            
-            // Hole info
-            row.innerHTML = `
-              <td>${holeIndex + 1}</td>
-              <td>${courseData.par[holeIndex]}</td>
-              <td style="color:red;">${courseData.si[holeIndex]}</td>
-              <td>${courseData.yards[teeColor][holeIndex]}</td>
-            `;
-            
-            // Player inputs
-            players.forEach((_, playerIndex) => {
-              row.innerHTML += `
-                <td>
-                  <input data-player="${playerIndex}" data-hole="${holeIndex}" type="number" min="0" max="999" oninput="if(this.value.length>3) this.value=this.value.slice(0,3)">
-                </td>
-                <td class="pts-${playerIndex}">
-                  <div class="stroke-info" data-player="${playerIndex}" data-hole="${holeIndex}"></div>
-                  <div class="points"></div>
-                </td>
-              `;
-            });
-            
-            tbody.appendChild(row);
-          });
-          
-          table.appendChild(tbody);
-          
-          // Create footer for totals
-          const tfoot = document.createElement('tfoot');
-          ['Front 9', 'Back 9', 'Total'].forEach((label, i) => {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td colspan="4">${label}</td>`;
-            
-            players.forEach((_, playerIndex) => {
-              row.innerHTML += `<td id="shots-${i}-${playerIndex}"></td><td id="pts-${i}-${playerIndex}"></td>`;
-            });
-            
-            tfoot.appendChild(row);
-          });
-          
-          table.appendChild(tfoot);
-          tableContainer.appendChild(table);
-          
-          // Setup handicap and scoring functionality
-          players.forEach((_, playerIndex) => {
-            // Get handicap input
-            const handicapInput = document.getElementById(`hcp-${playerIndex}`);
-            
-            // Create span for course handicap
-            const adjustedHandicapSpan = document.createElement('span');
-            adjustedHandicapSpan.id = `adjhcp-${playerIndex}`;
-            adjustedHandicapSpan.style.marginLeft = '0.5rem';
-            handicapInput.insertAdjacentElement('afterend', adjustedHandicapSpan);
-            
-            // Update course handicap and strokes received
-            const updateHandicapInfo = () => {
-              const rawHandicap = parseInt(handicapInput.value, 10) || 0;
-              const slopeRating = getSlopeRating(courseSelect.value, teeColor);
-              const courseHandicap = Math.round(rawHandicap * slopeRating / 113);
-              
-              // Update displayed course handicap
-              adjustedHandicapSpan.textContent = 'CH: ' + courseHandicap;
-              
-              // Update strokes received for each hole
-              holes.forEach(holeIndex => {
-                const si = courseData.si[holeIndex];
-                const strokesReceived = (courseHandicap >= si + 18) ? 2 : (courseHandicap >= si ? 1 : 0);
-                
-                const strokeInfo = document.querySelector(`.stroke-info[data-player="${playerIndex}"][data-hole="${holeIndex}"]`);
-                if (strokeInfo) {
-                  strokeInfo.textContent = `(${strokesReceived} stroke${strokesReceived !== 1 ? 's' : ''})`;
-                }
-              });
-              
-              // Update scores/points
-              debounce(updateScores, 200)();
-            };
-            
-            // Add input handler to handicap input
-            handicapInput.addEventListener('input', () => {
-              if (handicapInput.value === '' || isNaN(parseInt(handicapInput.value, 10)) || parseInt(handicapInput.value, 10) < 0) {
-                handicapInput.classList.add('invalid-hcp');
-              } else {
-                handicapInput.classList.remove('invalid-hcp');
-                updateHandicapInfo();
-              }
-            });
-            
-            // Initial update
-            updateHandicapInfo();
-          });
-          
-          // Add input handlers to all score inputs
-          const scoreInputs = table.querySelectorAll('tbody input[type="number"]');
-          scoreInputs.forEach(input => {
-            input.addEventListener('input', () => {
-              input.classList.remove('missing');
-              debounce(updateScores, 200)();
-            });
-          });
-          
-          // Enable save button
-          document.getElementById('save').disabled = false;
-          
-          // Close setup controls
-          document.getElementById('setup-controls').open = false;
-          
-          // Update state
-          scorecardBuilt = true;
-          savedSuccessfully = false;
-          
-          // Show success message
-          BBB_UTILS.showMessage('Scorecard built successfully!', 'success');
-        }
-        
-        /**
-         * Reset scorecard
-         */
-        function resetScorecard() {
-          if (scorecardBuilt && !window.confirm('Reset scorecard? All data will be lost.')) {
-            return;
+        },
+        Airlinks: {
+          par: [4,3,4,5,3,4,4,5,4,3,4,4,5,3,4,4,3,5],
+          si:  [6,14,4,10,16,2,8,12,1,18,7,5,11,17,3,9,15,13],
+          yards: {
+            white: [375,185,420,510,175,450,380,520,430,165,410,365,525,170,445,375,180,540],
+            yellow: [360,175,405,495,165,435,365,510,415,155,395,355,515,160,430,365,170,525],
+            red: [345,165,385,470,150,410,345,480,395,145,375,335,485,145,405,345,155,495]
+          },
+          tees: {
+            white: {courseRating: 63.4, slopeRating: 102},
+            yellow: {courseRating: 62.0, slopeRating: 98},
+            red: {courseRating: 61.1, slopeRating: 92}
           }
-          
-          // Clear table container
-          tableContainer.innerHTML = '';
-          
-          // Reset state
-          scorecardBuilt = false;
-          savedSuccessfully = false;
-          
-          // Disable save button
-          document.getElementById('save').disabled = true;
-          
-          // Open setup controls
-          document.getElementById('setup-controls').open = true;
-          
-          // Show message
-          BBB_UTILS.showMessage('Scorecard reset.', 'success');
-        }
-        
-        /**
-         * Save scorecard
-         */
-        function saveScorecard() {
-          if (!scorecardBuilt) {
-            BBB_UTILS.showMessage('Please build a scorecard first.', 'error');
-            return;
+        },
+        Ascot: {
+          par: [4,4,3,4,5,4,3,4,5,4,3,4,5,3,4,4,3,5],
+          si:  [5,11,15,1,9,3,17,7,13,4,18,6,10,16,2,8,14,12],
+          yards: {
+            white: [410,385,175,440,525,430,180,415,545,425,170,435,530,185,445,405,175,540],
+            yellow: [395,370,165,425,510,415,170,400,530,410,160,420,515,175,430,390,165,525],
+            red: [365,340,145,395,480,385,150,370,500,380,140,390,485,155,400,360,145,495]
+          },
+          tees: {
+            white: {courseRating: 70.3, slopeRating: 123},
+            yellow: {courseRating: 68.5, slopeRating: 118},
+            red: {courseRating: 70.0, slopeRating: 113}
           }
+        },
+        Stoke: {
+          par: [4,5,3,4,4,3,4,4,5,4,3,4,5,4,3,4,5,4],
+          si:  [7,15,11,1,9,17,5,3,13,8,18,4,10,2,16,6,12,14],
+          yards: {
+            white: [405,510,190,450,430,175,415,425,535,420,165,440,520,430,180,425,545,410],
+            yellow: [390,495,180,435,415,165,400,410,520,405,155,425,505,415,170,410,530,395],
+            red: [360,465,160,405,385,145,370,380,490,375,135,395,475,385,150,380,500,365]
+          },
+          tees: {
+            white: {courseRating: 70.9, slopeRating: 126},
+            yellow: {courseRating: 69.1, slopeRating: 122},
+            red: {courseRating: 68.5, slopeRating: 118}
+          }
+        },
+        Inspirations: {
+          par: [5,4,3,4,5,3,4,4,5,4,3,4,5,4,3,4,4,5],
+          si:  [11,5,17,1,9,15,3,7,13,4,18,6,10,2,16,8,14,12],
+          yards: {
+            white: [530,440,185,460,540,175,445,430,555,435,180,450,535,465,170,425,410,540],
+            yellow: [515,425,175,445,525,165,430,415,540,420,170,435,520,450,160,410,395,525],
+            red: [485,395,155,415,495,145,400,385,510,390,150,405,490,420,140,380,365,495]
+          },
+          tees: {
+            white: {courseRating: 74.3, slopeRating: 128},
+            yellow: {courseRating: 72.1, slopeRating: 124},
+            red: {courseRating: 70.5, slopeRating: 120}
+          }
+        }
+      };
+      
+      // Show message function
+      function showMessage(message, type) {
+        statusMessage.textContent = message;
+        statusMessage.className = type;
+        statusMessage.style.display = 'block';
+        setTimeout(() => {
+          statusMessage.style.display = 'none';
+        }, 3000);
+      }
+      
+      // Prevent duplicate player selection
+      function updatePlayerOptions() {
+        const selectedPlayers = [];
+        playerSelects.forEach(select => {
+          if (select.value) selectedPlayers.push(select.value);
+        });
+        
+        playerSelects.forEach(select => {
+          const currentValue = select.value;
+          const options = select.querySelectorAll('option');
           
-          // Check that all inputs have values
-          const inputs = tableContainer.querySelectorAll('tbody input[type="number"]');
-          let allFilled = true;
-          
-          inputs.forEach(input => {
-            if (input.value === '' || isNaN(parseInt(input.value, 10))) {
-              input.classList.add('missing');
-              allFilled = false;
+          options.forEach(option => {
+            if (option.value && option.value !== currentValue && selectedPlayers.includes(option.value)) {
+              option.disabled = true;
+              option.style.color = '#999';
             } else {
-              input.classList.remove('missing');
+              option.disabled = false;
+              option.style.color = '#000';
             }
           });
-          
-          if (!allFilled) {
-            BBB_UTILS.showMessage('Please enter all scores before saving.', 'error');
-            return;
-          }
-          
-          // Create scorecard object
+        });
+      }
+
+      // Add event listeners to player selects
+      playerSelects.forEach(select => {
+        select.addEventListener('change', updatePlayerOptions);
+      });
+
+      // Debounce function to limit execution frequency
+      function debounce(fn, delay = 200) {
+        let timer;
+        return function(...args) {
+          clearTimeout(timer);
+          timer = setTimeout(() => fn.apply(this, args), delay);
+        };
+      }
+
+      // Save to local storage
+      function saveToLocalStorage() {
+        if (!scorecardBuilt) return;
+        
+        try {
           const scorecard = {
             date: new Date().toISOString(),
             course: courseSelect.value,
             tee: teeSelect.value,
-            holes: document.querySelector('input[name="holes"]:checked').value,
+            holes: [...holeRadios].find(r => r.checked).value,
             players: [],
-            createdAt: new Date().toISOString()
+            savedAt: new Date().toLocaleString('en-GB')
           };
           
-          // Get selected players
-          const players = [];
-          document.querySelectorAll('.player-select').forEach(select => {
-            if (select.value) players.push(select.value);
+          // Get players and their data
+          const selectedPlayers = [];
+          playerSelects.forEach(select => {
+            if (select.value) selectedPlayers.push(select.value);
           });
           
-          // Get course data
-          const courseData = getCourseData(courseSelect.value);
-          const holeSelection = document.querySelector('input[name="holes"]:checked').value;
-          
-          // Determine which holes to show
-          let holes = Array.from({ length: 18 }, (_, i) => i);
-          if (holeSelection === '9f') holes = holes.slice(0, 9);
-          if (holeSelection === '9b') holes = holes.slice(9);
-          
-          // Get player data
-          players.forEach((player, playerIndex) => {
-            const handicapInput = document.getElementById(`hcp-${playerIndex}`);
-            const handicap = parseInt(handicapInput.value, 10) || 0;
-            const slopeRating = getSlopeRating(courseSelect.value, teeSelect.value);
-            const courseHandicap = Math.round(handicap * slopeRating / 113);
-            
-            // Get scores and calculate points
+          selectedPlayers.forEach((player, index) => {
+            const handicap = parseInt(document.getElementById(`hcp-${index}`).value, 10) || 0;
             const scores = [];
             const points = [];
-            let totalShots = 0;
-            let totalPoints = 0;
             
-            holes.forEach(holeIndex => {
-              const scoreInput = document.querySelector(`input[data-player="${playerIndex}"][data-hole="${holeIndex}"]`);
-              const score = parseInt(scoreInput.value, 10) || 0;
+            const holeVal = scorecard.holes;
+            let holeIndices = [...Array(18).keys()];
+            if (holeVal === '9f') holeIndices = holeIndices.slice(0, 9);
+            if (holeVal === '9b') holeIndices = holeIndices.slice(9);
+            
+            holeIndices.forEach(hole => {
+              const input = document.querySelector(`input[data-player="${index}"][data-hole="${hole}"]`);
+              const score = parseInt(input?.value, 10) || 0;
               scores.push(score);
-              totalShots += score;
               
-              // Calculate points
-              const par = courseData.par[holeIndex];
-              const si = courseData.si[holeIndex];
-              const strokesReceived = (courseHandicap >= si + 18) ? 2 : (courseHandicap >= si ? 1 : 0);
-              const netScore = score - strokesReceived;
-              
-              let pointsValue = 0;
-              if (netScore <= par - 3) pointsValue = 5;        // Albatross or better
-              else if (netScore === par - 2) pointsValue = 4;  // Eagle
-              else if (netScore === par - 1) pointsValue = 3;  // Birdie
-              else if (netScore === par) pointsValue = 2;      // Par
-              else if (netScore === par + 1) pointsValue = 1;  // Bogey
-              
-              points.push(pointsValue);
-              totalPoints += pointsValue;
+              // Get points from the display
+              const pointsEl = document.querySelector(`.pts-${index} .points`);
+              if (pointsEl && pointsEl.textContent) {
+                points.push(parseInt(pointsEl.textContent, 10) || 0);
+              } else {
+                points.push(0);
+              }
             });
             
-            // Add player data to scorecard
+            // Calculate totals
+            const totalShots = scores.reduce((sum, val) => sum + val, 0);
+            const totalPoints = points.reduce((sum, val) => sum + val, 0);
+            
             scorecard.players.push({
               name: player,
               handicap,
-              courseHandicap,
+              courseHandicap: Math.round(handicap * courses[courseSelect.value].tees[teeSelect.value].slopeRating / 113),
               scores,
               points,
               totalShots,
@@ -612,193 +516,264 @@
             });
           });
           
-          // Save scorecard
-          BBB_DB.saveScorecard(scorecard)
-            .then(() => {
-              BBB_UTILS.showMessage('Scorecard saved successfully!', 'success');
-              savedSuccessfully = true;
-            })
-            .catch(err => {
-              console.error('Error saving scorecard:', err);
-              BBB_UTILS.showMessage('Error saving scorecard: ' + err.message, 'error');
-            });
-        }
-        
-        /**
-         * Download scorecard as image
-         */
-        function downloadScorecardImage() {
-          if (!tableContainer.firstElementChild) {
-            BBB_UTILS.showMessage('No scorecard to capture.', 'error');
-            return;
+          // Get existing scorecards or initialize empty array
+          let savedScorecards;
+          try {
+            savedScorecards = JSON.parse(localStorage.getItem('golfScorecards') || '[]');
+          } catch (e) {
+            savedScorecards = [];
           }
           
-          // Apply temporary styles for image capture
-          const table = tableContainer.firstElementChild;
-          const originalStyle = table.getAttribute('style') || '';
+          // Add new scorecard and save
+          savedScorecards.push(scorecard);
+          localStorage.setItem('golfScorecards', JSON.stringify(savedScorecards));
           
-          table.style.backgroundColor = 'white';
-          table.style.color = 'black';
-          
-          table.querySelectorAll('th, td').forEach(cell => {
-            cell.style.color = 'black';
-            cell.style.backgroundColor = 'white';
-            cell.style.borderColor = '#000';
-          });
-          
-          // Check if html2canvas is loaded
-          if (typeof html2canvas !== 'function') {
-            BBB_UTILS.showMessage('Image capture library not loaded. Please try again in a few seconds.', 'warning');
-            
-            // Restore original styles
-            table.setAttribute('style', originalStyle);
-            table.querySelectorAll('th, td').forEach(cell => cell.removeAttribute('style'));
-            
-            return;
-          }
-          
-          // Create loading overlay
-          const loadingOverlay = document.createElement('div');
-          loadingOverlay.style.position = 'fixed';
-          loadingOverlay.style.top = '0';
-          loadingOverlay.style.left = '0';
-          loadingOverlay.style.width = '100%';
-          loadingOverlay.style.height = '100%';
-          loadingOverlay.style.backgroundColor = 'rgba(0,0,0,0.5)';
-          loadingOverlay.style.display = 'flex';
-          loadingOverlay.style.justifyContent = 'center';
-          loadingOverlay.style.alignItems = 'center';
-          loadingOverlay.style.color = 'white';
-          loadingOverlay.style.fontSize = '1.5rem';
-          loadingOverlay.style.zIndex = '9999';
-          loadingOverlay.textContent = 'Generating image...';
-          document.body.appendChild(loadingOverlay);
-          
-          // Capture table
-          html2canvas(table, { scale: 2 })
-            .then(canvas => {
-              // Create download link
-              const link = document.createElement('a');
-              link.download = `scorecard_${courseSelect.value}_${new Date().toISOString().split('T')[0]}.png`;
-              link.href = canvas.toDataURL('image/png');
-              link.click();
-              
-              BBB_UTILS.showMessage('Image downloaded successfully!', 'success');
-            })
-            .catch(err => {
-              console.error('Error capturing image:', err);
-              BBB_UTILS.showMessage('Error capturing image: ' + err.message, 'error');
-            })
-            .finally(() => {
-              // Restore original styles
-              table.setAttribute('style', originalStyle);
-              table.querySelectorAll('th, td').forEach(cell => cell.removeAttribute('style'));
-              
-              // Remove loading overlay
-              document.body.removeChild(loadingOverlay);
-            });
+          showMessage('Scorecard saved successfully!', 'success');
+          savedSuccessfully = true;
+        } catch (error) {
+          console.error("Error saving scorecard:", error);
+          showMessage('Error saving scorecard: ' + error.message, 'error');
         }
-        
-        /**
-         * Update scores and points
-         */
-        function updateScores() {
-          if (!scorecardBuilt) return;
-          
-          // Get selected players
+      }
+
+      // Build scorecard button click handler
+      buildBtn.addEventListener('click', function() {
+        try {
           const players = [];
-          document.querySelectorAll('.player-select').forEach(select => {
+          playerSelects.forEach(select => {
             if (select.value) players.push(select.value);
           });
           
-          // Create totals object for each player
-          const totals = players.map(() => ({
-            frontShots: 0,
-            frontPoints: 0,
-            backShots: 0,
-            backPoints: 0,
-            totalShots: 0,
-            totalPoints: 0
-          }));
+          if (!players.length) {
+            showMessage('Please select at least one player.', 'error');
+            return;
+          }
           
-          // Get hole selection
-          const holeSelection = document.querySelector('input[name="holes"]:checked').value;
-          
-          // Determine which holes to show
-          let holes = Array.from({ length: 18 }, (_, i) => i);
-          if (holeSelection === '9f') holes = holes.slice(0, 9);
-          if (holeSelection === '9b') holes = holes.slice(9);
-          
-          // Get course data
-          const courseData = getCourseData(courseSelect.value);
-          
-          // Process each row (hole)
-          tableContainer.querySelectorAll('tbody tr').forEach((row, rowIndex) => {
-            if (rowIndex >= holes.length) return;
-            
-            const holeIndex = holes[rowIndex];
-            const par = courseData.par[holeIndex];
-            const si = courseData.si[holeIndex];
-            const isFrontNine = holeIndex < 9;
-            
-            // Process each player
-            players.forEach((_, playerIndex) => {
-              // Get score input
-              const scoreInput = row.querySelector(`input[data-player="${playerIndex}"][data-hole="${holeIndex}"]`);
-              if (!scoreInput) return;
-              
-              const score = parseInt(scoreInput.value, 10);
-              if (isNaN(score)) return;
-              
-              // Get handicap
-              const handicapInput = document.getElementById(`hcp-${playerIndex}`);
-              const handicap = parseInt(handicapInput.value, 10) || 0;
-              const slopeRating = getSlopeRating(courseSelect.value, teeSelect.value);
-              const courseHandicap = Math.round(handicap * slopeRating / 113);
-              
-              // Calculate strokes received
-              const strokesReceived = (courseHandicap >= si + 18) ? 2 : (courseHandicap >= si ? 1 : 0);
-              
-              // Calculate net score and points
-              const netScore = score - strokesReceived;
-              let points = 0;
-              
-              if (netScore <= par - 3) points = 5;        // Albatross or better
-              else if (netScore === par - 2) points = 4;  // Eagle
-              else if (netScore === par - 1) points = 3;  // Birdie
-              else if (netScore === par) points = 2;      // Par
-              else if (netScore === par + 1) points = 1;  // Bogey
-              
-              // Update points display
-              const pointsDiv = row.querySelector(`.pts-${playerIndex} .points`);
-              if (pointsDiv) pointsDiv.textContent = points;
-              
-              // Update totals
-              totals[playerIndex].totalShots += score;
-              totals[playerIndex].totalPoints += points;
-              
-              if (isFrontNine) {
-                totals[playerIndex].frontShots += score;
-                totals[playerIndex].frontPoints += points;
-              } else {
-                totals[playerIndex].backShots += score;
-                totals[playerIndex].backPoints += points;
-              }
-            });
+          build(players);
+          scorecardBuilt = true;
+          document.getElementById('setup-controls').open = false;
+          saveBtn.disabled = false;
+          showMessage('Scorecard built successfully!', 'success');
+        } catch (error) {
+          console.error("Error building scorecard:", error);
+          showMessage('Error building scorecard: ' + error.message, 'error');
+        }
+      });
+
+      // Reset button click handler
+      resetBtn.addEventListener('click', function() {
+        try {
+          if (scorecardBuilt && !confirm('Reset scorecard? All data will be lost.')) return;
+          scorecardBuilt = false;
+          savedSuccessfully = false;
+          tableContainer.innerHTML = '';
+          document.getElementById('setup-controls').open = true;
+          saveBtn.disabled = true;
+          showMessage('Scorecard reset.', 'success');
+        } catch (error) {
+          console.error("Error resetting scorecard:", error);
+          showMessage('Error resetting scorecard: ' + error.message, 'error');
+        }
+      });
+
+      // Save button click handler
+      saveBtn.addEventListener('click', function() {
+        try {
+          const inputs = tableContainer.querySelectorAll('tbody input[type="number"]');
+          let allFilled = true;
+          inputs.forEach(inp => {
+            if (inp.value === '' || isNaN(parseInt(inp.value, 10))) {
+              inp.classList.add('missing'); 
+              allFilled = false;
+            } else {
+              inp.classList.remove('missing');
+            }
           });
           
-          // Update footer totals
-          players.forEach((_, playerIndex) => {
-            const frontShotsEl = document.getElementById(`shots-0-${playerIndex}`);
-            const frontPointsEl = document.getElementById(`pts-0-${playerIndex}`);
-            const backShotsEl = document.getElementById(`shots-1-${playerIndex}`);
-            const backPointsEl = document.getElementById(`pts-1-${playerIndex}`);
-            const totalShotsEl = document.getElementById(`shots-2-${playerIndex}`);
-            const totalPointsEl = document.getElementById(`pts-2-${playerIndex}`);
+          if (!allFilled) {
+            showMessage('Please enter all scores before saving.', 'error');
+            return;
+          }
+          
+          saveToLocalStorage();
+        } catch (error) {
+          console.error("Error in save button handler:", error);
+          showMessage('Error saving: ' + error.message, 'error');
+        }
+      });
+
+      // Download image button click handler
+      downloadBtn.addEventListener('click', function() {
+        try {
+          const node = tableContainer.firstElementChild;
+          if (!node) {
+            showMessage('No scorecard to capture.', 'error');
+            return;
+          }
+          
+          showMessage('Image download functionality requires html2canvas library. Try saving the scorecard instead.', 'info');
+        } catch (error) {
+          console.error("Error in download button handler:", error);
+          showMessage('Error downloading image: ' + error.message, 'error');
+        }
+      });
+      // Build the scorecard
+      function build(players) {
+        tableContainer.innerHTML = '';
+        const table = document.createElement('table');
+        const caption = document.createElement('caption');
+        caption.textContent = 'Scorecard created: ' + new Date().toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) + 
+                              ' | Course: ' + courseSelect.value + ' | Tees: ' + teeSelect.value;
+        table.appendChild(caption);
+
+        const thead = document.createElement('thead');
+        let hdr1 = '<tr><th>Hole</th><th>Par</th><th style="color:red;">SI</th><th>Yards</th>';
+        players.forEach((p,i) => hdr1 += `<th colspan="2">${p}<br>H:<input id="hcp-${i}" type="number" min="0" max="99" value="0" oninput="if(this.value.length>2) this.value=this.value.slice(0,2)"></th>`);
+        hdr1 += '</tr>';
+        let hdr2 = '<tr><th></th><th></th><th></th><th></th>';
+        players.forEach(() => hdr2 += '<th>Shots</th><th>Pts</th>');
+        hdr2 += '</tr>';
+        thead.innerHTML = hdr1 + hdr2;
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        const holeVal = [...holeRadios].find(r => r.checked).value;
+        let idx = [...Array(18).keys()];
+        if (holeVal === '9f') idx = idx.slice(0,9);
+        if (holeVal === '9b') idx = idx.slice(9);
+        idx.forEach(h => {
+          const tr = document.createElement('tr');
+          const c = courses[courseSelect.value];
+          tr.innerHTML = `<td>${h+1}</td><td>${c.par[h]}</td><td style="color:red;">${c.si[h]}</td><td>${c.yards[teeSelect.value][h]}</td>`;
+          players.forEach((_,pi) => {
+            tr.innerHTML += `<td><input data-player="${pi}" data-hole="${h}" type="number" min="0" max="999" oninput="if(this.value.length>3) this.value=this.value.slice(0,3)"></td><td class="pts-${pi}"><div class="stroke-info" data-player="${pi}" data-hole="${h}"></div><div class="points"></div></td>`;
+          });
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+
+        const tfoot = document.createElement('tfoot');
+        ['Front 9','Back 9','Total'].forEach((lbl,i) => {
+          let row = `<tr><td colspan="4">${lbl}</td>`;
+          players.forEach((_,pi) => row += `<td id="shots-${i}-${pi}"></td><td id="pts-${i}-${pi}"></td>`);
+          row += '</tr>';
+          tfoot.innerHTML += row;
+        });
+        table.appendChild(tfoot);
+        tableContainer.appendChild(table);
+
+        // Setup handlers
+        players.forEach((_,i) => {
+          const hIn = document.getElementById(`hcp-${i}`);
+          if (!hIn) return; // Safety check
+          
+          const adj = document.createElement('span'); 
+          adj.id = `adjhcp-${i}`; 
+          adj.style.marginLeft = '0.5rem';
+          hIn.insertAdjacentElement('afterend', adj);
+          
+          const updateAdj = () => {
+            const raw = parseInt(hIn.value, 10) || 0;
+            const a = Math.round(raw * courses[courseSelect.value].tees[teeSelect.value].slopeRating / 113);
+            adj.textContent = 'CH: ' + a;
             
-            if (frontShotsEl) frontShotsEl.textContent = totals[playerIndex].frontShots || '';
-            if (frontPointsEl) frontPointsEl.textContent = totals[playerIndex].frontPoints || '';
-            if (backShotsEl) backShotsEl.textContent = totals[playerIndex].backShots || '';
-            if (backPointsEl) backPointsEl.textContent = totals[playerIndex].backPoints || '';
-            if (totalShotsEl) totalShotsEl.textContent = totals[playerIndex].totalShots || '';
-            if (totalPointsEl) totalPointsEl.textContent = totals[playerIndex].totalPoints || '';
+            idx.forEach(h => {
+              const siVal = courses[courseSelect.value].si[h];
+              const strokes = a >= siVal + 18 ? 2 : a >= siVal ? 1 : 0;
+              const info = document.querySelector(`.stroke-info[data-player="${i}"][data-hole="${h}"]`);
+              if (info) info.textContent = `(${strokes} stroke${strokes!==1?'s':''})`;
+            });
+          };
+          
+          hIn.addEventListener('input', () => { 
+            if (hIn.value === '' || isNaN(parseInt(hIn.value, 10)) || parseInt(hIn.value, 10) < 0) {
+              hIn.classList.add('invalid-hcp');
+            } else {
+              hIn.classList.remove('invalid-hcp');
+              updateAdj(); 
+              debounce(updateScores)();
+            }
+          });
+          
+          updateAdj();
+        });
+
+        // Add input handlers to all score inputs
+        const scoreInputs = table.querySelectorAll('tbody input[type="number"]');
+        scoreInputs.forEach(inp => {
+          inp.addEventListener('input', () => { 
+            inp.classList.remove('missing'); 
+            debounce(updateScores)(); 
+          });
+        });
+
+        function updateScores() {
+          try {
+            const tots = players.map(() => ({fS:0, fP:0, bS:0, bP:0, oS:0, oP:0}));
+            
+            table.querySelectorAll('tbody tr').forEach((tr, rIdx) => {
+              if (rIdx >= idx.length) return; // Safety check
+              
+              const h = idx[rIdx]; 
+              const c = courses[courseSelect.value]; 
+              const parVal = c.par[h];
+              const siVal = c.si[h]; 
+              const front = h < 9;
+              
+              players.forEach((_, pi) => {
+                const inp = tr.querySelector(`input[data-player="${pi}"][data-hole="${h}"]`);
+                if (!inp) return; // Safety check
+                
+                const sc = parseInt(inp.value, 10); 
+                if (isNaN(sc)) return;
+                
+                const hcpInput = document.getElementById(`hcp-${pi}`);
+                if (!hcpInput) return; // Safety check
+                
+                const raw = parseInt(hcpInput.value, 10) || 0;
+                const a = Math.round(raw * courses[courseSelect.value].tees[teeSelect.value].slopeRating / 113);
+                const strokes = a >= siVal + 18 ? 2 : a >= siVal ? 1 : 0;
+                const net = sc - strokes;
+                let pts = 0;
+                
+                if (net <= parVal - 3)       pts = 5;
+                else if (net === parVal - 2)  pts = 4;
+                else if (net === parVal - 1)  pts = 3;
+                else if (net === parVal)      pts = 2;
+                else if (net === parVal + 1)  pts = 1;
+                
+                const pointsDiv = tr.querySelector(`.pts-${pi} .points`);
+                if (pointsDiv) pointsDiv.textContent = pts;
+                
+                tots[pi].oS += sc; 
+                tots[pi].oP += pts;
+                
+                if (front) { 
+                  tots[pi].fS += sc; 
+                  tots[pi].fP += pts; 
+                } else { 
+                  tots[pi].bS += sc; 
+                  tots[pi].bP += pts; 
+                }
+              });
+            });
+            
+            // Update totals in footer
+            tots.forEach((t, pi) => {
+              [['shots', 'fS', 'fP'], ['shots', 'bS', 'bP'], ['shots', 'oS', 'oP']].forEach((cols, i) => {
+                const shotsEl = document.getElementById(`${cols[0]}-${i}-${pi}`);
+                const ptsEl = document.getElementById(`pts-${i}-${pi}`);
+                
+                if (shotsEl) shotsEl.textContent = t[cols[1]];
+                if (ptsEl) ptsEl.textContent = t[cols[2]];
+              });
+            });
+          } catch (error) {
+            console.error("Error updating scores:", error);
+          }
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
