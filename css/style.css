@@ -844,3 +844,32 @@ caption {
     max-width: 300px; /* Limit width on mobile */
   }
 }
+/* Main image centering styles */
+.main-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem auto;
+  width: 100%;
+  max-width: 800px; /* Adjust this value based on your preference */
+}
+
+.main-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.main-image:hover {
+  transform: scale(1.02);
+}
+
+/* Return text styling */
+.return-text {
+  text-align: center;
+  font-style: italic;
+  color: #666;
+  margin-bottom: 1.5rem;
+}
