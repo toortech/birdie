@@ -58,6 +58,12 @@
 }
 
 /* ----------- Base Styles ----------- */
+html, body {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
 body {
   background-color: var(--bbb-background);
   font-family: var(--font-family-base);
@@ -91,6 +97,7 @@ body {
 header {
   margin-bottom: var(--spacing-xl);
   position: relative;
+  border-top: none;
 }
 
 .top-bar {
@@ -133,6 +140,7 @@ header {
   padding: var(--spacing-md);
   z-index: 5;
   background-color: transparent;
+  border-top: none;
 }
 
 .main-content {
