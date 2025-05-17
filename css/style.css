@@ -541,6 +541,31 @@ caption {
     margin: 0 8px;
   }
   
+  /* FIX: Added for title and golf ball alignment on tablets */
+  .page-title-container {
+    margin-top: 80px; /* Space for the logo */
+  }
+  
+  .golf-ball-decoration {
+    display: inline-block;
+    margin-bottom: 0.5rem;
+  }
+  
+  .title-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  /* Make title display as block for better mobile alignment */
+  h1.page-title {
+    display: block;
+    text-align: center;
+    margin-top: 0.5rem;
+  }
+  
+  /* END FIX */
+  
   .corner-logo {
     width: 70px;
     height: 70px;
@@ -587,6 +612,25 @@ caption {
     width: 40px;
     margin: 0 5px;
   }
+  
+  /* FIX: Adjusted for smaller mobile screens */
+  .page-title-container {
+    margin-top: 70px; /* Slightly reduced for smaller screens */
+  }
+  
+  /* Force golf ball row to appear above title */
+  .golf-ball-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+  
+  /* Add more space between title and golfballs on very small screens */
+  .golf-ball-decoration {
+    margin-bottom: 0.75rem;
+  }
+  
+  /* END FIX */
   
   .corner-logo {
     width: 65px;
