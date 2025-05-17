@@ -1003,6 +1003,34 @@
             return;
           }
           
+          // Check if any scores are missing before generating image
+          const inputs = tableContainer.querySelectorAll('tbody input[type="number"]');
+          let missingScores = false;
+          let invalidScores = false;
+          
+          inputs.forEach(inp => {
+            if (inp.value === '' || inp.value === null) {
+              inp.classList.add('missing');
+              missingScores = true;
+            } else if (isNaN(parseInt(inp.value, 10)) || parseInt(inp.value, 10) < 0) {
+              inp.classList.add('invalid-score');
+              invalidScores = true;
+            } else {
+              inp.classList.remove('missing');
+              inp.classList.remove('invalid-score');
+            }
+          });
+          
+          if (missingScores) {
+            showMessage('Please enter all scores before saving as image.', 'error');
+            return;
+          }
+          
+          if (invalidScores) {
+            showMessage('Please fix invalid scores before saving as image.', 'error');
+            return;
+          }
+          
           downloadScorecardAsImage();
         } catch (error) {
           console.error("Error in download button handler:", error);
