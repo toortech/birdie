@@ -710,6 +710,36 @@
           // Clone the table so we don't modify the original
           const tableClone = table.cloneNode(true);
           
+          // Fix input values in the clone - convert inputs to text elements
+          // This is the critical part that fixes the numbers not showing in boxes
+          const inputs = tableClone.querySelectorAll('input');
+          inputs.forEach(input => {
+            const span = document.createElement('span');
+            // Copy the value from the original input
+            const originalInput = table.querySelector(`input[id="${input.id}"], input[data-player="${input.dataset.player}"][data-hole="${input.dataset.hole}"]`);
+            
+            if (originalInput && originalInput.value) {
+              span.textContent = originalInput.value;
+            } else if (input.value) {
+              span.textContent = input.value;
+            } else {
+              span.textContent = '';
+            }
+            
+            // Style the span to look like an input
+            span.style.display = 'inline-block';
+            span.style.width = input.type === 'number' ? '20px' : '30px';
+            span.style.height = '20px';
+            span.style.border = '1px solid #ccc';
+            span.style.borderRadius = '3px';
+            span.style.backgroundColor = '#fff';
+            span.style.padding = '2px';
+            span.style.textAlign = 'center';
+            
+            // Replace the input with the span
+            input.parentNode.replaceChild(span, input);
+          });
+          
           // Add a proper title to the image
           const title = document.createElement('h2');
           title.textContent = `Stableford Scorecard - ${courseSelect.value} (${teeSelect.value} tees)`;
@@ -725,7 +755,8 @@
           html2canvas(container, { 
             backgroundColor: '#ffffff',
             scale: 2, // Increase quality
-            logging: false
+            logging: false,
+            useCORS: true
           }).then(canvas => {
             // Remove the temporary container
             document.body.removeChild(container);
