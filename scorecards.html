@@ -5,6 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stableford Scorecard – Birdie Bush Bandits</title>
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  <!-- Add scripts to support BBB framework -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
   <!-- Add html2canvas library for image download functionality -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
@@ -506,18 +512,19 @@
         };
       }
 
-      // Save to local storage
+      // Save to database and link to view page
       function saveToLocalStorage() {
         if (!scorecardBuilt) return;
         
         try {
           const scorecard = {
-            id: Date.now(), // Add a unique ID for each scorecard
+            id: 'scorecard_' + Date.now(), // Add a unique ID for each scorecard
             date: new Date().toISOString(),
             course: courseSelect.value,
             tee: teeSelect.value,
             holes: [...holeRadios].find(r => r.checked).value,
             players: [],
+            createdAt: new Date().toISOString(),
             savedAt: new Date().toLocaleString('en-GB')
           };
           
@@ -580,6 +587,40 @@
             });
           });
           
+          // Try to save using BBB_DB if available, otherwise fallback to localStorage
+          if (typeof BBB_DB !== 'undefined' && typeof BBB_DB.saveScorecard === 'function') {
+            // Using BBB_DB module
+            BBB_DB.saveScorecard(scorecard)
+              .then(() => {
+                showMessage('Scorecard saved successfully!', 'success');
+                savedSuccessfully = true;
+                
+                // Add redirect to view page after short delay
+                setTimeout(() => {
+                  window.location.href = 'view-saved-scores.html';
+                }, 1500);
+              })
+              .catch(error => {
+                console.error("Error saving to BBB_DB:", error);
+                // Fallback to localStorage if BBB_DB fails
+                saveToLocalStorageFallback(scorecard);
+              });
+          } else {
+            // Fallback to localStorage if BBB_DB not available
+            saveToLocalStorageFallback(scorecard);
+          }
+          
+          return true;
+        } catch (error) {
+          console.error("Error saving scorecard:", error);
+          showMessage('Error saving scorecard: ' + error.message, 'error');
+          return false;
+        }
+      }
+      
+      // Fallback to original localStorage method
+      function saveToLocalStorageFallback(scorecard) {
+        try {
           // Get existing scorecards or initialize empty array
           let savedScorecards;
           try {
@@ -594,99 +635,134 @@
           savedScorecards.push(scorecard);
           localStorage.setItem('golfScorecards', JSON.stringify(savedScorecards));
           
-          showMessage('Scorecard saved successfully!', 'success');
+          showMessage('Scorecard saved to local storage. View in saved scorecards page.', 'success');
           savedSuccessfully = true;
           
-          // Update the saved scorecards list
+          // Update UI
           updateSavedScorecardsList();
+          
+          // Add a button to navigate to the view page
+          const viewBtn = document.createElement('button');
+          viewBtn.textContent = 'View All Scorecards';
+          viewBtn.className = 'btn';
+          viewBtn.style.marginTop = '1rem';
+          viewBtn.style.display = 'block';
+          viewBtn.style.margin = '1rem auto';
+          viewBtn.addEventListener('click', () => {
+            window.location.href = 'view-saved-scores.html';
+          });
+          
+          // Add to container
+          if (!document.getElementById('view-scorecards-btn')) {
+            viewBtn.id = 'view-scorecards-btn';
+            tableContainer.appendChild(viewBtn);
+          }
           
           return true;
         } catch (error) {
-          console.error("Error saving scorecard:", error);
-          showMessage('Error saving scorecard: ' + error.message, 'error');
+          console.error("Error in localStorage fallback:", error);
+          showMessage('Error saving to localStorage: ' + error.message, 'error');
           return false;
         }
       }
       
-      // Load saved scorecards list
-      function updateSavedScorecardsList() {
-        try {
-          let savedScorecards = JSON.parse(localStorage.getItem('golfScorecards') || '[]');
-          if (!Array.isArray(savedScorecards)) savedScorecards = [];
-          
-          scorecardList.innerHTML = '';
-          
-          if (savedScorecards.length === 0) {
-            scorecardList.innerHTML = '<li>No saved scorecards found</li>';
-            return;
+      // Load any saved scorecards
+      function loadSavedScorecards() {
+        if (typeof BBB_DB !== 'undefined' && typeof BBB_DB.getScorecards === 'function') {
+          BBB_DB.getScorecards()
+            .then(scorecards => {
+              // Iterate over scorecards, they might be an object
+              const scorecardItems = Object.values(scorecards);
+              if (scorecardItems.length > 0) {
+                // Show a button to view all scorecards
+                const viewButton = document.createElement('button');
+                viewButton.id = 'view-all-saved';
+                viewButton.className = 'btn';
+                viewButton.textContent = 'View All Saved Scorecards';
+                viewButton.style.display = 'block';
+                viewButton.style.margin = '1rem auto';
+                viewButton.addEventListener('click', () => {
+                  window.location.href = 'view-saved-scores.html';
+                });
+                
+                if (!document.getElementById('view-all-saved')) {
+                  document.body.insertBefore(viewButton, document.body.firstChild.nextSibling);
+                }
+              }
+            })
+            .catch(err => {
+              console.error("Error loading scorecards:", err);
+            });
+        } else {
+          // Fallback to localStorage if BBB_DB not available
+          try {
+            const savedScorecards = JSON.parse(localStorage.getItem('golfScorecards') || '[]');
+            if (savedScorecards.length > 0) {
+              // Show a button to view all scorecards
+              const viewButton = document.createElement('button');
+              viewButton.id = 'view-all-saved';
+              viewButton.className = 'btn';
+              viewButton.textContent = 'View All Saved Scorecards';
+              viewButton.style.display = 'block';
+              viewButton.style.margin = '1rem auto';
+              viewButton.addEventListener('click', () => {
+                window.location.href = 'view-saved-scores.html';
+              });
+              
+              if (!document.getElementById('view-all-saved')) {
+                document.body.insertBefore(viewButton, document.body.firstChild.nextSibling);
+              }
+            }
+          } catch (e) {
+            console.error("Error parsing saved scorecards:", e);
           }
-          
-          // Sort by date, newest first
-          savedScorecards.sort((a, b) => new Date(b.date) - new Date(a.date));
-          
-          savedScorecards.forEach(card => {
-            const li = document.createElement('li');
-            
-            // Create the scorecard info text
-            const date = new Date(card.date);
-            const formattedDate = date.toLocaleDateString('en-GB', { 
-              weekday: 'short',
-              year: 'numeric', 
-              month: 'short', 
-              day: 'numeric' 
-            });
-            
-            // Create the info text with player details
-            let playerInfo = '';
-            card.players.forEach(player => {
-              playerInfo += `${player.name} (${player.totalPoints}pts), `;
-            });
-            playerInfo = playerInfo.slice(0, -2); // Remove the last comma
-            
-            li.innerHTML = `
-              <div>
-                <strong>${formattedDate} - ${card.course} (${card.tee})</strong><br>
-                ${playerInfo}
-              </div>
-              <div>
-                <button class="delete-card" data-id="${card.id}">Delete</button>
-              </div>
-            `;
-            
-            scorecardList.appendChild(li);
-          });
-          
-          // Add event listeners to delete buttons
-          document.querySelectorAll('.delete-card').forEach(btn => {
-            btn.addEventListener('click', function() {
-              const cardId = parseInt(this.dataset.id, 10);
-              deleteScorecard(cardId);
-            });
-          });
-        } catch (error) {
-          console.error("Error updating saved scorecards list:", error);
-          showMessage('Error loading saved scorecards: ' + error.message, 'error');
         }
       }
       
-      // Delete a saved scorecard
-      function deleteScorecard(id) {
-        try {
-          if (!confirm('Are you sure you want to delete this scorecard?')) return;
-          
-          let savedScorecards = JSON.parse(localStorage.getItem('golfScorecards') || '[]');
-          if (!Array.isArray(savedScorecards)) savedScorecards = [];
-          
-          const filteredScorecards = savedScorecards.filter(card => card.id !== id);
-          localStorage.setItem('golfScorecards', JSON.stringify(filteredScorecards));
-          
-          showMessage('Scorecard deleted successfully!', 'success');
-          updateSavedScorecardsList();
-        } catch (error) {
-          console.error("Error deleting scorecard:", error);
-          showMessage('Error deleting scorecard: ' + error.message, 'error');
+      // Check for BBB modules and initialize if available
+      function initBBBModules() {
+        // Check if BBB modules are loaded
+        if (typeof BBB_AUTH !== 'undefined' && typeof BBB_DB !== 'undefined') {
+          try {
+            // Initialize BBB modules
+            if (typeof BBB_CONFIG !== 'undefined') {
+              BBB_AUTH.init({
+                cloudflareEnabled: BBB_CONFIG.cloudflareEnabled || false
+              });
+              
+              BBB_DB.init({
+                useCloudflare: BBB_CONFIG.cloudflareEnabled || false,
+                localStoragePrefix: 'bbb_'
+              });
+            } else {
+              // Fallback initialization
+              BBB_AUTH.init({
+                cloudflareEnabled: false
+              });
+              
+              BBB_DB.init({
+                useCloudflare: false,
+                localStoragePrefix: 'bbb_'
+              });
+            }
+            
+            // Load saved scorecards
+            loadSavedScorecards();
+            
+            console.log("BBB modules initialized successfully");
+          } catch (err) {
+            console.error("Error initializing BBB modules:", err);
+          }
+        } else {
+          console.log("BBB modules not available");
         }
       }
+      
+      // Initialize BBB modules after DOM content loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        // Small delay to ensure all scripts are loaded
+        setTimeout(initBBBModules, 100);
+      });
       
       // Download scorecard as image
       function downloadScorecardAsImage() {
