@@ -4,7 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stableford Scorecard – Birdie Bush Bandits</title>
+  <meta name="description" content="Create and save golf scorecards for Birdie Bush Bandits members.">
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  <!-- Add Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
   <!-- Load JavaScript modules -->
   <script src="js/config.js"></script>
   <script src="js/utils.js"></script>
@@ -12,75 +17,11 @@
   <script src="js/db.js"></script>
   <script src="js/ui.js"></script>
   <style>
-    /* Base styles */
-    body { 
-      background: #f5f5f5; 
-      color: #000; 
-      font-family: Arial, sans-serif; 
-      padding: 1rem; 
-      margin: 0 auto; 
-      max-width: 1200px;
-      position: relative;
-    }
-    
-    /* Validation & utility */
-    .invalid-hcp, .missing { border: 2px solid red; background-color: #ffcccc; }
-    
-    /* Logo in top-right corner */
-    .top-bar {
-      position: absolute;
-      top: 0;
-      right: 0;
-      z-index: 10;
-    }
-    
-    .corner-logo {
-      width: 80px;
-      height: 80px;
-      display: block;
-    }
-    
-    h1 { 
-      color: #003300; 
-      font-size: 2rem; 
-      text-align: center; 
-      margin-bottom: 1rem; 
-    }
-    
-    header { 
-      position: fixed;
-      top: 0;
-      left: 0;
-      padding: 1rem;
-      z-index: 5;
-    }
-    
-    .home-link { 
-      color: #000; 
-      font-weight: bold; 
-      text-decoration: none;
-      display: inline-block;
-      padding: 0.5rem 0.75rem;
-      background-color: rgba(255, 255, 255, 0.9);
-      border-radius: 4px;
-      transition: background-color 0.3s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    .home-link:hover {
-      background-color: rgba(255, 255, 255, 1);
-    }
-    
-    /* Main content wrapper */
-    main {
-      padding-top: 80px;
-    }
-    
+    /* Scorecard-specific styles to supplement site-wide CSS */
     /* Controls */
     details#setup-controls { margin-bottom: 1rem; }
     .controls { display: flex; flex-wrap: wrap; gap: 1rem; }
     .controls > div { background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 6px; flex: 1 1 200px; }
-    .controls label { display: block; margin-bottom: 0.25rem; font-weight: bold; }
     .controls label.checkbox { display: inline-block; margin-right: 0.5rem; }
     
     /* Player selects styling */
@@ -103,80 +44,16 @@
       margin-bottom: 0.5rem;
     }
     
-    /* Buttons */
-    #button-group { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem; }
-    select, button { padding: 0.5rem 1rem; cursor: pointer; }
-    button { background: #004c99; color: white; border: none; border-radius: 4px; }
-    button:hover { background: #003d7a; }
-    button:active { opacity: 0.8; transform: scale(0.98); }
-    button:disabled { background: #cccccc; cursor: not-allowed; }
-    
     /* Table */
     #table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 1rem; }
-    table { width: 100%; border-collapse: collapse; min-width: 600px; }
-    caption { caption-side: top; text-align: left; padding: 0.5rem; font-weight: bold; background: #eef; }
-    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: center; white-space: nowrap; }
-    th { background: #ddd; }
     
-    /* Status messages */
-    #status-message { 
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 4px;
-      text-align: center;
-      display: none;
-    }
-    .success { background-color: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
-    .error { background-color: #ffcdd2; color: #b71c1c; border: 1px solid #ef9a9a; }
-    .warning { background-color: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
-    .info { background-color: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; }
+    /* Validation */
+    .invalid-hcp, .missing { border: 2px solid var(--bbb-error, #dc3545); background-color: #ffcccc; }
     
-    /* Responsive */
-    @media (max-width: 768px) {
-      header {
-        padding: 0.75rem;
-      }
-      
-      main {
-        padding-top: 70px;
-      }
-      
-      .corner-logo {
-        width: 70px;
-        height: 70px;
-      }
-      
-      .controls { flex-direction: column; }
-      #button-group { flex-direction: column; }
-      table { font-size: 0.8rem; }
-    }
+    /* Stroke info and points */
+    .stroke-info, .points { font-size: 0.85em; }
     
     @media (max-width: 480px) {
-      body { padding: 0.5rem; }
-      
-      header {
-        padding: 0.5rem;
-      }
-      
-      main {
-        padding-top: 65px;
-      }
-      
-      .corner-logo {
-        width: 65px;
-        height: 65px;
-      }
-      
-      .home-link {
-        padding: 0.4rem 0.6rem;
-        font-size: 0.9rem;
-      }
-      
-      h1 { font-size: 1.5rem; }
-      .controls { flex-direction: column; gap: 0.5rem; }
-      .controls > div { flex: 1 1 100%; }
-      #button-group { flex-direction: column; }
-      select, button { width: 100%; }
       /* Mobile table adjustments */
       table { min-width: auto; table-layout: auto; font-size: 0.65rem; width: 100%; }
       th, td { white-space: normal; word-wrap: break-word; padding: 0.2rem; }
@@ -186,23 +63,63 @@
   </style>
 </head>
 <body>
+  <!-- Set Flag for Auth Check -->
+  <script type="text/javascript">
+    // Define authCheckPerformed in window scope to prevent double authentication
+    window.authCheckPerformed = false;
+  </script>
+
+  
   <!-- Authentication Protection -->
   <script>
-    // Check if BBB_AUTH is loaded
+    // Check if BBB_AUTH is loaded - with debug output
     document.addEventListener('DOMContentLoaded', function() {
-      // Wait for auth module to initialize
+      // Skip if auth check already performed
+      if (window.authCheckPerformed) {
+        console.log('Auth check already performed, skipping');
+        return;
+      }
+      
+      console.log('DOM loaded, checking auth status...');
+      window.authCheckPerformed = true;
+      
+      // Check immediately first
+      if (typeof BBB_AUTH !== 'undefined') {
+        console.log('Auth module found, current auth status:', BBB_AUTH.isAuthenticated);
+        
+        // Only redirect if explicitly not authenticated (avoid redirecting during initialization)
+        if (BBB_AUTH.isAuthenticated === false && window.location.pathname.indexOf('login.html') === -1) {
+          console.log('Not authenticated, redirecting to login');
+          // Save the current URL to redirect back after login
+          sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+          window.location.href = 'login.html';
+        } else {
+          console.log('Already authenticated or authentication in progress');
+        }
+      } else {
+        console.log('Auth module not found initially, will check again after delay');
+      }
+      
+      // Wait for auth module to initialize as fallback
       setTimeout(function() {
         if (typeof BBB_AUTH !== 'undefined') {
-          // If not authenticated and not on login page, redirect to login
-          if (!BBB_AUTH.isAuthenticated && window.location.pathname.indexOf('login.html') === -1) {
+          console.log('Auth module check after delay, status:', BBB_AUTH.isAuthenticated);
+          
+          // Only redirect if explicitly not authenticated AND module is fully loaded
+          if (BBB_AUTH.isAuthenticated === false && 
+              BBB_AUTH.currentUser === null && 
+              window.location.pathname.indexOf('login.html') === -1) {
+            console.log('Not authenticated after delay, redirecting to login');
             // Save the current URL to redirect back after login
             sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
             window.location.href = 'login.html';
+          } else {
+            console.log('Already authenticated or no redirection needed');
           }
         } else {
           console.error('BBB_AUTH module not found! Authentication check failed.');
         }
-      }, 100); // Small delay to ensure modules are loaded
+      }, 300); // Increased delay to ensure modules are loaded
     });
   </script>
 
@@ -214,11 +131,124 @@
     <nav><a href="index.html" class="home-link">🏠 Home</a></nav>
   </header>
   
-  <main>
-    <h1>Stableford Scorecard – Birdie Bush Bandits</h1>
-    <div id="status-message"></div>
-    <details id="setup-controls" open>
-      <summary>⚙️ Setup Options</summary>
+  <main id="main"></main>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize modules
+      if (typeof BBB_AUTH !== 'undefined') {
+        console.log('Initializing BBB_AUTH...');
+        try {
+          BBB_AUTH.init({
+            cloudflareEnabled: BBB_CONFIG && BBB_CONFIG.cloudflareEnabled ? BBB_CONFIG.cloudflareEnabled : false
+          });
+          console.log('BBB_AUTH initialization complete, authenticated:', BBB_AUTH.isAuthenticated);
+        } catch (e) {
+          console.error('Error initializing BBB_AUTH:', e);
+        }
+      } else {
+        console.warn('BBB_AUTH module not available');
+      }
+      
+      if (typeof BBB_DB !== 'undefined') {
+        console.log('Initializing BBB_DB...');
+        try {
+          BBB_DB.init({
+            useCloudflare: BBB_CONFIG && BBB_CONFIG.cloudflareEnabled ? BBB_CONFIG.cloudflareEnabled : false,
+            localStoragePrefix: 'bbb_'
+          });
+          console.log('BBB_DB initialization complete');
+        } catch (e) {
+          console.error('Error initializing BBB_DB:', e);
+        }
+      } else {
+        console.warn('BBB_DB module not available');
+      }
+      
+      // Try to use the UI module's header if available
+      let mainElement;
+      
+      if (typeof BBB_UI !== 'undefined' && typeof BBB_UI.createHeader === 'function') {
+        const headerElements = BBB_UI.createHeader({
+          fixed: true,
+          showHomeLinkText: true
+        });
+        
+        document.body.insertBefore(headerElements.header, document.body.firstChild);
+        mainElement = document.getElementById('main');
+        mainElement.appendChild(headerElements.mainWrapper);
+        
+        // Create content div
+        const mainContent = document.createElement('div');
+        
+        // Create page title with golf balls if UI module supports it
+        if (typeof BBB_UI.createPageTitle === 'function') {
+          const titleContainer = BBB_UI.createPageTitle({
+            title: 'Birdie Bush Bandits',
+            showFoundedText: true,
+            showGolfballs: true
+          });
+          mainContent.appendChild(titleContainer);
+        } else {
+          // Fallback title
+          const h1 = document.createElement('h1');
+          h1.textContent = 'Birdie Bush Bandits';
+          mainContent.appendChild(h1);
+        }
+        
+        // Add page subtitle
+        const subtitle = document.createElement('h2');
+        subtitle.textContent = 'Stableford Scorecard';
+        mainContent.appendChild(subtitle);
+        
+        // Create status message container
+        let statusMessage;
+        if (typeof BBB_UI.createStatusMessage === 'function') {
+          statusMessage = BBB_UI.createStatusMessage();
+        } else {
+          statusMessage = document.createElement('div');
+          statusMessage.id = 'status-message';
+        }
+        mainContent.appendChild(statusMessage);
+        
+        // Add scorecard content
+        createScorecardContent(mainContent, statusMessage);
+        
+        // Add content to main wrapper
+        headerElements.mainWrapper.appendChild(mainContent);
+      } else {
+        // Fallback if UI module not available
+        mainElement = document.getElementById('main');
+        const h1 = document.createElement('h1');
+        h1.textContent = 'Stableford Scorecard – Birdie Bush Bandits';
+        mainElement.appendChild(h1);
+        
+        // Direct status message
+        const statusMessage = document.createElement('div');
+        statusMessage.id = 'status-message';
+        mainElement.appendChild(statusMessage);
+        
+        // Create scorecard directly in main
+        createScorecardContent(mainElement, statusMessage);
+      }
+      
+      function createScorecardContent(container, statusMessageEl) {
+    (function() {
+      'use strict';
+      
+      function createScorecardContent(container, statusMessageEl) {
+        // Create the scorecard interface container
+        const scorecardContainer = document.createElement('div');
+        scorecardContainer.className = 'calculator';
+        
+        // Create setup controls
+        const setupControls = document.createElement('details');
+        setupControls.id = 'setup-controls';
+        setupControls.open = true;
+        
+        const setupSummary = document.createElement('summary');
+        setupSummary.innerHTML = '⚙️ Setup Options';
+        setupControls.appendChild(setupSummary);
       <div class="controls">
         <div>
           <label for="course-select">Course:</label>
@@ -324,14 +354,68 @@
         </div>
       </div>
     </details>
-    <div id="button-group">
-      <button id="build">Build Scorecard</button>
-      <button id="reset">Reset</button>
-      <button id="save" disabled>Save Scorecard</button>
-      <button id="download-image">📸 Save Scorecard as Image</button>
-    </div>
-    <div id="table-container"></div>
-  </main>
+        // Button group
+        const buttonGroup = document.createElement('div');
+        buttonGroup.id = 'button-group';
+        buttonGroup.className = 'button-group';
+        
+        let buildBtn, resetBtn, saveBtn, downloadBtn;
+        
+        // Try to use BBB_UI for buttons if available
+        if (typeof BBB_UI !== 'undefined' && typeof BBB_UI.createButton === 'function') {
+          buildBtn = BBB_UI.createButton({
+            text: 'Build Scorecard',
+            id: 'build'
+          });
+          
+          resetBtn = BBB_UI.createButton({
+            text: 'Reset',
+            id: 'reset'
+          });
+          
+          saveBtn = BBB_UI.createButton({
+            text: 'Save Scorecard',
+            id: 'save',
+            disabled: true
+          });
+          
+          downloadBtn = BBB_UI.createButton({
+            text: '📸 Save Scorecard as Image',
+            id: 'download-image'
+          });
+        } else {
+          // Fallback to regular buttons
+          buildBtn = document.createElement('button');
+          buildBtn.id = 'build';
+          buildBtn.textContent = 'Build Scorecard';
+          
+          resetBtn = document.createElement('button');
+          resetBtn.id = 'reset';
+          resetBtn.textContent = 'Reset';
+          
+          saveBtn = document.createElement('button');
+          saveBtn.id = 'save';
+          saveBtn.textContent = 'Save Scorecard';
+          saveBtn.disabled = true;
+          
+          downloadBtn = document.createElement('button');
+          downloadBtn.id = 'download-image';
+          downloadBtn.textContent = '📸 Save Scorecard as Image';
+        }
+        // Finish building the page structure
+        buttonGroup.appendChild(buildBtn);
+        buttonGroup.appendChild(resetBtn);
+        buttonGroup.appendChild(saveBtn);
+        buttonGroup.appendChild(downloadBtn);
+        scorecardContainer.appendChild(setupControls);
+        scorecardContainer.appendChild(buttonGroup);
+        
+        // Table container
+        const tableContainer = document.createElement('div');
+        tableContainer.id = 'table-container';
+        scorecardContainer.appendChild(tableContainer);
+        
+        container.appendChild(scorecardContainer);
   <script>
     (function() {
       'use strict';
@@ -438,11 +522,18 @@
       
       // Show message function
       function showMessage(message, type) {
-        statusMessage.textContent = message;
-        statusMessage.className = type;
-        statusMessage.style.display = 'block';
+        // Try to use BBB_UTILS first if available
+        if (typeof BBB_UTILS !== 'undefined' && typeof BBB_UTILS.showMessage === 'function') {
+          BBB_UTILS.showMessage(message, type);
+          return;
+        }
+        
+        // Otherwise use direct DOM manipulation
+        statusMessageEl.textContent = message;
+        statusMessageEl.className = type;
+        statusMessageEl.style.display = 'block';
         setTimeout(() => {
-          statusMessage.style.display = 'none';
+          statusMessageEl.style.display = 'none';
         }, 3000);
       }
       
