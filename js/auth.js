@@ -28,11 +28,18 @@ const BBB_AUTH = {
     // Merge options with defaults
     this.config = { ...this.config, ...options };
     
-    // Check for existing session
+    // Check for existing session - priority #1
     this.checkSession();
     
     // Set up listeners for auth-protected elements
     this.setupProtectedElements();
+    
+    // For debugging - log authentication status
+    console.log('Auth initialized:', { 
+      isAuthenticated: this.isAuthenticated, 
+      currentUser: this.currentUser,
+      userRoles: this.userRoles
+    });
     
     // Return for chaining
     return this;
@@ -46,12 +53,17 @@ const BBB_AUTH = {
     try {
       // Get stored session
       const storedSession = localStorage.getItem(this.config.storageKey);
-      if (!storedSession) return false;
+      if (!storedSession) {
+        console.log('No stored session found');
+        return false;
+      }
       
       const session = JSON.parse(storedSession);
+      console.log('Found stored session:', session);
       
       // Check if session is expired
       if (Date.now() > session.expiresAt) {
+        console.log('Session expired, logging out');
         this.logout();
         return false;
       }
@@ -60,6 +72,12 @@ const BBB_AUTH = {
       this.currentUser = session.user;
       this.isAuthenticated = true;
       this.userRoles = session.roles || [];
+      
+      console.log('Valid session restored:', {
+        user: this.currentUser,
+        roles: this.userRoles,
+        expiresAt: new Date(session.expiresAt).toLocaleString()
+      });
       
       return true;
     } catch (error) {
@@ -105,6 +123,12 @@ const BBB_AUTH = {
       this.isAuthenticated = true;
       this.userRoles = userData.roles || ['member'];
       
+      console.log('Login successful:', {
+        user: this.currentUser,
+        roles: this.userRoles,
+        expiresAt: new Date(expiresAt).toLocaleString()
+      });
+      
       return userData;
     } catch (error) {
       console.error('Login error:', error);
@@ -141,6 +165,8 @@ const BBB_AUTH = {
    * @returns {Object|null} - User data or null if invalid
    */
   localLogin: function(username, password) {
+    console.log('Attempting local login for:', username);
+    
     // IMPORTANT: This is a simple implementation for development
     // In production, authentication should always use a secure backend
     
@@ -154,7 +180,7 @@ const BBB_AUTH = {
     }
     
     // For admin access
-    if (username === 'admin' && password === 'admin123') {
+    if (username === 'admin' && password === 'bbb123') {
       return {
         id: 'admin',
         name: 'Administrator',
@@ -163,7 +189,7 @@ const BBB_AUTH = {
     }
     
     // For regular members (simplified - each member would need own credentials)
-    if (BBB_CONFIG.members.includes(username) && password === 'member123') {
+    if (BBB_CONFIG.members && BBB_CONFIG.members.includes(username) && password === 'member123') {
       return {
         id: username.toLowerCase(),
         name: username,
@@ -171,6 +197,7 @@ const BBB_AUTH = {
       };
     }
     
+    console.log('Login failed: Invalid credentials');
     return null;
   },
   
@@ -178,6 +205,8 @@ const BBB_AUTH = {
    * Log out current user
    */
   logout: function() {
+    console.log('Logging out user:', this.currentUser?.name);
+    
     // Clear session storage
     localStorage.removeItem(this.config.storageKey);
     
@@ -186,10 +215,7 @@ const BBB_AUTH = {
     this.isAuthenticated = false;
     this.userRoles = [];
     
-    // Redirect to home page if needed
-    if (window.location.pathname !== '/' && window.location.pathname !== '/index.html') {
-      window.location.href = '/index.html';
-    }
+    console.log('Logout complete');
   },
   
   /**
