@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Stableford Scorecard – Birdie Bush Bandits</title>
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="style2.css">
   <!-- Add Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -98,6 +98,10 @@
       font-family: var(--font-family-base);
     }
     
+    select, input {
+      font-family: var(--font-family-base);
+    }
+    
     #player-selects label {
       font-size: var(--font-size-sm);
       color: var(--bbb-text-light);
@@ -106,6 +110,31 @@
     
     #player-selects > div > div {
       margin-bottom: var(--spacing-sm);
+    }
+    
+    /* Override any default button styles */
+    button {
+      background-color: var(--bbb-secondary);
+      color: white;
+      font-family: var(--font-family-accent);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: none;
+      border-radius: var(--border-radius-sm);
+      cursor: pointer;
+      transition: all 0.3s;
+      font-weight: bold;
+      min-width: 140px;
+    }
+    
+    button:hover {
+      background-color: var(--bbb-secondary-dark);
+      transform: translateY(-2px);
+    }
+    
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+      transform: none;
     }
     
     /* Table specific styles that need to override global */
@@ -292,11 +321,11 @@
         </div>
       </div>
     </details>
-    <div id="button-group" class="btn-group">
-      <button id="build" class="btn">Build Scorecard</button>
-      <button id="reset" class="btn">Reset</button>
-      <button id="save" class="btn" disabled>Save Scorecard</button>
-      <button id="download-image" class="btn">📸 Save Scorecard as Image</button>
+    <div id="button-group" class="button-group">
+      <button id="build" class="btn btn-md">Build Scorecard</button>
+      <button id="reset" class="btn btn-md">Reset</button>
+      <button id="save" class="btn btn-md" disabled>Save Scorecard</button>
+      <button id="download-image" class="btn btn-md">📸 Save Scorecard as Image</button>
     </div>
     <div id="table-container"></div>
   </main>
