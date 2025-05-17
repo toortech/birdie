@@ -340,15 +340,15 @@
       // Add content to main wrapper
       headerElements.mainWrapper.appendChild(mainContent);
       
+      // Variables for scorecard state
+      let scorecardBuilt = false;
+      let savedSuccessfully = false;
+      
       // Add event listeners for buttons
       const buildBtnEl = document.getElementById('build');
       const resetBtnEl = document.getElementById('reset');
       const saveBtnEl = document.getElementById('save');
       const downloadBtnEl = document.getElementById('download-image');
-      
-      // Variables for scorecard state
-      let scorecardBuilt = false;
-      let savedSuccessfully = false;
       
       if (buildBtnEl) {
         buildBtnEl.addEventListener('click', function() {
@@ -403,7 +403,11 @@
             }
           } catch (error) {
             console.error("Error resetting scorecard:", error);
-            BBB_UTILS.showMessage('Error resetting scorecard: ' + error.message, 'error');
+            if (typeof BBB_UTILS !== 'undefined' && typeof BBB_UTILS.showMessage === 'function') {
+              BBB_UTILS.showMessage('Error resetting scorecard: ' + error.message, 'error');
+            } else {
+              alert('Error resetting scorecard: ' + error.message);
+            }
           }
         });
       }
@@ -510,10 +514,6 @@
       playerSelects.forEach(select => {
         select.addEventListener('change', updatePlayerOptions);
       });
-      
-      // Variables for scorecard state
-      let scorecardBuilt = false;
-      let savedSuccessfully = false;
       
       // Save to local storage
       function saveToLocalStorage() {
