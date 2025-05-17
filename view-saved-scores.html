@@ -18,6 +18,28 @@
   <script src="js/ui.js"></script>
 </head>
 <body>
+  <body>
+  <!-- Authentication Protection -->
+  <script>
+    // Check if BBB_AUTH is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Wait for auth module to initialize
+      setTimeout(function() {
+        if (typeof BBB_AUTH !== 'undefined') {
+          // If not authenticated and not on login page, redirect to login
+          if (!BBB_AUTH.isAuthenticated && window.location.pathname.indexOf('login.html') === -1) {
+            // Save the current URL to redirect back after login
+            sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+            window.location.href = 'login.html';
+          }
+        } else {
+          console.error('BBB_AUTH module not found! Authentication check failed.');
+        }
+      }, 100); // Small delay to ensure modules are loaded
+    });
+  </script>
+  
+  <!-- Rest of your page content -->
   <a href="#main" class="skip-link">Skip to main content</a>
   
   <main id="main"></main>
