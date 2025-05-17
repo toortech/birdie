@@ -94,14 +94,26 @@ body {
 }
 
 /* ----------- Header & Logo ----------- */
-/* ----------- Header & Logo ----------- */
 header {
   margin-bottom: var(--spacing-xl);
   position: relative;
   border: none !important;
-  border-top: none !important;
-  box-shadow: none !important;
-  background-image: none !important;
+}
+
+/* Remove the green line */
+header::before,
+header::after,
+body::before,
+body::after,
+.fixed-header::before,
+.fixed-header::after,
+.main-wrapper::before,
+.main-wrapper::after {
+  display: none !important;
+  border: none !important;
+  height: 0 !important;
+  background: transparent !important;
+  content: none !important;
 }
 
 .top-bar {
@@ -145,22 +157,6 @@ header {
   z-index: 5;
   background-color: transparent;
   border: none !important;
-  border-top: none !important;
-}
-
-/* Ensure consistent styling for all viewports */
-@media (max-width: 768px) {
-  header, .fixed-header, body::before, html::before {
-    border: none !important;
-    border-top: none !important;
-  }
-}
-
-@media (max-width: 480px) {
-  header, .fixed-header, body::before, html::before {
-    border: none !important;
-    border-top: none !important;
-  }
 }
 
 .main-content {
@@ -184,8 +180,9 @@ h1 {
   flex-wrap: wrap;
 }
 
+/* Hide golf ball images in headings */
 h1 img {
-  display: none;
+  display: none !important;
 }
 
 h2 {
@@ -563,7 +560,7 @@ caption {
   }
   
   h1 img {
-    display: none;
+    display: none !important;
   }
   
   .corner-logo {
@@ -582,6 +579,7 @@ caption {
   
   .fixed-header {
     padding: var(--spacing-sm);
+    border: none !important;
   }
   
   /* Responsive grid adjustments */
@@ -609,7 +607,7 @@ caption {
   }
   
   h1 img {
-    display: none;
+    display: none !important;
   }
   
   .corner-logo {
@@ -623,6 +621,7 @@ caption {
   
   .fixed-header {
     padding: var(--spacing-xs);
+    border: none !important;
   }
   
   .home-link {
@@ -829,4 +828,56 @@ caption {
   font-style: italic;
   color: var(--bbb-text-muted); /* Updated to use variable */
   margin-bottom: 1.5rem;
+}
+
+/* Centered logo styling */
+.logo-centered {
+  display: flex;
+  justify-content: center;
+  margin: 1rem auto 2rem auto;
+  text-align: center;
+}
+
+.logo-centered img {
+  width: 120px;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* Fix for green header line */
+body:before, 
+header:before, 
+.fixed-header:before,
+.main-wrapper:before,
+body:after, 
+header:after, 
+.fixed-header:after,
+.main-wrapper:after,
+#main:before,
+#main:after {
+  display: none !important;
+  content: none !important;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  height: 0 !important;
+  background-color: transparent !important;
+}
+
+/* Override any borders on header and navigation */
+body > *:first-child,
+#main > *:first-child,
+header > *:first-child {
+  border-top: none !important;
+  border: none !important;
+}
+
+/* Target any potential headers created by the JavaScript UI system */
+[class*="header"],
+[id*="header"],
+[class*="nav"],
+[class*="banner"],
+[class*="top"] {
+  border: none !important;
+  border-top: none !important;
 }
