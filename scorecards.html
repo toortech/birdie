@@ -27,6 +27,7 @@
     
     /* Validation & utility */
     .invalid-hcp, .missing { border: 2px solid red; background-color: #ffcccc; }
+    .invalid-score { border: 2px solid orange; background-color: #ffeecc; }
     
     /* Logo in top-right corner */
     .top-bar {
@@ -507,6 +508,52 @@
         if (!scorecardBuilt) return;
         
         try {
+          // Check if any scores are missing
+          const inputs = tableContainer.querySelectorAll('tbody input[type="number"]');
+          let missingScores = false;
+          let invalidScores = false;
+          
+          inputs.forEach(inp => {
+            if (inp.value === '' || inp.value === null) {
+              inp.classList.add('missing');
+              missingScores = true;
+            } else if (isNaN(parseInt(inp.value, 10)) || parseInt(inp.value, 10) < 0) {
+              inp.classList.add('invalid-score');
+              invalidScores = true;
+            } else {
+              inp.classList.remove('missing');
+              inp.classList.remove('invalid-score');
+            }
+          });
+          
+          if (missingScores) {
+            showMessage('Please enter all scores before saving.', 'error');
+            return false;
+          }
+          
+          if (invalidScores) {
+            showMessage('Some scores are invalid. Please enter positive numbers only.', 'error');
+            return false;
+          }
+          
+          // Check if any players have invalid handicaps
+          const handicapInputs = document.querySelectorAll('[id^="hcp-"]');
+          let invalidHandicaps = false;
+          
+          handicapInputs.forEach(input => {
+            if (input.value !== '' && (isNaN(parseInt(input.value, 10)) || parseInt(input.value, 10) < 0)) {
+              input.classList.add('invalid-hcp');
+              invalidHandicaps = true;
+            } else {
+              input.classList.remove('invalid-hcp');
+            }
+          });
+          
+          if (invalidHandicaps) {
+            showMessage('Some handicaps are invalid. Please enter positive numbers only.', 'error');
+            return false;
+          }
+          
           const scorecard = {
             id: 'scorecard_' + Date.now(), // Add a unique ID for each scorecard
             date: new Date().toISOString(),
@@ -587,8 +634,11 @@
                 
                 // Add redirect to view page after short delay
                 setTimeout(() => {
-                  window.location.href = 'view-saved-scores.html';
-                }, 1500);
+                  showMessage('Redirecting to saved scorecards...', 'info');
+                  setTimeout(() => {
+                    window.location.href = 'view-saved-scores.html';
+                  }, 1500);
+                }, 1000);
               })
               .catch(error => {
                 console.error("Error saving to BBB_DB:", error);
@@ -883,13 +933,45 @@
       // Reset button click handler
       resetBtn.addEventListener('click', function() {
         try {
-          if (scorecardBuilt && !confirm('Reset scorecard? All data will be lost.')) return;
+          // Only confirm if there's data to lose
+          if (scorecardBuilt) {
+            // Check if any scores have been entered
+            const inputs = tableContainer.querySelectorAll('tbody input[type="number"]');
+            let hasEnteredScores = false;
+            
+            inputs.forEach(input => {
+              if (input.value && input.value !== '' && !isNaN(parseInt(input.value, 10))) {
+                hasEnteredScores = true;
+              }
+            });
+            
+            if (hasEnteredScores) {
+              // Show a more detailed confirmation for scores
+              if (!confirm('WARNING: You have entered scores that will be permanently lost if you reset.\n\nAre you sure you want to reset the scorecard?')) {
+                return;
+              }
+            } else {
+              // Basic confirmation for built scorecard with no scores
+              if (!confirm('Reset scorecard? The current layout will be cleared.')) {
+                return;
+              }
+            }
+          }
+          
+          // Reset everything
           scorecardBuilt = false;
           savedSuccessfully = false;
           tableContainer.innerHTML = '';
           document.getElementById('setup-controls').open = true;
           saveBtn.disabled = true;
-          showMessage('Scorecard reset.', 'success');
+          
+          // Also reset player handicaps to make starting fresh easier
+          const handicapInputs = document.querySelectorAll('input[id^="hcp-"]');
+          handicapInputs.forEach(input => {
+            input.value = 0;
+          });
+          
+          showMessage('Scorecard has been reset.', 'success');
         } catch (error) {
           console.error("Error resetting scorecard:", error);
           showMessage('Error resetting scorecard: ' + error.message, 'error');
@@ -899,22 +981,7 @@
       // Save button click handler
       saveBtn.addEventListener('click', function() {
         try {
-          const inputs = tableContainer.querySelectorAll('tbody input[type="number"]');
-          let allFilled = true;
-          inputs.forEach(inp => {
-            if (inp.value === '' || isNaN(parseInt(inp.value, 10))) {
-              inp.classList.add('missing'); 
-              allFilled = false;
-            } else {
-              inp.classList.remove('missing');
-            }
-          });
-          
-          if (!allFilled) {
-            showMessage('Please enter all scores before saving.', 'error');
-            return;
-          }
-          
+          // This is now handled within the saveToLocalStorage function
           const success = saveToLocalStorage();
           if (success) {
             saveBtn.disabled = true;
