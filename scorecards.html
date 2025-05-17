@@ -346,16 +346,10 @@
       <button id="reset">Reset</button>
       <button id="save" disabled>Save Scorecard</button>
       <button id="download-image">📸 Save Scorecard as Image</button>
-      <button id="view-saved">View Saved Scorecards</button>
     </div>
-    <div id="table-container"></div>
     
-    <!-- Added container for saved scorecards -->
-    <div id="saved-scorecards" style="display: none;">
-      <h2>Saved Scorecards</h2>
-      <ul id="scorecard-list"></ul>
-      <button id="close-saved">Close</button>
-    </div>
+    <!-- Table container for the scorecard -->
+    <div id="table-container"></div>
   </main>
   <script>
     (function() {
@@ -364,16 +358,12 @@
       const saveBtn = document.getElementById('save');
       const resetBtn = document.getElementById('reset');
       const downloadBtn = document.getElementById('download-image');
-      const viewSavedBtn = document.getElementById('view-saved');
-      const closeSavedBtn = document.getElementById('close-saved');
       const tableContainer = document.getElementById('table-container');
       const courseSelect = document.getElementById('course-select');
       const teeSelect = document.getElementById('tee-select');
       const holeRadios = document.querySelectorAll('input[name="holes"]');
       const playerSelects = document.querySelectorAll('.player-select');
       const statusMessage = document.getElementById('status-message');
-      const savedScorecardsDiv = document.getElementById('saved-scorecards');
-      const scorecardList = document.getElementById('scorecard-list');
       let scorecardBuilt = false;
       let savedSuccessfully = false;
 
