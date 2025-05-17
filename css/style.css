@@ -5,15 +5,15 @@
 
 /* ----------- Variables ----------- */
 :root {
-  /* Color palette */
-  --bbb-primary: #003300;
-  --bbb-secondary: #004c99;
-  --bbb-secondary-dark: #003d7a;
+  /* Color palette - updated for better contrast */
+  --bbb-primary: #004d00; /* Darkened slightly for better contrast */
+  --bbb-secondary: #0046ad; /* Darker blue for better contrast with white text */
+  --bbb-secondary-dark: #003a8c; /* Adjusted accordingly */
   --bbb-background: #f5f5f5;
-  --bbb-text: #000000;
-  --bbb-text-muted: #666666;
-  --bbb-text-light: #333333;
-  --bbb-border: #cccccc;
+  --bbb-text: #212529; /* Slightly softer than pure black */
+  --bbb-text-muted: #6c757d; /* Better contrast gray */
+  --bbb-text-light: #495057; /* Improved midtone */
+  --bbb-border: #dee2e6; /* Softened border color */
   --bbb-error: #dc3545;
   --bbb-success: #28a745;
   --bbb-warning: #ffc107;
@@ -26,9 +26,9 @@
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
   
-  /* Typography */
-  --font-family-base: Arial, sans-serif;
-  --font-family-accent: Georgia, serif;
+  /* Typography - updated with modern fonts */
+  --font-family-base: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-family-accent: 'Montserrat', Georgia, serif;
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
   --font-size-md: 1rem;
@@ -46,6 +46,15 @@
   --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
   --shadow-md: 0 2px 4px rgba(0,0,0,0.1);
   --shadow-lg: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Font utility classes */
+.font-inter {
+  font-family: var(--font-family-base);
+}
+
+.font-montserrat {
+  font-family: var(--font-family-accent);
 }
 
 /* ----------- Base Styles ----------- */
@@ -98,15 +107,16 @@ header {
 }
 
 .home-link { 
-  color: #003300; /* Match the primary color used for headings */
+  color: var(--bbb-primary); /* Updated to use variable */
   font-weight: bold; 
   text-decoration: none;
   display: inline-block;
   padding: 0.5rem 0.75rem;
-  background-color: #f5f5f5; /* Match the site's background color */
+  background-color: var(--bbb-background); /* Updated to use variable */
   border-radius: 4px;
   transition: all 0.3s ease;
   box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-family: var(--font-family-accent); /* Added Montserrat font */
 }
 
 .home-link:hover {
@@ -130,13 +140,17 @@ header {
 }
 
 /* ----------- Typography ----------- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-accent); /* Apply Montserrat to all headings */
+  color: var(--bbb-primary);
+  font-weight: bold;
+}
+
 h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: var(--font-size-xxxl);
-  color: var(--bbb-primary);
-  font-weight: bold;
   margin: 0;
   margin-bottom: var(--spacing-sm);
   flex-wrap: wrap;
@@ -149,8 +163,6 @@ h1 img {
 }
 
 h2 {
-  color: var(--bbb-primary);
-  font-weight: bold;
   margin: var(--spacing-md) 0;
 }
 
@@ -164,7 +176,7 @@ h2 {
 }
 
 /* ----------- Buttons ----------- */
-.btn {
+.btn, button.btn, .nav-boxes a {
   display: inline-block;
   padding: var(--spacing-md) var(--spacing-lg);
   border: none;
@@ -177,46 +189,47 @@ h2 {
   cursor: pointer;
   box-shadow: var(--shadow-sm);
   text-align: center;
+  font-family: var(--font-family-accent); /* Added Montserrat font */
 }
 
-.btn:hover {
+.btn:hover, button.btn:hover, .nav-boxes a:hover {
   background-color: var(--bbb-secondary-dark);
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
 
-.btn:active {
+.btn:active, button.btn:active {
   transform: translateY(0);
 }
 
-.btn:focus {
+.btn:focus, button.btn:focus {
   outline: 3px solid var(--bbb-primary);
   outline-offset: 2px;
 }
 
-.btn-sm {
+.btn-sm, button.btn-sm {
   padding: var(--spacing-sm) var(--spacing-md);
   font-size: var(--font-size-sm);
 }
 
-.btn-lg {
+.btn-lg, button.btn-lg {
   padding: var(--spacing-lg) var(--spacing-xl);
   font-size: var(--font-size-lg);
 }
 
-.btn-danger {
+.btn-danger, button.btn-danger {
   background-color: var(--bbb-error);
 }
 
-.btn-danger:hover {
+.btn-danger:hover, button.btn-danger:hover {
   background-color: #c82333;
 }
 
-.btn-success {
+.btn-success, button.btn-success {
   background-color: var(--bbb-success);
 }
 
-.btn-success:hover {
+.btn-success:hover, button.btn-success:hover {
   background-color: #218838;
 }
 
@@ -230,6 +243,7 @@ input, select, textarea {
   font-size: var(--font-size-md);
   background: #fff;
   color: var(--bbb-text);
+  font-family: var(--font-family-base); /* Add Inter font */
 }
 
 input:focus, select:focus, textarea:focus {
@@ -242,6 +256,7 @@ label {
   margin-bottom: var(--spacing-xs);
   font-weight: bold;
   color: var(--bbb-text-light);
+  font-family: var(--font-family-accent); /* Add Montserrat for labels */
 }
 
 .form-group {
@@ -299,6 +314,7 @@ label {
   font-weight: bold;
   font-size: var(--font-size-lg);
   margin: 0;
+  font-family: var(--font-family-accent); /* Add Montserrat */
 }
 
 .card-footer {
@@ -342,6 +358,7 @@ th, td {
 th {
   background-color: #eee;
   font-weight: bold;
+  font-family: var(--font-family-accent); /* Add Montserrat */
 }
 
 caption {
@@ -350,6 +367,7 @@ caption {
   padding: var(--spacing-sm);
   font-weight: bold;
   background-color: #f8f9fa;
+  font-family: var(--font-family-accent); /* Add Montserrat */
 }
 
 /* ----------- Status Messages ----------- */
@@ -359,6 +377,7 @@ caption {
   border-radius: var(--border-radius-sm);
   text-align: center;
   display: none;
+  font-family: var(--font-family-base); /* Add Inter */
 }
 
 .success {
@@ -408,6 +427,7 @@ caption {
   max-width: 200px;
   text-align: center;
   box-shadow: var(--shadow-sm);
+  font-family: var(--font-family-accent); /* Add Montserrat */
 }
 
 .nav-boxes a:hover {
@@ -647,13 +667,14 @@ caption {
     page-break-after: avoid;
   }
 }
-/* Button styles to add to your CSS */
+
+/* Button styles with centering - updated with improved contrast */
 .btn, button.btn {
   display: inline-block;
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 4px;
-  background-color: #004c99;
+  background-color: var(--bbb-secondary); /* Updated to use variable */
   color: white;
   font-weight: bold;
   text-decoration: none;
@@ -662,100 +683,11 @@ caption {
   transition: background-color 0.3s, transform 0.2s;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   min-width: 160px;
+  font-family: var(--font-family-accent); /* Added Montserrat font */
 }
 
 .btn:hover, button.btn:hover {
-  background-color: #003d7a;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-}
-
-.btn:active, button.btn:active {
-  transform: translateY(0);
-}
-
-.btn-sm, button.btn-sm {
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
-  min-width: 120px;
-}
-
-.btn-lg, button.btn-lg {
-  padding: 1rem 2rem;
-  font-size: 1.25rem;
-  min-width: 200px;
-}
-
-.btn-danger, button.btn-danger {
-  background-color: #dc3545;
-}
-
-.btn-danger:hover, button.btn-danger:hover {
-  background-color: #c82333;
-}
-
-.btn-success, button.btn-success {
-  background-color: #28a745;
-}
-
-.btn-success:hover, button.btn-success:hover {
-  background-color: #218838;
-}
-
-.btn-group {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.card-actions {
-  display: flex;
-  gap: 1rem;
-  justify-content: space-between;
-  margin-top: 1rem;
-}
-
-/* Apply consistent margins */
-.action-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.action-buttons .btn {
-  flex: 0 0 auto;
-}
-
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .btn-group, .card-actions, .action-buttons {
-    flex-direction: column;
-  }
-  
-  .btn, button.btn, .btn-sm, button.btn-sm, .btn-lg, button.btn-lg {
-    width: 100%;
-  }
-}
-/* Button styles with centering */
-.btn, button.btn {
-  display: inline-block;
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 4px;
-  background-color: #004c99;
-  color: white;
-  font-weight: bold;
-  text-decoration: none;
-  text-align: center;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.2s;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  min-width: 160px;
-}
-
-.btn:hover, button.btn:hover {
-  background-color: #003d7a;
+  background-color: var(--bbb-secondary-dark); /* Updated to use variable */
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
@@ -844,6 +776,7 @@ caption {
     max-width: 300px; /* Limit width on mobile */
   }
 }
+
 /* Main image centering styles */
 .main-image-container {
   display: flex;
@@ -870,6 +803,6 @@ caption {
 .return-text {
   text-align: center;
   font-style: italic;
-  color: #666;
+  color: var(--bbb-text-muted); /* Updated to use variable */
   margin-bottom: 1.5rem;
 }
