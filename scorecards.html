@@ -173,7 +173,7 @@
       // Add course options from config
       Object.keys(BBB_CONFIG.courses).forEach(courseName => {
         const option = document.createElement('option');
-        option.value = BBB_CONFIG.courses[courseName].shortName;
+        option.value = courseName;
         option.textContent = courseName;
         courseSelect.appendChild(option);
       });
@@ -526,7 +526,8 @@
             tee: teeSelect.value,
             holes: [...document.querySelectorAll('input[name="holes"]')].find(r => r.checked).value,
             players: [],
-            savedAt: new Date().toLocaleString('en-GB')
+            savedAt: new Date().toLocaleString('en-GB'),
+            id: 'sc_' + Date.now() + '_' + Math.floor(Math.random() * 10000)
           };
           
           // Get players and their data
@@ -626,164 +627,185 @@
         }
       }
 
-      // Build the scorecard
       function build(players) {
-        tableContainer.innerHTML = '';
-        const table = document.createElement('table');
-        const caption = document.createElement('caption');
-        caption.textContent = 'Scorecard created: ' + new Date().toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) + 
-                              ' | Course: ' + courseSelect.value + ' | Tees: ' + teeSelect.value;
-        table.appendChild(caption);
-
-        const thead = document.createElement('thead');
-        let hdr1 = '<tr><th>Hole</th><th>Par</th><th style="color:red;">SI</th><th>Yards</th>';
-        players.forEach((p,i) => hdr1 += `<th colspan="2">${p}<br>H:<input id="hcp-${i}" type="number" min="0" max="99" value="0" oninput="if(this.value.length>2) this.value=this.value.slice(0,2)"></th>`);
-        hdr1 += '</tr>';
-        let hdr2 = '<tr><th></th><th></th><th></th><th></th>';
-        players.forEach(() => hdr2 += '<th>Shots</th><th>Pts</th>');
-        hdr2 += '</tr>';
-        thead.innerHTML = hdr1 + hdr2;
-        table.appendChild(thead);
-
-        const tbody = document.createElement('tbody');
-        const holeVal = [...document.querySelectorAll('input[name="holes"]')].find(r => r.checked).value;
-        let idx = [...Array(18).keys()];
-        if (holeVal === '9f') idx = idx.slice(0,9);
-        if (holeVal === '9b') idx = idx.slice(9);
-        idx.forEach(h => {
-          const tr = document.createElement('tr');
-          const c = BBB_CONFIG.courses[courseSelect.value];
-          tr.innerHTML = `<td>${h+1}</td><td>${c.par[h]}</td><td style="color:red;">${c.si[h]}</td><td>${c.yards[teeSelect.value][h]}</td>`;
-          players.forEach((_,pi) => {
-            tr.innerHTML += `<td><input data-player="${pi}" data-hole="${h}" type="number" min="0" max="999" oninput="if(this.value.length>3) this.value=this.value.slice(0,3)"></td><td class="pts-${pi}"><div class="stroke-info" data-player="${pi}" data-hole="${h}"></div><div class="points" data-hole="${h}"></div></td>`;
-          });
-          tbody.appendChild(tr);
-        });
-        table.appendChild(tbody);
-
-        const tfoot = document.createElement('tfoot');
-        ['Front 9','Back 9','Total'].forEach((lbl,i) => {
-          let row = `<tr><td colspan="4">${lbl}</td>`;
-          players.forEach((_,pi) => row += `<td id="shots-${i}-${pi}"></td><td id="pts-${i}-${pi}"></td>`);
-          row += '</tr>';
-          tfoot.innerHTML += row;
-        });
-        table.appendChild(tfoot);
-        tableContainer.appendChild(table);
-
-        // Setup handlers
-        players.forEach((_,i) => {
-          const hIn = document.getElementById(`hcp-${i}`);
-          if (!hIn) return; // Safety check
+        try {
+          tableContainer.innerHTML = '';
+          const table = document.createElement('table');
+          const caption = document.createElement('caption');
           
-          const adj = document.createElement('span'); 
-          adj.id = `adjhcp-${i}`; 
-          adj.style.marginLeft = '0.5rem';
-          hIn.insertAdjacentElement('afterend', adj);
+          // Get the selected course and tee
+          const selectedCourse = courseSelect.value;
+          const selectedTee = teeSelect.value;
           
-          const updateAdj = () => {
-            const raw = parseInt(hIn.value, 10) || 0;
-            const c = BBB_CONFIG.courses[courseSelect.value];
-            const a = Math.round(raw * c.tees[teeSelect.value].slopeRating / 113);
-            adj.textContent = 'CH: ' + a;
-            
-            idx.forEach(h => {
-              const siVal = c.si[h];
-              const strokes = a >= siVal + 18 ? 2 : a >= siVal ? 1 : 0;
-              const info = document.querySelector(`.stroke-info[data-player="${i}"][data-hole="${h}"]`);
-              if (info) info.textContent = `(${strokes} stroke${strokes!==1?'s':''})`;
+          // Debugging
+          console.log("Selected course:", selectedCourse);
+          console.log("Selected tee:", selectedTee);
+          console.log("Course data:", BBB_CONFIG.courses[selectedCourse]);
+          
+          caption.textContent = 'Scorecard created: ' + new Date().toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) + 
+                                ' | Course: ' + selectedCourse + ' | Tees: ' + selectedTee;
+          table.appendChild(caption);
+  
+          const thead = document.createElement('thead');
+          let hdr1 = '<tr><th>Hole</th><th>Par</th><th style="color:red;">SI</th><th>Yards</th>';
+          players.forEach((p,i) => hdr1 += `<th colspan="2">${p}<br>H:<input id="hcp-${i}" type="number" min="0" max="99" value="0" oninput="if(this.value.length>2) this.value=this.value.slice(0,2)"></th>`);
+          hdr1 += '</tr>';
+          let hdr2 = '<tr><th></th><th></th><th></th><th></th>';
+          players.forEach(() => hdr2 += '<th>Shots</th><th>Pts</th>');
+          hdr2 += '</tr>';
+          thead.innerHTML = hdr1 + hdr2;
+          table.appendChild(thead);
+  
+          const tbody = document.createElement('tbody');
+          const holeVal = [...document.querySelectorAll('input[name="holes"]')].find(r => r.checked).value;
+          let idx = [...Array(18).keys()];
+          if (holeVal === '9f') idx = idx.slice(0,9);
+          if (holeVal === '9b') idx = idx.slice(9);
+          
+          const c = BBB_CONFIG.courses[selectedCourse]; 
+          if (!c || !c.par || !c.si || !c.yards || !c.yards[selectedTee]) {
+            throw new Error(`Missing course data for ${selectedCourse} with tee ${selectedTee}`);
+          }
+          
+          idx.forEach(h => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${h+1}</td><td>${c.par[h]}</td><td style="color:red;">${c.si[h]}</td><td>${c.yards[selectedTee][h]}</td>`;
+            players.forEach((_,pi) => {
+              tr.innerHTML += `<td><input data-player="${pi}" data-hole="${h}" type="number" min="0" max="999" oninput="if(this.value.length>3) this.value=this.value.slice(0,3)"></td><td class="pts-${pi}"><div class="stroke-info" data-player="${pi}" data-hole="${h}"></div><div class="points" data-hole="${h}"></div></td>`;
             });
-          };
-          
-          hIn.addEventListener('input', () => { 
-            if (hIn.value === '' || isNaN(parseInt(hIn.value, 10)) || parseInt(hIn.value, 10) < 0) {
-              hIn.classList.add('invalid-hcp');
-            } else {
-              hIn.classList.remove('invalid-hcp');
-              updateAdj(); 
-              debounce(updateScores)();
-            }
+            tbody.appendChild(tr);
           });
-          
-          updateAdj();
-        });
-
-        // Add input handlers to all score inputs
-        const scoreInputs = table.querySelectorAll('tbody input[type="number"]');
-        scoreInputs.forEach(inp => {
-          inp.addEventListener('input', () => { 
-            inp.classList.remove('missing'); 
-            debounce(updateScores)(); 
+          table.appendChild(tbody);
+  
+          const tfoot = document.createElement('tfoot');
+          ['Front 9','Back 9','Total'].forEach((lbl,i) => {
+            let row = `<tr><td colspan="4">${lbl}</td>`;
+            players.forEach((_,pi) => row += `<td id="shots-${i}-${pi}"></td><td id="pts-${i}-${pi}"></td>`);
+            row += '</tr>';
+            tfoot.innerHTML += row;
           });
-        });
-
-        function updateScores() {
-          try {
-            const tots = players.map(() => ({fS:0, fP:0, bS:0, bP:0, oS:0, oP:0}));
+          table.appendChild(tfoot);
+          tableContainer.appendChild(table);
+  
+          // Setup handlers
+          players.forEach((_,i) => {
+            const hIn = document.getElementById(`hcp-${i}`);
+            if (!hIn) return; // Safety check
             
-            table.querySelectorAll('tbody tr').forEach((tr, rIdx) => {
-              if (rIdx >= idx.length) return; // Safety check
+            const adj = document.createElement('span'); 
+            adj.id = `adjhcp-${i}`; 
+            adj.style.marginLeft = '0.5rem';
+            hIn.insertAdjacentElement('afterend', adj);
+            
+            const updateAdj = () => {
+              const raw = parseInt(hIn.value, 10) || 0;
+              const a = Math.round(raw * c.tees[selectedTee].slopeRating / 113);
+              adj.textContent = 'CH: ' + a;
               
-              const h = idx[rIdx]; 
-              const c = BBB_CONFIG.courses[courseSelect.value]; 
-              const parVal = c.par[h];
-              const siVal = c.si[h]; 
-              const front = h < 9;
-              
-              players.forEach((_, pi) => {
-                const inp = tr.querySelector(`input[data-player="${pi}"][data-hole="${h}"]`);
-                if (!inp) return; // Safety check
-                
-                const sc = parseInt(inp.value, 10); 
-                if (isNaN(sc)) return;
-                
-                const hcpInput = document.getElementById(`hcp-${pi}`);
-                if (!hcpInput) return; // Safety check
-                
-                const raw = parseInt(hcpInput.value, 10) || 0;
-                const a = Math.round(raw * c.tees[teeSelect.value].slopeRating / 113);
+              idx.forEach(h => {
+                const siVal = c.si[h];
                 const strokes = a >= siVal + 18 ? 2 : a >= siVal ? 1 : 0;
-                const net = sc - strokes;
-                let pts = 0;
-                
-                if (net <= parVal - 3)       pts = 5;
-                else if (net === parVal - 2)  pts = 4;
-                else if (net === parVal - 1)  pts = 3;
-                else if (net === parVal)      pts = 2;
-                else if (net === parVal + 1)  pts = 1;
-                
-                const pointsDiv = tr.querySelector(`.pts-${pi} .points[data-hole="${h}"]`);
-                if (pointsDiv) pointsDiv.textContent = pts;
-                
-                tots[pi].oS += sc; 
-                tots[pi].oP += pts;
-                
-                if (front) { 
-                  tots[pi].fS += sc; 
-                  tots[pi].fP += pts; 
-                } else { 
-                  tots[pi].bS += sc; 
-                  tots[pi].bP += pts; 
-                }
+                const info = document.querySelector(`.stroke-info[data-player="${i}"][data-hole="${h}"]`);
+                if (info) info.textContent = `(${strokes} stroke${strokes!==1?'s':''})`;
               });
+            };
+            
+            hIn.addEventListener('input', () => { 
+              if (hIn.value === '' || isNaN(parseInt(hIn.value, 10)) || parseInt(hIn.value, 10) < 0) {
+                hIn.classList.add('invalid-hcp');
+              } else {
+                hIn.classList.remove('invalid-hcp');
+                updateAdj(); 
+                debounce(updateScores)();
+              }
             });
             
-            // Update totals in footer
-            tots.forEach((t, pi) => {
-              [['shots', 'fS', 'fP'], ['shots', 'bS', 'bP'], ['shots', 'oS', 'oP']].forEach((cols, i) => {
-                const shotsEl = document.getElementById(`${cols[0]}-${i}-${pi}`);
-                const ptsEl = document.getElementById(`pts-${i}-${pi}`);
-                
-                if (shotsEl) shotsEl.textContent = t[cols[1]];
-                if (ptsEl) ptsEl.textContent = t[cols[2]];
-              });
+            updateAdj();
+          });
+  
+          // Add input handlers to all score inputs
+          const scoreInputs = table.querySelectorAll('tbody input[type="number"]');
+          scoreInputs.forEach(inp => {
+            inp.addEventListener('input', () => { 
+              inp.classList.remove('missing'); 
+              debounce(updateScores)(); 
             });
-          } catch (error) {
-            console.error("Error updating scores:", error);
+          });
+  
+          function updateScores() {
+            try {
+              const tots = players.map(() => ({fS:0, fP:0, bS:0, bP:0, oS:0, oP:0}));
+              
+              table.querySelectorAll('tbody tr').forEach((tr, rIdx) => {
+                if (rIdx >= idx.length) return; // Safety check
+                
+                const h = idx[rIdx]; 
+                const parVal = c.par[h];
+                const siVal = c.si[h]; 
+                const front = h < 9;
+                
+                players.forEach((_, pi) => {
+                  const inp = tr.querySelector(`input[data-player="${pi}"][data-hole="${h}"]`);
+                  if (!inp) return; // Safety check
+                  
+                  const sc = parseInt(inp.value, 10); 
+                  if (isNaN(sc)) return;
+                  
+                  const hcpInput = document.getElementById(`hcp-${pi}`);
+                  if (!hcpInput) return; // Safety check
+                  
+                  const raw = parseInt(hcpInput.value, 10) || 0;
+                  const a = Math.round(raw * c.tees[selectedTee].slopeRating / 113);
+                  const strokes = a >= siVal + 18 ? 2 : a >= siVal ? 1 : 0;
+                  const net = sc - strokes;
+                  let pts = 0;
+                  
+                  if (net <= parVal - 3)       pts = 5;
+                  else if (net === parVal - 2)  pts = 4;
+                  else if (net === parVal - 1)  pts = 3;
+                  else if (net === parVal)      pts = 2;
+                  else if (net === parVal + 1)  pts = 1;
+                  
+                  const pointsDiv = tr.querySelector(`.pts-${pi} .points[data-hole="${h}"]`);
+                  if (pointsDiv) pointsDiv.textContent = pts;
+                  
+                  tots[pi].oS += sc; 
+                  tots[pi].oP += pts;
+                  
+                  if (front) { 
+                    tots[pi].fS += sc; 
+                    tots[pi].fP += pts; 
+                  } else { 
+                    tots[pi].bS += sc; 
+                    tots[pi].bP += pts; 
+                  }
+                });
+              });
+              
+              // Update totals in footer
+              tots.forEach((t, pi) => {
+                [['shots', 'fS', 'fP'], ['shots', 'bS', 'bP'], ['shots', 'oS', 'oP']].forEach((cols, i) => {
+                  const shotsEl = document.getElementById(`${cols[0]}-${i}-${pi}`);
+                  const ptsEl = document.getElementById(`pts-${i}-${pi}`);
+                  
+                  if (shotsEl) shotsEl.textContent = t[cols[1]];
+                  if (ptsEl) ptsEl.textContent = t[cols[2]];
+                });
+              });
+            } catch (error) {
+              console.error("Error updating scores:", error);
+            }
+          }
+  
+          scorecardBuilt = true;
+        } catch (error) {
+          console.error("Error in build function:", error);
+          if (typeof BBB_UTILS !== 'undefined' && typeof BBB_UTILS.showMessage === 'function') {
+            BBB_UTILS.showMessage('Error building scorecard: ' + error.message, 'error');
+          } else {
+            alert('Error building scorecard: ' + error.message);
           }
         }
-
-        scorecardBuilt = true;
       }
     });
   </script>
