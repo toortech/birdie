@@ -3,101 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - Birdie Bush Bandits</title>
-  <meta name="description" content="Login to access the Birdie Bush Bandits golf group website.">
+  <title>Birdie Bush Bandits - Golf Group</title>
+  <meta name="description" content="Birdie Bush Bandits - A golf group founded in August 2020. View photo galleries, scorecards, calculate handicaps, and meet our members.">
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  
+  <!-- Open Graph tags for social sharing -->
+  <meta property="og:title" content="Birdie Bush Bandits - Golf Group">
+  <meta property="og:description" content="A golf group founded in August 2020. View photo galleries, scorecards, calculate handicaps, and meet our members.">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="golf-flag.jpeg">
   
   <!-- Global CSS -->
   <link rel="stylesheet" href="css/style.css">
-  
-  <style>
-    /* Login page specific styles */
-    body {
-      background: #f5f5f5;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      padding: 1rem;
-    }
-    
-    .login-container {
-      max-width: 400px;
-      width: 100%;
-      background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-    
-    .logo-container {
-      text-align: center;
-      margin-bottom: 1.5rem;
-    }
-    
-    .logo {
-      max-width: 100px;
-      height: auto;
-    }
-    
-    h1 {
-      color: #003300;
-      text-align: center;
-      margin-bottom: 1.5rem;
-      font-size: 1.8rem;
-    }
-    
-    .form-group {
-      margin-bottom: 1.5rem;
-    }
-    
-    label {
-      display: block;
-      margin-bottom: 0.5rem;
-      font-weight: bold;
-    }
-    
-    input {
-      width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 1rem;
-    }
-    
-    button {
-      width: 100%;
-      padding: 0.75rem;
-      background: #004c99;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      font-size: 1rem;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    
-    button:hover {
-      background: #003d7a;
-    }
-    
-    .error-message {
-      color: #dc3545;
-      margin-top: 1rem;
-      text-align: center;
-      display: none;
-    }
-    
-    .help-text {
-      text-align: center;
-      margin-top: 1.5rem;
-      color: #666;
-      font-size: 0.9rem;
-    }
-  </style>
   
   <!-- Core Modules (loaded in specific order) -->
   <script src="js/config.js"></script>
@@ -107,42 +24,29 @@
   <script src="js/ui.js"></script>
 </head>
 <body>
-  <div class="login-container">
-    <div class="logo-container">
-      <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="logo">
-    </div>
-    
-    <h1>Birdie Bush Bandits<br>Member Login</h1>
-    
-    <form id="login-form">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="Enter your username" required>
-      </div>
-      
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Enter your password" required>
-      </div>
-      
-      <button type="submit">Login</button>
-      
-      <div id="error-message" class="error-message">
-        Invalid username or password. Please try again.
-      </div>
-    </form>
-    
-    <div class="help-text">
-      <!-- Add this comment with credentials for site owner -->
-      <!-- 
-      DEVELOPER NOTE:
-      Temporary admin credentials:
-      Username: admin
-      Password: bbb123
-      -->
-      Need help? Contact your club administrator.
-    </div>
-  </div>
+  <!-- Authentication Protection -->
+  <script>
+    // Check if BBB_AUTH is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Wait for auth module to initialize
+      setTimeout(function() {
+        if (typeof BBB_AUTH !== 'undefined') {
+          // If not authenticated and not on login page, redirect to login
+          if (!BBB_AUTH.isAuthenticated && window.location.pathname.indexOf('login.html') === -1) {
+            // Save the current URL to redirect back after login
+            sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+            window.location.href = 'login.html';
+          }
+        } else {
+          console.error('BBB_AUTH module not found! Authentication check failed.');
+        }
+      }, 100); // Small delay to ensure modules are loaded
+    });
+  </script>
+
+  <a href="#main" class="skip-link">Skip to main content</a>
+  
+  <main id="main"></main>
   
   <script>
     // Initialize modules
@@ -158,42 +62,104 @@
         localStoragePrefix: 'bbb_'
       });
       
-      // Check if already logged in
-      if (BBB_AUTH.isAuthenticated) {
-        // Redirect to index or saved page
-        redirectAfterLogin();
-      }
-      
-      // Set up login form
-      const loginForm = document.getElementById('login-form');
-      loginForm.addEventListener('submit', function(event) {
-        event.preventDefault();
-        
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        
-        // Try to login
-        BBB_AUTH.login(username, password)
-          .then(user => {
-            console.log('Login successful:', user);
-            // Redirect after login
-            redirectAfterLogin();
-          })
-          .catch(err => {
-            console.error('Login error:', err);
-            // Show error message
-            document.getElementById('error-message').style.display = 'block';
-          });
+      // Create header
+      const headerElements = BBB_UI.createHeader({
+        fixed: true,
+        showHomeLinkText: true
       });
       
-      // Function to redirect after login
-      function redirectAfterLogin() {
-        // Get saved redirect URL or default to index
-        const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || 'index.html';
-        // Clear saved URL
-        sessionStorage.removeItem('redirectAfterLogin');
-        // Redirect
-        window.location.href = redirectUrl;
+      document.body.insertBefore(headerElements.header, document.body.firstChild);
+      
+      // Get main content element
+      const main = document.getElementById('main');
+      main.appendChild(headerElements.mainWrapper);
+      
+      // Create page content
+      const mainContent = document.createElement('div');
+      
+      // Create page title
+      const titleContainer = BBB_UI.createPageTitle({
+        title: 'Birdie Bush Bandits',
+        showFoundedText: true,
+        showGolfballs: true
+      });
+      mainContent.appendChild(titleContainer);
+      
+      // Create status message container
+      const statusMessage = BBB_UI.createStatusMessage();
+      mainContent.appendChild(statusMessage);
+      
+      // Add construction message
+      const constructionMessage = document.createElement('h2');
+      constructionMessage.textContent = 'This site is under construction';
+      constructionMessage.style.fontStyle = 'italic';
+      constructionMessage.style.margin = '2rem 0';
+      mainContent.appendChild(constructionMessage);
+      
+      // Create main navigation
+      const mainNav = BBB_UI.createMainNavigation();
+      mainContent.appendChild(mainNav);
+      
+      // Add "if found" message
+      const returnText = document.createElement('p');
+      returnText.className = 'return-text';
+      returnText.textContent = 'If found please return to BBB Headquarters';
+      mainContent.appendChild(returnText);
+      
+      // Add main image in a container for centering
+      const mainImageContainer = document.createElement('div');
+      mainImageContainer.className = 'main-image-container';
+      
+      const mainImage = document.createElement('img');
+      mainImage.className = 'main-image';
+      mainImage.src = 'golf-flag.jpeg';
+      mainImage.alt = 'Golfer holding the flag on a golf course';
+      mainImage.setAttribute('loading', 'lazy');
+      
+      mainImageContainer.appendChild(mainImage);
+      mainContent.appendChild(mainImageContainer);
+      
+      // Add auth-protected content for members
+      const memberContent = document.createElement('div');
+      memberContent.setAttribute('data-role-required', 'member,admin');
+      memberContent.style.marginTop = '2rem';
+      
+      const memberWelcome = document.createElement('h3');
+      memberWelcome.textContent = 'Welcome back!';
+      
+      const memberMessage = document.createElement('p');
+      memberMessage.textContent = 'You are logged in as a member. You have access to all features.';
+      
+      const logoutButton = BBB_UI.createButton({
+        text: 'Logout',
+        onClick: function() {
+          BBB_AUTH.logout();
+          window.location.href = 'login.html';
+        }
+      });
+      
+      memberContent.appendChild(memberWelcome);
+      memberContent.appendChild(memberMessage);
+      memberContent.appendChild(logoutButton);
+      mainContent.appendChild(memberContent);
+      
+      // Add content to main
+      headerElements.mainWrapper.appendChild(mainContent);
+      
+      // Check for "missing" image (seen in the uploaded file)
+      // This is specific to the image in your first upload
+      const missingImageUrl = new URLSearchParams(window.location.search).get('missing');
+      if (missingImageUrl) {
+        const missingImg = document.createElement('img');
+        missingImg.src = missingImageUrl;
+        missingImg.alt = 'Missing golfer';
+        missingImg.style.maxWidth = '100%';
+        missingImg.style.marginTop = '2rem';
+        
+        const missingContainer = document.createElement('div');
+        missingContainer.appendChild(missingImg);
+        
+        mainContent.appendChild(missingContainer);
       }
     });
   </script>
