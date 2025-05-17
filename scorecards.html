@@ -635,28 +635,16 @@
           savedScorecards.push(scorecard);
           localStorage.setItem('golfScorecards', JSON.stringify(savedScorecards));
           
-          showMessage('Scorecard saved to local storage. View in saved scorecards page.', 'success');
+          showMessage('Scorecard saved to local storage!', 'success');
           savedSuccessfully = true;
           
-          // Update UI
-          updateSavedScorecardsList();
-          
-          // Add a button to navigate to the view page
-          const viewBtn = document.createElement('button');
-          viewBtn.textContent = 'View All Scorecards';
-          viewBtn.className = 'btn';
-          viewBtn.style.marginTop = '1rem';
-          viewBtn.style.display = 'block';
-          viewBtn.style.margin = '1rem auto';
-          viewBtn.addEventListener('click', () => {
-            window.location.href = 'view-saved-scores.html';
-          });
-          
-          // Add to container
-          if (!document.getElementById('view-scorecards-btn')) {
-            viewBtn.id = 'view-scorecards-btn';
-            tableContainer.appendChild(viewBtn);
-          }
+          // Add button to redirect to view-saved-scores.html
+          setTimeout(() => {
+            showMessage('Redirecting to saved scorecards...', 'info');
+            setTimeout(() => {
+              window.location.href = 'view-saved-scores.html';
+            }, 1500);
+          }, 1000);
           
           return true;
         } catch (error) {
@@ -674,19 +662,26 @@
               // Iterate over scorecards, they might be an object
               const scorecardItems = Object.values(scorecards);
               if (scorecardItems.length > 0) {
-                // Show a button to view all scorecards
+                // Show a button to view all scorecards at the bottom
                 const viewButton = document.createElement('button');
                 viewButton.id = 'view-all-saved';
                 viewButton.className = 'btn';
                 viewButton.textContent = 'View All Saved Scorecards';
                 viewButton.style.display = 'block';
                 viewButton.style.margin = '1rem auto';
+                viewButton.style.marginTop = '2rem';
                 viewButton.addEventListener('click', () => {
                   window.location.href = 'view-saved-scores.html';
                 });
                 
                 if (!document.getElementById('view-all-saved')) {
-                  document.body.insertBefore(viewButton, document.body.firstChild.nextSibling);
+                  // Add at the bottom of main
+                  const main = document.querySelector('main');
+                  if (main) {
+                    main.appendChild(viewButton);
+                  } else {
+                    document.body.appendChild(viewButton);
+                  }
                 }
               }
             })
@@ -698,19 +693,26 @@
           try {
             const savedScorecards = JSON.parse(localStorage.getItem('golfScorecards') || '[]');
             if (savedScorecards.length > 0) {
-              // Show a button to view all scorecards
+              // Show a button to view all scorecards at the bottom
               const viewButton = document.createElement('button');
               viewButton.id = 'view-all-saved';
               viewButton.className = 'btn';
               viewButton.textContent = 'View All Saved Scorecards';
               viewButton.style.display = 'block';
               viewButton.style.margin = '1rem auto';
+              viewButton.style.marginTop = '2rem';
               viewButton.addEventListener('click', () => {
                 window.location.href = 'view-saved-scores.html';
               });
               
               if (!document.getElementById('view-all-saved')) {
-                document.body.insertBefore(viewButton, document.body.firstChild.nextSibling);
+                // Add at the bottom of main
+                const main = document.querySelector('main');
+                if (main) {
+                  main.appendChild(viewButton);
+                } else {
+                  document.body.appendChild(viewButton);
+                }
               }
             }
           } catch (e) {
@@ -876,6 +878,12 @@
           document.getElementById('setup-controls').open = false;
           saveBtn.disabled = false;
           showMessage('Scorecard built successfully!', 'success');
+          
+          // Remove any existing View Saved Cards button
+          const existingViewBtn = document.getElementById('view-scorecards-btn');
+          if (existingViewBtn) {
+            existingViewBtn.remove();
+          }
         } catch (error) {
           console.error("Error building scorecard:", error);
           showMessage('Error building scorecard: ' + error.message, 'error');
