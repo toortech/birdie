@@ -7,23 +7,21 @@
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
   <link rel="stylesheet" href="css/style.css">
   <!-- Add Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet"
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
+    /* Scorecard-specific styles that complement the global styles */
     /* Base styles */
     body { 
-      background: #f5f5f5; 
-      color: #000; 
-      font-family: Arial, sans-serif; 
-      padding: 1rem; 
-      margin: 0 auto; 
-      max-width: 1200px;
+      padding: var(--spacing-md);
       position: relative;
     }
     
     /* Validation & utility */
-    .invalid-hcp, .missing { border: 2px solid red; background-color: #ffcccc; }
+    .invalid-hcp, .missing { border: 2px solid var(--bbb-error); background-color: #ffcccc; }
     
-    /* Logo in top-right corner */
+    /* Logo in top-right corner - keeping consistent with global */
     .top-bar {
       position: absolute;
       top: 0;
@@ -38,147 +36,140 @@
     }
     
     h1 { 
-      color: #003300; 
-      font-size: 2rem; 
+      color: var(--bbb-primary);
       text-align: center; 
-      margin-bottom: 1rem; 
-    }
-    
-    header { 
-      position: fixed;
-      top: 0;
-      left: 0;
-      padding: 1rem;
-      z-index: 5;
-    }
-    
-    .home-link { 
-      color: #000; 
-      font-weight: bold; 
-      text-decoration: none;
-      display: inline-block;
-      padding: 0.5rem 0.75rem;
-      background-color: rgba(255, 255, 255, 0.9);
-      border-radius: 4px;
-      transition: background-color 0.3s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    .home-link:hover {
-      background-color: rgba(255, 255, 255, 1);
-    }
-    
-    /* Main content wrapper */
-    main {
-      padding-top: 80px;
+      margin-bottom: var(--spacing-md);
+      font-family: var(--font-family-accent);
     }
     
     /* Controls */
-    details#setup-controls { margin-bottom: 1rem; }
-    .controls { display: flex; flex-wrap: wrap; gap: 1rem; }
-    .controls > div { background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 6px; flex: 1 1 200px; }
-    .controls label { display: block; margin-bottom: 0.25rem; font-weight: bold; }
-    .controls label.checkbox { display: inline-block; margin-right: 0.5rem; }
+    details#setup-controls { 
+      margin-bottom: var(--spacing-md);
+      background: white;
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-md);
+      border: 1px solid var(--bbb-border);
+    }
+
+    details#setup-controls summary {
+      font-family: var(--font-family-accent);
+      font-weight: bold;
+      cursor: pointer;
+      color: var(--bbb-primary);
+    }
+    
+    .controls { 
+      display: flex; 
+      flex-wrap: wrap; 
+      gap: var(--spacing-md); 
+    }
+    
+    .controls > div { 
+      background: rgba(255,255,255,0.1); 
+      padding: var(--spacing-md); 
+      border-radius: var(--border-radius-md); 
+      flex: 1 1 200px; 
+      border: 1px solid var(--bbb-border);
+    }
+    
+    .controls label { 
+      display: block; 
+      margin-bottom: var(--spacing-xs); 
+      font-weight: bold; 
+      color: var(--bbb-text-light);
+      font-family: var(--font-family-accent);
+    }
+    
+    .controls label.checkbox { 
+      display: inline-block; 
+      margin-right: var(--spacing-sm);
+      font-family: var(--font-family-base);
+    }
     
     /* Player selects styling */
     .player-select {
       width: 100%;
-      padding: 0.5rem;
-      margin-top: 0.25rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      padding: var(--spacing-sm);
+      margin-top: var(--spacing-xs);
+      border: 1px solid var(--bbb-border);
+      border-radius: var(--border-radius-sm);
       background-color: white;
       cursor: pointer;
+      font-family: var(--font-family-base);
     }
     
     #player-selects label {
-      font-size: 0.9rem;
-      color: #666;
+      font-size: var(--font-size-sm);
+      color: var(--bbb-text-light);
+      font-family: var(--font-family-accent);
     }
     
     #player-selects > div > div {
-      margin-bottom: 0.5rem;
+      margin-bottom: var(--spacing-sm);
     }
     
-    /* Buttons */
-    #button-group { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem; }
-    select, button { padding: 0.5rem 1rem; cursor: pointer; }
-    button { background: #004c99; color: white; border: none; border-radius: 4px; }
-    button:hover { background: #003d7a; }
-    button:active { opacity: 0.8; transform: scale(0.98); }
-    button:disabled { background: #cccccc; cursor: not-allowed; }
+    /* Table specific styles that need to override global */
+    #table-container { 
+      overflow-x: auto; 
+      -webkit-overflow-scrolling: touch; 
+      margin-top: var(--spacing-md);
+      background: white;
+      padding: var(--spacing-md);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-md);
+    }
     
-    /* Table */
-    #table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 1rem; }
-    table { width: 100%; border-collapse: collapse; min-width: 600px; }
-    caption { caption-side: top; text-align: left; padding: 0.5rem; font-weight: bold; background: #eef; }
-    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: center; white-space: nowrap; }
-    th { background: #ddd; }
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+      min-width: 600px; 
+      font-family: var(--font-family-base);
+    }
     
-    /* Status messages */
-    #status-message { 
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 4px;
+    caption { 
+      caption-side: top; 
+      text-align: left; 
+      padding: var(--spacing-sm); 
+      font-weight: bold; 
+      background: #eef; 
+      font-family: var(--font-family-accent);
+    }
+    
+    th, td { 
+      border: 1px solid var(--bbb-border); 
+      padding: var(--spacing-sm); 
+      text-align: center; 
+      white-space: nowrap; 
+    }
+    
+    th { 
+      background: #ddd; 
+      font-family: var(--font-family-accent);
+      font-weight: bold;
+    }
+    
+    input[type="number"] {
+      width: 3rem;
       text-align: center;
-      display: none;
+      padding: var(--spacing-xs);
     }
-    .success { background-color: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
-    .error { background-color: #ffcdd2; color: #b71c1c; border: 1px solid #ef9a9a; }
-    .warning { background-color: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
-    .info { background-color: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; }
+    
+    .stroke-info, .points {
+      font-size: var(--font-size-sm);
+    }
     
     /* Responsive */
     @media (max-width: 768px) {
-      header {
-        padding: 0.75rem;
-      }
-      
-      main {
-        padding-top: 70px;
-      }
-      
-      .corner-logo {
-        width: 70px;
-        height: 70px;
-      }
-      
       .controls { flex-direction: column; }
       #button-group { flex-direction: column; }
-      table { font-size: 0.8rem; }
+      table { font-size: var(--font-size-sm); }
     }
     
     @media (max-width: 480px) {
-      body { padding: 0.5rem; }
-      
-      header {
-        padding: 0.5rem;
-      }
-      
-      main {
-        padding-top: 65px;
-      }
-      
-      .corner-logo {
-        width: 65px;
-        height: 65px;
-      }
-      
-      .home-link {
-        padding: 0.4rem 0.6rem;
-        font-size: 0.9rem;
-      }
-      
-      h1 { font-size: 1.5rem; }
-      .controls { flex-direction: column; gap: 0.5rem; }
-      .controls > div { flex: 1 1 100%; }
-      #button-group { flex-direction: column; }
-      select, button { width: 100%; }
-      /* Mobile table adjustments */
-      table { min-width: auto; table-layout: auto; font-size: 0.65rem; width: 100%; }
-      th, td { white-space: normal; word-wrap: break-word; padding: 0.2rem; }
-      input[type="number"] { width: 1.2rem; font-size: 0.7rem; }
-      .stroke-info, .points { font-size: 0.6em; }
+      table { min-width: auto; table-layout: auto; font-size: var(--font-size-xs); width: 100%; }
+      th, td { white-space: normal; word-wrap: break-word; padding: var(--spacing-xs); }
+      input[type="number"] { width: 1.2rem; font-size: var(--font-size-xs); }
+      .stroke-info, .points { font-size: var(--font-size-xs); }
     }
   </style>
 </head>
@@ -187,11 +178,11 @@
     <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="corner-logo">
   </div>
   
-  <header>
+  <header class="fixed-header">
     <nav><a href="index.html" class="home-link">🏠 Home</a></nav>
   </header>
   
-  <main>
+  <main class="main-content">
     <h1>Stableford Scorecard – Birdie Bush Bandits</h1>
     <div id="status-message"></div>
     <details id="setup-controls" open>
@@ -301,11 +292,11 @@
         </div>
       </div>
     </details>
-    <div id="button-group">
-      <button id="build">Build Scorecard</button>
-      <button id="reset">Reset</button>
-      <button id="save" disabled>Save Scorecard</button>
-      <button id="download-image">📸 Save Scorecard as Image</button>
+    <div id="button-group" class="btn-group">
+      <button id="build" class="btn">Build Scorecard</button>
+      <button id="reset" class="btn">Reset</button>
+      <button id="save" class="btn" disabled>Save Scorecard</button>
+      <button id="download-image" class="btn">📸 Save Scorecard as Image</button>
     </div>
     <div id="table-container"></div>
   </main>
@@ -630,7 +621,7 @@
         table.appendChild(caption);
 
         const thead = document.createElement('thead');
-        let hdr1 = '<tr><th>Hole</th><th>Par</th><th style="color:red;">SI</th><th>Yards</th>';
+        let hdr1 = '<tr><th>Hole</th><th>Par</th><th style="color:var(--bbb-error);">SI</th><th>Yards</th>';
         players.forEach((p,i) => hdr1 += `<th colspan="2">${p}<br>H:<input id="hcp-${i}" type="number" min="0" max="99" value="0" oninput="if(this.value.length>2) this.value=this.value.slice(0,2)"></th>`);
         hdr1 += '</tr>';
         let hdr2 = '<tr><th></th><th></th><th></th><th></th>';
@@ -647,7 +638,7 @@
         idx.forEach(h => {
           const tr = document.createElement('tr');
           const c = courses[courseSelect.value];
-          tr.innerHTML = `<td>${h+1}</td><td>${c.par[h]}</td><td style="color:red;">${c.si[h]}</td><td>${c.yards[teeSelect.value][h]}</td>`;
+          tr.innerHTML = `<td>${h+1}</td><td>${c.par[h]}</td><td style="color:var(--bbb-error);">${c.si[h]}</td><td>${c.yards[teeSelect.value][h]}</td>`;
           players.forEach((_,pi) => {
             tr.innerHTML += `<td><input data-player="${pi}" data-hole="${h}" type="number" min="0" max="999" oninput="if(this.value.length>3) this.value=this.value.slice(0,3)"></td><td class="pts-${pi}"><div class="stroke-info" data-player="${pi}" data-hole="${h}"></div><div class="points"></div></td>`;
           });
