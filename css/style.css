@@ -94,10 +94,14 @@ body {
 }
 
 /* ----------- Header & Logo ----------- */
+/* ----------- Header & Logo ----------- */
 header {
   margin-bottom: var(--spacing-xl);
   position: relative;
-  border-top: none;
+  border: none !important;
+  border-top: none !important;
+  box-shadow: none !important;
+  background-image: none !important;
 }
 
 .top-bar {
@@ -140,7 +144,23 @@ header {
   padding: var(--spacing-md);
   z-index: 5;
   background-color: transparent;
-  border-top: none;
+  border: none !important;
+  border-top: none !important;
+}
+
+/* Ensure consistent styling for all viewports */
+@media (max-width: 768px) {
+  header, .fixed-header, body::before, html::before {
+    border: none !important;
+    border-top: none !important;
+  }
+}
+
+@media (max-width: 480px) {
+  header, .fixed-header, body::before, html::before {
+    border: none !important;
+    border-top: none !important;
+  }
 }
 
 .main-content {
