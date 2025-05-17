@@ -76,21 +76,9 @@ body {
   position: relative;
 }
 
-/* ----------- Accessibility ----------- */
+./* ----------- Accessibility ----------- */
 .skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  background: var(--bbb-primary);
-  color: white;
-  padding: var(--spacing-sm);
-  text-decoration: none;
-  z-index: 100;
-  border-radius: 0 0 4px 0;
-}
-
-.skip-link:focus {
-  top: 0;
+  display: none !important;
 }
 
 /* ----------- Header & Logo ----------- */
