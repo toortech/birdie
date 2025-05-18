@@ -94,6 +94,65 @@
       calculatorContainer.id = 'handicap-calculator';
       calculatorContainer.className = 'calculator';
       
+      // Create member selection section
+      const memberSection = document.createElement('div');
+      memberSection.className = 'member-selection-section';
+      
+      const memberLabel = document.createElement('label');
+      memberLabel.textContent = 'Calculate Handicap For:';
+      memberLabel.htmlFor = 'member-select';
+      
+      const memberSelect = document.createElement('select');
+      memberSelect.id = 'member-select';
+      memberSelect.className = 'member-select';
+      
+      // Populate members dropdown
+      if (BBB_CONFIG.members && BBB_CONFIG.members.length > 0) {
+        // Add a "Select Member" option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '-- Select Member --';
+        memberSelect.appendChild(defaultOption);
+        
+        // Add all members from config
+        BBB_CONFIG.members.forEach(member => {
+          const option = document.createElement('option');
+          option.value = member.toLowerCase();
+          option.textContent = member;
+          
+          // If logged in user matches this member, select it by default
+          if (BBB_AUTH.isAuthenticated && 
+              BBB_AUTH.currentUser && 
+              BBB_AUTH.currentUser.id === member.toLowerCase()) {
+            option.selected = true;
+          }
+          
+          memberSelect.appendChild(option);
+        });
+      } else {
+        // If no members in config, create a default option
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = 'No members found';
+        memberSelect.appendChild(option);
+      }
+      
+      // Add admin message for permissions
+      const adminMessage = document.createElement('div');
+      adminMessage.className = 'admin-message';
+      adminMessage.style.display = 'none';
+      adminMessage.innerHTML = '<small>As an admin, you can calculate and save handicaps for any member.</small>';
+      
+      // Check if user is an admin and show message
+      if (BBB_AUTH.isAuthenticated && BBB_AUTH.hasRole('admin')) {
+        adminMessage.style.display = 'block';
+      }
+      
+      // Add elements to member section
+      memberSection.appendChild(memberLabel);
+      memberSection.appendChild(memberSelect);
+      memberSection.appendChild(adminMessage);
+      
       // Create help section
       const helpToggle = document.createElement('button');
       helpToggle.className = 'btn help-toggle';
@@ -116,13 +175,14 @@
       helpSection.innerHTML = `
         <h3>How to Use the Handicap Calculator</h3>
         <ol>
+          <li>Select the member whose handicap you want to calculate.</li>
           <li>Enter details for at least 3 rounds of golf (up to 20).</li>
-          <li>For each round, select the course and tee color you played.</li>
-          <li>Enter your gross score for the round.</li>
+          <li>For each round, select the course and tee color played.</li>
+          <li>Enter the gross score for the round.</li>
           <li>The course rating and slope rating will be filled automatically.</li>
           <li>Your score differential will be calculated automatically.</li>
-          <li>Click "Calculate Handicap" to get your handicap index.</li>
-          <li>If logged in, you can save your handicap to your profile.</li>
+          <li>Click "Calculate Handicap" to get the handicap index.</li>
+          <li>Click "Save Handicap" to save it to the member's profile.</li>
         </ol>
         <p>The handicap index is calculated using the World Handicap System (WHS) formula.</p>
       `;
@@ -201,6 +261,7 @@
       historySection.style.display = 'none';
       
       // Add elements to calculator container
+      calculatorContainer.appendChild(memberSection);
       calculatorContainer.appendChild(helpToggle);
       calculatorContainer.appendChild(helpSection);
       calculatorContainer.appendChild(resultDisplay);
@@ -221,9 +282,14 @@
         addRoundInput();
       }
       
-      // Load saved handicap data if user is authenticated
-      if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
-        loadSavedHandicap();
+      // Setup member select change event
+      memberSelect.addEventListener('change', function() {
+        loadSavedHandicap(this.value);
+      });
+      
+      // Load saved handicap data for current selection
+      if (memberSelect.value) {
+        loadSavedHandicap(memberSelect.value);
       }
       
       // Function to create table header
@@ -448,6 +514,10 @@
           return;
         }
         
+        // Get selected member
+        const memberSelect = document.getElementById('member-select');
+        const selectedMember = memberSelect.options[memberSelect.selectedIndex].text;
+        
         // Calculate handicap using BBB_UTILS if available
         let handicapIndex;
         if (typeof BBB_UTILS !== 'undefined' && typeof BBB_UTILS.calculateHandicapIndex === 'function') {
@@ -480,15 +550,16 @@
         const resultDisplay = document.getElementById('handicap-result');
         resultDisplay.innerHTML = `
           <div class="handicap-result-inner">
-            <h3>Your Handicap Index is</h3>
+            <h3>${selectedMember}'s Handicap Index is</h3>
             <div class="handicap-value">${handicapIndex}</div>
             <div class="handicap-info">Calculated using ${differentials.length} rounds</div>
           </div>
         `;
         resultDisplay.style.display = 'block';
         
-        // Enable save button if user is authenticated
-        if (BBB_AUTH.isAuthenticated) {
+        // Enable save button if user is authenticated and member is selected
+        const memberSelect = document.getElementById('member-select');
+        if (BBB_AUTH.isAuthenticated && memberSelect.value) {
           document.getElementById('save').disabled = false;
         }
         
@@ -526,7 +597,7 @@
       // Save handicap to user profile
       function saveHandicap() {
         if (!BBB_AUTH.isAuthenticated) {
-          BBB_UTILS.showMessage('Please log in to save your handicap.', 'error');
+          BBB_UTILS.showMessage('Please log in to save handicap.', 'error');
           return;
         }
         
@@ -534,7 +605,22 @@
         const handicapIndex = resultDisplay.dataset.value;
         
         if (!handicapIndex) {
-          BBB_UTILS.showMessage('Please calculate your handicap first.', 'error');
+          BBB_UTILS.showMessage('Please calculate handicap first.', 'error');
+          return;
+        }
+        
+        // Get selected member
+        const memberSelect = document.getElementById('member-select');
+        const selectedMemberId = memberSelect.value;
+        
+        if (!selectedMemberId) {
+          BBB_UTILS.showMessage('Please select a member.', 'error');
+          return;
+        }
+        
+        // Check permissions for saving to other members' profiles
+        if (selectedMemberId !== BBB_AUTH.currentUser.id && !BBB_AUTH.hasRole('admin')) {
+          BBB_UTILS.showMessage('You can only save handicaps to your own profile unless you are an admin.', 'error');
           return;
         }
         
@@ -561,10 +647,10 @@
         
         // Save to database
         if (typeof BBB_DB !== 'undefined' && typeof BBB_DB.saveMemberHandicap === 'function') {
-          BBB_DB.saveMemberHandicap(BBB_AUTH.currentUser.id, handicapData)
+          BBB_DB.saveMemberHandicap(selectedMemberId, handicapData)
             .then(() => {
               BBB_UTILS.showMessage('Handicap saved successfully!', 'success');
-              loadSavedHandicap();
+              loadSavedHandicap(selectedMemberId);
             })
             .catch(err => {
               console.error('Error saving handicap:', err);
@@ -577,11 +663,12 @@
             savedHandicaps.push({
               ...handicapData,
               savedAt: new Date().toISOString(),
-              id: `hcp_${Date.now()}`
+              id: `hcp_${Date.now()}`,
+              memberId: selectedMemberId
             });
             localStorage.setItem('handicap_history', JSON.stringify(savedHandicaps));
             BBB_UTILS.showMessage('Handicap saved to browser storage!', 'success');
-            loadSavedHandicap();
+            loadSavedHandicap(selectedMemberId);
           } catch (error) {
             console.error('Error saving to localStorage:', error);
             BBB_UTILS.showMessage('Error saving handicap.', 'error');
@@ -589,44 +676,63 @@
         }
       }
       
-      // Load saved handicap data
-      function loadSavedHandicap() {
+      // Load saved handicap data for a specific member
+      function loadSavedHandicap(memberId) {
+        if (!memberId) return;
+        
         const historySection = document.getElementById('handicap-history');
         
-        if (typeof BBB_DB !== 'undefined' && typeof BBB_DB.getMemberHandicap === 'function' && BBB_AUTH.currentUser) {
-          BBB_DB.getMemberHandicap(BBB_AUTH.currentUser.id)
+        if (typeof BBB_DB !== 'undefined' && typeof BBB_DB.getMemberHandicap === 'function') {
+          BBB_DB.getMemberHandicap(memberId)
             .then(data => {
               if (data) {
-                displayHandicapHistory([data]);
+                displayHandicapHistory([data], memberId);
+              } else {
+                // If no data found, clear history
+                historySection.innerHTML = '';
+                historySection.style.display = 'none';
               }
             })
             .catch(err => {
               console.error('Error loading handicap history:', err);
+              historySection.innerHTML = '';
+              historySection.style.display = 'none';
             });
         } else {
           // Fallback to localStorage
           try {
             const savedHandicaps = JSON.parse(localStorage.getItem('handicap_history') || '[]');
-            if (savedHandicaps.length > 0) {
-              displayHandicapHistory(savedHandicaps);
+            const memberHandicaps = savedHandicaps.filter(h => h.memberId === memberId);
+            
+            if (memberHandicaps.length > 0) {
+              displayHandicapHistory(memberHandicaps, memberId);
+            } else {
+              // If no data found, clear history
+              historySection.innerHTML = '';
+              historySection.style.display = 'none';
             }
           } catch (error) {
             console.error('Error loading from localStorage:', error);
+            historySection.innerHTML = '';
+            historySection.style.display = 'none';
           }
         }
       }
       
       // Display handicap history
-      function displayHandicapHistory(handicapData) {
+      function displayHandicapHistory(handicapData, memberId) {
         if (!handicapData || handicapData.length === 0) return;
         
         const historySection = document.getElementById('handicap-history');
+        const memberSelect = document.getElementById('member-select');
+        const memberName = Array.from(memberSelect.options).find(opt => opt.value === memberId)?.text || 'Selected Member';
+        
         historySection.innerHTML = '';
         historySection.style.display = 'block';
         
         // Create heading
         const heading = document.createElement('h3');
-        heading.textContent = 'Handicap History';
+        heading.textContent = `${memberName}'s Handicap History`;
         historySection.appendChild(heading);
         
         // Create history cards container
@@ -669,7 +775,12 @@
           return;
         }
         
+        // Get selected member
+        const memberSelect = document.getElementById('member-select');
+        const selectedMember = memberSelect.options[memberSelect.selectedIndex].text;
+        
         let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += `Handicap Data for ${selectedMember}\n`;
         csvContent += "Course,Tee,Score,Course Rating,Slope Rating,Differential\n";
         
         Array.from(tbody.children).forEach(row => {
@@ -686,7 +797,7 @@
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
         link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `handicap_calculation_${new Date().toISOString().slice(0,10)}.csv`);
+        link.setAttribute("download", `${selectedMember.replace(/\s+/g, '_')}_handicap_${new Date().toISOString().slice(0,10)}.csv`);
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -704,6 +815,32 @@
       border-radius: 8px;
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
       margin-top: 1.5rem;
+    }
+    
+    .member-selection-section {
+      margin-bottom: 1.5rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .member-selection-section label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+    
+    .member-select {
+      width: 100%;
+      max-width: 300px;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
+    }
+    
+    .admin-message {
+      color: #666;
+      font-style: italic;
     }
     
     .help-toggle {
