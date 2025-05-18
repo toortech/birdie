@@ -54,19 +54,6 @@
       margin-bottom: 0;
     }
     
-    /* Upload section */
-    .upload-section {
-      background-color: #f8f9fa;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin: 2rem 0;
-      text-align: center;
-    }
-    
-    .upload-instructions {
-      margin-bottom: 1rem;
-    }
-    
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .logo-gallery {
@@ -228,37 +215,8 @@
         });
       }
       
-      // Add upload instructions section
-      const uploadSection = document.createElement('div');
-      uploadSection.className = 'upload-section';
-      
-      const uploadInstructions = document.createElement('div');
-      uploadInstructions.className = 'upload-instructions';
-      uploadInstructions.innerHTML = `
-        <h3>Adding More Logos</h3>
-        <p>To add more logos to this page:</p>
-        <ol>
-          <li>Create a folder named "logos" in the project root</li>
-          <li>Add image files with simple numbered names:
-            <ul>
-              <li>logo1.svg</li>
-              <li>logo2.png</li>
-              <li>logo3.jpg</li>
-              <li>etc. (up to logo10)</li>
-            </ul>
-          </li>
-          <li>The logos will appear automatically on this page</li>
-        </ol>
-        <p>Supported file formats: SVG, PNG, JPG, JPEG, GIF</p>
-      `;
-      
-      uploadSection.appendChild(uploadInstructions);
-      
-      // Add logo gallery and instructions to main content
-      mainContent.appendChild(logoGallery);
-      mainContent.appendChild(uploadSection);
-      
       // Add content to main wrapper
+      mainContent.appendChild(logoGallery);
       headerElements.mainWrapper.appendChild(mainContent);
     });
   </script>
