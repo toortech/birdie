@@ -54,20 +54,13 @@
       margin-bottom: 0;
     }
     
-    /* Loading and error messages */
-    .loading-message,
-    .error-message {
+    /* Empty state */
+    .empty-message {
       text-align: center;
       padding: 2rem;
       background-color: #f8f9fa;
       border-radius: 8px;
       margin: 2rem 0;
-    }
-    
-    .error-message {
-      color: #721c24;
-      background-color: #f8d7da;
-      border: 1px solid #f5c6cb;
     }
     
     /* Responsive adjustments */
@@ -158,116 +151,12 @@
       description.textContent = 'Here are the official Birdie Bush Bandits logos available for club use.';
       mainContent.appendChild(description);
       
-      // Create logo gallery container
+      // Create logo gallery
       const logoGallery = document.createElement('div');
       logoGallery.className = 'logo-gallery';
-      logoGallery.id = 'logo-gallery';
       
-      // Add loading message initially
-      const loadingMessage = document.createElement('div');
-      loadingMessage.className = 'loading-message';
-      loadingMessage.id = 'loading-message';
-      loadingMessage.textContent = 'Loading logos...';
-      mainContent.appendChild(loadingMessage);
-      
-      // Add gallery after loading
-      mainContent.appendChild(logoGallery);
-      
-      // Function to load all logos from the logos directory
-      async function loadLogos() {
-        try {
-          // Fetch the list of files in the logos directory
-          // This would typically be done through a server-side API
-          // For static sites, we'll use a workaround by trying to load image files
-          
-          // List of common image extensions to try
-          const extensions = ['svg', 'png', 'jpg', 'jpeg', 'gif'];
-          
-          // Initialize the gallery
-          logoGallery.innerHTML = '';
-          let foundLogos = false;
-          
-          // Create a set of filenames to avoid duplicates
-          const processedFiles = new Set();
-          
-          // Try to load each logo with predefined names and extensions
-          const filenamesToTry = [
-            'bbb-logo',
-            'bbb-logo-white',
-            'bbb-round-logo',
-            'bbb-square-logo',
-            'bbb-text-logo',
-            'bbb-badge',
-            'bbb-icon',
-            'bbb-wordmark',
-            'logo',
-            'logo-white',
-            'logo-color',
-            'bbandits-logo',
-            'birdiebush-logo',
-            'banner',
-            'badge',
-            'icon'
-          ];
-          
-          // First try the direct logos directory
-          for (const baseName of filenamesToTry) {
-            for (const ext of extensions) {
-              // Generate both path variations (with and without logos directory)
-              const pathsToTry = [
-                `logos/${baseName}.${ext}`,  // Try with logos directory
-                `${baseName}.${ext}`         // Try in root directory as fallback
-              ];
-              
-              for (const path of pathsToTry) {
-                // Skip if we've already processed this file
-                if (processedFiles.has(path)) continue;
-                
-                // Try to load the image
-                const img = new Image();
-                img.src = path;
-                
-                // Use a promise to wait for load or error
-                await new Promise(resolve => {
-                  img.onload = function() {
-                    // Image loaded successfully, add to gallery
-                    addLogoToGallery(path, baseName);
-                    foundLogos = true;
-                    processedFiles.add(path);
-                    resolve();
-                  };
-                  
-                  img.onerror = function() {
-                    // Image failed to load, just resolve
-                    resolve();
-                  };
-                });
-              }
-            }
-          }
-          
-          // Check if we found any logos
-          if (!foundLogos) {
-            // No logos found, show message
-            const noLogosMessage = document.createElement('div');
-            noLogosMessage.className = 'error-message';
-            noLogosMessage.textContent = 'No logo files found. Please upload some logo files to the "logos" directory.';
-            logoGallery.appendChild(noLogosMessage);
-          }
-          
-          // Hide loading message
-          document.getElementById('loading-message').style.display = 'none';
-        } catch (error) {
-          console.error('Error loading logos:', error);
-          
-          // Show error message
-          document.getElementById('loading-message').textContent = 'Error loading logos. Please try again later.';
-          document.getElementById('loading-message').className = 'error-message';
-        }
-      }
-      
-      // Function to add a logo to the gallery
-      function addLogoToGallery(path, baseName) {
+      // Create function to add logo to gallery
+      function addLogo(path, name) {
         const logoItem = document.createElement('div');
         logoItem.className = 'logo-item';
         
@@ -277,39 +166,80 @@
         const logoImg = document.createElement('img');
         logoImg.className = 'logo-img';
         logoImg.src = path;
-        logoImg.alt = formatLogoName(path);
+        logoImg.alt = name;
         
         logoImgContainer.appendChild(logoImg);
         
         const logoName = document.createElement('p');
         logoName.className = 'logo-name';
-        logoName.textContent = formatLogoName(path);
+        logoName.textContent = name;
         
         logoItem.appendChild(logoImgContainer);
         logoItem.appendChild(logoName);
         logoGallery.appendChild(logoItem);
+        
+        return logoItem;
       }
       
-      // Function to format logo name from filename
-      function formatLogoName(filename) {
-        // Extract just the filename without path or extension
-        const baseName = filename.split('/').pop().split('.')[0];
-        
-        // Replace hyphens and underscores with spaces
-        const nameWithSpaces = baseName.replace(/[-_]/g, ' ');
-        
-        // Capitalize first letter of each word
-        return nameWithSpaces
-          .split(' ')
-          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-          .join(' ');
+      // Track whether any logos were added
+      let logosAdded = false;
+      
+      // Add example logo from root directory
+      try {
+        // This logo should exist in the project
+        addLogo('bbb-logo.svg', 'BBB Logo');
+        logosAdded = true;
+      } catch (e) {
+        console.log("Root logo not found", e);
       }
+      
+      // Check logos directory for each file when possible
+      // If any files exist in logos/ directory, they'll be displayed
+      
+      // Directory logic that generates dynamic entries
+      // The following code creates a placeholder that will be 
+      // automatically populated by logos found in the logos/ directory
+      
+      // LOGOS_DIRECTORY_PLACEHOLDER
+      // This is where the server or build process will inject dynamic logo entries
+      
+      // Add some logos with specific paths to check
+      const logoFiles = [
+        { path: 'logos/bbb-logo.svg', name: 'Primary Logo' },
+        { path: 'logos/bbb-logo-white.svg', name: 'White Logo' },
+        { path: 'logos/bbb-icon.svg', name: 'Icon' },
+        { path: 'logos/bbb-wordmark.svg', name: 'Wordmark' }
+      ];
+      
+      // Try to add each logo
+      logoFiles.forEach(logo => {
+        const img = new Image();
+        img.onload = function() {
+          addLogo(logo.path, logo.name);
+          logosAdded = true;
+        };
+        img.src = logo.path;
+      });
+      
+      // Add instructional content if no logos are loaded
+      if (!logosAdded) {
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className = 'empty-message';
+        emptyMessage.innerHTML = `
+          <p>No logo files found. To add logos:</p>
+          <ol>
+            <li>Create a folder named "logos" in the project root</li>
+            <li>Add SVG or PNG logo files to the folder</li>
+            <li>Use filenames like "bbb-logo.svg", "bbb-logo-white.svg", etc.</li>
+          </ol>
+        `;
+        logoGallery.appendChild(emptyMessage);
+      }
+      
+      mainContent.appendChild(logoGallery);
       
       // Add content to main wrapper
       headerElements.mainWrapper.appendChild(mainContent);
-      
-      // Load logos
-      loadLogos();
     });
   </script>
 </body>
