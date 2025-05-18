@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
-  <!-- Gradient Definitions -->
+  <!-- Enhanced Gradient Definitions -->
   <defs>
     <!-- Gold gradient for premium feel -->
     <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -9,13 +9,20 @@
       <stop offset="100%" style="stop-color:#FFB300;stop-opacity:1" />
     </linearGradient>
     
-    <!-- Green gradient for depth -->
+    <!-- Green gradient for depth - softened -->
     <radialGradient id="greenGradient" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" style="stop-color:#004d00;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#003300;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#2d805c;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1a5c40;stop-opacity:1" />
     </radialGradient>
     
-    <!-- Flag gradient -->
+    <!-- Ball gradient from first design -->
+    <radialGradient id="ballGradient" cx="40%" cy="40%" r="60%" fx="40%" fy="40%">
+      <stop offset="0%" stop-color="#ffffff" />
+      <stop offset="85%" stop-color="#f7f7f7" />
+      <stop offset="100%" stop-color="#efefef" />
+    </radialGradient>
+    
+    <!-- Flag gradient - enhanced -->
     <linearGradient id="flagGradient" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" style="stop-color:#0066cc;stop-opacity:1" />
       <stop offset="50%" style="stop-color:#004499;stop-opacity:1" />
@@ -29,117 +36,325 @@
       <stop offset="100%" style="stop-color:#654321;stop-opacity:1" />
     </linearGradient>
     
-    <!-- Shadow filter -->
+    <!-- BBB letter gradient - from first design -->
+    <linearGradient id="letterGradient" x1="30%" y1="0%" x2="70%" y2="100%">
+      <stop offset="0%" stop-color="#55a87a" />
+      <stop offset="100%" stop-color="#2d805c" />
+    </linearGradient>
+    
+    <!-- Enhanced shadow filter -->
     <filter id="dropShadow">
-      <feDropShadow dx="1" dy="1" stdDeviation="2" flood-color="#000000" flood-opacity="0.3"/>
+      <feDropShadow dx="1.5" dy="1.5" stdDeviation="2.5" flood-color="#000000" flood-opacity="0.3"/>
     </filter>
+    
+    <!-- Inner glow filter -->
+    <filter id="innerGlow">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur" />
+      <feComposite in="blur" operator="out" in2="SourceAlpha" result="glowA" />
+      <feFlood flood-color="#ffffff" flood-opacity="0.6" result="glowC" />
+      <feComposite in="glowC" in2="glowA" operator="in" result="glowD" />
+      <feMerge>
+        <feMergeNode in="glowD" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+    
+    <!-- Clip path for circular logo -->
+    <clipPath id="circleClip">
+      <circle cx="200" cy="200" r="190" />
+    </clipPath>
   </defs>
   
-  <!-- Outer decorative ring -->
-  <circle cx="200" cy="200" r="195" fill="url(#goldGradient)" opacity="0.2"/>
-  <circle cx="200" cy="200" r="190" fill="white"/>
-  
-  <!-- Main circle border with gradient -->
-  <circle cx="200" cy="200" r="185" fill="none" stroke="url(#greenGradient)" stroke-width="8"/>
-  
-  <!-- Inner circle with subtle pattern -->
-  <circle cx="200" cy="200" r="175" fill="#f0f9f0"/>
-  
-  <!-- Golf course with realistic green -->
-  <ellipse cx="200" cy="240" rx="130" ry="60" fill="url(#greenGradient)" opacity="0.4"/>
-  
-  <!-- No bushes -->
-  
-  <!-- Golf hole with depth -->
-  <ellipse cx="200" cy="250" rx="12" ry="6" fill="#1a1a1a"/>
-  <ellipse cx="200" cy="248" rx="10" ry="4" fill="#000000"/>
-  
-  <!-- Enhanced flag pole with texture - CENTERED -->
-  <rect x="198" y="100" width="4" height="130" fill="url(#metalGradient)" filter="url(#dropShadow)"/>
-  <circle cx="200" cy="100" r="5" fill="#8B4513"/> <!-- Pole top -->
-  
-  <!-- Premium flag with gradient and shadow - CENTERED -->
-  <g filter="url(#dropShadow)">
-    <path d="M 202 100 L 280 120 L 280 165 L 202 145 Z" fill="url(#flagGradient)"/>
-    <path d="M 202 100 L 280 120 L 280 165 L 202 145 Z" fill="none" stroke="#003366" stroke-width="2"/>
-  </g>
-  
-  <!-- Flag emblem - BBB fits better -->
-  <text x="241" y="140" font-family="Impact, Arial Black, sans-serif" font-size="28" font-weight="900" 
-        fill="white" text-anchor="middle">BBB</text>
-  
-  <!-- Premium golf ball - MOVED LEFT -->
-  <g transform="translate(140, 235)">
-    <circle cx="0" cy="0" r="15" fill="white" stroke="#cccccc" stroke-width="1"/>
-    <!-- Dimple pattern -->
-    <circle cx="-5" cy="-5" r="2" fill="#e6e6e6"/>
-    <circle cx="0" cy="-6" r="2" fill="#e6e6e6"/>
-    <circle cx="5" cy="-5" r="2" fill="#e6e6e6"/>
-    <circle cx="-6" cy="0" r="2" fill="#e6e6e6"/>
-    <circle cx="6" cy="0" r="2" fill="#e6e6e6"/>
-    <circle cx="-5" cy="5" r="2" fill="#e6e6e6"/>
-    <circle cx="0" cy="6" r="2" fill="#e6e6e6"/>
-    <circle cx="5" cy="5" r="2" fill="#e6e6e6"/>
-  </g>
-  
-  <!-- Enhanced birdie with gradient -->
-  <g id="birdie" transform="translate(280, 110) scale(1.5)" filter="url(#dropShadow)">
-    <!-- Body with gradient -->
-    <ellipse cx="0" cy="0" rx="10" ry="8" fill="url(#goldGradient)"/>
-    <!-- Head -->
-    <circle cx="-6" cy="-3" r="6" fill="url(#goldGradient)"/>
-    <!-- Beak -->
-    <path d="M -12 -3 L -16 -3 L -14 -1 Z" fill="#FF8C00"/>
-    <!-- Eye with highlight -->
-    <circle cx="-8" cy="-4" r="2" fill="#000000"/>
-    <circle cx="-8.5" cy="-4.5" r="0.8" fill="#ffffff"/>
-    <!-- Wing with detail -->
-    <path d="M 5 0 Q 12 -3 15 0 Q 12 3 5 0" fill="#FFC700" stroke="#FFA500" stroke-width="1"/>
-    <!-- Tail feathers -->
-    <path d="M 8 2 L 12 0 L 12 4 Z" fill="#FFA500"/>
-  </g>
-  
-  <!-- Premium text - MOVED UP 10 PIXELS -->
-  <text x="200" y="90" font-family="Impact, Arial Black, sans-serif" font-size="36" font-weight="900" 
-        text-anchor="middle" fill="#003300" letter-spacing="2">BIRDIE BUSH</text>
-  
-  <text x="200" y="340" font-family="Impact, Arial Black, sans-serif" font-size="36" font-weight="900" 
-        text-anchor="middle" fill="#003300" letter-spacing="3">BANDITS</text>
-  
-  <!-- Established date - MOVED UP -->
-  <g id="established">
-    <text x="200" y="360" font-family="Impact, Arial Black, sans-serif" font-size="14" font-weight="900" 
-          text-anchor="middle" fill="#666666">EST. 2020</text>
-  </g>
-  
-  <!-- Corner golf tees with gold accents - REPOSITIONED -->
-  <g id="corner-tees">
-    <!-- Top left -->
-    <g transform="translate(40, 40)">
-      <circle cx="0" cy="0" r="5" fill="url(#goldGradient)"/>
-      <rect x="-2" y="0" width="4" height="12" fill="url(#metalGradient)"/>
-      <circle cx="0" cy="13" r="2.5" fill="#654321"/>
+  <!-- Main logo group with clip path -->
+  <g clip-path="url(#circleClip)">
+    <!-- Background with improved gradient and golf ball texture -->
+    <circle cx="200" cy="200" r="195" fill="url(#goldGradient)" opacity="0.2"/>
+    <circle cx="200" cy="200" r="190" fill="url(#ballGradient)" filter="url(#innerGlow)"/>
+    
+    <!-- Main circle border with gradient -->
+    <circle cx="200" cy="200" r="185" fill="none" stroke="url(#greenGradient)" stroke-width="8"/>
+    
+    <!-- Golf ball texture (comprehensive dimple pattern covering the entire circle) -->
+    <g opacity="0.08">
+      <!-- Complete dimple pattern covering the whole circle -->
+      <!-- Top section -->
+      <circle cx="200" cy="40" r="4" fill="#2d805c" />
+      <circle cx="180" cy="43" r="4.5" fill="#2d805c" />
+      <circle cx="160" cy="47" r="4" fill="#2d805c" />
+      <circle cx="140" cy="53" r="4.5" fill="#2d805c" />
+      <circle cx="120" cy="60" r="4" fill="#2d805c" />
+      <circle cx="100" cy="70" r="4.5" fill="#2d805c" />
+      <circle cx="85" cy="80" r="4" fill="#2d805c" />
+      <circle cx="70" cy="95" r="4.5" fill="#2d805c" />
+      <circle cx="60" cy="110" r="4" fill="#2d805c" />
+      <circle cx="50" cy="130" r="4.5" fill="#2d805c" />
+      <circle cx="45" cy="150" r="4" fill="#2d805c" />
+      <circle cx="40" cy="170" r="4.5" fill="#2d805c" />
+      <circle cx="38" cy="190" r="4" fill="#2d805c" />
+      <circle cx="38" cy="210" r="4.5" fill="#2d805c" />
+      <circle cx="40" cy="230" r="4" fill="#2d805c" />
+      <circle cx="45" cy="250" r="4.5" fill="#2d805c" />
+      <circle cx="50" cy="270" r="4" fill="#2d805c" />
+      <circle cx="60" cy="290" r="4.5" fill="#2d805c" />
+      <circle cx="70" cy="305" r="4" fill="#2d805c" />
+      <circle cx="85" cy="320" r="4.5" fill="#2d805c" />
+      <circle cx="100" cy="330" r="4" fill="#2d805c" />
+      <circle cx="120" cy="340" r="4.5" fill="#2d805c" />
+      <circle cx="140" cy="347" r="4" fill="#2d805c" />
+      <circle cx="160" cy="353" r="4.5" fill="#2d805c" />
+      <circle cx="180" cy="357" r="4" fill="#2d805c" />
+      <circle cx="200" cy="360" r="4.5" fill="#2d805c" />
+      <circle cx="220" cy="357" r="4" fill="#2d805c" />
+      <circle cx="240" cy="353" r="4.5" fill="#2d805c" />
+      <circle cx="260" cy="347" r="4" fill="#2d805c" />
+      <circle cx="280" cy="340" r="4.5" fill="#2d805c" />
+      <circle cx="300" cy="330" r="4" fill="#2d805c" />
+      <circle cx="315" cy="320" r="4.5" fill="#2d805c" />
+      <circle cx="330" cy="305" r="4" fill="#2d805c" />
+      <circle cx="340" cy="290" r="4.5" fill="#2d805c" />
+      <circle cx="350" cy="270" r="4" fill="#2d805c" />
+      <circle cx="355" cy="250" r="4.5" fill="#2d805c" />
+      <circle cx="360" cy="230" r="4" fill="#2d805c" />
+      <circle cx="362" cy="210" r="4.5" fill="#2d805c" />
+      <circle cx="362" cy="190" r="4" fill="#2d805c" />
+      <circle cx="360" cy="170" r="4.5" fill="#2d805c" />
+      <circle cx="355" cy="150" r="4" fill="#2d805c" />
+      <circle cx="350" cy="130" r="4.5" fill="#2d805c" />
+      <circle cx="340" cy="110" r="4" fill="#2d805c" />
+      <circle cx="330" cy="95" r="4.5" fill="#2d805c" />
+      <circle cx="315" cy="80" r="4" fill="#2d805c" />
+      <circle cx="300" cy="70" r="4.5" fill="#2d805c" />
+      <circle cx="280" cy="60" r="4" fill="#2d805c" />
+      <circle cx="260" cy="53" r="4.5" fill="#2d805c" />
+      <circle cx="240" cy="47" r="4" fill="#2d805c" />
+      <circle cx="220" cy="43" r="4.5" fill="#2d805c" />
+      
+      <!-- Second outer ring -->
+      <circle cx="200" cy="60" r="4.5" fill="#2d805c" />
+      <circle cx="175" cy="63" r="4" fill="#2d805c" />
+      <circle cx="155" cy="67" r="4.5" fill="#2d805c" />
+      <circle cx="135" cy="73" r="4" fill="#2d805c" />
+      <circle cx="115" cy="82" r="4.5" fill="#2d805c" />
+      <circle cx="100" cy="92" r="4" fill="#2d805c" />
+      <circle cx="85" cy="105" r="4.5" fill="#2d805c" />
+      <circle cx="75" cy="120" r="4" fill="#2d805c" />
+      <circle cx="67" cy="135" r="4.5" fill="#2d805c" />
+      <circle cx="62" cy="155" r="4" fill="#2d805c" />
+      <circle cx="57" cy="175" r="4.5" fill="#2d805c" />
+      <circle cx="55" cy="195" r="4" fill="#2d805c" />
+      <circle cx="57" cy="215" r="4.5" fill="#2d805c" />
+      <circle cx="62" cy="235" r="4" fill="#2d805c" />
+      <circle cx="67" cy="255" r="4.5" fill="#2d805c" />
+      <circle cx="75" cy="275" r="4" fill="#2d805c" />
+      <circle cx="85" cy="295" r="4.5" fill="#2d805c" />
+      <circle cx="100" cy="310" r="4" fill="#2d805c" />
+      <circle cx="115" cy="322" r="4.5" fill="#2d805c" />
+      <circle cx="135" cy="332" r="4" fill="#2d805c" />
+      <circle cx="155" cy="337" r="4.5" fill="#2d805c" />
+      <circle cx="175" cy="342" r="4" fill="#2d805c" />
+      <circle cx="200" cy="345" r="4.5" fill="#2d805c" />
+      <circle cx="225" cy="342" r="4" fill="#2d805c" />
+      <circle cx="245" cy="337" r="4.5" fill="#2d805c" />
+      <circle cx="265" cy="332" r="4" fill="#2d805c" />
+      <circle cx="285" cy="322" r="4.5" fill="#2d805c" />
+      <circle cx="300" cy="310" r="4" fill="#2d805c" />
+      <circle cx="315" cy="295" r="4.5" fill="#2d805c" />
+      <circle cx="325" cy="275" r="4" fill="#2d805c" />
+      <circle cx="333" cy="255" r="4.5" fill="#2d805c" />
+      <circle cx="338" cy="235" r="4" fill="#2d805c" />
+      <circle cx="343" cy="215" r="4.5" fill="#2d805c" />
+      <circle cx="345" cy="195" r="4" fill="#2d805c" />
+      <circle cx="343" cy="175" r="4.5" fill="#2d805c" />
+      <circle cx="338" cy="155" r="4" fill="#2d805c" />
+      <circle cx="333" cy="135" r="4.5" fill="#2d805c" />
+      <circle cx="325" cy="120" r="4" fill="#2d805c" />
+      <circle cx="315" cy="105" r="4.5" fill="#2d805c" />
+      <circle cx="300" cy="92" r="4" fill="#2d805c" />
+      <circle cx="285" cy="82" r="4.5" fill="#2d805c" />
+      <circle cx="265" cy="73" r="4" fill="#2d805c" />
+      <circle cx="245" cy="67" r="4.5" fill="#2d805c" />
+      <circle cx="225" cy="63" r="4" fill="#2d805c" />
+      
+      <!-- Third ring -->
+      <circle cx="200" cy="80" r="5" fill="#2d805c" />
+      <circle cx="175" cy="83" r="4.5" fill="#2d805c" />
+      <circle cx="150" cy="90" r="5" fill="#2d805c" />
+      <circle cx="130" cy="100" r="4.5" fill="#2d805c" />
+      <circle cx="110" cy="115" r="5" fill="#2d805c" />
+      <circle cx="95" cy="130" r="4.5" fill="#2d805c" />
+      <circle cx="85" cy="150" r="5" fill="#2d805c" />
+      <circle cx="80" cy="170" r="4.5" fill="#2d805c" />
+      <circle cx="75" cy="190" r="5" fill="#2d805c" />
+      <circle cx="80" cy="210" r="4.5" fill="#2d805c" />
+      <circle cx="85" cy="230" r="5" fill="#2d805c" />
+      <circle cx="95" cy="250" r="4.5" fill="#2d805c" />
+      <circle cx="110" cy="270" r="5" fill="#2d805c" />
+      <circle cx="130" cy="285" r="4.5" fill="#2d805c" />
+      <circle cx="150" cy="295" r="5" fill="#2d805c" />
+      <circle cx="175" cy="303" r="4.5" fill="#2d805c" />
+      <circle cx="200" cy="305" r="5" fill="#2d805c" />
+      <circle cx="225" cy="303" r="4.5" fill="#2d805c" />
+      <circle cx="250" cy="295" r="5" fill="#2d805c" />
+      <circle cx="270" cy="285" r="4.5" fill="#2d805c" />
+      <circle cx="290" cy="270" r="5" fill="#2d805c" />
+      <circle cx="305" cy="250" r="4.5" fill="#2d805c" />
+      <circle cx="315" cy="230" r="5" fill="#2d805c" />
+      <circle cx="320" cy="210" r="4.5" fill="#2d805c" />
+      <circle cx="325" cy="190" r="5" fill="#2d805c" />
+      <circle cx="320" cy="170" r="4.5" fill="#2d805c" />
+      <circle cx="315" cy="150" r="5" fill="#2d805c" />
+      <circle cx="305" cy="130" r="4.5" fill="#2d805c" />
+      <circle cx="290" cy="115" r="5" fill="#2d805c" />
+      <circle cx="270" cy="100" r="4.5" fill="#2d805c" />
+      <circle cx="250" cy="90" r="5" fill="#2d805c" />
+      <circle cx="225" cy="83" r="4.5" fill="#2d805c" />
+
+      <!-- Inner patterns with offset to avoid collision with elements -->
+      <circle cx="130" cy="130" r="5" fill="#2d805c" />
+      <circle cx="155" cy="120" r="4.5" fill="#2d805c" />
+      <circle cx="180" cy="115" r="5" fill="#2d805c" />
+      <circle cx="205" cy="115" r="4.5" fill="#2d805c" />
+      <circle cx="230" cy="120" r="5" fill="#2d805c" />
+      <circle cx="250" cy="130" r="4.5" fill="#2d805c" />
+      
+      <circle cx="120" cy="160" r="4.5" fill="#2d805c" />
+      <circle cx="140" cy="145" r="5" fill="#2d805c" />
+      <circle cx="165" cy="140" r="4.5" fill="#2d805c" />
+      <circle cx="190" cy="135" r="5" fill="#2d805c" />
+      <circle cx="215" cy="140" r="4.5" fill="#2d805c" />
+      <circle cx="240" cy="145" r="5" fill="#2d805c" />
+      <circle cx="260" cy="160" r="4.5" fill="#2d805c" />
+      
+      <circle cx="110" cy="180" r="5" fill="#2d805c" />
+      <circle cx="135" cy="170" r="4.5" fill="#2d805c" />
+      <circle cx="160" cy="165" r="5" fill="#2d805c" />
+      <circle cx="240" cy="165" r="5" fill="#2d805c" />
+      <circle cx="265" cy="170" r="4.5" fill="#2d805c" />
+      <circle cx="285" cy="180" r="5" fill="#2d805c" />
+      
+      <!-- Lower portion -->
+      <circle cx="120" cy="200" r="4.5" fill="#2d805c" />
+      <circle cx="145" cy="205" r="5" fill="#2d805c" />
+      <circle cx="170" cy="210" r="4.5" fill="#2d805c" />
+      <circle cx="230" cy="210" r="4.5" fill="#2d805c" />
+      <circle cx="255" cy="205" r="5" fill="#2d805c" />
+      <circle cx="280" cy="200" r="4.5" fill="#2d805c" />
+      
+      <circle cx="130" cy="275" r="5" fill="#2d805c" />
+      <circle cx="155" cy="280" r="4.5" fill="#2d805c" />
+      <circle cx="180" cy="285" r="5" fill="#2d805c" />
+      <circle cx="205" cy="283" r="4.5" fill="#2d805c" />
+      <circle cx="230" cy="280" r="5" fill="#2d805c" />
+      <circle cx="255" cy="275" r="4.5" fill="#2d805c" />
+      
+      <!-- Additional scattered dimples -->
+      <circle cx="105" cy="225" r="4" fill="#2d805c" />
+      <circle cx="125" cy="245" r="3.5" fill="#2d805c" />
+      <circle cx="150" cy="235" r="4" fill="#2d805c" />
+      <circle cx="125" cy="260" r="3.5" fill="#2d805c" />
+      <circle cx="145" cy="265" r="4" fill="#2d805c" />
+      <circle cx="170" cy="260" r="3.5" fill="#2d805c" />
+      
+      <circle cx="295" cy="225" r="4" fill="#2d805c" />
+      <circle cx="275" cy="245" r="3.5" fill="#2d805c" />
+      <circle cx="250" cy="235" r="4" fill="#2d805c" />
+      <circle cx="275" cy="260" r="3.5" fill="#2d805c" />
+      <circle cx="255" cy="265" r="4" fill="#2d805c" />
+      <circle cx="230" cy="260" r="3.5" fill="#2d805c" />
     </g>
     
-    <!-- Top right -->
-    <g transform="translate(360, 40)">
-      <circle cx="0" cy="0" r="5" fill="url(#goldGradient)"/>
-      <rect x="-2" y="0" width="4" height="12" fill="url(#metalGradient)"/>
-      <circle cx="0" cy="13" r="2.5" fill="#654321"/>
+    <!-- Golf course with realistic green -->
+    <ellipse cx="200" cy="240" rx="130" ry="60" fill="url(#greenGradient)" opacity="0.25"/>
+    
+    <!-- Golf hole with depth -->
+    <ellipse cx="200" cy="250" rx="12" ry="6" fill="#1a1a1a"/>
+    <ellipse cx="200" cy="248" rx="10" ry="4" fill="#000000"/>
+    
+    <!-- BBB Flag in center of green - bigger and closer to hole -->
+    <g transform="translate(200, 242)">
+      <!-- Flag pole - thicker and shorter -->
+      <rect x="-1.5" y="-60" width="3" height="60" fill="#444444" />
+      
+      <!-- Flag with gradient - larger -->
+      <g filter="url(#dropShadow)">
+        <path d="M 1.5 -60 L 40 -52 L 40 -30 L 1.5 -38 Z" fill="url(#flagGradient)"/>
+        <path d="M 1.5 -60 L 40 -52 L 40 -30 L 1.5 -38 Z" fill="none" stroke="#003366" stroke-width="0.8"/>
+      </g>
+      
+      <!-- BBB text on flag - larger -->
+      <text x="20" y="-42" font-family="Arial Black, sans-serif" font-size="11" font-weight="bold" 
+            text-anchor="middle" fill="white">BBB</text>
     </g>
     
-    <!-- Bottom left -->
-    <g transform="translate(40, 360)">
-      <circle cx="0" cy="0" r="5" fill="url(#goldGradient)"/>
-      <rect x="-2" y="0" width="4" height="12" fill="url(#metalGradient)"/>
-      <circle cx="0" cy="13" r="2.5" fill="#654321"/>
+    <!-- Main BBB logo group from first design - moved up and no flags -->
+    <g transform="translate(200, 100) scale(0.85)" filter="url(#dropShadow)">
+      <!-- BBB monogram with 3D effect -->
+      <g>
+        <!-- First B -->
+        <path d="M-100,-40 C-100,-40 -95,-43 -90,-43 L-55,-43 C-35,-43 -25,-33 -25,-20 C-25,-8 -35,3 -55,3 L-85,3 L-85,-35 C-85,-35 -90,-38 -95,-39 Z" fill="#2d805c" />
+        <path d="M-95,-38 C-95,-38 -90,-40 -85,-40 L-60,-40 C-40,-40 -30,-30 -30,-20 C-30,-10 -40,0 -60,0 L-85,0 L-85,-35 C-85,-35 -90,-36 -95,-38 Z" fill="url(#letterGradient)" />
+        
+        <path d="M-100,40 C-100,40 -95,43 -90,43 L-55,43 C-35,43 -25,33 -25,20 C-25,8 -35,-3 -55,-3 L-85,-3 L-85,35 C-85,35 -90,38 -95,39 Z" fill="#2d805c" />
+        <path d="M-95,38 C-95,38 -90,40 -85,40 L-60,40 C-40,40 -30,30 -30,20 C-30,10 -40,0 -60,0 L-85,0 L-85,35 C-85,35 -90,36 -95,38 Z" fill="url(#letterGradient)" />
+        
+        <!-- Second B -->
+        <path d="M-30,-40 C-30,-40 -25,-43 -20,-43 L15,-43 C35,-43 45,-33 45,-20 C45,-8 35,3 15,3 L-15,3 L-15,-35 C-15,-35 -20,-38 -25,-39 Z" fill="#2d805c" />
+        <path d="M-25,-38 C-25,-38 -20,-40 -15,-40 L10,-40 C30,-40 40,-30 40,-20 C40,-10 30,0 10,0 L-15,0 L-15,-35 C-15,-35 -20,-36 -25,-38 Z" fill="url(#letterGradient)" />
+        
+        <path d="M-30,40 C-30,40 -25,43 -20,43 L15,43 C35,43 45,33 45,20 C45,8 35,-3 15,-3 L-15,-3 L-15,35 C-15,35 -20,38 -25,39 Z" fill="#2d805c" />
+        <path d="M-25,38 C-25,38 -20,40 -15,40 L10,40 C30,40 40,30 40,20 C40,10 30,0 10,0 L-15,0 L-15,35 C-15,35 -20,36 -25,38 Z" fill="url(#letterGradient)" />
+        
+        <!-- Third B -->
+        <path d="M40,-40 C40,-40 45,-43 50,-43 L85,-43 C105,-43 115,-33 115,-20 C115,-8 105,3 85,3 L55,3 L55,-35 C55,-35 50,-38 45,-39 Z" fill="#2d805c" />
+        <path d="M45,-38 C45,-38 50,-40 55,-40 L80,-40 C100,-40 110,-30 110,-20 C110,-10 100,0 80,0 L55,0 L55,-35 C55,-35 50,-36 45,-38 Z" fill="url(#letterGradient)" />
+        
+        <path d="M40,40 C40,40 45,43 50,43 L85,43 C105,43 115,33 115,20 C115,8 105,-3 85,-3 L55,-3 L55,35 C55,35 50,38 45,39 Z" fill="#2d805c" />
+        <path d="M45,38 C45,38 50,40 55,40 L80,40 C100,40 110,30 110,20 C110,10 100,0 80,0 L55,0 L55,35 C55,35 50,36 45,38 Z" fill="url(#letterGradient)" />
+      </g>
+      
+      <!-- Birdie positioned on the first B -->
+      <g transform="translate(-70, -25) scale(1.2)" filter="url(#dropShadow)">
+        <!-- Body with gradient -->
+        <ellipse cx="0" cy="0" rx="10" ry="8" fill="url(#goldGradient)"/>
+        <!-- Head -->
+        <circle cx="-6" cy="-3" r="6" fill="url(#goldGradient)"/>
+        <!-- Beak -->
+        <path d="M -12 -3 L -16 -3 L -14 -1 Z" fill="#FF8C00"/>
+        <!-- Eye with highlight -->
+        <circle cx="-8" cy="-4" r="2" fill="#000000"/>
+        <circle cx="-8.5" cy="-4.5" r="0.8" fill="#ffffff"/>
+        <!-- Wing with detail -->
+        <path d="M 5 0 Q 12 -3 15 0 Q 12 3 5 0" fill="#FFC700" stroke="#FFA500" stroke-width="1"/>
+        <!-- Tail feathers -->
+        <path d="M 8 2 L 12 0 L 12 4 Z" fill="#FFA500"/>
+      </g>
     </g>
     
-    <!-- Bottom right -->
-    <g transform="translate(360, 360)">
-      <circle cx="0" cy="0" r="5" fill="url(#goldGradient)"/>
-      <rect x="-2" y="0" width="4" height="12" fill="url(#metalGradient)"/>
-      <circle cx="0" cy="13" r="2.5" fill="#654321"/>
+    <!-- Enhanced birdie with gradient - REMOVED (moved to first B) -->
+    
+    <!-- Premium golf ball - MOVED LEFT -->
+    <g transform="translate(120, 235)">
+      <circle cx="0" cy="0" r="15" fill="white" stroke="#cccccc" stroke-width="1" filter="url(#dropShadow)"/>
+      <!-- Dimple pattern -->
+      <circle cx="-5" cy="-5" r="2" fill="#e6e6e6"/>
+      <circle cx="0" cy="-6" r="2" fill="#e6e6e6"/>
+      <circle cx="5" cy="-5" r="2" fill="#e6e6e6"/>
+      <circle cx="-6" cy="0" r="2" fill="#e6e6e6"/>
+      <circle cx="6" cy="0" r="2" fill="#e6e6e6"/>
+      <circle cx="-5" cy="5" r="2" fill="#e6e6e6"/>
+      <circle cx="0" cy="6" r="2" fill="#e6e6e6"/>
+      <circle cx="5" cy="5" r="2" fill="#e6e6e6"/>
+    </g>
+    
+    <!-- Text with premium font styling - moved to bottom -->
+    <g filter="url(#dropShadow)">
+      <text x="200" y="330" font-family="Impact, Arial Black, sans-serif" font-size="24" font-weight="900" 
+            text-anchor="middle" fill="#2d805c">BIRDIE BUSH BANDITS</text>
+      <text x="200" y="355" font-family="Arial, sans-serif" font-size="14" font-weight="bold" 
+            text-anchor="middle" fill="#666666">EST. 2020</text>
     </g>
   </g>
+  
+  <!-- Outer circle to define the circular boundary -->
+  <circle cx="200" cy="200" r="190" fill="none" stroke="none"/>
 </svg>
