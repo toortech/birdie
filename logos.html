@@ -19,79 +19,67 @@
   <script src="js/ui.js"></script>
   
   <style>
-    /* Logo page specific styles */
-    .logo-grid {
+    /* Simple logo gallery styles */
+    .logo-gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2rem;
-      margin-top: 2rem;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
     }
     
-    .logo-card {
-      background-color: white;
+    .logo-item {
+      border: 1px solid #eee;
       border-radius: 8px;
-      padding: 1.5rem;
-      text-align: center;
-      box-shadow: var(--shadow-md);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .logo-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-lg);
-    }
-    
-    .logo-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 200px;
-      margin-bottom: 1rem;
-      background-color: #f9f9f9;
-      border-radius: 4px;
       padding: 1rem;
+      text-align: center;
+      background-color: white;
     }
     
-    .logo-image {
-      max-width: 100%;
-      max-height: 180px;
-    }
-    
-    .logo-title {
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-    }
-    
-    .logo-desc {
-      color: var(--bbb-text-muted);
-      font-size: 0.9rem;
-      margin-bottom: 1.25rem;
-    }
-    
-    .download-group {
+    .logo-img-container {
+      height: 150px;
       display: flex;
-      gap: 0.5rem;
+      align-items: center;
       justify-content: center;
+      margin-bottom: 0.75rem;
     }
     
-    .download-btn {
-      padding: 0.5rem 1rem;
+    .logo-img {
+      max-width: 100%;
+      max-height: 100%;
+    }
+    
+    .logo-name {
       font-size: 0.9rem;
+      font-weight: bold;
+      margin-bottom: 0;
     }
     
-    .logo-card.dark-bg .logo-container {
-      background-color: #333;
+    /* Loading and error messages */
+    .loading-message,
+    .error-message {
+      text-align: center;
+      padding: 2rem;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      margin: 2rem 0;
     }
     
+    .error-message {
+      color: #721c24;
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+    }
+    
+    /* Responsive adjustments */
     @media (max-width: 768px) {
-      .logo-grid {
-        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      .logo-gallery {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       }
     }
     
     @media (max-width: 480px) {
-      .logo-grid {
-        grid-template-columns: 1fr;
+      .logo-gallery {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       }
     }
   </style>
@@ -158,118 +146,169 @@
       
       // Add page subtitle
       const subtitle = document.createElement('h2');
-      subtitle.textContent = 'Official Logos';
+      subtitle.textContent = 'Club Logos';
       mainContent.appendChild(subtitle);
       
       // Create status message container
       const statusMessage = BBB_UI.createStatusMessage();
       mainContent.appendChild(statusMessage);
       
-      // Add description text
+      // Add simple description
       const description = document.createElement('p');
-      description.className = 'logo-description';
-      description.textContent = 'Download official Birdie Bush Bandits logos and branding materials for club events, merchandise, and communications.';
+      description.textContent = 'Here are the official Birdie Bush Bandits logos available for club use.';
       mainContent.appendChild(description);
       
-      // Create logo grid
-      const logoGrid = document.createElement('div');
-      logoGrid.className = 'logo-grid';
+      // Create logo gallery container
+      const logoGallery = document.createElement('div');
+      logoGallery.className = 'logo-gallery';
+      logoGallery.id = 'logo-gallery';
       
-      // Array of logo data
-      const logos = [
-        {
-          id: 'primary-logo',
-          title: 'Primary Logo',
-          image: 'bbb-logo.svg',
-          description: 'The primary Birdie Bush Bandits logo for use on light backgrounds.',
-          formats: ['SVG', 'PNG', 'JPG']
-        },
-        {
-          id: 'dark-logo',
-          title: 'Logo (Dark Background)',
-          image: 'bbb-logo-white.svg',
-          description: 'White version of the logo for use on dark backgrounds.',
-          formats: ['SVG', 'PNG'],
-          darkBg: true
-        },
-        {
-          id: 'wordmark',
-          title: 'BBB Wordmark',
-          image: 'bbb-wordmark.svg',
-          description: 'Text-only version of the Birdie Bush Bandits branding.',
-          formats: ['SVG', 'PNG']
-        },
-        {
-          id: 'badge',
-          title: 'Club Badge',
-          image: 'bbb-badge.svg',
-          description: 'Circular badge design for merchandise and social media profiles.',
-          formats: ['SVG', 'PNG']
+      // Add loading message initially
+      const loadingMessage = document.createElement('div');
+      loadingMessage.className = 'loading-message';
+      loadingMessage.id = 'loading-message';
+      loadingMessage.textContent = 'Loading logos...';
+      mainContent.appendChild(loadingMessage);
+      
+      // Add gallery after loading
+      mainContent.appendChild(logoGallery);
+      
+      // Function to load all logos from the logos directory
+      async function loadLogos() {
+        try {
+          // Fetch the list of files in the logos directory
+          // This would typically be done through a server-side API
+          // For static sites, we'll use a workaround by trying to load image files
+          
+          // List of common image extensions to try
+          const extensions = ['svg', 'png', 'jpg', 'jpeg', 'gif'];
+          
+          // Initialize the gallery
+          logoGallery.innerHTML = '';
+          let foundLogos = false;
+          
+          // Create a set of filenames to avoid duplicates
+          const processedFiles = new Set();
+          
+          // Try to load each logo with predefined names and extensions
+          const filenamesToTry = [
+            'bbb-logo',
+            'bbb-logo-white',
+            'bbb-round-logo',
+            'bbb-square-logo',
+            'bbb-text-logo',
+            'bbb-badge',
+            'bbb-icon',
+            'bbb-wordmark',
+            'logo',
+            'logo-white',
+            'logo-color',
+            'bbandits-logo',
+            'birdiebush-logo',
+            'banner',
+            'badge',
+            'icon'
+          ];
+          
+          // First try the direct logos directory
+          for (const baseName of filenamesToTry) {
+            for (const ext of extensions) {
+              // Generate both path variations (with and without logos directory)
+              const pathsToTry = [
+                `logos/${baseName}.${ext}`,  // Try with logos directory
+                `${baseName}.${ext}`         // Try in root directory as fallback
+              ];
+              
+              for (const path of pathsToTry) {
+                // Skip if we've already processed this file
+                if (processedFiles.has(path)) continue;
+                
+                // Try to load the image
+                const img = new Image();
+                img.src = path;
+                
+                // Use a promise to wait for load or error
+                await new Promise(resolve => {
+                  img.onload = function() {
+                    // Image loaded successfully, add to gallery
+                    addLogoToGallery(path, baseName);
+                    foundLogos = true;
+                    processedFiles.add(path);
+                    resolve();
+                  };
+                  
+                  img.onerror = function() {
+                    // Image failed to load, just resolve
+                    resolve();
+                  };
+                });
+              }
+            }
+          }
+          
+          // Check if we found any logos
+          if (!foundLogos) {
+            // No logos found, show message
+            const noLogosMessage = document.createElement('div');
+            noLogosMessage.className = 'error-message';
+            noLogosMessage.textContent = 'No logo files found. Please upload some logo files to the "logos" directory.';
+            logoGallery.appendChild(noLogosMessage);
+          }
+          
+          // Hide loading message
+          document.getElementById('loading-message').style.display = 'none';
+        } catch (error) {
+          console.error('Error loading logos:', error);
+          
+          // Show error message
+          document.getElementById('loading-message').textContent = 'Error loading logos. Please try again later.';
+          document.getElementById('loading-message').className = 'error-message';
         }
-      ];
+      }
       
-      // Create logo cards
-      logos.forEach(logo => {
-        const logoCard = document.createElement('div');
-        logoCard.className = `logo-card ${logo.darkBg ? 'dark-bg' : ''}`;
+      // Function to add a logo to the gallery
+      function addLogoToGallery(path, baseName) {
+        const logoItem = document.createElement('div');
+        logoItem.className = 'logo-item';
         
-        // Logo image container
-        const logoContainer = document.createElement('div');
-        logoContainer.className = 'logo-container';
+        const logoImgContainer = document.createElement('div');
+        logoImgContainer.className = 'logo-img-container';
         
         const logoImg = document.createElement('img');
-        logoImg.className = 'logo-image';
-        logoImg.src = logo.image;
-        logoImg.alt = `${logo.title} - Birdie Bush Bandits`;
+        logoImg.className = 'logo-img';
+        logoImg.src = path;
+        logoImg.alt = formatLogoName(path);
         
-        logoContainer.appendChild(logoImg);
+        logoImgContainer.appendChild(logoImg);
         
-        // Logo title
-        const logoTitle = document.createElement('h3');
-        logoTitle.className = 'logo-title';
-        logoTitle.textContent = logo.title;
+        const logoName = document.createElement('p');
+        logoName.className = 'logo-name';
+        logoName.textContent = formatLogoName(path);
         
-        // Logo description
-        const logoDesc = document.createElement('p');
-        logoDesc.className = 'logo-desc';
-        logoDesc.textContent = logo.description;
-        
-        // Download buttons
-        const downloadGroup = document.createElement('div');
-        downloadGroup.className = 'download-group';
-        
-        logo.formats.forEach(format => {
-          const downloadBtn = document.createElement('a');
-          downloadBtn.href = `#download-${logo.id}-${format.toLowerCase()}`;
-          downloadBtn.className = 'btn download-btn';
-          downloadBtn.textContent = format;
-          
-          // Add click handler to show message (since the files don't exist yet)
-          downloadBtn.addEventListener('click', function(e) {
-            e.preventDefault();
-            BBB_UTILS.showMessage(`The ${format} download for ${logo.title} would start now. Files coming soon!`, 'info');
-          });
-          
-          downloadGroup.appendChild(downloadBtn);
-        });
-        
-        // Assemble logo card
-        logoCard.appendChild(logoContainer);
-        logoCard.appendChild(logoTitle);
-        logoCard.appendChild(logoDesc);
-        logoCard.appendChild(downloadGroup);
-        
-        // Add card to grid
-        logoGrid.appendChild(logoCard);
-      });
+        logoItem.appendChild(logoImgContainer);
+        logoItem.appendChild(logoName);
+        logoGallery.appendChild(logoItem);
+      }
       
-      // Add logo grid to page
-      mainContent.appendChild(logoGrid);
+      // Function to format logo name from filename
+      function formatLogoName(filename) {
+        // Extract just the filename without path or extension
+        const baseName = filename.split('/').pop().split('.')[0];
+        
+        // Replace hyphens and underscores with spaces
+        const nameWithSpaces = baseName.replace(/[-_]/g, ' ');
+        
+        // Capitalize first letter of each word
+        return nameWithSpaces
+          .split(' ')
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+          .join(' ');
+      }
       
       // Add usage guidelines section
       const guidelinesSection = document.createElement('div');
       guidelinesSection.className = 'section-card';
-      guidelinesSection.style.marginTop = '3rem';
+      guidelinesSection.style.marginTop = '2rem';
       guidelinesSection.style.padding = '1.5rem';
       guidelinesSection.style.backgroundColor = 'white';
       guidelinesSection.style.borderRadius = '8px';
@@ -313,6 +352,9 @@
       
       // Add content to main wrapper
       headerElements.mainWrapper.appendChild(mainContent);
+      
+      // Load logos
+      loadLogos();
     });
   </script>
 </body>
