@@ -99,8 +99,33 @@
       constructionMessage.style.margin = '2rem 0';
       mainContent.appendChild(constructionMessage);
       
-      // Create main navigation
-      const mainNav = BBB_UI.createMainNavigation();
+      // Create custom main navigation to include Logos button
+      const createCustomMainNavigation = function() {
+        const nav = document.createElement('nav');
+        nav.className = 'nav-boxes';
+        nav.setAttribute('role', 'navigation');
+        nav.setAttribute('aria-label', 'Main navigation');
+        
+        const links = [
+          { url: 'photo-gallery.html', text: 'Photo Gallery' },
+          { url: 'view-saved-scores.html', text: 'Scorecards' },
+          { url: 'handicap-calculator.html', text: 'Handicap Calculator' },
+          { url: 'members.html', text: 'Members' },
+          { url: 'logos.html', text: 'Logos' }  // New "Logos" button
+        ];
+        
+        links.forEach(link => {
+          const a = document.createElement('a');
+          a.href = link.url;
+          a.textContent = link.text;
+          nav.appendChild(a);
+        });
+        
+        return nav;
+      };
+      
+      // Add custom navigation to page
+      const mainNav = createCustomMainNavigation();
       mainContent.appendChild(mainNav);
       
       // Add "if found" message
