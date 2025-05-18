@@ -42,7 +42,12 @@ const BBB_DB = {
   get: async function(collection, id = null) {
     try {
       if (this.config.useCloudflare) {
-        return await this.cloudflareGet(collection, id);
+        try {
+          return await this.cloudflareGet(collection, id);
+        } catch (cloudflareError) {
+          console.warn(`Cloudflare get failed for ${collection}/${id}, falling back to local storage: ${cloudflareError.message}`);
+          return this.localGet(collection, id);
+        }
       } else {
         return this.localGet(collection, id);
       }
@@ -62,7 +67,12 @@ const BBB_DB = {
   save: async function(collection, id, data) {
     try {
       if (this.config.useCloudflare) {
-        return await this.cloudflareSave(collection, id, data);
+        try {
+          return await this.cloudflareSave(collection, id, data);
+        } catch (cloudflareError) {
+          console.warn(`Cloudflare save failed for ${collection}/${id}, falling back to local storage: ${cloudflareError.message}`);
+          return this.localSave(collection, id, data);
+        }
       } else {
         return this.localSave(collection, id, data);
       }
@@ -81,7 +91,12 @@ const BBB_DB = {
   delete: async function(collection, id) {
     try {
       if (this.config.useCloudflare) {
-        return await this.cloudflareDelete(collection, id);
+        try {
+          return await this.cloudflareDelete(collection, id);
+        } catch (cloudflareError) {
+          console.warn(`Cloudflare delete failed for ${collection}/${id}, falling back to local storage: ${cloudflareError.message}`);
+          return this.localDelete(collection, id);
+        }
       } else {
         return this.localDelete(collection, id);
       }
@@ -100,7 +115,12 @@ const BBB_DB = {
   query: async function(collection, filterFn) {
     try {
       if (this.config.useCloudflare) {
-        return await this.cloudflareQuery(collection, filterFn);
+        try {
+          return await this.cloudflareQuery(collection, filterFn);
+        } catch (cloudflareError) {
+          console.warn(`Cloudflare query failed for ${collection}, falling back to local storage: ${cloudflareError.message}`);
+          return this.localQuery(collection, filterFn);
+        }
       } else {
         return this.localQuery(collection, filterFn);
       }
