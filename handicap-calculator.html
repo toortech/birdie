@@ -17,20 +17,6 @@
   <script src="js/auth.js"></script>
   <script src="js/db.js"></script>
   <script src="js/ui.js"></script>
-  
-  <!-- React and ReactDOM from CDN -->
-  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  
-  <!-- Load Babel for JSX -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
-  <!-- Tailwind CSS for React component styling -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Lucide React Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://unpkg.com/lucide-react@latest"></script>
 </head>
 <body>
   <!-- Authentication Protection -->
@@ -103,165 +89,374 @@
       const statusMessage = BBB_UI.createStatusMessage();
       mainContent.appendChild(statusMessage);
       
-      // Create React root container
-      const reactRoot = document.createElement('div');
-      reactRoot.id = 'handicap-calculator-root';
-      mainContent.appendChild(reactRoot);
+      // Create calculator container
+      const calculatorContainer = document.createElement('div');
+      calculatorContainer.id = 'handicap-calculator';
+      calculatorContainer.className = 'calculator';
+      
+      // Create help section
+      const helpToggle = document.createElement('button');
+      helpToggle.className = 'btn help-toggle';
+      helpToggle.textContent = 'Show Help';
+      helpToggle.onclick = function() {
+        const helpSection = document.getElementById('help-section');
+        if (helpSection.style.display === 'none') {
+          helpSection.style.display = 'block';
+          helpToggle.textContent = 'Hide Help';
+        } else {
+          helpSection.style.display = 'none';
+          helpToggle.textContent = 'Show Help';
+        }
+      };
+      
+      const helpSection = document.createElement('div');
+      helpSection.id = 'help-section';
+      helpSection.className = 'help-section';
+      helpSection.style.display = 'none';
+      helpSection.innerHTML = `
+        <h3>How to Use the Handicap Calculator</h3>
+        <ol>
+          <li>Enter details for at least 3 rounds of golf (up to 20).</li>
+          <li>For each round, select the course and tee color you played.</li>
+          <li>Enter your gross score for the round.</li>
+          <li>The course rating and slope rating will be filled automatically.</li>
+          <li>Your score differential will be calculated automatically.</li>
+          <li>Click "Calculate Handicap" to get your handicap index.</li>
+          <li>If logged in, you can save your handicap to your profile.</li>
+        </ol>
+        <p>The handicap index is calculated using the World Handicap System (WHS) formula.</p>
+      `;
+      
+      // Create result display
+      const resultDisplay = document.createElement('div');
+      resultDisplay.id = 'handicap-result';
+      resultDisplay.className = 'result';
+      
+      // Create instructions text
+      const instructions = document.createElement('p');
+      instructions.textContent = 'Enter up to 20 rounds. Minimum 3 to calculate.';
+      
+      // Rounds container
+      const roundsContainer = document.createElement('div');
+      roundsContainer.id = 'rounds-container';
+      
+      // Create button container
+      const buttonContainer = document.createElement('div');
+      buttonContainer.className = 'button-group';
+      
+      // Add Round button
+      const addButton = document.createElement('button');
+      addButton.id = 'add-round';
+      addButton.className = 'btn';
+      addButton.textContent = 'Add Round';
+      addButton.onclick = function() {
+        if (roundsContainer.children.length < 20) {
+          addRoundInput();
+          updateAllDifferentials();
+        } else {
+          BBB_UTILS.showMessage('Maximum 20 rounds allowed.', 'warning');
+        }
+      };
+      
+      // Calculate button
+      const calculateButton = document.createElement('button');
+      calculateButton.id = 'calculate';
+      calculateButton.className = 'btn';
+      calculateButton.textContent = 'Calculate Handicap';
+      calculateButton.onclick = calculateHandicap;
+      
+      // Reset button
+      const resetButton = document.createElement('button');
+      resetButton.id = 'reset';
+      resetButton.className = 'btn';
+      resetButton.textContent = 'Reset';
+      resetButton.onclick = resetCalculator;
+      
+      // Save button
+      const saveButton = document.createElement('button');
+      saveButton.id = 'save';
+      saveButton.className = 'btn';
+      saveButton.textContent = 'Save Handicap';
+      saveButton.disabled = true;
+      saveButton.onclick = saveHandicap;
+      
+      // Export button
+      const exportButton = document.createElement('button');
+      exportButton.id = 'export';
+      exportButton.className = 'btn';
+      exportButton.textContent = 'Export to CSV';
+      exportButton.onclick = exportToCSV;
+      
+      // Add buttons to container
+      buttonContainer.appendChild(addButton);
+      buttonContainer.appendChild(calculateButton);
+      buttonContainer.appendChild(resetButton);
+      buttonContainer.appendChild(saveButton);
+      buttonContainer.appendChild(exportButton);
+      
+      // Create handicap history section
+      const historySection = document.createElement('div');
+      historySection.id = 'handicap-history';
+      historySection.className = 'history-section';
+      historySection.style.display = 'none';
+      
+      // Add elements to calculator container
+      calculatorContainer.appendChild(helpToggle);
+      calculatorContainer.appendChild(helpSection);
+      calculatorContainer.appendChild(resultDisplay);
+      calculatorContainer.appendChild(instructions);
+      calculatorContainer.appendChild(createTableHeader());
+      calculatorContainer.appendChild(roundsContainer);
+      calculatorContainer.appendChild(buttonContainer);
+      calculatorContainer.appendChild(historySection);
+      
+      // Add calculator container to page
+      mainContent.appendChild(calculatorContainer);
       
       // Add content to main wrapper
       headerElements.mainWrapper.appendChild(mainContent);
-    });
-  </script>
-  
-  <!-- React component -->
-  <script type="text/babel">
-    // Import necessary components from Lucide
-    const { Save, PlusCircle, MinusCircle, Calculator, Database, HelpCircle, Download, Upload } = lucide.icons;
-    
-    // Main Handicap Calculator Component
-    const HandicapCalculator = () => {
-      // State for rounds
-      const [rounds, setRounds] = React.useState([]);
-      const [calculatedHandicap, setCalculatedHandicap] = React.useState(null);
-      const [errorMessage, setErrorMessage] = React.useState('');
-      const [successMessage, setSuccessMessage] = React.useState('');
-      const [isAuthenticated, setIsAuthenticated] = React.useState(false);
-      const [currentUser, setCurrentUser] = React.useState(null);
-      const [savedCalculations, setSavedCalculations] = React.useState([]);
-      const [showHelp, setShowHelp] = React.useState(false);
-
-      // State for courses and tees
-      const [courses, setCourses] = React.useState({});
-      const [teeColors, setTeeColors] = React.useState({});
-
-      // Initialize with some rounds
-      React.useEffect(() => {
-        // Check if BBB_CONFIG and other modules are available
-        if (typeof window.BBB_CONFIG !== 'undefined') {
-          setCourses(window.BBB_CONFIG.courses);
-          setTeeColors(window.BBB_CONFIG.teeColors);
-        }
-
-        if (typeof window.BBB_AUTH !== 'undefined') {
-          setIsAuthenticated(window.BBB_AUTH.isAuthenticated);
-          setCurrentUser(window.BBB_AUTH.currentUser);
-        }
-
-        // Add initial rounds
-        if (rounds.length === 0) {
-          const initialRounds = [];
-          for (let i = 0; i < 3; i++) {
-            initialRounds.push(createEmptyRound(i));
-          }
-          setRounds(initialRounds);
-        }
-
-        // Load saved calculations if user is authenticated
-        loadSavedCalculations();
-      }, []);
-
-      // Create an empty round
-      const createEmptyRound = (index) => {
-        return {
-          id: Date.now() + index,
-          course: Object.keys(courses)[0] || '',
-          tee: 'white',
-          score: '',
-          courseRating: '',
-          slopeRating: '',
-          differential: ''
-        };
-      };
-
-      // Add a new round
-      const addRound = () => {
-        if (rounds.length >= 20) {
-          showError('Maximum of 20 rounds allowed.');
-          return;
-        }
+      
+      // Add initial rounds
+      for (let i = 0; i < 3; i++) {
+        addRoundInput();
+      }
+      
+      // Load saved handicap data if user is authenticated
+      if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+        loadSavedHandicap();
+      }
+      
+      // Function to create table header
+      function createTableHeader() {
+        const table = document.createElement('table');
+        table.id = 'rounds-table';
+        table.className = 'rounds-table';
         
-        setRounds([...rounds, createEmptyRound(rounds.length)]);
-        showSuccess('Round added');
-      };
-
-      // Remove a round
-      const removeRound = (id) => {
-        if (rounds.length <= 3) {
-          showError('Minimum of 3 rounds required.');
-          return;
-        }
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
         
-        setRounds(rounds.filter(round => round.id !== id));
-        showSuccess('Round removed');
-      };
-
-      // Update round data
-      const updateRound = (id, field, value) => {
-        const updatedRounds = rounds.map(round => {
-          if (round.id === id) {
-            const updatedRound = { ...round, [field]: value };
-            
-            // Auto-update course rating and slope rating if course and tee are set
-            if ((field === 'course' || field === 'tee') && courses[updatedRound.course] && courses[updatedRound.course].tees && courses[updatedRound.course].tees[updatedRound.tee]) {
-              updatedRound.courseRating = courses[updatedRound.course].tees[updatedRound.tee].courseRating;
-              updatedRound.slopeRating = courses[updatedRound.course].tees[updatedRound.tee].slopeRating;
-            }
-            
-            // Calculate differential if we have all the required values
-            if (
-              updatedRound.score && 
-              updatedRound.courseRating && 
-              updatedRound.slopeRating &&
-              !isNaN(parseFloat(updatedRound.score)) &&
-              !isNaN(parseFloat(updatedRound.courseRating)) &&
-              !isNaN(parseFloat(updatedRound.slopeRating))
-            ) {
-              const score = parseFloat(updatedRound.score);
-              const courseRating = parseFloat(updatedRound.courseRating);
-              const slopeRating = parseFloat(updatedRound.slopeRating);
-              
-              // Calculate directly
-              updatedRound.differential = ((score - courseRating) * 113 / slopeRating).toFixed(1);
-            } else {
-              updatedRound.differential = '';
-            }
-            
-            return updatedRound;
-          }
-          return round;
+        // Define column headers
+        const headers = [
+          '#', 'Course', 'Tee', 'Score', 'Course Rating', 'Slope Rating', 'Differential', 'Action'
+        ];
+        
+        // Create header cells
+        headers.forEach(header => {
+          const th = document.createElement('th');
+          th.textContent = header;
+          headerRow.appendChild(th);
         });
         
-        setRounds(updatedRounds);
-      };
-
-      // Calculate handicap
-      const calculateHandicap = () => {
-        // Validate rounds
-        const validRounds = rounds.filter(round => 
-          round.score && 
-          round.courseRating && 
-          round.slopeRating && 
-          round.differential
-        );
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
         
-        if (validRounds.length < 3) {
-          showError('Please enter at least 3 complete rounds.');
-          return;
+        // Create table body
+        const tbody = document.createElement('tbody');
+        tbody.id = 'rounds-tbody';
+        table.appendChild(tbody);
+        
+        return table;
+      }
+      
+      // Function to add a round input
+      function addRoundInput() {
+        const tbody = document.getElementById('rounds-tbody');
+        const roundIndex = tbody.children.length;
+        
+        const row = document.createElement('tr');
+        row.id = `round-${roundIndex}`;
+        row.className = 'round-row';
+        
+        // Round number
+        const numCell = document.createElement('td');
+        numCell.textContent = roundIndex + 1;
+        
+        // Course selection
+        const courseCell = document.createElement('td');
+        const courseSelect = document.createElement('select');
+        courseSelect.className = 'course-select';
+        courseSelect.id = `course-${roundIndex}`;
+        
+        // Add course options from config
+        for (const courseName in BBB_CONFIG.courses) {
+          const option = document.createElement('option');
+          option.value = courseName;
+          option.textContent = courseName;
+          courseSelect.appendChild(option);
         }
         
-        // Extract differentials
-        const differentials = validRounds.map(round => 
-          parseFloat(round.differential)
-        ).filter(diff => !isNaN(diff));
+        courseCell.appendChild(courseSelect);
+        
+        // Tee selection
+        const teeCell = document.createElement('td');
+        const teeSelect = document.createElement('select');
+        teeSelect.className = 'tee-select';
+        teeSelect.id = `tee-${roundIndex}`;
+        
+        // Add tee options from config
+        for (const teeValue in BBB_CONFIG.teeColors) {
+          const option = document.createElement('option');
+          option.value = teeValue;
+          option.textContent = BBB_CONFIG.teeColors[teeValue];
+          teeSelect.appendChild(option);
+        }
+        
+        teeCell.appendChild(teeSelect);
+        
+        // Score input
+        const scoreCell = document.createElement('td');
+        const scoreInput = document.createElement('input');
+        scoreInput.type = 'number';
+        scoreInput.min = '0';
+        scoreInput.className = 'score-input';
+        scoreInput.id = `score-${roundIndex}`;
+        scoreCell.appendChild(scoreInput);
+        
+        // Course Rating display
+        const crCell = document.createElement('td');
+        const crInput = document.createElement('input');
+        crInput.type = 'number';
+        crInput.step = '0.1';
+        crInput.className = 'cr-input';
+        crInput.id = `cr-${roundIndex}`;
+        crCell.appendChild(crInput);
+        
+        // Slope Rating display
+        const srCell = document.createElement('td');
+        const srInput = document.createElement('input');
+        srInput.type = 'number';
+        srInput.min = '55';
+        srInput.max = '155';
+        srInput.className = 'sr-input';
+        srInput.id = `sr-${roundIndex}`;
+        srCell.appendChild(srInput);
+        
+        // Differential display
+        const diffCell = document.createElement('td');
+        const diffSpan = document.createElement('span');
+        diffSpan.className = 'differential';
+        diffSpan.id = `diff-${roundIndex}`;
+        diffCell.appendChild(diffSpan);
+        
+        // Remove button
+        const actionCell = document.createElement('td');
+        const removeButton = document.createElement('button');
+        removeButton.className = 'remove-btn';
+        removeButton.textContent = '✕';
+        removeButton.onclick = function() {
+          if (tbody.children.length > 3) {
+            row.remove();
+            // Renumber rows
+            Array.from(tbody.children).forEach((row, idx) => {
+              row.querySelector('td:first-child').textContent = idx + 1;
+              row.id = `round-${idx}`;
+            });
+          } else {
+            BBB_UTILS.showMessage('Minimum 3 rounds required.', 'warning');
+          }
+        };
+        actionCell.appendChild(removeButton);
+        
+        // Add all cells to row
+        row.appendChild(numCell);
+        row.appendChild(courseCell);
+        row.appendChild(teeCell);
+        row.appendChild(scoreCell);
+        row.appendChild(crCell);
+        row.appendChild(srCell);
+        row.appendChild(diffCell);
+        row.appendChild(actionCell);
+        
+        // Add row to table
+        tbody.appendChild(row);
+        
+        // Set up event handlers to update ratings and differential
+        function updateRatings() {
+          const selectedCourse = courseSelect.value;
+          const selectedTee = teeSelect.value;
+          
+          // Get ratings from config
+          if (BBB_CONFIG.courses[selectedCourse] && 
+              BBB_CONFIG.courses[selectedCourse].tees && 
+              BBB_CONFIG.courses[selectedCourse].tees[selectedTee]) {
+            crInput.value = BBB_CONFIG.courses[selectedCourse].tees[selectedTee].courseRating;
+            srInput.value = BBB_CONFIG.courses[selectedCourse].tees[selectedTee].slopeRating;
+          }
+          
+          updateDifferential(roundIndex);
+        }
+        
+        // Add event listeners
+        courseSelect.addEventListener('change', updateRatings);
+        teeSelect.addEventListener('change', updateRatings);
+        scoreInput.addEventListener('input', function() { updateDifferential(roundIndex); });
+        crInput.addEventListener('input', function() { updateDifferential(roundIndex); });
+        srInput.addEventListener('input', function() { updateDifferential(roundIndex); });
+        
+        // Initial update
+        updateRatings();
+      }
+      
+      // Update differential for a specific round
+      function updateDifferential(index) {
+        const scoreInput = document.getElementById(`score-${index}`);
+        const crInput = document.getElementById(`cr-${index}`);
+        const srInput = document.getElementById(`sr-${index}`);
+        const diffSpan = document.getElementById(`diff-${index}`);
+        
+        const score = parseFloat(scoreInput.value);
+        const courseRating = parseFloat(crInput.value);
+        const slopeRating = parseFloat(srInput.value);
+        
+        if (!isNaN(score) && !isNaN(courseRating) && !isNaN(slopeRating)) {
+          // Calculate differential using formula: (Score - CR) * (113 / SR)
+          const differential = ((score - courseRating) * 113 / slopeRating).toFixed(1);
+          diffSpan.textContent = differential;
+          diffSpan.dataset.value = differential; // Store for calculation
+        } else {
+          diffSpan.textContent = '';
+          diffSpan.dataset.value = '';
+        }
+      }
+      
+      // Update all differentials
+      function updateAllDifferentials() {
+        const tbody = document.getElementById('rounds-tbody');
+        Array.from(tbody.children).forEach((row, idx) => {
+          updateDifferential(idx);
+        });
+      }
+      
+      // Calculate handicap
+      function calculateHandicap() {
+        const differentials = [];
+        const tbody = document.getElementById('rounds-tbody');
+        
+        // Collect all differentials
+        Array.from(tbody.children).forEach(row => {
+          const diffSpan = row.querySelector('.differential');
+          const diffValue = parseFloat(diffSpan.dataset.value);
+          
+          if (!isNaN(diffValue)) {
+            differentials.push(diffValue);
+          }
+        });
+        
+        // Check if we have enough differentials
+        if (differentials.length < 3) {
+          BBB_UTILS.showMessage('Please enter at least 3 complete rounds.', 'error');
+          return;
+        }
         
         // Calculate handicap using BBB_UTILS if available
         let handicapIndex;
-        if (typeof window.BBB_UTILS !== 'undefined' && typeof window.BBB_UTILS.calculateHandicapIndex === 'function') {
-          handicapIndex = window.BBB_UTILS.calculateHandicapIndex(differentials);
+        if (typeof BBB_UTILS !== 'undefined' && typeof BBB_UTILS.calculateHandicapIndex === 'function') {
+          handicapIndex = BBB_UTILS.calculateHandicapIndex(differentials);
         } else {
-          // Implement calculation directly if BBB_UTILS not available
+          // Directly calculate if not available
           differentials.sort((a, b) => a - b);
           
+          // Determine how many scores to use based on the number of differentials
           let countToUse;
           if (differentials.length <= 3) countToUse = 1;
           else if (differentials.length <= 6) countToUse = 2;
@@ -273,46 +468,110 @@
           else if (differentials.length <= 19) countToUse = 8;
           else countToUse = 10;
           
+          // Calculate average of best differentials
           const bestDifferentials = differentials.slice(0, countToUse);
           const average = bestDifferentials.reduce((sum, diff) => sum + diff, 0) / countToUse;
+          
+          // Apply 0.96 multiplier
           handicapIndex = (average * 0.96).toFixed(1);
         }
         
-        setCalculatedHandicap(handicapIndex);
-        showSuccess(`Your Handicap Index is ${handicapIndex}`);
-      };
-
-      // Save handicap calculation
-      const saveHandicap = () => {
-        if (!calculatedHandicap) {
-          showError('Please calculate your handicap first.');
+        // Display result
+        const resultDisplay = document.getElementById('handicap-result');
+        resultDisplay.innerHTML = `
+          <div class="handicap-result-inner">
+            <h3>Your Handicap Index is</h3>
+            <div class="handicap-value">${handicapIndex}</div>
+            <div class="handicap-info">Calculated using ${differentials.length} rounds</div>
+          </div>
+        `;
+        resultDisplay.style.display = 'block';
+        
+        // Enable save button if user is authenticated
+        if (BBB_AUTH.isAuthenticated) {
+          document.getElementById('save').disabled = false;
+        }
+        
+        // Store for later saving
+        resultDisplay.dataset.value = handicapIndex;
+        
+        BBB_UTILS.showMessage('Handicap calculated successfully!', 'success');
+      }
+      
+      // Reset calculator
+      function resetCalculator() {
+        if (confirm('Are you sure you want to reset the calculator? This will clear all rounds.')) {
+          // Clear existing rounds
+          const tbody = document.getElementById('rounds-tbody');
+          tbody.innerHTML = '';
+          
+          // Add 3 initial rounds
+          for (let i = 0; i < 3; i++) {
+            addRoundInput();
+          }
+          
+          // Clear result
+          const resultDisplay = document.getElementById('handicap-result');
+          resultDisplay.innerHTML = '';
+          resultDisplay.style.display = 'none';
+          delete resultDisplay.dataset.value;
+          
+          // Disable save button
+          document.getElementById('save').disabled = true;
+          
+          BBB_UTILS.showMessage('Calculator has been reset.', 'success');
+        }
+      }
+      
+      // Save handicap to user profile
+      function saveHandicap() {
+        if (!BBB_AUTH.isAuthenticated) {
+          BBB_UTILS.showMessage('Please log in to save your handicap.', 'error');
           return;
         }
         
-        if (!isAuthenticated) {
-          showError('Please log in to save your handicap.');
+        const resultDisplay = document.getElementById('handicap-result');
+        const handicapIndex = resultDisplay.dataset.value;
+        
+        if (!handicapIndex) {
+          BBB_UTILS.showMessage('Please calculate your handicap first.', 'error');
           return;
         }
         
+        // Collect differentials
+        const differentials = [];
+        const tbody = document.getElementById('rounds-tbody');
+        
+        Array.from(tbody.children).forEach(row => {
+          const diffSpan = row.querySelector('.differential');
+          const diffValue = parseFloat(diffSpan.dataset.value);
+          
+          if (!isNaN(diffValue)) {
+            differentials.push(diffValue);
+          }
+        });
+        
+        // Create handicap data
         const handicapData = {
-          index: calculatedHandicap,
+          index: handicapIndex,
           calculatedAt: new Date().toISOString(),
-          rounds: rounds.filter(round => round.differential).length,
-          differentials: rounds.filter(round => round.differential).map(round => parseFloat(round.differential))
+          rounds: differentials.length,
+          differentials: differentials
         };
         
-        if (typeof window.BBB_DB !== 'undefined' && typeof window.BBB_DB.saveMemberHandicap === 'function') {
-          window.BBB_DB.saveMemberHandicap(currentUser.id, handicapData)
+        // Save to database
+        if (typeof BBB_DB !== 'undefined' && typeof BBB_DB.saveMemberHandicap === 'function') {
+          BBB_DB.saveMemberHandicap(BBB_AUTH.currentUser.id, handicapData)
             .then(() => {
-              showSuccess('Handicap saved successfully!');
-              loadSavedCalculations();
+              BBB_UTILS.showMessage('Handicap saved successfully!', 'success');
+              loadSavedHandicap();
             })
             .catch(err => {
               console.error('Error saving handicap:', err);
-              showError('Error saving handicap.');
+              BBB_UTILS.showMessage('Error saving handicap.', 'error');
             });
         } else {
-          // Fallback to localStorage if BBB_DB not available
+          // Fallback to localStorage
           try {
             const savedHandicaps = JSON.parse(localStorage.getItem('handicap_history') || '[]');
             savedHandicaps.push({
@@ -321,22 +580,24 @@
               id: `hcp_${Date.now()}`
             });
             localStorage.setItem('handicap_history', JSON.stringify(savedHandicaps));
-            showSuccess('Handicap saved to browser storage!');
-            loadSavedCalculations();
+            BBB_UTILS.showMessage('Handicap saved to browser storage!', 'success');
+            loadSavedHandicap();
           } catch (error) {
             console.error('Error saving to localStorage:', error);
-            showError('Error saving handicap.');
+            BBB_UTILS.showMessage('Error saving handicap.', 'error');
           }
         }
-      };
-
-      // Load saved calculations
-      const loadSavedCalculations = () => {
-        if (typeof window.BBB_DB !== 'undefined' && typeof window.BBB_DB.getMemberHandicap === 'function' && currentUser) {
-          window.BBB_DB.getMemberHandicap(currentUser.id)
+      }
+      
+      // Load saved handicap data
+      function loadSavedHandicap() {
+        const historySection = document.getElementById('handicap-history');
+        
+        if (typeof BBB_DB !== 'undefined' && typeof BBB_DB.getMemberHandicap === 'function' && BBB_AUTH.currentUser) {
+          BBB_DB.getMemberHandicap(BBB_AUTH.currentUser.id)
             .then(data => {
               if (data) {
-                setSavedCalculations([data]);
+                displayHandicapHistory([data]);
               }
             })
             .catch(err => {
@@ -346,25 +607,80 @@
           // Fallback to localStorage
           try {
             const savedHandicaps = JSON.parse(localStorage.getItem('handicap_history') || '[]');
-            setSavedCalculations(savedHandicaps);
+            if (savedHandicaps.length > 0) {
+              displayHandicapHistory(savedHandicaps);
+            }
           } catch (error) {
             console.error('Error loading from localStorage:', error);
           }
         }
-      };
-
-      // Export calculations to CSV
-      const exportToCSV = () => {
-        if (rounds.length === 0) {
-          showError('No rounds to export.');
+      }
+      
+      // Display handicap history
+      function displayHandicapHistory(handicapData) {
+        if (!handicapData || handicapData.length === 0) return;
+        
+        const historySection = document.getElementById('handicap-history');
+        historySection.innerHTML = '';
+        historySection.style.display = 'block';
+        
+        // Create heading
+        const heading = document.createElement('h3');
+        heading.textContent = 'Handicap History';
+        historySection.appendChild(heading);
+        
+        // Create history cards container
+        const cardsContainer = document.createElement('div');
+        cardsContainer.className = 'history-cards';
+        
+        // Add cards for each handicap calculation
+        handicapData.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'history-card';
+          
+          const indexValue = document.createElement('div');
+          indexValue.className = 'history-index';
+          indexValue.textContent = `Index: ${item.index}`;
+          
+          const dateValue = document.createElement('div');
+          dateValue.className = 'history-date';
+          dateValue.textContent = `Calculated: ${new Date(item.calculatedAt).toLocaleDateString()}`;
+          
+          const roundsValue = document.createElement('div');
+          roundsValue.className = 'history-rounds';
+          roundsValue.textContent = `Rounds used: ${item.rounds || item.differentials?.length || 'Unknown'}`;
+          
+          card.appendChild(indexValue);
+          card.appendChild(dateValue);
+          card.appendChild(roundsValue);
+          
+          cardsContainer.appendChild(card);
+        });
+        
+        historySection.appendChild(cardsContainer);
+      }
+      
+      // Export data to CSV
+      function exportToCSV() {
+        const tbody = document.getElementById('rounds-tbody');
+        
+        if (tbody.children.length === 0) {
+          BBB_UTILS.showMessage('No rounds to export.', 'error');
           return;
         }
         
         let csvContent = "data:text/csv;charset=utf-8,";
         csvContent += "Course,Tee,Score,Course Rating,Slope Rating,Differential\n";
         
-        rounds.forEach(round => {
-          csvContent += `${round.course},${round.tee},${round.score},${round.courseRating},${round.slopeRating},${round.differential}\n`;
+        Array.from(tbody.children).forEach(row => {
+          const course = row.querySelector('.course-select').value;
+          const tee = row.querySelector('.tee-select').value;
+          const score = row.querySelector('.score-input').value;
+          const cr = row.querySelector('.cr-input').value;
+          const sr = row.querySelector('.sr-input').value;
+          const diff = row.querySelector('.differential').textContent;
+          
+          csvContent += `${course},${tee},${score},${cr},${sr},${diff}\n`;
         });
         
         const encodedUri = encodeURI(csvContent);
@@ -375,272 +691,191 @@
         link.click();
         document.body.removeChild(link);
         
-        showSuccess('Exported to CSV file.');
-      };
-
-      // Show error message
-      const showError = (message) => {
-        setErrorMessage(message);
-        setSuccessMessage('');
-        setTimeout(() => setErrorMessage(''), 5000);
-      };
-
-      // Show success message
-      const showSuccess = (message) => {
-        setSuccessMessage(message);
-        setErrorMessage('');
-        setTimeout(() => setSuccessMessage(''), 5000);
-      };
-
-      // Reset calculator
-      const resetCalculator = () => {
-        if (confirm('Are you sure you want to reset the calculator? This will clear all entered rounds.')) {
-          const initialRounds = [];
-          for (let i = 0; i < 3; i++) {
-            initialRounds.push(createEmptyRound(i));
-          }
-          setRounds(initialRounds);
-          setCalculatedHandicap(null);
-          showSuccess('Calculator has been reset.');
-        }
-      };
-
-      return (
-        <div className="bg-white rounded-lg shadow-md p-6 max-w-4xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold text-green-800">Handicap Calculator</h1>
-            <button 
-              onClick={() => setShowHelp(!showHelp)}
-              className="flex items-center text-blue-600 hover:text-blue-800"
-            >
-              <HelpCircle size={16} className="mr-1" />
-              {showHelp ? 'Hide Help' : 'Show Help'}
-            </button>
-          </div>
-
-          {showHelp && (
-            <div className="bg-blue-50 p-4 rounded-md mb-6 text-sm">
-              <h2 className="font-bold text-blue-800 mb-2">How to Use the Handicap Calculator</h2>
-              <ol className="list-decimal pl-5 space-y-1">
-                <li>Enter details for at least 3 rounds of golf (up to 20).</li>
-                <li>For each round, select the course and tee color you played.</li>
-                <li>Enter your gross score for the round.</li>
-                <li>The course rating and slope rating will be filled automatically.</li>
-                <li>Your score differential will be calculated automatically.</li>
-                <li>Click "Calculate Handicap" to get your handicap index.</li>
-                <li>If logged in, you can save your handicap to your profile.</li>
-              </ol>
-              <p className="mt-2 text-blue-700">
-                The handicap index is calculated using the World Handicap System (WHS) formula.
-              </p>
-            </div>
-          )}
-
-          {errorMessage && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-              {errorMessage}
-            </div>
-          )}
-
-          {successMessage && (
-            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-              {successMessage}
-            </div>
-          )}
-
-          {calculatedHandicap && (
-            <div className="bg-green-50 p-6 rounded-lg mb-6 text-center">
-              <h2 className="text-xl font-bold text-green-800 mb-1">Your Handicap Index</h2>
-              <p className="text-4xl font-bold text-green-700">{calculatedHandicap}</p>
-              <p className="text-sm text-green-600 mt-2">
-                Calculated using {rounds.filter(r => r.differential).length} rounds
-              </p>
-            </div>
-          )}
-
-          <div className="mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Your Rounds</h2>
-              <div className="flex gap-2">
-                <button 
-                  onClick={addRound}
-                  className="flex items-center bg-green-600 hover:bg-green-700 text-white py-1 px-3 rounded"
-                  disabled={rounds.length >= 20}
-                >
-                  <PlusCircle size={16} className="mr-1" />
-                  Add Round
-                </button>
-                <button 
-                  onClick={resetCalculator}
-                  className="flex items-center bg-gray-600 hover:bg-gray-700 text-white py-1 px-3 rounded"
-                >
-                  Reset
-                </button>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="min-w-full bg-white rounded">
-                <thead className="bg-gray-100">
-                  <tr>
-                    <th className="py-2 px-3 text-left">#</th>
-                    <th className="py-2 px-3 text-left">Course</th>
-                    <th className="py-2 px-3 text-left">Tee</th>
-                    <th className="py-2 px-3 text-left">Score</th>
-                    <th className="py-2 px-3 text-left">C.R.</th>
-                    <th className="py-2 px-3 text-left">S.R.</th>
-                    <th className="py-2 px-3 text-left">Diff.</th>
-                    <th className="py-2 px-3 text-left">Action</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rounds.map((round, index) => (
-                    <tr key={round.id} className="border-t hover:bg-gray-50">
-                      <td className="py-2 px-3">{index + 1}</td>
-                      <td className="py-2 px-3">
-                        <select 
-                          value={round.course}
-                          onChange={(e) => updateRound(round.id, 'course', e.target.value)}
-                          className="w-full border rounded py-1 px-2"
-                        >
-                          {Object.keys(courses).map(course => (
-                            <option key={course} value={course}>
-                              {course}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="py-2 px-3">
-                        <select
-                          value={round.tee}
-                          onChange={(e) => updateRound(round.id, 'tee', e.target.value)}
-                          className="w-full border rounded py-1 px-2"
-                        >
-                          {Object.keys(teeColors).map(tee => (
-                            <option key={tee} value={tee}>
-                              {teeColors[tee]}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td className="py-2 px-3">
-                        <input 
-                          type="number"
-                          value={round.score}
-                          onChange={(e) => updateRound(round.id, 'score', e.target.value)}
-                          placeholder="Gross"
-                          min="0"
-                          className="w-16 border rounded py-1 px-2"
-                        />
-                      </td>
-                      <td className="py-2 px-3">
-                        <input 
-                          type="number"
-                          value={round.courseRating}
-                          onChange={(e) => updateRound(round.id, 'courseRating', e.target.value)}
-                          placeholder="C.R."
-                          step="0.1"
-                          className="w-16 border rounded py-1 px-2"
-                        />
-                      </td>
-                      <td className="py-2 px-3">
-                        <input 
-                          type="number"
-                          value={round.slopeRating}
-                          onChange={(e) => updateRound(round.id, 'slopeRating', e.target.value)}
-                          placeholder="S.R."
-                          className="w-16 border rounded py-1 px-2"
-                        />
-                      </td>
-                      <td className="py-2 px-3 font-semibold">
-                        {round.differential}
-                      </td>
-                      <td className="py-2 px-3">
-                        <button 
-                          onClick={() => removeRound(round.id)}
-                          className="text-red-600 hover:text-red-800"
-                          disabled={rounds.length <= 3}
-                        >
-                          <MinusCircle size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="flex flex-wrap gap-2 mt-6 justify-center">
-              <button 
-                onClick={calculateHandicap}
-                className="flex items-center bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded"
-              >
-                <Calculator size={18} className="mr-2" />
-                Calculate Handicap
-              </button>
-              
-              <button 
-                onClick={saveHandicap}
-                disabled={!calculatedHandicap || !isAuthenticated}
-                className={`flex items-center ${!calculatedHandicap || !isAuthenticated ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'} text-white py-2 px-4 rounded`}
-              >
-                <Save size={18} className="mr-2" />
-                Save Handicap
-              </button>
-              
-              <button 
-                onClick={exportToCSV}
-                className="flex items-center bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded"
-              >
-                <Download size={18} className="mr-2" />
-                Export to CSV
-              </button>
-            </div>
-          </div>
-
-          {savedCalculations.length > 0 && (
-            <div className="mt-8 border-t pt-6">
-              <h2 className="text-lg font-semibold mb-4">Handicap History</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {savedCalculations.map((calc, index) => (
-                  <div key={index} className="bg-gray-50 rounded p-4 border">
-                    <div className="text-lg font-bold mb-1">Index: {calc.index}</div>
-                    <div className="text-sm text-gray-600">
-                      Calculated: {new Date(calc.calculatedAt).toLocaleDateString()}
-                    </div>
-                    <div className="text-sm text-gray-600">
-                      Rounds used: {calc.rounds || calc.differentials?.length || 'Unknown'}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    };
-
-    // Render the component
-    ReactDOM.createRoot(document.getElementById('handicap-calculator-root')).render(
-      <HandicapCalculator />
-    );
+        BBB_UTILS.showMessage('Exported to CSV file.', 'success');
+      }
+    });
   </script>
-
-  <!-- Add style override for consistent BBB appearance -->
+  
   <style>
-    #handicap-calculator-root {
-      font-family: var(--font-family-base);
-      margin: 2rem 0;
+    /* Handicap Calculator Specific Styles */
+    .calculator {
+      background: #f9f9f9;
+      padding: 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-top: 1.5rem;
     }
     
-    #handicap-calculator-root h1, 
-    #handicap-calculator-root h2 {
-      font-family: var(--font-family-accent);
+    .help-toggle {
+      margin-bottom: 1rem;
+      background-color: #004d00;
     }
     
-    /* Ensure Tailwind doesn't conflict with BBB styles outside our component */
-    #handicap-calculator-root * {
-      box-sizing: border-box;
+    .help-section {
+      background-color: #e7f5ff;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      border: 1px solid #cce5ff;
+    }
+    
+    .help-section h3 {
+      margin-top: 0;
+      color: #004085;
+    }
+    
+    .help-section ol {
+      padding-left: 1.5rem;
+    }
+    
+    .help-section li {
+      margin-bottom: 0.5rem;
+    }
+    
+    .rounds-table {
+      width: 100%;
+      margin-bottom: 1.5rem;
+      border-collapse: collapse;
+    }
+    
+    .rounds-table th {
+      background-color: #f2f2f2;
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 2px solid #ddd;
+    }
+    
+    .rounds-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid #ddd;
+    }
+    
+    .rounds-table input,
+    .rounds-table select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    
+    .rounds-table .score-input,
+    .rounds-table .cr-input,
+    .rounds-table .sr-input {
+      width: 80px;
+    }
+    
+    .remove-btn {
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 0.25rem 0.5rem;
+      cursor: pointer;
+    }
+    
+    .remove-btn:hover {
+      background-color: #c82333;
+    }
+    
+    .button-group {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .handicap-result-inner {
+      background-color: #d4edda;
+      color: #155724;
+      padding: 1.5rem;
+      border-radius: 8px;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .handicap-value {
+      font-size: 2.5rem;
+      font-weight: bold;
+      margin: 0.5rem 0;
+    }
+    
+    .handicap-info {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    
+    .history-section {
+      margin-top: 2rem;
+      padding-top: 1.5rem;
+      border-top: 1px solid #ddd;
+    }
+    
+    .history-section h3 {
+      margin-top: 0;
+      margin-bottom: 1rem;
+    }
+    
+    .history-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+    
+    .history-card {
+      background-color: #f2f2f2;
+      padding: 1rem;
+      border-radius: 8px;
+      border: 1px solid #ddd;
+    }
+    
+    .history-index {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 0.5rem;
+    }
+    
+    .history-date,
+    .history-rounds {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .button-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .rounds-table {
+        font-size: 0.9rem;
+      }
+      
+      .rounds-table th,
+      .rounds-table td {
+        padding: 0.5rem;
+      }
+      
+      .handicap-value {
+        font-size: 2rem;
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .calculator {
+        padding: 1rem;
+      }
+      
+      .rounds-table {
+        display: block;
+        overflow-x: auto;
+      }
+      
+      .history-cards {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </body>
