@@ -305,51 +305,6 @@
           .join(' ');
       }
       
-      // Add usage guidelines section
-      const guidelinesSection = document.createElement('div');
-      guidelinesSection.className = 'section-card';
-      guidelinesSection.style.marginTop = '2rem';
-      guidelinesSection.style.padding = '1.5rem';
-      guidelinesSection.style.backgroundColor = 'white';
-      guidelinesSection.style.borderRadius = '8px';
-      guidelinesSection.style.boxShadow = 'var(--shadow-md)';
-      
-      const guidelinesTitle = document.createElement('h3');
-      guidelinesTitle.textContent = 'Logo Usage Guidelines';
-      guidelinesTitle.style.marginTop = '0';
-      guidelinesTitle.style.marginBottom = '1rem';
-      
-      const guidelinesList = document.createElement('ul');
-      guidelinesList.style.paddingLeft = '1.5rem';
-      
-      const guidelines = [
-        'Maintain clear space around the logo equal to the height of the letter "B" in the logo.',
-        'Do not modify, distort, or alter the colors of the logo.',
-        'For best visibility, use the white version of the logo on dark backgrounds.',
-        'Minimum recommended size is 1 inch or 72 pixels for digital use.',
-        'The SVG format is preferred for all digital applications to maintain clarity at any size.'
-      ];
-      
-      guidelines.forEach(guideline => {
-        const item = document.createElement('li');
-        item.textContent = guideline;
-        item.style.marginBottom = '0.5rem';
-        guidelinesList.appendChild(item);
-      });
-      
-      guidelinesSection.appendChild(guidelinesTitle);
-      guidelinesSection.appendChild(guidelinesList);
-      
-      // Add contact info
-      const contactInfo = document.createElement('p');
-      contactInfo.style.marginTop = '1.5rem';
-      contactInfo.style.fontSize = '0.9rem';
-      contactInfo.style.fontStyle = 'italic';
-      contactInfo.textContent = 'For questions about logo usage or to request additional formats, please contact the BBB administrator.';
-      
-      guidelinesSection.appendChild(contactInfo);
-      mainContent.appendChild(guidelinesSection);
-      
       // Add content to main wrapper
       headerElements.mainWrapper.appendChild(mainContent);
       
