@@ -550,8 +550,7 @@
         viewProfileBtn.textContent = 'View Full Profile';
         viewProfileBtn.addEventListener('click', (e) => {
           e.stopPropagation(); // Prevent card click event
-          alert(`Full profile for ${memberName} would be shown here.`);
-          // In future, you could redirect to a member profile page
+          window.location.href = `member-profile.html?id=${encodeURIComponent(memberName.toLowerCase())}`;
         });
         
         cardContent.appendChild(viewProfileBtn);
