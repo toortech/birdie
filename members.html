@@ -863,6 +863,8 @@
         localStoragePrefix: 'bbb_'
       });
       
+      console.log('Modules initialized');
+      
       // Create header
       const headerElements = BBB_UI.createHeader({
         fixed: true,
@@ -870,6 +872,7 @@
       });
       
       document.body.insertBefore(headerElements.header, document.body.firstChild);
+      console.log('Header created');
       
       // Get main content element
       const main = document.getElementById('main');
@@ -1000,111 +1003,346 @@
       // Current user info (from auth)
       let currentUser = BBB_AUTH.getCurrentUser();
       
-      // Load handicap data for all members
-      const handicapPromises = BBB_CONFIG.members.map(member => 
-        BBB_DB.getMemberHandicap(member.toLowerCase())
-          .then(data => {
-            // Create enhanced member data with default values
-            enhancedMemberData[member] = {
-              name: member,
-              nickname: generateNickname(member),
-              handicap: data ? data.index : null,
-              joined: data ? data.calculatedAt : new Date().toISOString(),
-              bio: generateBio(member),
-              about: generateAbout(member),
-              profileImage: 'https://via.placeholder.com/150',
-              favoriteClub: getRandomFavoriteClub(),
-              favoriteCourse: getRandomCourse(),
-              achievements: generateAchievements(),
-              stats: generateStats(data ? data.index : 15),
-              email: `${member.toLowerCase().replace(/\s+/g, '.')}@example.com`,
-              phone: `+1 (555) ${Math.floor(100 + Math.random() * 900)}-${Math.floor(1000 + Math.random() * 9000)}`
-            };
-            
-            return { member, handicap: data };
-          })
-          .catch(() => {
-            // Default values if handicap data isn't available
-            enhancedMemberData[member] = {
-              name: member,
-              nickname: generateNickname(member),
-              handicap: null,
-              joined: new Date().toISOString(),
-              bio: generateBio(member),
-              about: generateAbout(member),
-              profileImage: 'https://via.placeholder.com/150',
-              favoriteClub: getRandomFavoriteClub(),
-              favoriteCourse: getRandomCourse(),
-              achievements: generateAchievements(),
-              stats: generateStats(15),
-              email: `${member.toLowerCase().replace(/\s+/g, '.')}@example.com`,
-              phone: `+1 (555) ${Math.floor(100 + Math.random() * 900)}-${Math.floor(1000 + Math.random() * 9000)}`
-            };
-            
-            return { member, handicap: null };
-          })
-      );
+      console.log('Page structure created');
+      
+      // Add immediate basic data display (ALTERNATIVE FIX)
+      if (BBB_CONFIG && BBB_CONFIG.members && Array.isArray(BBB_CONFIG.members)) {
+        console.log(`Found ${BBB_CONFIG.members.length} members in config`);
+        
+        // Immediately show basic member cards
+        BBB_CONFIG.members.forEach(member => {
+          // Create a basic member card
+          const card = createBasicMemberCard(member);
+          membersContainer.appendChild(card);
+        });
+        
+        console.log('Basic member cards created successfully');
+        
+        // Setup event listeners for view toggle
+        gridButton.addEventListener('click', function() {
+          gridButton.classList.add('active');
+          listButton.classList.remove('active');
+          membersContainer.className = 'members-grid';
+          refreshMembersList();
+        });
+        
+        listButton.addEventListener('click', function() {
+          listButton.classList.add('active');
+          gridButton.classList.remove('active');
+          membersContainer.className = 'space-y-4';
+          refreshMembersList();
+        });
+        
+        // Setup search functionality
+        searchInput.addEventListener('input', function() {
+          const searchText = this.value.toLowerCase();
+          refreshMembersList(searchText);
+        });
+        
+        // Setup sort functionality
+        sortSelect.addEventListener('change', function() {
+          refreshMembersList(searchInput.value.toLowerCase());
+        });
+        
+        // Setup modal functionality
+        setupModalInteraction();
+      } else {
+        console.error('BBB_CONFIG.members not found or not an array');
+        membersContainer.innerHTML = '<div class="alert alert-error">Error: Member data not available. Please check the console for details.</div>';
+      }
       
       // Try to load custom member data from localStorage
       loadCustomMemberData();
       
-      // Load scorecards to calculate recent scores
-      BBB_DB.getScorecards()
-        .then(scorecards => {
-          const scorecardsArray = Object.values(scorecards);
-          
-          // Process all handicap data
-          Promise.all(handicapPromises)
-            .then(memberData => {
-              // Create premium member cards
-              memberData.forEach(data => {
-                // Find recent scores for this member
-                const recentScores = findRecentScores(scorecardsArray, data.member);
-                enhancedMemberData[data.member].recentScores = recentScores;
-                
-                // Create member card
-                const memberCard = createPremiumMemberCard(data.member, data.handicap, recentScores, enhancedMemberData[data.member]);
-                membersContainer.appendChild(memberCard);
-              });
+      // CONTINUE WITH ENHANCED DATA LOADING
+      // Load handicap data for all members in the background
+      if (BBB_CONFIG && BBB_CONFIG.members && Array.isArray(BBB_CONFIG.members)) {
+        const handicapPromises = BBB_CONFIG.members.map(member => 
+          BBB_DB.getMemberHandicap(member.toLowerCase())
+            .then(data => {
+              // Create enhanced member data with default values
+              enhancedMemberData[member] = {
+                name: member,
+                nickname: generateNickname(member),
+                handicap: data ? data.index : null,
+                joined: data ? data.calculatedAt : new Date().toISOString(),
+                bio: generateBio(member),
+                about: generateAbout(member),
+                profileImage: 'https://via.placeholder.com/150',
+                favoriteClub: getRandomFavoriteClub(),
+                favoriteCourse: getRandomCourse(),
+                achievements: generateAchievements(),
+                stats: generateStats(data ? data.index : 15),
+                email: `${member.toLowerCase().replace(/\s+/g, '.')}@example.com`,
+                phone: `+1 (555) ${Math.floor(100 + Math.random() * 900)}-${Math.floor(1000 + Math.random() * 9000)}`
+              };
               
-              // Setup event listeners for view toggle
-              gridButton.addEventListener('click', function() {
-                gridButton.classList.add('active');
-                listButton.classList.remove('active');
-                membersContainer.className = 'members-grid';
-                refreshMembersList();
-              });
-              
-              listButton.addEventListener('click', function() {
-                listButton.classList.add('active');
-                gridButton.classList.remove('active');
-                membersContainer.className = 'space-y-4';
-                refreshMembersList();
-              });
-              
-              // Setup search functionality
-              searchInput.addEventListener('input', function() {
-                const searchText = this.value.toLowerCase();
-                refreshMembersList(searchText);
-              });
-              
-              // Setup sort functionality
-              sortSelect.addEventListener('change', function() {
-                refreshMembersList(searchInput.value.toLowerCase());
-              });
-              
-              // Setup modal functionality
-              setupModalInteraction();
+              return { member, handicap: data };
             })
-            .catch(err => {
-              console.error('Error loading member data:', err);
-              BBB_UTILS.showMessage('Error loading member data', 'error');
+            .catch(error => {
+              console.error(`Error loading handicap for ${member}:`, error);
+              // Default values if handicap data isn't available
+              enhancedMemberData[member] = {
+                name: member,
+                nickname: generateNickname(member),
+                handicap: null,
+                joined: new Date().toISOString(),
+                bio: generateBio(member),
+                about: generateAbout(member),
+                profileImage: 'https://via.placeholder.com/150',
+                favoriteClub: getRandomFavoriteClub(),
+                favoriteCourse: getRandomCourse(),
+                achievements: generateAchievements(),
+                stats: generateStats(15),
+                email: `${member.toLowerCase().replace(/\s+/g, '.')}@example.com`,
+                phone: `+1 (555) ${Math.floor(100 + Math.random() * 900)}-${Math.floor(1000 + Math.random() * 9000)}`
+              };
+              
+              return { member, handicap: null };
+            })
+        );
+        
+        // Load scorecards to calculate recent scores in the background
+        BBB_DB.getScorecards()
+          .then(scorecards => {
+            console.log('Scorecards loaded successfully');
+            const scorecardsArray = Object.values(scorecards);
+            
+            // Process all handicap data
+            Promise.all(handicapPromises)
+              .then(memberData => {
+                console.log('All member handicap data loaded');
+                // Enhance member data with scores
+                memberData.forEach(data => {
+                  // Find recent scores for this member
+                  const recentScores = findRecentScores(scorecardsArray, data.member);
+                  enhancedMemberData[data.member].recentScores = recentScores;
+                });
+                
+                // Update the member cards with enhanced data
+                refreshMembersList();
+                
+                console.log('Member cards updated with enhanced data');
+              })
+              .catch(err => {
+                console.error('Error processing member data:', err);
+                // We already have basic cards, so just show a toast message
+                showToast('Some member data could not be loaded. Basic information is displayed.', 'warning');
+              });
+          })
+          .catch(err => {
+            console.error('Error loading scorecards:', err);
+            // We already have basic cards, so just show a toast message
+            showToast('Score data could not be loaded. Basic member information is displayed.', 'warning');
+          });
+      }
+      
+      /**
+       * Create a basic member card with minimal data
+       * @param {string} memberName - Member name
+       * @returns {HTMLElement} - Basic member card
+       */
+      function createBasicMemberCard(memberName) {
+        // Try to get any stored data first
+        const storedData = enhancedMemberData[memberName] || {};
+        
+        const card = document.createElement('div');
+        card.className = 'premium-member-card';
+        card.dataset.member = memberName;
+        
+        // Member header with background pattern
+        const header = document.createElement('div');
+        header.className = 'card-header-premium';
+        
+        // Golf ball pattern background
+        const pattern = document.createElement('div');
+        pattern.className = 'golf-pattern';
+        pattern.innerHTML = `<svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <pattern id="golfPattern" width="30" height="30" patternUnits="userSpaceOnUse">
+            <circle cx="15" cy="15" r="1" fill="white" />
+            <circle cx="0" cy="0" r="1" fill="white" />
+            <circle cx="0" cy="30" r="1" fill="white" />
+            <circle cx="30" cy="0" r="1" fill="white" />
+            <circle cx="30" cy="30" r="1" fill="white" />
+          </pattern>
+          <rect width="100%" height="100%" fill="url(#golfPattern)" />
+        </svg>`;
+        header.appendChild(pattern);
+        
+        // Profile image
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'profile-image-container';
+        
+        const profileImage = document.createElement('img');
+        profileImage.src = storedData.profileImage || 'https://via.placeholder.com/150';
+        profileImage.alt = memberName;
+        profileImage.className = 'profile-image';
+        imageContainer.appendChild(profileImage);
+        
+        // Only show edit photo overlay for current user
+        if (currentUser && currentUser.username === memberName) {
+          const editPhotoOverlay = document.createElement('div');
+          editPhotoOverlay.className = 'edit-photo-overlay';
+          editPhotoOverlay.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          `;
+          
+          // Setup photo upload listener
+          editPhotoOverlay.addEventListener('click', function() {
+            // Create a temporary file input
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            
+            fileInput.addEventListener('change', function() {
+              if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
+                
+                // Show loading spinner
+                showLoading();
+                
+                // Convert to data URL
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                  // Update the profile image
+                  profileImage.src = e.target.result;
+                  
+                  // Update in member data
+                  if (!enhancedMemberData[memberName]) {
+                    enhancedMemberData[memberName] = { name: memberName };
+                  }
+                  enhancedMemberData[memberName].profileImage = e.target.result;
+                  
+                  // Save to localStorage
+                  saveCustomMemberData();
+                  
+                  // Refresh member list
+                  refreshMembersList();
+                  
+                  // Hide loading spinner
+                  hideLoading();
+                  
+                  // Show success message
+                  showToast('Profile photo updated successfully!', 'success');
+                };
+                
+                reader.onerror = function() {
+                  hideLoading();
+                  showToast('Failed to upload photo. Please try again.', 'error');
+                };
+                
+                reader.readAsDataURL(file);
+              }
             });
-        })
-        .catch(err => {
-          console.error('Error loading scorecards:', err);
-          BBB_UTILS.showMessage('Error loading scorecards', 'error');
-        });
+            
+            // Trigger the file input click
+            fileInput.click();
+          });
+          
+          imageContainer.appendChild(editPhotoOverlay);
+        }
+        
+        header.appendChild(imageContainer);
+        card.appendChild(header);
+        
+        // Card body
+        const body = document.createElement('div');
+        body.className = 'card-body-premium';
+        
+        // Member name
+        const nameElement = document.createElement('h3');
+        nameElement.className = 'member-name';
+        nameElement.textContent = memberName;
+        body.appendChild(nameElement);
+        
+        // Nickname
+        const nickname = document.createElement('p');
+        nickname.className = 'member-nickname';
+        nickname.textContent = `"${storedData.nickname || 'Golf Enthusiast'}"`;
+        body.appendChild(nickname);
+        
+        // Handicap badge
+        const handicapBadge = document.createElement('div');
+        handicapBadge.className = 'handicap-badge';
+        handicapBadge.textContent = storedData.handicap ? `Handicap: ${storedData.handicap}` : 'Handicap: Loading...';
+        body.appendChild(handicapBadge);
+        
+        // Bio
+        const bio = document.createElement('p');
+        bio.className = 'member-bio';
+        bio.textContent = storedData.bio || `Member of Birdie Bush Bandits. Click to view profile.`;
+        body.appendChild(bio);
+        
+        // Stats grid
+        const statsGrid = document.createElement('div');
+        statsGrid.className = 'stats-grid';
+        
+        // Avg Score stat
+        const avgScoreStat = document.createElement('div');
+        avgScoreStat.className = 'stat-box';
+        
+        const avgScoreLabel = document.createElement('div');
+        avgScoreLabel.className = 'stat-label';
+        avgScoreLabel.textContent = 'Avg Score';
+        
+        const avgScoreValue = document.createElement('div');
+        avgScoreValue.className = 'stat-value';
+        avgScoreValue.textContent = storedData.stats ? storedData.stats.scoringAvg : '-';
+        
+        avgScoreStat.appendChild(avgScoreLabel);
+        avgScoreStat.appendChild(avgScoreValue);
+        statsGrid.appendChild(avgScoreStat);
+        
+        // Member since stat
+        const joinedStat = document.createElement('div');
+        joinedStat.className = 'stat-box';
+        
+        const joinedLabel = document.createElement('div');
+        joinedLabel.className = 'stat-label';
+        joinedLabel.textContent = 'Member Since';
+        
+        const joinedValue = document.createElement('div');
+        joinedValue.className = 'stat-value';
+        joinedValue.textContent = storedData.joined ? new Date(storedData.joined).getFullYear() : '-';
+        
+        joinedStat.appendChild(joinedLabel);
+        joinedStat.appendChild(joinedValue);
+        statsGrid.appendChild(joinedStat);
+        
+        body.appendChild(statsGrid);
+        
+        // View profile button
+        const viewProfileBtn = document.createElement('button');
+        viewProfileBtn.className = 'btn btn-sm view-profile-btn';
+        viewProfileBtn.textContent = 'View Profile';
+        viewProfileBtn.dataset.member = memberName;
+        viewProfileBtn.style.width = '100%';
+        body.appendChild(viewProfileBtn);
+        
+        card.appendChild(body);
+        
+        // Card footer
+        const footer = document.createElement('div');
+        footer.className = 'card-footer-premium';
+        
+        const favCourseLabel = document.createElement('div');
+        favCourseLabel.className = 'stat-label';
+        favCourseLabel.textContent = 'Favorite Course';
+        
+        const favCourseValue = document.createElement('div');
+        favCourseValue.className = 'text-sm font-medium text-gray-800 truncate';
+        favCourseValue.textContent = storedData.favoriteCourse || '-';
+        
+        footer.appendChild(favCourseLabel);
+        footer.appendChild(favCourseValue);
+        
+        card.appendChild(footer);
+        
+        return card;
+      }
       
       /**
        * Try to load custom member data from localStorage
@@ -1117,13 +1355,16 @@
             
             // Merge with enhancedMemberData (will be overwritten by any new data)
             Object.keys(parsedData).forEach(member => {
-              if (enhancedMemberData[member]) {
-                enhancedMemberData[member] = {
-                  ...enhancedMemberData[member],
-                  ...parsedData[member]
-                };
+              if (!enhancedMemberData[member]) {
+                enhancedMemberData[member] = {};
               }
+              enhancedMemberData[member] = {
+                ...enhancedMemberData[member],
+                ...parsedData[member]
+              };
             });
+            
+            console.log('Custom member data loaded from localStorage');
           }
         } catch (error) {
           console.error('Error loading custom member data:', error);
@@ -1136,6 +1377,7 @@
       function saveCustomMemberData() {
         try {
           localStorage.setItem('bbb_custom_member_data', JSON.stringify(enhancedMemberData));
+          console.log('Custom member data saved to localStorage');
         } catch (error) {
           console.error('Error saving custom member data:', error);
         }
@@ -1603,6 +1845,7 @@
        * Refresh the members list based on search and sort criteria
        */
       function refreshMembersList(searchText = '') {
+        console.log('Refreshing members list, search:', searchText);
         const currentView = gridButton.classList.contains('active') ? 'grid' : 'list';
         const sortValue = sortSelect.value;
         const membersContainer = document.getElementById('members-container');
@@ -1611,28 +1854,46 @@
         membersContainer.innerHTML = '';
         
         // Get all members
-        const members = Object.keys(enhancedMemberData);
+        let members = [];
+        
+        // First try from BBB_CONFIG
+        if (BBB_CONFIG && BBB_CONFIG.members && Array.isArray(BBB_CONFIG.members)) {
+          members = BBB_CONFIG.members;
+        }
+        
+        // Also include any members from enhancedMemberData that might not be in BBB_CONFIG
+        Object.keys(enhancedMemberData).forEach(member => {
+          if (!members.includes(member)) {
+            members.push(member);
+          }
+        });
+        
+        console.log(`Found ${members.length} total members`);
         
         // Filter by search text
         const filteredMembers = members.filter(member => {
-          const data = enhancedMemberData[member];
+          const data = enhancedMemberData[member] || {};
           return (
-            member.toLowerCase().includes(searchText) ||
-            data.nickname.toLowerCase().includes(searchText)
+            member.toLowerCase().includes(searchText.toLowerCase()) ||
+            (data.nickname && data.nickname.toLowerCase().includes(searchText.toLowerCase()))
           );
         });
         
+        console.log(`Filtered to ${filteredMembers.length} members`);
+        
         // Sort members
         filteredMembers.sort((a, b) => {
-          const dataA = enhancedMemberData[a];
-          const dataB = enhancedMemberData[b];
+          const dataA = enhancedMemberData[a] || {};
+          const dataB = enhancedMemberData[b] || {};
           
           if (sortValue === 'handicap') {
             const handicapA = dataA.handicap ? parseFloat(dataA.handicap) : 999;
             const handicapB = dataB.handicap ? parseFloat(dataB.handicap) : 999;
             return handicapA - handicapB;
           } else if (sortValue === 'joined') {
-            return new Date(dataB.joined) - new Date(dataA.joined);
+            const joinedA = dataA.joined ? new Date(dataA.joined) : new Date(0);
+            const joinedB = dataB.joined ? new Date(dataB.joined) : new Date(0);
+            return joinedB - joinedA;
           } else {
             return a.localeCompare(b); // Default: sort by name
           }
@@ -1647,15 +1908,21 @@
           
           // Create and append member cards
           filteredMembers.forEach(member => {
-            const data = enhancedMemberData[member];
+            const data = enhancedMemberData[member] || {};
             const handicapData = data.handicap ? { index: data.handicap } : null;
             const recentScores = data.recentScores || [];
             
-            if (currentView === 'grid') {
-              membersContainer.appendChild(createGridCard(member, handicapData, recentScores, data));
+            let card;
+            if (Object.keys(data).length === 0) {
+              // If no enhanced data, create a basic card
+              card = createBasicMemberCard(member);
+            } else if (currentView === 'grid') {
+              card = createGridCard(member, handicapData, recentScores, data);
             } else {
-              membersContainer.appendChild(createListCard(member, handicapData, recentScores, data));
+              card = createListCard(member, handicapData, recentScores, data);
             }
+            
+            membersContainer.appendChild(card);
           });
           
           // Re-attach event listeners to view profile buttons
@@ -1734,15 +2001,15 @@
           
           // Get current member data
           const memberName = document.getElementById('modal-name').textContent;
-          const memberData = enhancedMemberData[memberName];
+          const memberData = enhancedMemberData[memberName] || {};
           
           // Populate editable fields
           document.getElementById('edit-name').value = memberName;
-          document.getElementById('edit-nickname').value = memberData.nickname.replace(/"/g, '');
-          document.getElementById('edit-bio').value = memberData.bio;
-          document.getElementById('edit-detail').value = memberData.about;
-          document.getElementById('edit-favorite-club').value = memberData.favoriteClub;
-          document.getElementById('edit-favorite-course').value = memberData.favoriteCourse;
+          document.getElementById('edit-nickname').value = memberData.nickname ? memberData.nickname.replace(/"/g, '') : '';
+          document.getElementById('edit-bio').value = memberData.bio || '';
+          document.getElementById('edit-detail').value = memberData.about || '';
+          document.getElementById('edit-favorite-club').value = memberData.favoriteClub || 'Driver';
+          document.getElementById('edit-favorite-course').value = memberData.favoriteCourse || '';
           document.getElementById('edit-email').value = memberData.email || '';
           document.getElementById('edit-phone').value = memberData.phone || '';
         });
@@ -1769,6 +2036,11 @@
           const updatedFavoriteCourse = document.getElementById('edit-favorite-course').value;
           const updatedEmail = document.getElementById('edit-email').value;
           const updatedPhone = document.getElementById('edit-phone').value;
+          
+          // Initialize member data if it doesn't exist
+          if (!enhancedMemberData[memberName]) {
+            enhancedMemberData[memberName] = { name: memberName };
+          }
           
           // Update the member data
           enhancedMemberData[memberName] = {
@@ -1825,6 +2097,11 @@
             // Get current member name
             const memberName = document.getElementById('modal-name').textContent;
             
+            // Initialize member data if it doesn't exist
+            if (!enhancedMemberData[memberName]) {
+              enhancedMemberData[memberName] = { name: memberName };
+            }
+            
             // Convert to data URL
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -1880,6 +2157,16 @@
           // Get current member name
           const memberName = document.getElementById('modal-name').textContent;
           
+          // Initialize member data if it doesn't exist
+          if (!enhancedMemberData[memberName]) {
+            enhancedMemberData[memberName] = { 
+              name: memberName,
+              achievements: []
+            };
+          } else if (!enhancedMemberData[memberName].achievements) {
+            enhancedMemberData[memberName].achievements = [];
+          }
+          
           // Add to achievements
           enhancedMemberData[memberName].achievements.push(achievementText);
           
@@ -1905,12 +2192,12 @@
         const preferencesList = document.getElementById('member-preferences');
         preferencesList.innerHTML = '';
         
-        const memberData = enhancedMemberData[memberName];
+        const memberData = enhancedMemberData[memberName] || {};
         
         const preferences = [
-          { label: 'Favorite Club', value: memberData.favoriteClub },
-          { label: 'Favorite Course', value: memberData.favoriteCourse },
-          { label: 'Member Since', value: BBB_UTILS.formatDate(memberData.joined, 'short') }
+          { label: 'Favorite Club', value: memberData.favoriteClub || 'Not specified' },
+          { label: 'Favorite Course', value: memberData.favoriteCourse || 'Not specified' },
+          { label: 'Member Since', value: memberData.joined ? BBB_UTILS.formatDate(memberData.joined, 'short') : 'Not specified' }
         ];
         
         preferences.forEach(pref => {
@@ -1935,9 +2222,10 @@
         const achievementsGrid = document.getElementById('achievements-grid');
         achievementsGrid.innerHTML = '';
         
-        const memberData = enhancedMemberData[memberName];
+        const memberData = enhancedMemberData[memberName] || {};
+        const achievements = memberData.achievements || [];
         
-        memberData.achievements.forEach((achievement, index) => {
+        achievements.forEach((achievement, index) => {
           const achievementCard = document.createElement('div');
           achievementCard.className = 'bg-white p-4 rounded-lg border border-gray-200 flex items-start gap-3';
           
@@ -1971,7 +2259,7 @@
           achievementsGrid.appendChild(achievementCard);
         });
         
-        if (memberData.achievements.length === 0) {
+        if (achievements.length === 0) {
           const noAchievements = document.createElement('div');
           noAchievements.className = 'text-center py-8 text-gray-500';
           noAchievements.textContent = 'No achievements recorded yet';
@@ -1985,17 +2273,19 @@
             const index = parseInt(this.dataset.index);
             const memberName = document.getElementById('modal-name').textContent;
             
-            // Remove the achievement
-            enhancedMemberData[memberName].achievements.splice(index, 1);
-            
-            // Save to localStorage
-            saveCustomMemberData();
-            
-            // Update achievements display
-            updateAchievementsGrid(memberName);
-            
-            // Show success message
-            showToast('Achievement deleted successfully!', 'success');
+            if (enhancedMemberData[memberName] && enhancedMemberData[memberName].achievements) {
+              // Remove the achievement
+              enhancedMemberData[memberName].achievements.splice(index, 1);
+              
+              // Save to localStorage
+              saveCustomMemberData();
+              
+              // Update achievements display
+              updateAchievementsGrid(memberName);
+              
+              // Show success message
+              showToast('Achievement deleted successfully!', 'success');
+            }
           });
         });
       }
@@ -2004,21 +2294,21 @@
        * Open member modal with details
        */
       function openMemberModal(memberName) {
-        const memberData = enhancedMemberData[memberName];
-        if (!memberData) return;
+        console.log(`Opening modal for ${memberName}`);
         
+        const memberData = enhancedMemberData[memberName] || { name: memberName };
         const modal = document.getElementById('member-modal');
         
         // Set header info
-        document.getElementById('modal-profile-image').src = memberData.profileImage;
-        document.getElementById('modal-name').textContent = memberData.name;
-        document.getElementById('modal-nickname').textContent = `"${memberData.nickname}"`;
+        document.getElementById('modal-profile-image').src = memberData.profileImage || 'https://via.placeholder.com/150';
+        document.getElementById('modal-name').textContent = memberData.name || memberName;
+        document.getElementById('modal-nickname').textContent = memberData.nickname ? `"${memberData.nickname}"` : '"Golf Enthusiast"';
         document.getElementById('modal-handicap').textContent = `Handicap: ${memberData.handicap || 'N/A'}`;
         
         // About tab
-        document.getElementById('about-name').textContent = memberData.name;
-        document.getElementById('about-bio').textContent = memberData.bio;
-        document.getElementById('about-detail').textContent = memberData.about;
+        document.getElementById('about-name').textContent = memberData.name || memberName;
+        document.getElementById('about-bio').textContent = memberData.bio || 'No bio available.';
+        document.getElementById('about-detail').textContent = memberData.about || '';
         
         // Update preferences list
         updatePreferencesList(memberName);
@@ -2059,6 +2349,24 @@
           document.getElementById('handicap-value').textContent = memberData.handicap || 'N/A';
           document.getElementById('gir-value').textContent = `${stats.greensInRegulation}%`;
           document.getElementById('putting-value').textContent = stats.puttingAvg;
+        } else {
+          // Default values if no stats
+          document.getElementById('driving-accuracy').textContent = 'N/A';
+          document.getElementById('driving-accuracy-bar').style.width = '0%';
+          
+          document.getElementById('gir').textContent = 'N/A';
+          document.getElementById('gir-bar').style.width = '0%';
+          
+          document.getElementById('putting-avg').textContent = 'N/A';
+          document.getElementById('putting-avg-bar').style.width = '0%';
+          
+          document.getElementById('scoring-avg').textContent = 'N/A';
+          document.getElementById('scoring-avg-bar').style.width = '0%';
+          
+          document.getElementById('avg-score-value').textContent = 'N/A';
+          document.getElementById('handicap-value').textContent = 'N/A';
+          document.getElementById('gir-value').textContent = 'N/A';
+          document.getElementById('putting-value').textContent = 'N/A';
         }
         
         // Scores tab
@@ -2080,7 +2388,7 @@
             
             const teeCell = document.createElement('td');
             teeCell.className = 'py-4 px-4 border-b text-sm text-gray-500';
-            teeCell.textContent = BBB_CONFIG.teeColors[score.tee] || score.tee;
+            teeCell.textContent = BBB_CONFIG.teeColors && BBB_CONFIG.teeColors[score.tee] ? BBB_CONFIG.teeColors[score.tee] : score.tee;
             
             const scoreCell = document.createElement('td');
             scoreCell.className = 'py-4 px-4 border-b text-sm font-medium text-gray-900';
@@ -2351,103 +2659,5 @@
       }
     });
   </script>
-  
-<script>
-  // Function to immediately display members without waiting for other data
-  function quickDisplayMembers() {
-    console.log("Loading members...");
-    
-    // Get the members container
-    const membersContainer = document.getElementById('members-container');
-    if (!membersContainer) {
-      console.error("Members container not found");
-      return;
-    }
-    
-    // Clear any existing content
-    membersContainer.innerHTML = '';
-    
-    // Check if BBB_CONFIG and BBB_CONFIG.members exists
-    if (!window.BBB_CONFIG || !BBB_CONFIG.members || !Array.isArray(BBB_CONFIG.members)) {
-      console.error("BBB_CONFIG.members not found or not an array");
-      membersContainer.innerHTML = '<div class="alert alert-error">Error: Member data not available. Please check the console for details.</div>';
-      return;
-    }
-    
-    console.log(`Found ${BBB_CONFIG.members.length} members in config`);
-    
-    // Create simple member cards for each member in BBB_CONFIG.members
-    BBB_CONFIG.members.forEach(memberName => {
-      // Create a simple member card
-      const card = document.createElement('div');
-      card.className = 'premium-member-card';
-      card.dataset.member = memberName;
-      
-      // Simple header with default profile image
-      card.innerHTML = `
-        <div class="card-header-premium">
-          <div class="golf-pattern">
-            <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-              <pattern id="golfPattern" width="30" height="30" patternUnits="userSpaceOnUse">
-                <circle cx="15" cy="15" r="1" fill="white" />
-                <circle cx="0" cy="0" r="1" fill="white" />
-                <circle cx="0" cy="30" r="1" fill="white" />
-                <circle cx="30" cy="0" r="1" fill="white" />
-                <circle cx="30" cy="30" r="1" fill="white" />
-              </pattern>
-              <rect width="100%" height="100%" fill="url(#golfPattern)" />
-            </svg>
-          </div>
-          <div class="profile-image-container">
-            <img src="https://via.placeholder.com/150" alt="${memberName}" class="profile-image">
-          </div>
-        </div>
-        
-        <div class="card-body-premium">
-          <h3 class="member-name">${memberName}</h3>
-          <p class="member-nickname">"Golf Enthusiast"</p>
-          <div class="handicap-badge">Handicap: Loading...</div>
-          <p class="member-bio">Member of Birdie Bush Bandits. Click to view profile.</p>
-          
-          <div class="stats-grid">
-            <div class="stat-box">
-              <div class="stat-label">Avg Score</div>
-              <div class="stat-value">-</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-label">Member Since</div>
-              <div class="stat-value">-</div>
-            </div>
-          </div>
-          
-          <button class="btn btn-sm view-profile-btn" style="width: 100%;" data-member="${memberName}">
-            View Profile
-          </button>
-        </div>
-        
-        <div class="card-footer-premium">
-          <div class="stat-label">Favorite Course</div>
-          <div class="text-sm font-medium text-gray-800 truncate">-</div>
-        </div>
-      `;
-      
-      // Add card to container
-      membersContainer.appendChild(card);
-      
-      // Add click event to view profile button
-      const viewBtn = card.querySelector('.view-profile-btn');
-      if (viewBtn) {
-        viewBtn.addEventListener('click', function() {
-          alert(`Profile view for ${memberName} not implemented in quick fix`);
-        });
-      }
-    });
-    
-    console.log("Members displayed successfully");
-  }
-  
-  // Call the function after a short delay to ensure DOM is ready
-  setTimeout(quickDisplayMembers, 500);
-</script>
 </body>
 </html>
