@@ -54,13 +54,17 @@
       margin-bottom: 0;
     }
     
-    /* Empty state */
-    .empty-message {
-      text-align: center;
-      padding: 2rem;
+    /* Upload section */
+    .upload-section {
       background-color: #f8f9fa;
       border-radius: 8px;
+      padding: 1.5rem;
       margin: 2rem 0;
+      text-align: center;
+    }
+    
+    .upload-instructions {
+      margin-bottom: 1rem;
     }
     
     /* Responsive adjustments */
@@ -155,28 +159,8 @@
       const logoGallery = document.createElement('div');
       logoGallery.className = 'logo-gallery';
       
-      // Initialize empty message for no logos found
-      const emptyMessage = document.createElement('div');
-      emptyMessage.className = 'empty-message';
-      emptyMessage.innerHTML = `
-        <p>No logo files found yet. To add logos:</p>
-        <ol>
-          <li>Create a folder named "logos" in the project root</li>
-          <li>Add image files to the folder (SVG, PNG, JPG, etc.)</li>
-          <li>All image files will automatically appear here</li>
-        </ol>
-      `;
-      
-      // Add to content
-      mainContent.appendChild(logoGallery);
-      
-      // Function to add logo to gallery
-      function addLogo(path) {
-        // Remove empty message if present
-        if (document.querySelector('.empty-message')) {
-          document.querySelector('.empty-message').remove();
-        }
-        
+      // Function to add a logo to the gallery
+      function addLogoToGallery(path, name) {
         const logoItem = document.createElement('div');
         logoItem.className = 'logo-item';
         
@@ -186,10 +170,6 @@
         const logoImg = document.createElement('img');
         logoImg.className = 'logo-img';
         logoImg.src = path;
-        
-        // Format the logo name from the filename
-        const filename = path.split('/').pop();
-        const name = formatLogoName(filename);
         logoImg.alt = name;
         
         logoImgContainer.appendChild(logoImg);
@@ -201,14 +181,12 @@
         logoItem.appendChild(logoImgContainer);
         logoItem.appendChild(logoName);
         logoGallery.appendChild(logoItem);
-        
-        return logoItem;
       }
       
-      // Format logo name from filename
-      function formatLogoName(filename) {
-        // Remove extension
-        const baseName = filename.split('.')[0];
+      // Function to format logo name from filename
+      function formatName(filename) {
+        // Remove path and extension
+        const baseName = filename.split('/').pop().split('.')[0];
         
         // Replace hyphens and underscores with spaces
         const nameWithSpaces = baseName.replace(/[-_]/g, ' ');
@@ -220,105 +198,64 @@
           .join(' ');
       }
       
-      // First add any images from the root that might exist (fallback)
-      try {
-        // Check if main logo exists
-        fetch('bbb-logo.svg')
-          .then(response => {
-            if (response.ok) {
-              addLogo('bbb-logo.svg');
-            }
-          })
-          .catch(() => {
-            console.log("Main logo not available");
-          });
-      } catch (e) {
-        console.log("Error checking for root logo", e);
-      }
+      // Add main site logo
+      addLogoToGallery('bbb-logo.svg', 'BBB Logo');
       
-      // Use fetch to list directory contents if possible
-      // This will work if there's a server with directory listing enabled
-      let foundAnyLogos = false;
+      // Always look for these common logo files
+      // This approach simply adds img elements for each potential file
+      // Even if the file doesn't exist, it won't cause errors
+      const logoFiles = [
+        'logos/logo.svg',
+        'logos/logo.png',
+        'logos/logo-white.svg',
+        'logos/logo-white.png',
+        'logos/bbb-logo.svg',
+        'logos/bbb-logo.png',
+        'logos/bbb-logo-white.svg',
+        'logos/bbb-logo-white.png',
+        'logos/icon.svg',
+        'logos/icon.png',
+        'logos/badge.svg',
+        'logos/badge.png',
+        'logos/wordmark.svg',
+        'logos/wordmark.png'
+      ];
       
-      try {
-        fetch('logos/')
-          .then(response => response.text())
-          .then(html => {
-            // Parse the directory listing HTML
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(html, 'text/html');
-            
-            // Find all links that might be image files
-            const links = doc.querySelectorAll('a');
-            const imageExtensions = ['.svg', '.png', '.jpg', '.jpeg', '.gif', '.webp'];
-            
-            // Filter for image files
-            for (const link of links) {
-              const href = link.getAttribute('href');
-              
-              // Check if it's an image file
-              if (href && imageExtensions.some(ext => href.toLowerCase().endsWith(ext))) {
-                addLogo(`logos/${href}`);
-                foundAnyLogos = true;
-              }
-            }
-            
-            // If no logos found through directory listing, try specific checks
-            if (!foundAnyLogos) {
-              checkSpecificFiles();
-            }
-          })
-          .catch(() => {
-            // Directory listing failed or not enabled, try specific files
-            checkSpecificFiles();
-          });
-      } catch (e) {
-        // Fallback to checking specific files
-        checkSpecificFiles();
-      }
-      
-      // Function to check for specific files if directory listing fails
-      function checkSpecificFiles() {
-        // Common image extensions
-        const extensions = ['svg', 'png', 'jpg', 'jpeg', 'gif', 'webp'];
+      // Add all potential logo files to the gallery
+      logoFiles.forEach(file => {
+        // Create image with error handler
+        const img = new Image();
         
-        // Check files in the logos directory
-        const checkFile = (filename) => {
-          const img = new Image();
-          img.onload = function() {
-            addLogo(filename);
-            foundAnyLogos = true;
-          };
-          img.src = filename;
+        // Only add to gallery if the image loads successfully
+        img.onload = function() {
+          addLogoToGallery(file, formatName(file));
         };
         
-        // Try variations of file patterns
-        for (const ext of extensions) {
-          // Try with index numbers
-          for (let i = 1; i <= 10; i++) {
-            checkFile(`logos/logo${i}.${ext}`);
-            checkFile(`logos/bbb-logo${i}.${ext}`);
-          }
-          
-          // Try common names
-          checkFile(`logos/logo.${ext}`);
-          checkFile(`logos/bbb-logo.${ext}`);
-          checkFile(`logos/logo-white.${ext}`);
-          checkFile(`logos/bbb-logo-white.${ext}`);
-          checkFile(`logos/icon.${ext}`);
-          checkFile(`logos/badge.${ext}`);
-        }
-        
-        // Check for logo files directly from GitHub URLs if possible
-        // This might help if files are checked in but not yet served locally
-        
-        // After a delay, show empty message if no logos found
-        setTimeout(() => {
-          if (!foundAnyLogos && !document.querySelector('.logo-item')) {
-            logoGallery.appendChild(emptyMessage);
-          }
-        }, 2000);
-      }
+        // Set the source to try loading
+        img.src = file;
+      });
+      
+      // Add upload instructions section
+      const uploadSection = document.createElement('div');
+      uploadSection.className = 'upload-section';
+      
+      const uploadInstructions = document.createElement('div');
+      uploadInstructions.className = 'upload-instructions';
+      uploadInstructions.innerHTML = `
+        <h3>Adding More Logos</h3>
+        <p>To add more logos to this page:</p>
+        <ol>
+          <li>Create a folder named "logos" in the project root</li>
+          <li>Add SVG or PNG logo files to the folder</li>
+          <li>The logos will appear automatically on this page</li>
+        </ol>
+      `;
+      
+      uploadSection.appendChild(uploadInstructions);
+      
+      // Add logo gallery and instructions to main content
+      mainContent.appendChild(logoGallery);
+      mainContent.appendChild(uploadSection);
       
       // Add content to main wrapper
       headerElements.mainWrapper.appendChild(mainContent);
