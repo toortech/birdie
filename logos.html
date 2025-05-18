@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birdie Bush Bandits – Logos</title>
+  <meta name="description" content="Official logos and branding materials for the Birdie Bush Bandits golf group.">
+  <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  <!-- Add Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Core Modules -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+  
+  <style>
+    /* Logo page specific styles */
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+    
+    .logo-card {
+      background-color: white;
+      border-radius: 8px;
+      padding: 1.5rem;
+      text-align: center;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .logo-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+    
+    .logo-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 200px;
+      margin-bottom: 1rem;
+      background-color: #f9f9f9;
+      border-radius: 4px;
+      padding: 1rem;
+    }
+    
+    .logo-image {
+      max-width: 100%;
+      max-height: 180px;
+    }
+    
+    .logo-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .logo-desc {
+      color: var(--bbb-text-muted);
+      font-size: 0.9rem;
+      margin-bottom: 1.25rem;
+    }
+    
+    .download-group {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+    }
+    
+    .download-btn {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .logo-card.dark-bg .logo-container {
+      background-color: #333;
+    }
+    
+    @media (max-width: 768px) {
+      .logo-grid {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .logo-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Authentication Protection -->
+  <script>
+    // Check if BBB_AUTH is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Wait for auth module to initialize
+      setTimeout(function() {
+        if (typeof BBB_AUTH !== 'undefined') {
+          // If not authenticated and not on login page, redirect to login
+          if (!BBB_AUTH.isAuthenticated && window.location.pathname.indexOf('login.html') === -1) {
+            // Save the current URL to redirect back after login
+            sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+            window.location.href = 'login.html';
+          }
+        } else {
+          console.error('BBB_AUTH module not found! Authentication check failed.');
+        }
+      }, 100); // Small delay to ensure modules are loaded
+    });
+  </script>
+  
+  <a href="#main" class="skip-link">Skip to main content</a>
+  
+  <main id="main"></main>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize modules
+      BBB_AUTH.init({
+        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+      });
+      
+      BBB_DB.init({
+        useCloudflare: BBB_CONFIG.cloudflareEnabled,
+        localStoragePrefix: 'bbb_'
+      });
+      
+      // Create header
+      const headerElements = BBB_UI.createHeader({
+        fixed: true,
+        showHomeLinkText: true
+      });
+      
+      document.body.insertBefore(headerElements.header, document.body.firstChild);
+      
+      // Get main content element
+      const main = document.getElementById('main');
+      main.appendChild(headerElements.mainWrapper);
+      
+      // Create page content
+      const mainContent = document.createElement('div');
+      
+      // Create page title
+      const titleContainer = BBB_UI.createPageTitle({
+        title: 'Birdie Bush Bandits',
+        showFoundedText: true,
+        showGolfballs: true
+      });
+      mainContent.appendChild(titleContainer);
+      
+      // Add page subtitle
+      const subtitle = document.createElement('h2');
+      subtitle.textContent = 'Official Logos';
+      mainContent.appendChild(subtitle);
+      
+      // Create status message container
+      const statusMessage = BBB_UI.createStatusMessage();
+      mainContent.appendChild(statusMessage);
+      
+      // Add description text
+      const description = document.createElement('p');
+      description.className = 'logo-description';
+      description.textContent = 'Download official Birdie Bush Bandits logos and branding materials for club events, merchandise, and communications.';
+      mainContent.appendChild(description);
+      
+      // Create logo grid
+      const logoGrid = document.createElement('div');
+      logoGrid.className = 'logo-grid';
+      
+      // Array of logo data
+      const logos = [
+        {
+          id: 'primary-logo',
+          title: 'Primary Logo',
+          image: 'bbb-logo.svg',
+          description: 'The primary Birdie Bush Bandits logo for use on light backgrounds.',
+          formats: ['SVG', 'PNG', 'JPG']
+        },
+        {
+          id: 'dark-logo',
+          title: 'Logo (Dark Background)',
+          image: 'bbb-logo-white.svg',
+          description: 'White version of the logo for use on dark backgrounds.',
+          formats: ['SVG', 'PNG'],
+          darkBg: true
+        },
+        {
+          id: 'wordmark',
+          title: 'BBB Wordmark',
+          image: 'bbb-wordmark.svg',
+          description: 'Text-only version of the Birdie Bush Bandits branding.',
+          formats: ['SVG', 'PNG']
+        },
+        {
+          id: 'badge',
+          title: 'Club Badge',
+          image: 'bbb-badge.svg',
+          description: 'Circular badge design for merchandise and social media profiles.',
+          formats: ['SVG', 'PNG']
+        }
+      ];
+      
+      // Create logo cards
+      logos.forEach(logo => {
+        const logoCard = document.createElement('div');
+        logoCard.className = `logo-card ${logo.darkBg ? 'dark-bg' : ''}`;
+        
+        // Logo image container
+        const logoContainer = document.createElement('div');
+        logoContainer.className = 'logo-container';
+        
+        const logoImg = document.createElement('img');
+        logoImg.className = 'logo-image';
+        logoImg.src = logo.image;
+        logoImg.alt = `${logo.title} - Birdie Bush Bandits`;
+        
+        logoContainer.appendChild(logoImg);
+        
+        // Logo title
+        const logoTitle = document.createElement('h3');
+        logoTitle.className = 'logo-title';
+        logoTitle.textContent = logo.title;
+        
+        // Logo description
+        const logoDesc = document.createElement('p');
+        logoDesc.className = 'logo-desc';
+        logoDesc.textContent = logo.description;
+        
+        // Download buttons
+        const downloadGroup = document.createElement('div');
+        downloadGroup.className = 'download-group';
+        
+        logo.formats.forEach(format => {
+          const downloadBtn = document.createElement('a');
+          downloadBtn.href = `#download-${logo.id}-${format.toLowerCase()}`;
+          downloadBtn.className = 'btn download-btn';
+          downloadBtn.textContent = format;
+          
+          // Add click handler to show message (since the files don't exist yet)
+          downloadBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            BBB_UTILS.showMessage(`The ${format} download for ${logo.title} would start now. Files coming soon!`, 'info');
+          });
+          
+          downloadGroup.appendChild(downloadBtn);
+        });
+        
+        // Assemble logo card
+        logoCard.appendChild(logoContainer);
+        logoCard.appendChild(logoTitle);
+        logoCard.appendChild(logoDesc);
+        logoCard.appendChild(downloadGroup);
+        
+        // Add card to grid
+        logoGrid.appendChild(logoCard);
+      });
+      
+      // Add logo grid to page
+      mainContent.appendChild(logoGrid);
+      
+      // Add usage guidelines section
+      const guidelinesSection = document.createElement('div');
+      guidelinesSection.className = 'section-card';
+      guidelinesSection.style.marginTop = '3rem';
+      guidelinesSection.style.padding = '1.5rem';
+      guidelinesSection.style.backgroundColor = 'white';
+      guidelinesSection.style.borderRadius = '8px';
+      guidelinesSection.style.boxShadow = 'var(--shadow-md)';
+      
+      const guidelinesTitle = document.createElement('h3');
+      guidelinesTitle.textContent = 'Logo Usage Guidelines';
+      guidelinesTitle.style.marginTop = '0';
+      guidelinesTitle.style.marginBottom = '1rem';
+      
+      const guidelinesList = document.createElement('ul');
+      guidelinesList.style.paddingLeft = '1.5rem';
+      
+      const guidelines = [
+        'Maintain clear space around the logo equal to the height of the letter "B" in the logo.',
+        'Do not modify, distort, or alter the colors of the logo.',
+        'For best visibility, use the white version of the logo on dark backgrounds.',
+        'Minimum recommended size is 1 inch or 72 pixels for digital use.',
+        'The SVG format is preferred for all digital applications to maintain clarity at any size.'
+      ];
+      
+      guidelines.forEach(guideline => {
+        const item = document.createElement('li');
+        item.textContent = guideline;
+        item.style.marginBottom = '0.5rem';
+        guidelinesList.appendChild(item);
+      });
+      
+      guidelinesSection.appendChild(guidelinesTitle);
+      guidelinesSection.appendChild(guidelinesList);
+      
+      // Add contact info
+      const contactInfo = document.createElement('p');
+      contactInfo.style.marginTop = '1.5rem';
+      contactInfo.style.fontSize = '0.9rem';
+      contactInfo.style.fontStyle = 'italic';
+      contactInfo.textContent = 'For questions about logo usage or to request additional formats, please contact the BBB administrator.';
+      
+      guidelinesSection.appendChild(contactInfo);
+      mainContent.appendChild(guidelinesSection);
+      
+      // Add content to main wrapper
+      headerElements.mainWrapper.appendChild(mainContent);
+    });
+  </script>
+</body>
+</html>
