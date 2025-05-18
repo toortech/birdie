@@ -7,7 +7,7 @@
   <meta name="description" content="View photos from Birdie Bush Bandits golf outings and events.">
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
   <!-- Add Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
   <!-- Global CSS -->
   <link rel="stylesheet" href="css/style.css">
   
@@ -17,9 +17,142 @@
   <script src="js/auth.js"></script>
   <script src="js/db.js"></script>
   <script src="js/ui.js"></script>
+  
+  <!-- Gallery specific styles -->
+  <style>
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+      .gallery {
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 12px;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .gallery {
+        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        gap: 8px;
+      }
+    }
+    
+    .gallery-img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: 8px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    
+    .gallery-img:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+    }
+    
+    .upload-section {
+      display: flex;
+      justify-content: center;
+      margin: 1.5rem 0;
+    }
+    
+    .upload-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+    }
+    
+    .upload-label::before {
+      content: '📸';
+      font-size: 1.25rem;
+    }
+    
+    .empty-gallery {
+      text-align: center;
+      padding: 3rem;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      margin-top: 2rem;
+    }
+    
+    /* Improved lightbox styles */
+    .lightbox {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.9);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+    
+    .lightbox-img {
+      max-width: 90%;
+      max-height: 80%;
+      border-radius: 4px;
+      box-shadow: 0 5px 25px rgba(0,0,0,0.5);
+    }
+    
+    .lightbox-close {
+      position: absolute;
+      top: 20px; right: 25px;
+      font-size: 2.5rem;
+      color: white;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.3s;
+    }
+    
+    .lightbox-close:hover {
+      opacity: 1;
+    }
+    
+    .lightbox-caption {
+      color: white;
+      margin-top: 1rem;
+      font-size: 1.1rem;
+      max-width: 80%;
+      text-align: center;
+    }
+    
+    .upload-progress {
+      margin-top: 1rem;
+      width: 100%;
+      max-width: 500px;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      padding: 1rem;
+      text-align: center;
+      display: none;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      background-color: #e9ecef;
+      border-radius: 5px;
+      margin-top: 0.5rem;
+      overflow: hidden;
+    }
+    
+    .progress-bar-inner {
+      height: 100%;
+      background-color: var(--bbb-secondary);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+  </style>
 </head>
 <body>
-  <body>
   <!-- Authentication Protection -->
   <script>
     // Check if BBB_AUTH is loaded
@@ -57,83 +190,19 @@
         localStoragePrefix: 'bbb_'
       });
       
-      // First check if the user is already authenticated for gallery access
+      // Check if the user has access to the gallery
       const hasGalleryAccess = BBB_AUTH.isAuthenticated && 
         (BBB_AUTH.hasRole('gallery') || BBB_AUTH.hasRole('admin') || BBB_AUTH.hasRole('member'));
       
       if (!hasGalleryAccess) {
-        // Show login overlay
-        showGalleryLogin();
-      } else {
-        // Already authenticated, initialize gallery
-        initializeGallery();
+        // Not authorized - redirect to login
+        sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+        window.location.href = 'login.html';
+        return;
       }
       
-      /**
-       * Show gallery login overlay
-       */
-      function showGalleryLogin() {
-        const loginOverlay = document.createElement('div');
-        loginOverlay.id = 'login-overlay';
-        
-        const loginBox = document.createElement('div');
-        loginBox.id = 'login-box';
-        
-        const title = document.createElement('h2');
-        title.textContent = 'Enter Password';
-        
-        const passwordInput = document.createElement('input');
-        passwordInput.type = 'password';
-        passwordInput.id = 'pw-input';
-        passwordInput.placeholder = 'Password';
-        
-        const errorMsg = document.createElement('div');
-        errorMsg.id = 'error-msg';
-        errorMsg.textContent = 'Incorrect password';
-        errorMsg.style.color = 'red';
-        errorMsg.style.fontSize = '0.9rem';
-        errorMsg.style.display = 'none';
-        errorMsg.style.marginTop = '0.5rem';
-        
-        const submitBtn = document.createElement('button');
-        submitBtn.id = 'pw-submit';
-        submitBtn.textContent = 'Unlock Gallery';
-        submitBtn.className = 'btn';
-        submitBtn.style.marginTop = '1rem';
-        
-        loginBox.appendChild(title);
-        loginBox.appendChild(passwordInput);
-        loginBox.appendChild(errorMsg);
-        loginBox.appendChild(submitBtn);
-        
-        loginOverlay.appendChild(loginBox);
-        document.body.appendChild(loginOverlay);
-        
-        // Focus password input
-        setTimeout(() => passwordInput.focus(), 100);
-        
-        // Handle login events
-        submitBtn.addEventListener('click', handleLogin);
-        passwordInput.addEventListener('keypress', e => {
-          if (e.key === 'Enter') handleLogin();
-        });
-        
-        function handleLogin() {
-          const password = passwordInput.value;
-          
-          BBB_AUTH.login('gallery', password)
-            .then(() => {
-              // Login successful
-              loginOverlay.remove();
-              initializeGallery();
-            })
-            .catch(err => {
-              // Login failed
-              console.error('Login error:', err);
-              errorMsg.style.display = 'block';
-            });
-        }
-      }
+      // User is authenticated, initialize the gallery
+      initializeGallery();
       
       /**
        * Initialize gallery after authentication
@@ -171,6 +240,12 @@
         const statusMessage = BBB_UI.createStatusMessage();
         mainContent.appendChild(statusMessage);
         
+        // Add description text
+        const description = document.createElement('p');
+        description.className = 'gallery-description';
+        description.textContent = 'Browse photos from our golf outings and events. Click on any image to view it in full size.';
+        mainContent.appendChild(description);
+        
         // Image upload section
         const uploadSection = document.createElement('div');
         uploadSection.className = 'upload-section';
@@ -191,6 +266,27 @@
         uploadSection.appendChild(uploadLabel);
         uploadSection.appendChild(uploadInput);
         mainContent.appendChild(uploadSection);
+        
+        // Upload progress indicator
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'upload-progress';
+        progressContainer.id = 'upload-progress';
+        
+        const progressText = document.createElement('div');
+        progressText.id = 'progress-text';
+        progressText.textContent = 'Uploading photos...';
+        
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        
+        const progressBarInner = document.createElement('div');
+        progressBarInner.className = 'progress-bar-inner';
+        progressBarInner.id = 'progress-bar-inner';
+        
+        progressBar.appendChild(progressBarInner);
+        progressContainer.appendChild(progressText);
+        progressContainer.appendChild(progressBar);
+        mainContent.appendChild(progressContainer);
         
         // Gallery container
         const galleryContainer = document.createElement('div');
@@ -288,6 +384,7 @@
             img.alt = image.alt || 'Gallery image';
             img.className = 'gallery-img';
             img.dataset.id = image.id;
+            img.setAttribute('loading', 'lazy'); // Add lazy loading
             
             // Add click handler for lightbox
             img.addEventListener('click', () => {
@@ -299,13 +396,19 @@
           
           // If no images, show message
           if (images.length === 0) {
-            const noImages = document.createElement('p');
-            noImages.textContent = 'No images in gallery yet. Upload some photos!';
-            noImages.style.textAlign = 'center';
-            noImages.style.padding = '2rem';
-            noImages.style.backgroundColor = 'white';
-            noImages.style.borderRadius = '8px';
+            const noImages = document.createElement('div');
+            noImages.className = 'empty-gallery';
             
+            const noImagesIcon = document.createElement('div');
+            noImagesIcon.innerHTML = '📷';
+            noImagesIcon.style.fontSize = '3rem';
+            noImagesIcon.style.marginBottom = '1rem';
+            
+            const noImagesText = document.createElement('p');
+            noImagesText.textContent = 'No images in the gallery yet. Upload some photos to get started!';
+            
+            noImages.appendChild(noImagesIcon);
+            noImages.appendChild(noImagesText);
             galleryElement.appendChild(noImages);
           }
         }
@@ -364,20 +467,23 @@
             return;
           }
           
-          // Show status message
-          if (files.length > 1) {
-            BBB_UTILS.showMessage(`Uploading ${files.length} images...`, 'info');
-          } else {
-            BBB_UTILS.showMessage('Uploading image...', 'info');
-          }
+          // Show progress container
+          const progressContainer = document.getElementById('upload-progress');
+          const progressBarInner = document.getElementById('progress-bar-inner');
+          const progressText = document.getElementById('progress-text');
+          
+          progressContainer.style.display = 'block';
+          progressBarInner.style.width = '0%';
+          progressText.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}...`;
           
           let uploadedCount = 0;
           const failedUploads = [];
           
-          files.forEach(file => {
+          files.forEach((file, index) => {
             // Validate file type
             if (!file.type.startsWith('image/')) {
               failedUploads.push({ file, error: 'Not an image file' });
+              updateUploadProgress(files.length, uploadedCount + failedUploads.length);
               return;
             }
             
@@ -387,6 +493,7 @@
                 file, 
                 error: `File too large (max ${BBB_CONFIG.gallery.maxUploadSize / 1000000}MB)` 
               });
+              updateUploadProgress(files.length, uploadedCount + failedUploads.length);
               return;
             }
             
@@ -403,7 +510,7 @@
               const imageData = {
                 id: imageId,
                 src: dataURL,
-                alt: file.name || 'User uploaded photo',
+                alt: file.name.replace(/\.[^/.]+$/, '') || 'User uploaded photo',
                 uploadedAt: new Date().toISOString()
               };
               
@@ -411,6 +518,7 @@
               BBB_DB.saveGalleryImage(imageData)
                 .then(() => {
                   uploadedCount++;
+                  updateUploadProgress(files.length, uploadedCount + failedUploads.length);
                   
                   // Check if all uploads complete
                   if (uploadedCount + failedUploads.length === files.length) {
@@ -420,6 +528,7 @@
                 .catch(err => {
                   console.error('Error saving image:', err);
                   failedUploads.push({ file, error: 'Failed to save' });
+                  updateUploadProgress(files.length, uploadedCount + failedUploads.length);
                   
                   // Check if all uploads complete
                   if (uploadedCount + failedUploads.length === files.length) {
@@ -430,6 +539,7 @@
             
             reader.onerror = function() {
               failedUploads.push({ file, error: 'Failed to read file' });
+              updateUploadProgress(files.length, uploadedCount + failedUploads.length);
               
               // Check if all uploads complete
               if (uploadedCount + failedUploads.length === files.length) {
@@ -443,7 +553,26 @@
           // Reset file input
           e.target.value = '';
           
+          /**
+           * Update upload progress bar
+           * @param {number} total - Total number of files
+           * @param {number} completed - Number of completed uploads
+           */
+          function updateUploadProgress(total, completed) {
+            const percentage = Math.round((completed / total) * 100);
+            progressBarInner.style.width = `${percentage}%`;
+            progressText.textContent = `Uploading ${completed} of ${total} (${percentage}%)`;
+          }
+          
+          /**
+           * Finish the upload process
+           */
           function finishUploads() {
+            // Hide progress container
+            setTimeout(() => {
+              progressContainer.style.display = 'none';
+            }, 1500);
+            
             // Reload gallery
             loadGalleryImages();
             
@@ -519,6 +648,9 @@
                 });
             });
             
+            /**
+             * Finish the migration process
+             */
             function finishMigration() {
               // Mark as migrated
               localStorage.setItem('bbb_gallery_migrated', 'true');
