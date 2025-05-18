@@ -311,24 +311,26 @@
         <path d="M40,40 C40,40 45,43 50,43 L85,43 C105,43 115,33 115,20 C115,8 105,-3 85,-3 L55,-3 L55,35 C55,35 50,38 45,39 Z" fill="#2d805c" />
         <path d="M45,38 C45,38 50,40 55,40 L80,40 C100,40 110,30 110,20 C110,10 100,0 80,0 L55,0 L55,35 C55,35 50,36 45,38 Z" fill="url(#letterGradient)" />
       </g>
+      
+      <!-- Birdie positioned on the first B -->
+      <g transform="translate(-70, -25) scale(1.2)" filter="url(#dropShadow)">
+        <!-- Body with gradient -->
+        <ellipse cx="0" cy="0" rx="10" ry="8" fill="url(#goldGradient)"/>
+        <!-- Head -->
+        <circle cx="-6" cy="-3" r="6" fill="url(#goldGradient)"/>
+        <!-- Beak -->
+        <path d="M -12 -3 L -16 -3 L -14 -1 Z" fill="#FF8C00"/>
+        <!-- Eye with highlight -->
+        <circle cx="-8" cy="-4" r="2" fill="#000000"/>
+        <circle cx="-8.5" cy="-4.5" r="0.8" fill="#ffffff"/>
+        <!-- Wing with detail -->
+        <path d="M 5 0 Q 12 -3 15 0 Q 12 3 5 0" fill="#FFC700" stroke="#FFA500" stroke-width="1"/>
+        <!-- Tail feathers -->
+        <path d="M 8 2 L 12 0 L 12 4 Z" fill="#FFA500"/>
+      </g>
     </g>
     
-    <!-- Enhanced birdie with gradient - moved up -->
-    <g id="birdie" transform="translate(280, 80) scale(1.5)" filter="url(#dropShadow)">
-      <!-- Body with gradient -->
-      <ellipse cx="0" cy="0" rx="10" ry="8" fill="url(#goldGradient)"/>
-      <!-- Head -->
-      <circle cx="-6" cy="-3" r="6" fill="url(#goldGradient)"/>
-      <!-- Beak -->
-      <path d="M -12 -3 L -16 -3 L -14 -1 Z" fill="#FF8C00"/>
-      <!-- Eye with highlight -->
-      <circle cx="-8" cy="-4" r="2" fill="#000000"/>
-      <circle cx="-8.5" cy="-4.5" r="0.8" fill="#ffffff"/>
-      <!-- Wing with detail -->
-      <path d="M 5 0 Q 12 -3 15 0 Q 12 3 5 0" fill="#FFC700" stroke="#FFA500" stroke-width="1"/>
-      <!-- Tail feathers -->
-      <path d="M 8 2 L 12 0 L 12 4 Z" fill="#FFA500"/>
-    </g>
+    <!-- Enhanced birdie with gradient - REMOVED (moved to first B) -->
     
     <!-- Premium golf ball - MOVED LEFT -->
     <g transform="translate(120, 235)">
