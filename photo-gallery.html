@@ -82,7 +82,7 @@
       margin-top: 2rem;
     }
     
-    /* Improved lightbox styles */
+    /* Enhanced lightbox styles */
     .lightbox {
       display: none;
       position: fixed;
@@ -110,6 +110,7 @@
       cursor: pointer;
       opacity: 0.8;
       transition: opacity 0.3s;
+      z-index: 1002;
     }
     
     .lightbox-close:hover {
@@ -122,6 +123,54 @@
       font-size: 1.1rem;
       max-width: 80%;
       text-align: center;
+    }
+    
+    .lightbox-nav {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1001;
+    }
+    
+    .nav-btn {
+      color: white;
+      font-size: 3rem;
+      opacity: 0.7;
+      cursor: pointer;
+      padding: 20px;
+      transition: opacity 0.3s, transform 0.2s;
+      background: none;
+      border: none;
+      text-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+    
+    .nav-btn:hover {
+      opacity: 1;
+      transform: scale(1.1);
+    }
+    
+    .prev-btn {
+      margin-left: 20px;
+    }
+    
+    .next-btn {
+      margin-right: 20px;
+    }
+    
+    .image-counter {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      background-color: rgba(0,0,0,0.5);
+      padding: 5px 10px;
+      border-radius: 15px;
+      font-size: 0.9rem;
     }
     
     .upload-progress {
@@ -149,6 +198,56 @@
       background-color: var(--bbb-secondary);
       width: 0%;
       transition: width 0.3s ease;
+    }
+    
+    .gallery-tools {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 1rem 0;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .gallery-filter {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    
+    .gallery-filter select {
+      padding: 0.5rem;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+    }
+    
+    .error-container {
+      padding: 1rem;
+      background-color: #f8d7da;
+      color: #721c24;
+      border-radius: 4px;
+      margin: 1rem 0;
+      display: none;
+    }
+    
+    .error-list {
+      margin-top: 0.5rem;
+      padding-left: 1rem;
+    }
+    
+    @media (max-width: 480px) {
+      .nav-btn {
+        font-size: 2rem;
+        padding: 10px;
+      }
+      
+      .prev-btn {
+        margin-left: 5px;
+      }
+      
+      .next-btn {
+        margin-right: 5px;
+      }
     }
   </style>
 </head>
@@ -179,35 +278,63 @@
   <main id="main"></main>
   
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize modules
-      BBB_AUTH.init({
-        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
-      });
+    // Main Gallery Application
+    const BBB_GALLERY = (function() {
+      // Private variables
+      let allImages = [];
+      let currentImageIndex = 0;
       
-      BBB_DB.init({
-        useCloudflare: BBB_CONFIG.cloudflareEnabled,
-        localStoragePrefix: 'bbb_'
-      });
-      
-      // Check if the user has access to the gallery
-      const hasGalleryAccess = BBB_AUTH.isAuthenticated && 
-        (BBB_AUTH.hasRole('gallery') || BBB_AUTH.hasRole('admin') || BBB_AUTH.hasRole('member'));
-      
-      if (!hasGalleryAccess) {
-        // Not authorized - redirect to login
-        sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
-        window.location.href = 'login.html';
-        return;
-      }
-      
-      // User is authenticated, initialize the gallery
-      initializeGallery();
+      // Gallery configuration
+      const config = {
+        itemsPerPage: 24,
+        lazyLoad: true,
+        sortOrder: 'newest'
+      };
       
       /**
-       * Initialize gallery after authentication
+       * Initialize the gallery
        */
-      function initializeGallery() {
+      function init() {
+        // Initialize modules
+        BBB_AUTH.init({
+          cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+        });
+        
+        BBB_DB.init({
+          useCloudflare: BBB_CONFIG.cloudflareEnabled,
+          localStoragePrefix: 'bbb_'
+        });
+        
+        // Check if the user has access to the gallery
+        const hasGalleryAccess = BBB_AUTH.isAuthenticated && 
+          (BBB_AUTH.hasRole('gallery') || BBB_AUTH.hasRole('admin') || BBB_AUTH.hasRole('member'));
+        
+        if (!hasGalleryAccess) {
+          // Not authorized - redirect to login
+          sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+          window.location.href = 'login.html';
+          return;
+        }
+        
+        // User is authenticated, initialize the gallery
+        createGalleryUI();
+        
+        // Load gallery images
+        loadGalleryImages()
+          .then(() => {
+            // Check if we need to migrate images from localStorage
+            return migrateLocalStorageImages();
+          })
+          .catch(error => {
+            console.error('Gallery initialization error:', error);
+            showErrorMessage('Failed to initialize gallery. Please try refreshing the page.');
+          });
+      }
+      
+      /**
+       * Create the main gallery UI elements
+       */
+      function createGalleryUI() {
         // Create header
         const headerElements = BBB_UI.createHeader({
           fixed: true,
@@ -246,7 +373,28 @@
         description.textContent = 'Browse photos from our golf outings and events. Click on any image to view it in full size.';
         mainContent.appendChild(description);
         
-        // Image upload section
+        // Error container for displaying errors
+        const errorContainer = document.createElement('div');
+        errorContainer.className = 'error-container';
+        errorContainer.id = 'error-container';
+        
+        const errorTitle = document.createElement('strong');
+        errorTitle.id = 'error-title';
+        errorTitle.textContent = 'Error';
+        
+        const errorList = document.createElement('ul');
+        errorList.className = 'error-list';
+        errorList.id = 'error-list';
+        
+        errorContainer.appendChild(errorTitle);
+        errorContainer.appendChild(errorList);
+        mainContent.appendChild(errorContainer);
+        
+        // Gallery tools section (filter, sort)
+        const galleryTools = document.createElement('div');
+        galleryTools.className = 'gallery-tools';
+        
+        // Upload button
         const uploadSection = document.createElement('div');
         uploadSection.className = 'upload-section';
         
@@ -265,7 +413,36 @@
         
         uploadSection.appendChild(uploadLabel);
         uploadSection.appendChild(uploadInput);
-        mainContent.appendChild(uploadSection);
+        
+        // Sort options
+        const sortFilter = document.createElement('div');
+        sortFilter.className = 'gallery-filter';
+        
+        const sortLabel = document.createElement('label');
+        sortLabel.htmlFor = 'sort-select';
+        sortLabel.textContent = 'Sort by:';
+        
+        const sortSelect = document.createElement('select');
+        sortSelect.id = 'sort-select';
+        
+        const sortOptions = [
+          { value: 'newest', text: 'Newest first' },
+          { value: 'oldest', text: 'Oldest first' }
+        ];
+        
+        sortOptions.forEach(option => {
+          const optionEl = document.createElement('option');
+          optionEl.value = option.value;
+          optionEl.textContent = option.text;
+          sortSelect.appendChild(optionEl);
+        });
+        
+        sortFilter.appendChild(sortLabel);
+        sortFilter.appendChild(sortSelect);
+        
+        galleryTools.appendChild(uploadSection);
+        galleryTools.appendChild(sortFilter);
+        mainContent.appendChild(galleryTools);
         
         // Upload progress indicator
         const progressContainer = document.createElement('div');
@@ -299,38 +476,165 @@
         lightbox.id = 'lightbox';
         lightbox.className = 'lightbox';
         
+        // Lightbox close button
         const lightboxClose = document.createElement('span');
         lightboxClose.className = 'lightbox-close';
         lightboxClose.innerHTML = '&times;';
         
+        // Lightbox navigation
+        const lightboxNav = document.createElement('div');
+        lightboxNav.className = 'lightbox-nav';
+        
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'nav-btn prev-btn';
+        prevBtn.innerHTML = '&#10094;';
+        prevBtn.setAttribute('aria-label', 'Previous image');
+        
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'nav-btn next-btn';
+        nextBtn.innerHTML = '&#10095;';
+        nextBtn.setAttribute('aria-label', 'Next image');
+        
+        lightboxNav.appendChild(prevBtn);
+        lightboxNav.appendChild(nextBtn);
+        
+        // Image counter
+        const imageCounter = document.createElement('div');
+        imageCounter.className = 'image-counter';
+        imageCounter.id = 'image-counter';
+        
+        // Lightbox image
         const lightboxImg = document.createElement('img');
         lightboxImg.className = 'lightbox-img';
         lightboxImg.id = 'lightbox-img';
         lightboxImg.setAttribute('src', '');
         lightboxImg.setAttribute('alt', '');
         
+        // Lightbox caption
         const lightboxCaption = document.createElement('div');
         lightboxCaption.id = 'lightbox-caption';
         lightboxCaption.className = 'lightbox-caption';
         
+        // Add lightbox elements
         lightbox.appendChild(lightboxClose);
+        lightbox.appendChild(lightboxNav);
         lightbox.appendChild(lightboxImg);
         lightbox.appendChild(lightboxCaption);
+        lightbox.appendChild(imageCounter);
         mainContent.appendChild(lightbox);
         
         // Add content to main wrapper
         headerElements.mainWrapper.appendChild(mainContent);
         
-        // Load gallery images
-        loadGalleryImages();
-        
-        // Setup event handlers
+        // Add event listeners
         setupEventHandlers();
+      }
+      
+      /**
+       * Set up all event handlers for the gallery
+       */
+      function setupEventHandlers() {
+        // Upload handler
+        const uploadInput = document.getElementById('image-upload');
+        if (uploadInput) {
+          uploadInput.addEventListener('change', handleImageUpload);
+        }
         
-        /**
-         * Load gallery images from database and preloaded sources
-         */
-        function loadGalleryImages() {
+        // Lightbox close button
+        const lightboxClose = document.querySelector('.lightbox-close');
+        if (lightboxClose) {
+          lightboxClose.addEventListener('click', closeLightbox);
+        }
+        
+        // Lightbox navigation buttons
+        const prevBtn = document.querySelector('.prev-btn');
+        if (prevBtn) {
+          prevBtn.addEventListener('click', showPreviousImage);
+        }
+        
+        const nextBtn = document.querySelector('.next-btn');
+        if (nextBtn) {
+          nextBtn.addEventListener('click', showNextImage);
+        }
+        
+        // Sort select
+        const sortSelect = document.getElementById('sort-select');
+        if (sortSelect) {
+          sortSelect.addEventListener('change', handleSortChange);
+        }
+        
+        // Click outside lightbox to close
+        const lightbox = document.getElementById('lightbox');
+        if (lightbox) {
+          lightbox.addEventListener('click', e => {
+            if (e.target === lightbox) {
+              closeLightbox();
+            }
+          });
+        }
+        
+        // Keyboard navigation
+        document.addEventListener('keydown', handleKeyboardNavigation);
+      }
+      
+      /**
+       * Handle keyboard navigation for lightbox
+       * @param {KeyboardEvent} e - Keyboard event
+       */
+      function handleKeyboardNavigation(e) {
+        const lightbox = document.getElementById('lightbox');
+        if (!lightbox || lightbox.style.display !== 'flex') return;
+        
+        switch (e.key) {
+          case 'Escape':
+            closeLightbox();
+            break;
+          case 'ArrowLeft':
+            showPreviousImage();
+            break;
+          case 'ArrowRight':
+            showNextImage();
+            break;
+        }
+      }
+      
+      /**
+       * Handle sort option change
+       * @param {Event} e - Change event
+       */
+      function handleSortChange(e) {
+        const sortOrder = e.target.value;
+        config.sortOrder = sortOrder;
+        
+        // Sort and render images
+        sortImages();
+        renderGallery(allImages);
+      }
+      
+      /**
+       * Sort images based on current sort order
+       */
+      function sortImages() {
+        if (!allImages || !allImages.length) return;
+        
+        allImages.sort((a, b) => {
+          const dateA = new Date(a.uploadedAt || 0);
+          const dateB = new Date(b.uploadedAt || 0);
+          
+          if (config.sortOrder === 'newest') {
+            return dateB - dateA;
+          } else {
+            return dateA - dateB;
+          }
+        });
+      }
+      
+      /**
+       * Load gallery images from database and preloaded sources
+       * @returns {Promise} - Promise that resolves when images are loaded
+       */
+      function loadGalleryImages() {
+        return new Promise((resolve, reject) => {
           // First load from database
           BBB_DB.getGalleryImages()
             .then(galleryData => {
@@ -338,270 +642,384 @@
               
               // Add preloaded images (from original site)
               const preloadedImages = [
-                { id: 'pre_1', src: 'images/photo1.jpg', alt: 'Band on the green' },
-                { id: 'pre_2', src: 'images/photo2.jpg', alt: 'Group shot' },
-                { id: 'pre_3', src: 'images/photo3.jpg', alt: 'Trophy presentation' },
-                { id: 'pre_4', src: 'images/photo4.jpg', alt: 'Action shot' }
+                { 
+                  id: 'pre_1', 
+                  src: 'images/photo1.jpg', 
+                  alt: 'Band on the green',
+                  uploadedAt: new Date('2020-08-01').toISOString()
+                },
+                { 
+                  id: 'pre_2', 
+                  src: 'images/photo2.jpg', 
+                  alt: 'Group shot',
+                  uploadedAt: new Date('2020-08-02').toISOString()
+                },
+                { 
+                  id: 'pre_3', 
+                  src: 'images/photo3.jpg', 
+                  alt: 'Trophy presentation',
+                  uploadedAt: new Date('2020-08-03').toISOString()
+                },
+                { 
+                  id: 'pre_4', 
+                  src: 'images/photo4.jpg', 
+                  alt: 'Action shot',
+                  uploadedAt: new Date('2020-08-04').toISOString()
+                }
               ];
               
               // Merge database images with preloaded images
-              const allImages = [...preloadedImages, ...dbImages];
+              allImages = [...preloadedImages, ...dbImages];
+              
+              // Sort images
+              sortImages();
               
               // Render gallery
               renderGallery(allImages);
               
-              // Check if we migrated stored images from localStorage
-              migrateLocalStorageImages();
+              resolve();
             })
             .catch(err => {
               console.error('Error loading gallery images:', err);
-              BBB_UTILS.showMessage('Error loading gallery images', 'error');
+              showErrorMessage('Error loading gallery images. Please try again.');
               
               // Still try to render preloaded images
               const preloadedImages = [
-                { id: 'pre_1', src: 'images/photo1.jpg', alt: 'Band on the green' },
-                { id: 'pre_2', src: 'images/photo2.jpg', alt: 'Group shot' },
-                { id: 'pre_3', src: 'images/photo3.jpg', alt: 'Trophy presentation' },
-                { id: 'pre_4', src: 'images/photo4.jpg', alt: 'Action shot' }
+                { 
+                  id: 'pre_1', 
+                  src: 'images/photo1.jpg', 
+                  alt: 'Band on the green',
+                  uploadedAt: new Date('2020-08-01').toISOString()
+                },
+                { 
+                  id: 'pre_2', 
+                  src: 'images/photo2.jpg', 
+                  alt: 'Group shot',
+                  uploadedAt: new Date('2020-08-02').toISOString()
+                },
+                { 
+                  id: 'pre_3', 
+                  src: 'images/photo3.jpg', 
+                  alt: 'Trophy presentation',
+                  uploadedAt: new Date('2020-08-03').toISOString()
+                },
+                { 
+                  id: 'pre_4', 
+                  src: 'images/photo4.jpg', 
+                  alt: 'Action shot',
+                  uploadedAt: new Date('2020-08-04').toISOString()
+                }
               ];
               
-              renderGallery(preloadedImages);
+              allImages = preloadedImages;
+              renderGallery(allImages);
+              
+              reject(err);
             });
-        }
+        });
+      }
+      
+      /**
+       * Render gallery with images
+       * @param {Array} images - Array of image objects
+       */
+      function renderGallery(images) {
+        const galleryElement = document.getElementById('gallery');
+        if (!galleryElement) return;
         
-        /**
-         * Render gallery with images
-         * @param {Array} images - Array of image objects
-         */
-        function renderGallery(images) {
-          const galleryElement = document.getElementById('gallery');
-          galleryElement.innerHTML = '';
-          
-          // Create gallery
-          images.forEach(image => {
+        galleryElement.innerHTML = '';
+        
+        // Create gallery
+        if (images && images.length > 0) {
+          images.forEach((image, index) => {
             const img = document.createElement('img');
             img.src = image.src;
             img.alt = image.alt || 'Gallery image';
             img.className = 'gallery-img';
             img.dataset.id = image.id;
-            img.setAttribute('loading', 'lazy'); // Add lazy loading
+            img.dataset.index = index;
+            
+            if (config.lazyLoad) {
+              img.setAttribute('loading', 'lazy');
+            }
             
             // Add click handler for lightbox
             img.addEventListener('click', () => {
-              openLightbox(img);
+              openLightbox(index);
             });
             
             galleryElement.appendChild(img);
           });
-          
+        } else {
           // If no images, show message
-          if (images.length === 0) {
-            const noImages = document.createElement('div');
-            noImages.className = 'empty-gallery';
-            
-            const noImagesIcon = document.createElement('div');
-            noImagesIcon.innerHTML = '📷';
-            noImagesIcon.style.fontSize = '3rem';
-            noImagesIcon.style.marginBottom = '1rem';
-            
-            const noImagesText = document.createElement('p');
-            noImagesText.textContent = 'No images in the gallery yet. Upload some photos to get started!';
-            
-            noImages.appendChild(noImagesIcon);
-            noImages.appendChild(noImagesText);
-            galleryElement.appendChild(noImages);
-          }
+          const noImages = document.createElement('div');
+          noImages.className = 'empty-gallery';
+          
+          const noImagesIcon = document.createElement('div');
+          noImagesIcon.innerHTML = '📷';
+          noImagesIcon.style.fontSize = '3rem';
+          noImagesIcon.style.marginBottom = '1rem';
+          
+          const noImagesText = document.createElement('p');
+          noImagesText.textContent = 'No images in the gallery yet. Upload some photos to get started!';
+          
+          noImages.appendChild(noImagesIcon);
+          noImages.appendChild(noImagesText);
+          galleryElement.appendChild(noImages);
+        }
+      }
+      
+      /**
+       * Open lightbox and display image at specified index
+       * @param {number} index - Index of image to display
+       */
+      function openLightbox(index) {
+        if (!allImages || !allImages.length) return;
+        
+        // Validate index
+        if (index < 0) index = 0;
+        if (index >= allImages.length) index = allImages.length - 1;
+        
+        currentImageIndex = index;
+        
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxCaption = document.getElementById('lightbox-caption');
+        const imageCounter = document.getElementById('image-counter');
+        
+        // Update image and caption
+        const image = allImages[index];
+        lightboxImg.src = image.src;
+        lightboxCaption.textContent = image.alt || '';
+        
+        // Update counter
+        updateImageCounter();
+        
+        // Show lightbox
+        lightbox.style.display = 'flex';
+        
+        // Disable scrolling on body
+        document.body.style.overflow = 'hidden';
+      }
+      
+      /**
+       * Close lightbox
+       */
+      function closeLightbox() {
+        const lightbox = document.getElementById('lightbox');
+        lightbox.style.display = 'none';
+        
+        // Re-enable scrolling
+        document.body.style.overflow = '';
+      }
+      
+      /**
+       * Show next image in lightbox
+       */
+      function showNextImage() {
+        if (!allImages || !allImages.length) return;
+        
+        currentImageIndex = (currentImageIndex + 1) % allImages.length;
+        
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxCaption = document.getElementById('lightbox-caption');
+        
+        // Update image and caption
+        const image = allImages[currentImageIndex];
+        lightboxImg.src = image.src;
+        lightboxCaption.textContent = image.alt || '';
+        
+        // Update counter
+        updateImageCounter();
+      }
+      
+      /**
+       * Show previous image in lightbox
+       */
+      function showPreviousImage() {
+        if (!allImages || !allImages.length) return;
+        
+        currentImageIndex = (currentImageIndex - 1 + allImages.length) % allImages.length;
+        
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxCaption = document.getElementById('lightbox-caption');
+        
+        // Update image and caption
+        const image = allImages[currentImageIndex];
+        lightboxImg.src = image.src;
+        lightboxCaption.textContent = image.alt || '';
+        
+        // Update counter
+        updateImageCounter();
+      }
+      
+      /**
+       * Update image counter in lightbox
+       */
+      function updateImageCounter() {
+        const imageCounter = document.getElementById('image-counter');
+        if (imageCounter) {
+          imageCounter.textContent = `${currentImageIndex + 1} / ${allImages.length}`;
+        }
+      }
+      
+      /**
+       * Handle image upload
+       * @param {Event} e - Change event
+       */
+      function handleImageUpload(e) {
+        const files = Array.from(e.target.files);
+        
+        if (files.length === 0) {
+          return;
         }
         
-        /**
-         * Setup event handlers for gallery
-         */
-        function setupEventHandlers() {
-          // Upload handler
-          const uploadInput = document.getElementById('image-upload');
-          uploadInput.addEventListener('change', handleImageUpload);
-          
-          // Lightbox close
-          const lightboxClose = document.querySelector('.lightbox-close');
-          lightboxClose.addEventListener('click', () => {
-            document.getElementById('lightbox').style.display = 'none';
-          });
-          
-          // Click outside lightbox to close
-          document.getElementById('lightbox').addEventListener('click', e => {
-            if (e.target === document.getElementById('lightbox')) {
-              document.getElementById('lightbox').style.display = 'none';
-            }
-          });
-          
-          // ESC key to close lightbox
-          document.addEventListener('keyup', e => {
-            if (e.key === 'Escape') {
-              document.getElementById('lightbox').style.display = 'none';
-            }
-          });
-        }
+        // Clear previous errors
+        clearErrorMessages();
         
-        /**
-         * Open lightbox with image
-         * @param {HTMLElement} img - Image element to show in lightbox
-         */
-        function openLightbox(img) {
-          const lightbox = document.getElementById('lightbox');
-          const lightboxImg = document.getElementById('lightbox-img');
-          const lightboxCaption = document.getElementById('lightbox-caption');
-          
-          lightboxImg.src = img.src;
-          lightboxCaption.textContent = img.alt;
-          lightbox.style.display = 'flex';
-        }
+        // Show progress container
+        const progressContainer = document.getElementById('upload-progress');
+        const progressBarInner = document.getElementById('progress-bar-inner');
+        const progressText = document.getElementById('progress-text');
         
-        /**
-         * Handle image upload
-         * @param {Event} e - Change event
-         */
-        function handleImageUpload(e) {
-          const files = Array.from(e.target.files);
-          
-          if (files.length === 0) {
+        progressContainer.style.display = 'block';
+        progressBarInner.style.width = '0%';
+        progressText.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}...`;
+        
+        let uploadedCount = 0;
+        const failedUploads = [];
+        
+        files.forEach((file, index) => {
+          // Validate file type
+          if (!file.type.startsWith('image/')) {
+            failedUploads.push({ file, error: `"${file.name}" is not an image file` });
+            updateUploadProgress(files.length, uploadedCount + failedUploads.length);
             return;
           }
           
-          // Show progress container
-          const progressContainer = document.getElementById('upload-progress');
-          const progressBarInner = document.getElementById('progress-bar-inner');
-          const progressText = document.getElementById('progress-text');
+          // Validate file size
+          if (file.size > BBB_CONFIG.gallery.maxUploadSize) {
+            failedUploads.push({ 
+              file, 
+              error: `"${file.name}" is too large (max ${BBB_CONFIG.gallery.maxUploadSize / 1000000}MB)` 
+            });
+            updateUploadProgress(files.length, uploadedCount + failedUploads.length);
+            return;
+          }
           
-          progressContainer.style.display = 'block';
-          progressBarInner.style.width = '0%';
-          progressText.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}...`;
+          // Read file as data URL
+          const reader = new FileReader();
           
-          let uploadedCount = 0;
-          const failedUploads = [];
-          
-          files.forEach((file, index) => {
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-              failedUploads.push({ file, error: 'Not an image file' });
-              updateUploadProgress(files.length, uploadedCount + failedUploads.length);
-              return;
-            }
+          reader.onload = function(event) {
+            const dataURL = event.target.result;
             
-            // Validate file size
-            if (file.size > BBB_CONFIG.gallery.maxUploadSize) {
-              failedUploads.push({ 
-                file, 
-                error: `File too large (max ${BBB_CONFIG.gallery.maxUploadSize / 1000000}MB)` 
+            // Generate unique ID
+            const imageId = `img_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+            
+            // Create image object
+            const imageData = {
+              id: imageId,
+              src: dataURL,
+              alt: file.name.replace(/\.[^/.]+$/, '') || 'User uploaded photo',
+              uploadedAt: new Date().toISOString()
+            };
+            
+            // Save to database
+            BBB_DB.saveGalleryImage(imageData)
+              .then(() => {
+                uploadedCount++;
+                updateUploadProgress(files.length, uploadedCount + failedUploads.length);
+                
+                // Check if all uploads complete
+                if (uploadedCount + failedUploads.length === files.length) {
+                  finishUploads();
+                }
+              })
+              .catch(err => {
+                console.error('Error saving image:', err);
+                failedUploads.push({ file, error: `Failed to save "${file.name}"` });
+                updateUploadProgress(files.length, uploadedCount + failedUploads.length);
+                
+                // Check if all uploads complete
+                if (uploadedCount + failedUploads.length === files.length) {
+                  finishUploads();
+                }
               });
-              updateUploadProgress(files.length, uploadedCount + failedUploads.length);
-              return;
+          };
+          
+          reader.onerror = function() {
+            failedUploads.push({ file, error: `Failed to read "${file.name}"` });
+            updateUploadProgress(files.length, uploadedCount + failedUploads.length);
+            
+            // Check if all uploads complete
+            if (uploadedCount + failedUploads.length === files.length) {
+              finishUploads();
             }
-            
-            // Read file as data URL
-            const reader = new FileReader();
-            
-            reader.onload = function(event) {
-              const dataURL = event.target.result;
-              
-              // Generate unique ID
-              const imageId = `img_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
-              
-              // Create image object
-              const imageData = {
-                id: imageId,
-                src: dataURL,
-                alt: file.name.replace(/\.[^/.]+$/, '') || 'User uploaded photo',
-                uploadedAt: new Date().toISOString()
-              };
-              
-              // Save to database
-              BBB_DB.saveGalleryImage(imageData)
-                .then(() => {
-                  uploadedCount++;
-                  updateUploadProgress(files.length, uploadedCount + failedUploads.length);
-                  
-                  // Check if all uploads complete
-                  if (uploadedCount + failedUploads.length === files.length) {
-                    finishUploads();
-                  }
-                })
-                .catch(err => {
-                  console.error('Error saving image:', err);
-                  failedUploads.push({ file, error: 'Failed to save' });
-                  updateUploadProgress(files.length, uploadedCount + failedUploads.length);
-                  
-                  // Check if all uploads complete
-                  if (uploadedCount + failedUploads.length === files.length) {
-                    finishUploads();
-                  }
-                });
-            };
-            
-            reader.onerror = function() {
-              failedUploads.push({ file, error: 'Failed to read file' });
-              updateUploadProgress(files.length, uploadedCount + failedUploads.length);
-              
-              // Check if all uploads complete
-              if (uploadedCount + failedUploads.length === files.length) {
-                finishUploads();
-              }
-            };
-            
-            reader.readAsDataURL(file);
-          });
+          };
           
-          // Reset file input
-          e.target.value = '';
-          
-          /**
-           * Update upload progress bar
-           * @param {number} total - Total number of files
-           * @param {number} completed - Number of completed uploads
-           */
-          function updateUploadProgress(total, completed) {
-            const percentage = Math.round((completed / total) * 100);
-            progressBarInner.style.width = `${percentage}%`;
-            progressText.textContent = `Uploading ${completed} of ${total} (${percentage}%)`;
-          }
-          
-          /**
-           * Finish the upload process
-           */
-          function finishUploads() {
-            // Hide progress container
-            setTimeout(() => {
-              progressContainer.style.display = 'none';
-            }, 1500);
-            
-            // Reload gallery
-            loadGalleryImages();
-            
-            // Show status message
-            if (failedUploads.length === 0) {
-              if (uploadedCount > 1) {
-                BBB_UTILS.showMessage(`Successfully uploaded ${uploadedCount} images`, 'success');
-              } else {
-                BBB_UTILS.showMessage('Image uploaded successfully', 'success');
-              }
-            } else {
-              if (uploadedCount > 0) {
-                BBB_UTILS.showMessage(`Uploaded ${uploadedCount} images, ${failedUploads.length} failed`, 'warning');
-              } else {
-                BBB_UTILS.showMessage(`Failed to upload ${failedUploads.length} images`, 'error');
-              }
-            }
-          }
+          reader.readAsDataURL(file);
+        });
+        
+        // Reset file input
+        e.target.value = '';
+        
+        /**
+         * Update upload progress bar
+         * @param {number} total - Total number of files
+         * @param {number} completed - Number of completed uploads
+         */
+        function updateUploadProgress(total, completed) {
+          const percentage = Math.round((completed / total) * 100);
+          progressBarInner.style.width = `${percentage}%`;
+          progressText.textContent = `Uploading ${completed} of ${total} (${percentage}%)`;
         }
         
         /**
-         * Migrate images from localStorage (original site) to new system
+         * Finish the upload process
          */
-        function migrateLocalStorageImages() {
+        function finishUploads() {
+          // Hide progress container
+          setTimeout(() => {
+            progressContainer.style.display = 'none';
+          }, 1500);
+          
+          // Reload gallery
+          loadGalleryImages();
+          
+          // Show error messages for failed uploads
+          if (failedUploads.length > 0) {
+            const errorMessages = failedUploads.map(item => item.error);
+            showErrorMessage('Some uploads failed:', errorMessages);
+          }
+          
+          // Show status message
+          if (failedUploads.length === 0) {
+            if (uploadedCount > 1) {
+              BBB_UTILS.showMessage(`Successfully uploaded ${uploadedCount} images`, 'success');
+            } else {
+              BBB_UTILS.showMessage('Image uploaded successfully', 'success');
+            }
+          } else {
+            if (uploadedCount > 0) {
+              BBB_UTILS.showMessage(`Uploaded ${uploadedCount} images, ${failedUploads.length} failed`, 'warning');
+            } else {
+              BBB_UTILS.showMessage(`Failed to upload ${failedUploads.length} images`, 'error');
+            }
+          }
+        }
+      }
+      
+      /**
+       * Migrate images from localStorage (original site) to new system
+       * @returns {Promise} - Promise that resolves when migration completes
+       */
+      function migrateLocalStorageImages() {
+        return new Promise((resolve) => {
           try {
             // Check if we have already migrated
             const migrated = localStorage.getItem('bbb_gallery_migrated');
             if (migrated === 'true') {
-              return;
+              return resolve();
             }
             
             // Get stored images from original code
@@ -610,7 +1028,7 @@
             if (storedImages.length === 0) {
               // No images to migrate
               localStorage.setItem('bbb_gallery_migrated', 'true');
-              return;
+              return resolve();
             }
             
             // Show migration message
@@ -618,6 +1036,7 @@
             
             // Convert and save each image
             let migrationCount = 0;
+            const migrationPromises = [];
             
             storedImages.forEach((dataURL, index) => {
               // Create image object
@@ -629,43 +1048,90 @@
               };
               
               // Save to database
-              BBB_DB.saveGalleryImage(imageData)
-                .then(() => {
-                  migrationCount++;
-                  
-                  // Check if all migrations complete
-                  if (migrationCount === storedImages.length) {
-                    finishMigration();
-                  }
-                })
-                .catch(err => {
-                  console.error('Error migrating image:', err);
-                  
-                  // Continue with next image
-                  if (migrationCount === storedImages.length) {
-                    finishMigration();
-                  }
-                });
+              migrationPromises.push(
+                BBB_DB.saveGalleryImage(imageData)
+                  .then(() => {
+                    migrationCount++;
+                  })
+                  .catch(err => {
+                    console.error('Error migrating image:', err);
+                  })
+              );
             });
             
-            /**
-             * Finish the migration process
-             */
-            function finishMigration() {
-              // Mark as migrated
-              localStorage.setItem('bbb_gallery_migrated', 'true');
-              
-              // Reload gallery
-              loadGalleryImages();
-              
-              // Show status message
-              BBB_UTILS.showMessage(`Successfully migrated ${migrationCount} images`, 'success');
-            }
+            // Wait for all migrations to complete
+            Promise.all(migrationPromises)
+              .then(() => {
+                // Mark as migrated
+                localStorage.setItem('bbb_gallery_migrated', 'true');
+                
+                // Reload gallery
+                loadGalleryImages();
+                
+                // Show status message
+                BBB_UTILS.showMessage(`Successfully migrated ${migrationCount} images`, 'success');
+                
+                resolve();
+              })
+              .catch(err => {
+                console.error('Error during migration:', err);
+                resolve();
+              });
           } catch (err) {
             console.error('Error during gallery migration:', err);
+            resolve();
           }
+        });
+      }
+      
+      /**
+       * Show error message in error container
+       * @param {string} message - Main error message
+       * @param {Array} details - Optional array of error details
+       */
+      function showErrorMessage(message, details) {
+        const errorContainer = document.getElementById('error-container');
+        const errorTitle = document.getElementById('error-title');
+        const errorList = document.getElementById('error-list');
+        
+        if (!errorContainer || !errorTitle || !errorList) return;
+        
+        errorTitle.textContent = message;
+        errorList.innerHTML = '';
+        
+        if (Array.isArray(details) && details.length > 0) {
+          details.forEach(detail => {
+            const listItem = document.createElement('li');
+            listItem.textContent = detail;
+            errorList.appendChild(listItem);
+          });
+          errorList.style.display = 'block';
+        } else {
+          errorList.style.display = 'none';
+        }
+        
+        errorContainer.style.display = 'block';
+      }
+      
+      /**
+       * Clear error messages
+       */
+      function clearErrorMessages() {
+        const errorContainer = document.getElementById('error-container');
+        if (errorContainer) {
+          errorContainer.style.display = 'none';
         }
       }
+      
+      // Public methods
+      return {
+        init: init
+      };
+    })();
+    
+    // Initialize gallery when document is ready
+    document.addEventListener('DOMContentLoaded', function() {
+      BBB_GALLERY.init();
     });
   </script>
 </body>
