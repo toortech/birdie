@@ -198,42 +198,35 @@
           .join(' ');
       }
       
+      // Track how many logos were added
+      let logosAdded = 0;
+      
       // Add main site logo
       addLogoToGallery('bbb-logo.svg', 'BBB Logo');
+      logosAdded++;
       
-      // Always look for these common logo files
-      // This approach simply adds img elements for each potential file
-      // Even if the file doesn't exist, it won't cause errors
-      const logoFiles = [
-        'logos/logo.svg',
-        'logos/logo.png',
-        'logos/logo-white.svg',
-        'logos/logo-white.png',
-        'logos/bbb-logo.svg',
-        'logos/bbb-logo.png',
-        'logos/bbb-logo-white.svg',
-        'logos/bbb-logo-white.png',
-        'logos/icon.svg',
-        'logos/icon.png',
-        'logos/badge.svg',
-        'logos/badge.png',
-        'logos/wordmark.svg',
-        'logos/wordmark.png'
-      ];
+      // Common image extensions to check
+      const extensions = ['svg', 'png', 'jpg', 'jpeg', 'gif'];
       
-      // Add all potential logo files to the gallery
-      logoFiles.forEach(file => {
-        // Create image with error handler
-        const img = new Image();
-        
-        // Only add to gallery if the image loads successfully
-        img.onload = function() {
-          addLogoToGallery(file, formatName(file));
-        };
-        
-        // Set the source to try loading
-        img.src = file;
-      });
+      // Simple numbered logos: logo1.svg, logo2.png, etc.
+      // Checking logo1 through logo10 with various extensions
+      for (let i = 1; i <= 10; i++) {
+        extensions.forEach(ext => {
+          const path = `logos/logo${i}.${ext}`;
+          
+          // Try to load the image
+          const img = new Image();
+          
+          // Only add to gallery if image loads successfully
+          img.onload = function() {
+            addLogoToGallery(path, `Logo ${i}`);
+            logosAdded++;
+          };
+          
+          // Set source to attempt loading
+          img.src = path;
+        });
+      }
       
       // Add upload instructions section
       const uploadSection = document.createElement('div');
@@ -246,9 +239,17 @@
         <p>To add more logos to this page:</p>
         <ol>
           <li>Create a folder named "logos" in the project root</li>
-          <li>Add SVG or PNG logo files to the folder</li>
+          <li>Add image files with simple numbered names:
+            <ul>
+              <li>logo1.svg</li>
+              <li>logo2.png</li>
+              <li>logo3.jpg</li>
+              <li>etc. (up to logo10)</li>
+            </ul>
+          </li>
           <li>The logos will appear automatically on this page</li>
         </ol>
+        <p>Supported file formats: SVG, PNG, JPG, JPEG, GIF</p>
       `;
       
       uploadSection.appendChild(uploadInstructions);
