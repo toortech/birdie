@@ -109,29 +109,6 @@
       background-color: #f0f0f0;
     }
 
-    .edit-photo-overlay {
-      position: absolute;
-      inset: 0;
-      background-color: rgba(0, 0, 0, 0.5);
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      opacity: 0;
-      transition: opacity 0.2s;
-      cursor: pointer;
-    }
-
-    .profile-image-container:hover .edit-photo-overlay {
-      opacity: 1;
-    }
-
-    .edit-photo-overlay svg {
-      width: 24px;
-      height: 24px;
-      color: white;
-    }
-
     .card-body-premium {
       padding: 1.5rem;
       text-align: center;
@@ -374,106 +351,6 @@
       color: var(--bbb-text-muted);
     }
 
-    /* Photo upload styles */
-    .photo-upload-container {
-      position: relative;
-      display: inline-block;
-    }
-
-    .photo-upload-input {
-      position: absolute;
-      width: 0.1px;
-      height: 0.1px;
-      opacity: 0;
-      overflow: hidden;
-      z-index: -1;
-    }
-
-    .photo-upload-label {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-    }
-
-    .photo-upload-area {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      border: 2px dashed var(--bbb-border);
-      background-color: #f8f9fa;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 0.5rem;
-    }
-
-    .photo-preview {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-      display: none;
-    }
-
-    /* Editable fields */
-    .edit-mode .editable-field {
-      border: 1px solid var(--bbb-border);
-      border-radius: 4px;
-      padding: 0.5rem;
-      background-color: #fff;
-      width: 100%;
-      margin-bottom: 0.5rem;
-    }
-
-    .editable-content {
-      display: block;
-    }
-
-    .edit-mode .editable-content {
-      display: none;
-    }
-
-    .editable-input {
-      display: none;
-    }
-
-    .edit-mode .editable-input {
-      display: block;
-    }
-
-    .editable-select {
-      width: 100%;
-      padding: 0.5rem;
-      border: 1px solid var(--bbb-border);
-      border-radius: 4px;
-      background-color: #fff;
-    }
-
-    .editable-textarea {
-      min-height: 100px;
-      resize: vertical;
-    }
-
-    .edit-section-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-    }
-
-    .edit-buttons {
-      display: none;
-    }
-
-    .edit-mode .edit-buttons {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-
     /* Responsive adjustments */
     @media (max-width: 768px) {
       .premium-controls {
@@ -487,85 +364,6 @@
       .stat-grid {
         grid-template-columns: 1fr;
       }
-    }
-
-    /* Toast notification */
-    .toast-container {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      z-index: 9999;
-    }
-
-    .toast {
-      background-color: white;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      border-radius: 4px;
-      padding: 1rem;
-      margin-top: 0.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      transform: translateX(120%);
-      transition: transform 0.3s ease-in-out;
-      max-width: 300px;
-    }
-
-    .toast.show {
-      transform: translateX(0);
-    }
-
-    .toast-success {
-      border-left: 4px solid var(--bbb-success);
-    }
-
-    .toast-error {
-      border-left: 4px solid var(--bbb-error);
-    }
-
-    .toast-info {
-      border-left: 4px solid var(--bbb-info);
-    }
-
-    .toast-icon {
-      flex-shrink: 0;
-    }
-
-    .toast-message {
-      flex-grow: 1;
-    }
-
-    .toast-close {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-      color: var(--bbb-text-muted);
-    }
-
-    /* Loading spinner */
-    .spinner-overlay {
-      position: fixed;
-      inset: 0;
-      background-color: rgba(255, 255, 255, 0.8);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-      display: none;
-    }
-
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid rgba(0, 0, 0, 0.1);
-      border-radius: 50%;
-      border-top-color: var(--bbb-primary);
-      animation: spin 1s ease-in-out infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
     }
   </style>
   
@@ -602,14 +400,6 @@
   
   <main id="main"></main>
   
-  <!-- Toast notification container -->
-  <div class="toast-container" id="toast-container"></div>
-  
-  <!-- Loading spinner -->
-  <div class="spinner-overlay" id="loading-spinner">
-    <div class="spinner"></div>
-  </div>
-  
   <!-- Member Detail Modal (initially hidden) -->
   <div id="member-modal" class="member-modal">
     <div class="modal-container">
@@ -620,26 +410,12 @@
           </svg>
         </button>
         <div class="modal-profile">
-          <div class="photo-upload-container">
+          <div>
             <img id="modal-profile-image" class="profile-image" src="" alt="Member profile">
-            <div class="edit-photo-overlay" id="edit-photo-button">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-            </div>
-            <!-- Hidden file input for photo upload -->
-            <input type="file" id="photo-upload" accept="image/*" style="display: none;">
           </div>
           <div>
-            <div class="editable-field-container">
-              <h2 id="modal-name" class="text-xl font-bold editable-content"></h2>
-              <input type="text" id="edit-name" class="text-xl font-bold editable-input editable-field" placeholder="Your name">
-            </div>
-            <div class="editable-field-container">
-              <p id="modal-nickname" class="text-green-100 italic editable-content"></p>
-              <input type="text" id="edit-nickname" class="text-green-100 editable-input editable-field" placeholder="Your nickname">
-            </div>
+            <h2 id="modal-name" class="text-xl font-bold"></h2>
+            <p id="modal-nickname" class="text-green-100 italic"></p>
             <div class="mt-2">
               <span id="modal-handicap" class="inline-block bg-white text-green-800 px-3 py-1 rounded-full text-sm font-bold"></span>
             </div>
@@ -657,20 +433,9 @@
       <div class="modal-content">
         <!-- About Tab -->
         <div id="about-section" class="modal-content-section active">
-          <div class="edit-section-header">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">About <span id="about-name"></span></h3>
-            <button id="edit-profile-btn" class="btn btn-sm">Edit Profile</button>
-          </div>
-          
-          <div class="editable-field-container">
-            <p id="about-bio" class="mb-6 editable-content"></p>
-            <textarea id="edit-bio" class="mb-6 editable-input editable-field editable-textarea" placeholder="Write a short bio"></textarea>
-          </div>
-          
-          <div class="editable-field-container">
-            <p id="about-detail" class="editable-content"></p>
-            <textarea id="edit-detail" class="editable-input editable-field editable-textarea" placeholder="Additional details about yourself"></textarea>
-          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-4">About <span id="about-name"></span></h3>
+          <p id="about-bio" class="mb-6"></p>
+          <p id="about-detail"></p>
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <div class="stats-card">
@@ -678,56 +443,12 @@
               <ul id="member-preferences" class="space-y-2">
                 <!-- Populated dynamically -->
               </ul>
-              
-              <!-- Editable preferences (hidden by default) -->
-              <div class="editable-input">
-                <div class="mb-3">
-                  <label for="edit-favorite-club" class="block text-sm font-medium text-gray-700 mb-1">Favorite Club</label>
-                  <select id="edit-favorite-club" class="editable-select">
-                    <option value="Driver">Driver</option>
-                    <option value="3 Wood">3 Wood</option>
-                    <option value="5 Wood">5 Wood</option>
-                    <option value="4 Iron">4 Iron</option>
-                    <option value="5 Iron">5 Iron</option>
-                    <option value="7 Iron">7 Iron</option>
-                    <option value="9 Iron">9 Iron</option>
-                    <option value="Pitching Wedge">Pitching Wedge</option>
-                    <option value="Sand Wedge">Sand Wedge</option>
-                    <option value="Putter">Putter</option>
-                  </select>
-                </div>
-                
-                <div class="mb-3">
-                  <label for="edit-favorite-course" class="block text-sm font-medium text-gray-700 mb-1">Favorite Course</label>
-                  <input type="text" id="edit-favorite-course" class="editable-field" placeholder="Favorite golf course">
-                </div>
-              </div>
             </div>
             <div class="stats-card">
               <h4 class="font-bold text-gray-700 mb-3">Contact Information</h4>
-              <p class="text-gray-600 editable-content">Contact information is only visible to other members. Please log in to view contact details.</p>
-              
-              <!-- Editable contact info (hidden by default) -->
-              <div class="editable-input">
-                <div class="mb-3">
-                  <label for="edit-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                  <input type="email" id="edit-email" class="editable-field" placeholder="Your email">
-                </div>
-                
-                <div class="mb-3">
-                  <label for="edit-phone" class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                  <input type="tel" id="edit-phone" class="editable-field" placeholder="Your phone number">
-                </div>
-              </div>
-              
-              <button class="btn btn-sm mt-2 editable-content">Send Message</button>
+              <p class="text-gray-600">Contact information is only visible to other members. Please log in to view contact details.</p>
+              <button class="btn btn-sm mt-2">Send Message</button>
             </div>
-          </div>
-          
-          <!-- Save/Cancel buttons (hidden by default) -->
-          <div class="edit-buttons">
-            <button id="cancel-edit-btn" class="btn btn-sm" style="background-color: #6c757d;">Cancel</button>
-            <button id="save-profile-btn" class="btn btn-sm">Save Profile</button>
           </div>
         </div>
         
@@ -822,21 +543,7 @@
         
         <!-- Achievements Tab -->
         <div id="achievements-section" class="modal-content-section">
-          <div class="edit-section-header">
-            <h3 class="text-xl font-bold text-gray-800 mb-4">Achievements</h3>
-            <button id="add-achievement-btn" class="btn btn-sm">Add Achievement</button>
-          </div>
-          
-          <div id="add-achievement-form" style="display: none;" class="mb-4 p-4 border border-gray-200 rounded-md bg-gray-50">
-            <div class="mb-3">
-              <label for="new-achievement" class="block text-sm font-medium text-gray-700 mb-1">Achievement Title</label>
-              <input type="text" id="new-achievement" class="editable-field" placeholder="e.g., 'First Hole-in-One'">
-            </div>
-            <div class="flex justify-end gap-2">
-              <button id="cancel-achievement-btn" class="btn btn-sm" style="background-color: #6c757d;">Cancel</button>
-              <button id="save-achievement-btn" class="btn btn-sm">Save Achievement</button>
-            </div>
-          </div>
+          <h3 class="text-xl font-bold text-gray-800 mb-6">Achievements</h3>
           
           <div id="achievements-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <!-- Populated dynamically -->
@@ -846,7 +553,7 @@
       
       <div class="modal-footer">
         <button id="modal-close-btn" class="btn btn-sm" style="background-color: #6c757d;">Close</button>
-        <button id="contact-member-btn" class="btn btn-sm">Contact Member</button>
+        <button class="btn btn-sm">Contact Member</button>
       </div>
     </div>
   </div>
@@ -997,9 +704,6 @@
       // Enhanced member data with additional fields
       const enhancedMemberData = {};
       
-      // Current user info (from auth)
-      let currentUser = BBB_AUTH.getCurrentUser();
-      
       // Load handicap data for all members
       const handicapPromises = BBB_CONFIG.members.map(member => 
         BBB_DB.getMemberHandicap(member.toLowerCase())
@@ -1016,9 +720,7 @@
               favoriteClub: getRandomFavoriteClub(),
               favoriteCourse: getRandomCourse(),
               achievements: generateAchievements(),
-              stats: generateStats(data ? data.index : 15),
-              email: `${member.toLowerCase().replace(/\s+/g, '.')}@example.com`,
-              phone: `+1 (555) ${Math.floor(100 + Math.random() * 900)}-${Math.floor(1000 + Math.random() * 9000)}`
+              stats: generateStats(data ? data.index : 15)
             };
             
             return { member, handicap: data };
@@ -1036,17 +738,12 @@
               favoriteClub: getRandomFavoriteClub(),
               favoriteCourse: getRandomCourse(),
               achievements: generateAchievements(),
-              stats: generateStats(15),
-              email: `${member.toLowerCase().replace(/\s+/g, '.')}@example.com`,
-              phone: `+1 (555) ${Math.floor(100 + Math.random() * 900)}-${Math.floor(1000 + Math.random() * 9000)}`
+              stats: generateStats(15)
             };
             
             return { member, handicap: null };
           })
       );
-      
-      // Try to load custom member data from localStorage
-      loadCustomMemberData();
       
       // Load scorecards to calculate recent scores
       BBB_DB.getScorecards()
@@ -1105,41 +802,6 @@
           console.error('Error loading scorecards:', err);
           BBB_UTILS.showMessage('Error loading scorecards', 'error');
         });
-      
-      /**
-       * Try to load custom member data from localStorage
-       */
-      function loadCustomMemberData() {
-        try {
-          const customData = localStorage.getItem('bbb_custom_member_data');
-          if (customData) {
-            const parsedData = JSON.parse(customData);
-            
-            // Merge with enhancedMemberData (will be overwritten by any new data)
-            Object.keys(parsedData).forEach(member => {
-              if (enhancedMemberData[member]) {
-                enhancedMemberData[member] = {
-                  ...enhancedMemberData[member],
-                  ...parsedData[member]
-                };
-              }
-            });
-          }
-        } catch (error) {
-          console.error('Error loading custom member data:', error);
-        }
-      }
-      
-      /**
-       * Save custom member data to localStorage
-       */
-      function saveCustomMemberData() {
-        try {
-          localStorage.setItem('bbb_custom_member_data', JSON.stringify(enhancedMemberData));
-        } catch (error) {
-          console.error('Error saving custom member data:', error);
-        }
-      }
       
       /**
        * Find recent scores for a member
@@ -1230,69 +892,6 @@
         profileImage.alt = memberName;
         profileImage.className = 'profile-image';
         imageContainer.appendChild(profileImage);
-        
-        // Only show edit photo overlay for current user
-        if (currentUser && currentUser.username === memberName) {
-          const editPhotoOverlay = document.createElement('div');
-          editPhotoOverlay.className = 'edit-photo-overlay';
-          editPhotoOverlay.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          `;
-          
-          // Setup photo upload listener
-          editPhotoOverlay.addEventListener('click', function() {
-            // Create a temporary file input
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = 'image/*';
-            
-            fileInput.addEventListener('change', function() {
-              if (fileInput.files && fileInput.files[0]) {
-                const file = fileInput.files[0];
-                
-                // Show loading spinner
-                showLoading();
-                
-                // Convert to data URL
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                  // Update the profile image
-                  profileImage.src = e.target.result;
-                  
-                  // Update in member data
-                  enhancedData.profileImage = e.target.result;
-                  
-                  // Save to localStorage
-                  saveCustomMemberData();
-                  
-                  // Refresh member list
-                  refreshMembersList();
-                  
-                  // Hide loading spinner
-                  hideLoading();
-                  
-                  // Show success message
-                  showToast('Profile photo updated successfully!', 'success');
-                };
-                
-                reader.onerror = function() {
-                  hideLoading();
-                  showToast('Failed to upload photo. Please try again.', 'error');
-                };
-                
-                reader.readAsDataURL(file);
-              }
-            });
-            
-            // Trigger the file input click
-            fileInput.click();
-          });
-          
-          imageContainer.appendChild(editPhotoOverlay);
-        }
         
         header.appendChild(imageContainer);
         card.appendChild(header);
@@ -1416,81 +1015,12 @@
         const leftColumn = document.createElement('div');
         leftColumn.className = 'list-item-left';
         
-        // Profile image container
-        const imageContainer = document.createElement('div');
-        imageContainer.className = 'profile-image-container mb-3';
-        
         // Profile image
         const profileImage = document.createElement('img');
         profileImage.src = enhancedData.profileImage;
         profileImage.alt = memberName;
-        profileImage.className = 'profile-image';
-        imageContainer.appendChild(profileImage);
-        
-        // Only show edit photo overlay for current user
-        if (currentUser && currentUser.username === memberName) {
-          const editPhotoOverlay = document.createElement('div');
-          editPhotoOverlay.className = 'edit-photo-overlay';
-          editPhotoOverlay.innerHTML = `
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-          `;
-          
-          // Setup photo upload listener
-          editPhotoOverlay.addEventListener('click', function() {
-            // Create a temporary file input
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.accept = 'image/*';
-            
-            fileInput.addEventListener('change', function() {
-              if (fileInput.files && fileInput.files[0]) {
-                const file = fileInput.files[0];
-                
-                // Show loading spinner
-                showLoading();
-                
-                // Convert to data URL
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                  // Update the profile image
-                  profileImage.src = e.target.result;
-                  
-                  // Update in member data
-                  enhancedData.profileImage = e.target.result;
-                  
-                  // Save to localStorage
-                  saveCustomMemberData();
-                  
-                  // Refresh member list
-                  refreshMembersList();
-                  
-                  // Hide loading spinner
-                  hideLoading();
-                  
-                  // Show success message
-                  showToast('Profile photo updated successfully!', 'success');
-                };
-                
-                reader.onerror = function() {
-                  hideLoading();
-                  showToast('Failed to upload photo. Please try again.', 'error');
-                };
-                
-                reader.readAsDataURL(file);
-              }
-            });
-            
-            // Trigger the file input click
-            fileInput.click();
-          });
-          
-          imageContainer.appendChild(editPhotoOverlay);
-        }
-        
-        leftColumn.appendChild(imageContainer);
+        profileImage.className = 'profile-image mb-3';
+        leftColumn.appendChild(profileImage);
         
         // Member name
         const nameElement = document.createElement('h3');
@@ -1674,23 +1204,11 @@
       function setupModalInteraction() {
         const modal = document.getElementById('member-modal');
         const closeButtons = document.querySelectorAll('#modal-close, #modal-close-btn');
-        const editProfileBtn = document.getElementById('edit-profile-btn');
-        const saveProfileBtn = document.getElementById('save-profile-btn');
-        const cancelEditBtn = document.getElementById('cancel-edit-btn');
-        const photoUploadInput = document.getElementById('photo-upload');
-        const editPhotoButton = document.getElementById('edit-photo-button');
-        const addAchievementBtn = document.getElementById('add-achievement-btn');
-        const saveAchievementBtn = document.getElementById('save-achievement-btn');
-        const cancelAchievementBtn = document.getElementById('cancel-achievement-btn');
         
         // Close modal when clicking close buttons
         closeButtons.forEach(button => {
           button.addEventListener('click', function() {
             modal.style.display = 'none';
-            // Ensure edit mode is off when closing
-            document.querySelectorAll('.modal-content-section').forEach(section => {
-              section.classList.remove('edit-mode');
-            });
           });
         });
         
@@ -1698,10 +1216,6 @@
         modal.addEventListener('click', function(event) {
           if (event.target === modal) {
             modal.style.display = 'none';
-            // Ensure edit mode is off when closing
-            document.querySelectorAll('.modal-content-section').forEach(section => {
-              section.classList.remove('edit-mode');
-            });
           }
         });
         
@@ -1719,283 +1233,9 @@
             const contentSections = document.querySelectorAll('.modal-content-section');
             contentSections.forEach(section => {
               section.classList.remove('active');
-              // Also ensure edit mode is off when changing tabs
-              section.classList.remove('edit-mode');
             });
             
             document.getElementById(`${tabName}-section`).classList.add('active');
-          });
-        });
-        
-        // Edit profile button
-        editProfileBtn.addEventListener('click', function() {
-          const aboutSection = document.getElementById('about-section');
-          aboutSection.classList.add('edit-mode');
-          
-          // Get current member data
-          const memberName = document.getElementById('modal-name').textContent;
-          const memberData = enhancedMemberData[memberName];
-          
-          // Populate editable fields
-          document.getElementById('edit-name').value = memberName;
-          document.getElementById('edit-nickname').value = memberData.nickname.replace(/"/g, '');
-          document.getElementById('edit-bio').value = memberData.bio;
-          document.getElementById('edit-detail').value = memberData.about;
-          document.getElementById('edit-favorite-club').value = memberData.favoriteClub;
-          document.getElementById('edit-favorite-course').value = memberData.favoriteCourse;
-          document.getElementById('edit-email').value = memberData.email || '';
-          document.getElementById('edit-phone').value = memberData.phone || '';
-        });
-        
-        // Cancel edit button
-        cancelEditBtn.addEventListener('click', function() {
-          document.getElementById('about-section').classList.remove('edit-mode');
-        });
-        
-        // Save profile button
-        saveProfileBtn.addEventListener('click', function() {
-          // Get current member name
-          const memberName = document.getElementById('modal-name').textContent;
-          
-          // Show loading
-          showLoading();
-          
-          // Get updated values
-          const updatedName = document.getElementById('edit-name').value;
-          const updatedNickname = document.getElementById('edit-nickname').value;
-          const updatedBio = document.getElementById('edit-bio').value;
-          const updatedDetail = document.getElementById('edit-detail').value;
-          const updatedFavoriteClub = document.getElementById('edit-favorite-club').value;
-          const updatedFavoriteCourse = document.getElementById('edit-favorite-course').value;
-          const updatedEmail = document.getElementById('edit-email').value;
-          const updatedPhone = document.getElementById('edit-phone').value;
-          
-          // Update the member data
-          enhancedMemberData[memberName] = {
-            ...enhancedMemberData[memberName],
-            name: updatedName,
-            nickname: updatedNickname,
-            bio: updatedBio,
-            about: updatedDetail,
-            favoriteClub: updatedFavoriteClub,
-            favoriteCourse: updatedFavoriteCourse,
-            email: updatedEmail,
-            phone: updatedPhone
-          };
-          
-          // Save to localStorage
-          saveCustomMemberData();
-          
-          // Update modal elements
-          document.getElementById('modal-name').textContent = updatedName;
-          document.getElementById('modal-nickname').textContent = `"${updatedNickname}"`;
-          document.getElementById('about-name').textContent = updatedName;
-          document.getElementById('about-bio').textContent = updatedBio;
-          document.getElementById('about-detail').textContent = updatedDetail;
-          
-          // Update preferences list
-          updatePreferencesList(memberName);
-          
-          // Turn off edit mode
-          document.getElementById('about-section').classList.remove('edit-mode');
-          
-          // Refresh the members list
-          refreshMembersList();
-          
-          // Hide loading
-          hideLoading();
-          
-          // Show success message
-          showToast('Profile updated successfully!', 'success');
-        });
-        
-        // Photo upload button
-        editPhotoButton.addEventListener('click', function() {
-          photoUploadInput.click();
-        });
-        
-        // Photo upload handler
-        photoUploadInput.addEventListener('change', function() {
-          if (photoUploadInput.files && photoUploadInput.files[0]) {
-            const file = photoUploadInput.files[0];
-            
-            // Show loading
-            showLoading();
-            
-            // Get current member name
-            const memberName = document.getElementById('modal-name').textContent;
-            
-            // Convert to data URL
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              // Update profile image in modal
-              document.getElementById('modal-profile-image').src = e.target.result;
-              
-              // Update in member data
-              enhancedMemberData[memberName].profileImage = e.target.result;
-              
-              // Save to localStorage
-              saveCustomMemberData();
-              
-              // Refresh the members list
-              refreshMembersList();
-              
-              // Hide loading
-              hideLoading();
-              
-              // Show success message
-              showToast('Profile photo updated successfully!', 'success');
-            };
-            
-            reader.onerror = function() {
-              hideLoading();
-              showToast('Failed to upload photo. Please try again.', 'error');
-            };
-            
-            reader.readAsDataURL(file);
-          }
-        });
-        
-        // Add achievement button
-        addAchievementBtn.addEventListener('click', function() {
-          document.getElementById('add-achievement-form').style.display = 'block';
-          document.getElementById('new-achievement').focus();
-        });
-        
-        // Cancel achievement button
-        cancelAchievementBtn.addEventListener('click', function() {
-          document.getElementById('add-achievement-form').style.display = 'none';
-          document.getElementById('new-achievement').value = '';
-        });
-        
-        // Save achievement button
-        saveAchievementBtn.addEventListener('click', function() {
-          const achievementText = document.getElementById('new-achievement').value.trim();
-          
-          if (!achievementText) {
-            showToast('Please enter an achievement', 'error');
-            return;
-          }
-          
-          // Get current member name
-          const memberName = document.getElementById('modal-name').textContent;
-          
-          // Add to achievements
-          enhancedMemberData[memberName].achievements.push(achievementText);
-          
-          // Save to localStorage
-          saveCustomMemberData();
-          
-          // Update achievements display
-          updateAchievementsGrid(memberName);
-          
-          // Hide form and clear input
-          document.getElementById('add-achievement-form').style.display = 'none';
-          document.getElementById('new-achievement').value = '';
-          
-          // Show success message
-          showToast('Achievement added successfully!', 'success');
-        });
-      }
-      
-      /**
-       * Update the preferences list in the modal
-       */
-      function updatePreferencesList(memberName) {
-        const preferencesList = document.getElementById('member-preferences');
-        preferencesList.innerHTML = '';
-        
-        const memberData = enhancedMemberData[memberName];
-        
-        const preferences = [
-          { label: 'Favorite Club', value: memberData.favoriteClub },
-          { label: 'Favorite Course', value: memberData.favoriteCourse },
-          { label: 'Member Since', value: BBB_UTILS.formatDate(memberData.joined, 'short') }
-        ];
-        
-        preferences.forEach(pref => {
-          const listItem = document.createElement('li');
-          listItem.className = 'flex items-center gap-2';
-          listItem.innerHTML = `
-            <span class="text-green-600">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
-              </svg>
-            </span>
-            <span><strong>${pref.label}:</strong> ${pref.value}</span>
-          `;
-          preferencesList.appendChild(listItem);
-        });
-      }
-      
-      /**
-       * Update the achievements grid in the modal
-       */
-      function updateAchievementsGrid(memberName) {
-        const achievementsGrid = document.getElementById('achievements-grid');
-        achievementsGrid.innerHTML = '';
-        
-        const memberData = enhancedMemberData[memberName];
-        
-        memberData.achievements.forEach((achievement, index) => {
-          const achievementCard = document.createElement('div');
-          achievementCard.className = 'bg-white p-4 rounded-lg border border-gray-200 flex items-start gap-3';
-          
-          // Only add delete button for current user
-          let deleteButton = '';
-          if (currentUser && currentUser.username === memberName) {
-            deleteButton = `
-              <button class="delete-achievement-btn" data-index="${index}">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500 hover:text-red-700" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-              </button>
-            `;
-          }
-          
-          achievementCard.innerHTML = `
-            <div class="flex-shrink-0">
-              <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                </svg>
-              </div>
-            </div>
-            <div class="flex-grow">
-              <div class="font-medium text-gray-900">${achievement}</div>
-              <div class="text-sm text-gray-500">Birdie Bush Bandits</div>
-            </div>
-            ${deleteButton}
-          `;
-          
-          achievementsGrid.appendChild(achievementCard);
-        });
-        
-        if (memberData.achievements.length === 0) {
-          const noAchievements = document.createElement('div');
-          noAchievements.className = 'text-center py-8 text-gray-500';
-          noAchievements.textContent = 'No achievements recorded yet';
-          achievementsGrid.appendChild(noAchievements);
-        }
-        
-        // Add event listeners to delete buttons
-        const deleteButtons = document.querySelectorAll('.delete-achievement-btn');
-        deleteButtons.forEach(button => {
-          button.addEventListener('click', function() {
-            const index = parseInt(this.dataset.index);
-            const memberName = document.getElementById('modal-name').textContent;
-            
-            // Remove the achievement
-            enhancedMemberData[memberName].achievements.splice(index, 1);
-            
-            // Save to localStorage
-            saveCustomMemberData();
-            
-            // Update achievements display
-            updateAchievementsGrid(memberName);
-            
-            // Show success message
-            showToast('Achievement deleted successfully!', 'success');
           });
         });
       }
@@ -2020,22 +1260,29 @@
         document.getElementById('about-bio').textContent = memberData.bio;
         document.getElementById('about-detail').textContent = memberData.about;
         
-        // Update preferences list
-        updatePreferencesList(memberName);
+        // Preferences list
+        const preferencesList = document.getElementById('member-preferences');
+        preferencesList.innerHTML = '';
         
-        // Show/hide edit button based on current user
-        const editProfileBtn = document.getElementById('edit-profile-btn');
-        const addAchievementBtn = document.getElementById('add-achievement-btn');
+        const preferences = [
+          { label: 'Favorite Club', value: memberData.favoriteClub },
+          { label: 'Favorite Course', value: memberData.favoriteCourse },
+          { label: 'Member Since', value: BBB_UTILS.formatDate(memberData.joined, 'short') }
+        ];
         
-        if (currentUser && currentUser.username === memberName) {
-          editProfileBtn.style.display = 'block';
-          addAchievementBtn.style.display = 'block';
-          document.getElementById('edit-photo-button').style.display = 'flex';
-        } else {
-          editProfileBtn.style.display = 'none';
-          addAchievementBtn.style.display = 'none';
-          document.getElementById('edit-photo-button').style.display = 'none';
-        }
+        preferences.forEach(pref => {
+          const listItem = document.createElement('li');
+          listItem.className = 'flex items-center gap-2';
+          listItem.innerHTML = `
+            <span class="text-green-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+              </svg>
+            </span>
+            <span><strong>${pref.label}:</strong> ${pref.value}</span>
+          `;
+          preferencesList.appendChild(listItem);
+        });
         
         // Stats tab
         if (memberData.stats) {
@@ -2109,7 +1356,36 @@
         }
         
         // Achievements tab
-        updateAchievementsGrid(memberName);
+        const achievementsGrid = document.getElementById('achievements-grid');
+        achievementsGrid.innerHTML = '';
+        
+        memberData.achievements.forEach((achievement, index) => {
+          const achievementCard = document.createElement('div');
+          achievementCard.className = 'bg-white p-4 rounded-lg border border-gray-200 flex items-start gap-3';
+          
+          achievementCard.innerHTML = `
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+              </div>
+            </div>
+            <div>
+              <div class="font-medium text-gray-900">${achievement}</div>
+              <div class="text-sm text-gray-500">Birdie Bush Bandits</div>
+            </div>
+          `;
+          
+          achievementsGrid.appendChild(achievementCard);
+        });
+        
+        if (memberData.achievements.length === 0) {
+          const noAchievements = document.createElement('div');
+          noAchievements.className = 'text-center py-8 text-gray-500';
+          noAchievements.textContent = 'No achievements recorded yet';
+          achievementsGrid.appendChild(noAchievements);
+        }
         
         // Reset to About tab
         document.querySelectorAll('.modal-tab').forEach(tab => {
@@ -2119,92 +1395,11 @@
         
         document.querySelectorAll('.modal-content-section').forEach(section => {
           section.classList.remove('active');
-          section.classList.remove('edit-mode');
         });
         document.getElementById('about-section').classList.add('active');
         
-        // Hide achievement form
-        document.getElementById('add-achievement-form').style.display = 'none';
-        
         // Show modal
         modal.style.display = 'flex';
-      }
-      
-      /**
-       * Show toast notification
-       */
-      function showToast(message, type = 'info') {
-        const toastContainer = document.getElementById('toast-container');
-        
-        const toast = document.createElement('div');
-        toast.className = `toast toast-${type}`;
-        
-        // Different icon based on type
-        let iconSvg = '';
-        if (type === 'success') {
-          iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>`;
-        } else if (type === 'error') {
-          iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>`;
-        } else {
-          iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>`;
-        }
-        
-        toast.innerHTML = `
-          <div class="toast-icon">${iconSvg}</div>
-          <div class="toast-message">${message}</div>
-          <button class="toast-close">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        `;
-        
-        toastContainer.appendChild(toast);
-        
-        // Show toast with animation
-        setTimeout(() => {
-          toast.classList.add('show');
-        }, 10);
-        
-        // Setup close button
-        toast.querySelector('.toast-close').addEventListener('click', function() {
-          toast.classList.remove('show');
-          setTimeout(() => {
-            toast.remove();
-          }, 300);
-        });
-        
-        // Auto close after 5 seconds
-        setTimeout(() => {
-          if (toast.parentNode) {
-            toast.classList.remove('show');
-            setTimeout(() => {
-              if (toast.parentNode) {
-                toast.remove();
-              }
-            }, 300);
-          }
-        }, 5000);
-      }
-      
-      /**
-       * Show loading spinner
-       */
-      function showLoading() {
-        document.getElementById('loading-spinner').style.display = 'flex';
-      }
-      
-      /**
-       * Hide loading spinner
-       */
-      function hideLoading() {
-        document.getElementById('loading-spinner').style.display = 'none';
       }
       
       /**
