@@ -1017,7 +1017,7 @@
             albumCard.appendChild(albumInfo);
             
             // Add click handler to view album
-            albumCard.addEventListener('click', () => {
+            albumCard.onclick = function() {
               // Set current album
               currentAlbum = album.id;
               
@@ -1041,7 +1041,7 @@
               
               // Show info message
               BBB_UTILS.showMessage(`Viewing album: ${album.title}`, 'info');
-            });
+            };
             
             albumsGrid.appendChild(albumCard);
           });
@@ -1238,18 +1238,18 @@
             const viewBtn = document.createElement('button');
             viewBtn.className = 'image-action-btn view-btn';
             viewBtn.innerHTML = '👁️ View';
-            viewBtn.addEventListener('click', () => {
+            viewBtn.onclick = function() {
               openLightbox(img);
-            });
+            };
             
             // Add to album button
             const albumBtn = document.createElement('button');
             albumBtn.className = 'image-action-btn';
             albumBtn.innerHTML = '📁 Album';
-            albumBtn.addEventListener('click', (e) => {
+            albumBtn.onclick = function(e) {
               e.stopPropagation(); // Prevent lightbox
               showAlbumSelector(image.id, imgContainer);
-            });
+            };
             
             // Delete button (only show if admin or image was uploaded by current user)
             const deleteBtn = document.createElement('button');
@@ -1261,10 +1261,10 @@
                              image.uploadedBy === BBB_AUTH.currentUser.id);
             
             if (canDelete) {
-              deleteBtn.addEventListener('click', (e) => {
+              deleteBtn.onclick = function(e) {
                 e.stopPropagation(); // Prevent lightbox
                 deleteImage(image.id);
-              });
+              };
               imageActions.appendChild(deleteBtn);
             }
             
@@ -1272,9 +1272,9 @@
             imageActions.appendChild(viewBtn);
             
             // Add click handler for lightbox
-            img.addEventListener('click', () => {
+            img.onclick = function() {
               openLightbox(img);
-            });
+            };
             
             imgContainer.appendChild(img);
             imgContainer.appendChild(imageInfo);
@@ -1342,7 +1342,7 @@
             checkbox.style.marginRight = '8px';
             
             // Add change handler
-            checkbox.addEventListener('change', () => {
+            checkbox.onchange = function() {
               if (checkbox.checked) {
                 addPhotoToAlbum(photoId, album.id);
               } else {
@@ -1358,7 +1358,7 @@
               
               // Update album counts
               refreshAlbumsSection();
-            });
+            };
             
             const label = document.createElement('label');
             label.setAttribute('for', `album-option-${album.id}`);
@@ -1379,9 +1379,9 @@
           closeOption.style.marginTop = '8px';
           closeOption.style.paddingTop = '8px';
           closeOption.style.cursor = 'pointer';
-          closeOption.addEventListener('click', () => {
+          closeOption.onclick = function() {
             albumSelector.remove();
-          });
+          };
           dropdown.appendChild(closeOption);
           
           // Add dropdown to selector
@@ -1407,39 +1407,47 @@
         function setupEventHandlers() {
           // Upload handler
           const uploadInput = document.getElementById('image-upload');
-          uploadInput.addEventListener('change', handleImageUpload);
+          uploadInput.onchange = function(e) {
+            handleImageUpload(e);
+          };
           
           // Search handler
           const searchInput = document.getElementById('gallery-search');
-          searchInput.addEventListener('input', debounce(() => {
+          searchInput.oninput = debounce(function() {
             loadGalleryImages();
-          }, 500));
+          }, 500);
           
           // Sort handler
           const sortSelect = document.getElementById('gallery-sort');
-          sortSelect.addEventListener('change', () => {
+          sortSelect.onchange = function() {
             loadGalleryImages();
-          });
+          };
           
           // Lightbox close
           const lightboxClose = document.querySelector('.lightbox-close');
-          lightboxClose.addEventListener('click', () => {
+          lightboxClose.onclick = function() {
             document.getElementById('lightbox').style.display = 'none';
-          });
+          };
           
           // Click outside lightbox to close
-          document.getElementById('lightbox').addEventListener('click', e => {
+          document.getElementById('lightbox').onclick = function(e) {
             if (e.target === document.getElementById('lightbox')) {
               document.getElementById('lightbox').style.display = 'none';
             }
-          });
+          };
           
           // ESC key to close lightbox
-          document.addEventListener('keyup', e => {
+          document.onkeyup = function(e) {
             if (e.key === 'Escape') {
               document.getElementById('lightbox').style.display = 'none';
+              
+              // Also close any open album selector dropdowns
+              document.querySelectorAll('.album-selector').forEach(el => el.remove());
+              
+              // Also close modal if it's open
+              document.getElementById('create-album-modal').style.display = 'none';
             }
-          });
+          };
         }
         
         /**
