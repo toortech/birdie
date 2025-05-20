@@ -133,6 +133,7 @@
       padding: 1rem;
       text-align: center;
       display: none;
+      margin: 0 auto;
     }
     
     .progress-bar {
@@ -151,7 +152,13 @@
       transition: width 0.3s ease;
     }
     
-    /* Additional styles for Cloudflare integration */
+    /* Image container and actions styles */
+    .gallery-img-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+    
     .image-actions {
       position: absolute;
       bottom: 0;
@@ -165,12 +172,6 @@
       transition: opacity 0.3s;
       border-bottom-left-radius: 8px;
       border-bottom-right-radius: 8px;
-    }
-    
-    .gallery-img-container {
-      position: relative;
-      overflow: hidden;
-      border-radius: 8px;
     }
     
     .gallery-img-container:hover .image-actions {
@@ -255,6 +256,31 @@
       border: 1px solid #ddd;
       font-size: 0.9rem;
     }
+
+    /* Migration button */
+    .migration-button {
+      display: block;
+      margin: 1rem auto;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    /* Message styles */
+    .info-message {
+      background-color: #e3f2fd;
+      border: 1px solid #bbdefb;
+      color: #0d47a1;
+      padding: 0.75rem;
+      border-radius: 4px;
+      margin: 1rem auto;
+      max-width: 600px;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
@@ -295,22 +321,86 @@
         localStoragePrefix: 'bbb_'
       });
       
-      // Cloudflare worker URL - Replace with your actual worker URL
-      const CLOUDFLARE_API = 'https://bbb-gallery-worker.your-account.workers.dev';
+      // Cloudflare worker URL - Your actual worker URL
+      const CLOUDFLARE_API = 'https://bbb-gallery-worker.cf1demouk.workers.dev';
       
       // Check if the user has access to the gallery
       const hasGalleryAccess = BBB_AUTH.isAuthenticated && 
         (BBB_AUTH.hasRole('gallery') || BBB_AUTH.hasRole('admin') || BBB_AUTH.hasRole('member'));
       
       if (!hasGalleryAccess) {
-        // Not authorized - redirect to login
-        sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
-        window.location.href = 'login.html';
-        return;
+        // Show gallery login overlay
+        showGalleryLogin();
+      } else {
+        // Already authenticated, initialize gallery
+        initializeGallery();
       }
       
-      // User is authenticated, initialize the gallery
-      initializeGallery();
+      /**
+       * Show gallery login overlay
+       */
+      function showGalleryLogin() {
+        const loginOverlay = document.createElement('div');
+        loginOverlay.id = 'login-overlay';
+        
+        const loginBox = document.createElement('div');
+        loginBox.id = 'login-box';
+        
+        const title = document.createElement('h2');
+        title.textContent = 'Enter Password';
+        
+        const passwordInput = document.createElement('input');
+        passwordInput.type = 'password';
+        passwordInput.id = 'pw-input';
+        passwordInput.placeholder = 'Password';
+        
+        const errorMsg = document.createElement('div');
+        errorMsg.id = 'error-msg';
+        errorMsg.textContent = 'Incorrect password';
+        errorMsg.style.color = 'red';
+        errorMsg.style.fontSize = '0.9rem';
+        errorMsg.style.display = 'none';
+        errorMsg.style.marginTop = '0.5rem';
+        
+        const submitBtn = document.createElement('button');
+        submitBtn.id = 'pw-submit';
+        submitBtn.textContent = 'Unlock Gallery';
+        submitBtn.className = 'btn';
+        submitBtn.style.marginTop = '1rem';
+        
+        loginBox.appendChild(title);
+        loginBox.appendChild(passwordInput);
+        loginBox.appendChild(errorMsg);
+        loginBox.appendChild(submitBtn);
+        
+        loginOverlay.appendChild(loginBox);
+        document.body.appendChild(loginOverlay);
+        
+        // Focus password input
+        setTimeout(() => passwordInput.focus(), 100);
+        
+        // Handle login events
+        submitBtn.addEventListener('click', handleLogin);
+        passwordInput.addEventListener('keypress', e => {
+          if (e.key === 'Enter') handleLogin();
+        });
+        
+        function handleLogin() {
+          const password = passwordInput.value;
+          
+          BBB_AUTH.login('gallery', password)
+            .then(() => {
+              // Login successful
+              loginOverlay.remove();
+              initializeGallery();
+            })
+            .catch(err => {
+              // Login failed
+              console.error('Login error:', err);
+              errorMsg.style.display = 'block';
+            });
+        }
+      }
       
       /**
        * Initialize gallery after authentication
@@ -378,6 +468,12 @@
         uploadSection.appendChild(uploadLabel);
         uploadSection.appendChild(uploadInput);
         mainContent.appendChild(uploadSection);
+        
+        // Info message about cloudflare
+        const infoMessage = document.createElement('div');
+        infoMessage.className = 'info-message';
+        infoMessage.textContent = 'Gallery images are now stored in the cloud for better performance and reliability.';
+        mainContent.appendChild(infoMessage);
         
         // Upload progress indicator
         const progressContainer = document.createElement('div');
@@ -565,6 +661,9 @@
               
               renderGallery(preloadedImages);
             });
+            
+          // Check if we need to migrate images from localStorage
+          checkMigrationNeeded();
         }
         
         /**
@@ -906,10 +1005,9 @@
         }
         
         /**
-         * Migrate images from localStorage to Cloudflare
-         * This will be called once to move existing images to the cloud
+         * Check if image migration is needed
          */
-        function migrateLocalStorageImages() {
+        function checkMigrationNeeded() {
           try {
             // Check if we have already migrated
             const migrated = localStorage.getItem('bbb_gallery_migrated_to_cloudflare');
@@ -917,7 +1015,7 @@
               return;
             }
             
-            // Get stored images from original code
+            // Get stored images from original localStorage
             const storedImages = JSON.parse(localStorage.getItem('uploadedImages') || '[]');
             
             if (storedImages.length === 0) {
@@ -926,46 +1024,125 @@
               return;
             }
             
+            // Create migration button
+            const migrationBtn = document.createElement('button');
+            migrationBtn.className = 'btn migration-button';
+            migrationBtn.textContent = `Migrate ${storedImages.length} Images to Cloud`;
+            migrationBtn.addEventListener('click', () => migrateLocalStorageImages(storedImages));
+            
+            // Add before the gallery
+            const galleryElement = document.getElementById('gallery');
+            galleryElement.parentNode.insertBefore(migrationBtn, galleryElement);
+            
+            // Show migration message
+            BBB_UTILS.showMessage(`Found ${storedImages.length} images in your browser. Click the migration button to move them to the cloud.`, 'info');
+          } catch (err) {
+            console.error('Error checking for migration:', err);
+          }
+        }
+        
+        /**
+         * Migrate images from localStorage to Cloudflare
+         * @param {Array} storedImages - Array of data URLs
+         */
+        function migrateLocalStorageImages(storedImages) {
+          try {
             // Show migration message
             BBB_UTILS.showMessage(`Migrating ${storedImages.length} existing images to cloud storage...`, 'info');
             
+            // Get migration button and disable it
+            const migrationBtn = document.querySelector('.migration-button');
+            if (migrationBtn) {
+              migrationBtn.disabled = true;
+              migrationBtn.textContent = 'Migration in progress...';
+            }
+            
+            // Show progress container
+            const progressContainer = document.getElementById('upload-progress');
+            const progressBarInner = document.getElementById('progress-bar-inner');
+            const progressText = document.getElementById('progress-text');
+            
+            progressContainer.style.display = 'block';
+            progressBarInner.style.width = '0%';
+            progressText.textContent = 'Preparing migration...';
+            
             // Convert and upload each image
             let migrationCount = 0;
+            let migrationErrors = 0;
             
             storedImages.forEach((dataURL, index) => {
-              // Convert data URL to blob
-              const blob = dataURLtoBlob(dataURL);
-              
-              // Create form data for upload
-              const formData = new FormData();
-              formData.append('image', blob, `migrated_image_${index}.jpg`);
-              formData.append('alt', `Migrated image ${index + 1}`);
-              formData.append('username', 'migration');
-              
-              // Upload to Cloudflare Worker
-              fetch(`${CLOUDFLARE_API}/upload`, {
-                method: 'POST',
-                body: formData
-              })
-                .then(response => response.json())
-                .then(data => {
-                  if (data.success) {
-                    migrationCount++;
-                  }
-                  
-                  // Check if all migrations complete
-                  if (migrationCount + (index + 1 - migrationCount) === storedImages.length) {
-                    finishMigration();
-                  }
+              try {
+                // Convert data URL to blob
+                const blob = dataURLtoBlob(dataURL);
+                
+                // Create form data for upload
+                const formData = new FormData();
+                formData.append('image', blob, `migrated_image_${index}.jpg`);
+                formData.append('alt', `Migrated image ${index + 1}`);
+                formData.append('username', BBB_AUTH.currentUser ? BBB_AUTH.currentUser.id : 'migration');
+                
+                // Update progress text
+                progressText.textContent = `Migrating image ${index + 1} of ${storedImages.length}...`;
+                progressBarInner.style.width = `${Math.round((index / storedImages.length) * 100)}%`;
+                
+                // Upload to Cloudflare Worker
+                fetch(`${CLOUDFLARE_API}/upload`, {
+                  method: 'POST',
+                  body: formData
                 })
-                .catch(err => {
-                  console.error('Error migrating image:', err);
-                  
-                  // Continue with next image
-                  if (migrationCount + (index + 1 - migrationCount) === storedImages.length) {
-                    finishMigration();
-                  }
-                });
+                  .then(response => {
+                    if (!response.ok) {
+                      throw new Error(`Upload failed: ${response.status}`);
+                    }
+                    return response.json();
+                  })
+                  .then(data => {
+                    if (data.success) {
+                      migrationCount++;
+                    } else {
+                      migrationErrors++;
+                    }
+                    
+                    // Update progress
+                    const completed = migrationCount + migrationErrors;
+                    const percentage = Math.round((completed / storedImages.length) * 100);
+                    progressBarInner.style.width = `${percentage}%`;
+                    progressText.textContent = `Migrated ${migrationCount} of ${storedImages.length} images (${percentage}%)`;
+                    
+                    // Check if all migrations complete
+                    if (completed === storedImages.length) {
+                      finishMigration();
+                    }
+                  })
+                  .catch(err => {
+                    console.error('Error migrating image:', err);
+                    migrationErrors++;
+                    
+                    // Update progress
+                    const completed = migrationCount + migrationErrors;
+                    const percentage = Math.round((completed / storedImages.length) * 100);
+                    progressBarInner.style.width = `${percentage}%`;
+                    progressText.textContent = `Migrated ${migrationCount} of ${storedImages.length} images (${percentage}%)`;
+                    
+                    // Check if all migrations complete
+                    if (completed === storedImages.length) {
+                      finishMigration();
+                    }
+                  });
+              } catch (err) {
+                console.error('Error processing image for migration:', err);
+                migrationErrors++;
+                
+                // Update progress
+                const completed = migrationCount + migrationErrors;
+                const percentage = Math.round((completed / storedImages.length) * 100);
+                progressBarInner.style.width = `${percentage}%`;
+                
+                // Check if all migrations complete
+                if (completed === storedImages.length) {
+                  finishMigration();
+                }
+              }
             });
             
             /**
@@ -974,17 +1151,22 @@
              * @returns {Blob} - Blob data
              */
             function dataURLtoBlob(dataURL) {
-              const arr = dataURL.split(',');
-              const mime = arr[0].match(/:(.*?);/)[1];
-              const bstr = atob(arr[1]);
-              let n = bstr.length;
-              const u8arr = new Uint8Array(n);
-              
-              while (n--) {
-                u8arr[n] = bstr.charCodeAt(n);
+              try {
+                const arr = dataURL.split(',');
+                const mime = arr[0].match(/:(.*?);/)[1];
+                const bstr = atob(arr[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
+                
+                while (n--) {
+                  u8arr[n] = bstr.charCodeAt(n);
+                }
+                
+                return new Blob([u8arr], { type: mime });
+              } catch (err) {
+                console.error('Error converting data URL to blob:', err);
+                throw err;
               }
-              
-              return new Blob([u8arr], { type: mime });
             }
             
             /**
@@ -997,19 +1179,29 @@
               // Clear old localStorage to free up space
               localStorage.removeItem('uploadedImages');
               
+              // Hide progress
+              progressContainer.style.display = 'none';
+              
+              // Remove migration button
+              if (migrationBtn) {
+                migrationBtn.remove();
+              }
+              
               // Reload gallery
               loadGalleryImages();
               
               // Show status message
-              BBB_UTILS.showMessage(`Successfully migrated ${migrationCount} images to cloud storage`, 'success');
+              if (migrationErrors === 0) {
+                BBB_UTILS.showMessage(`Successfully migrated ${migrationCount} images to cloud storage`, 'success');
+              } else {
+                BBB_UTILS.showMessage(`Migrated ${migrationCount} images, failed to migrate ${migrationErrors} images`, 'warning');
+              }
             }
           } catch (err) {
             console.error('Error during gallery migration:', err);
+            BBB_UTILS.showMessage('Error migrating images: ' + err.message, 'error');
           }
         }
-        
-        // Check if we need to migrate
-        migrateLocalStorageImages();
       }
     });
   </script>
