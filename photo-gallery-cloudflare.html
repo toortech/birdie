@@ -501,21 +501,43 @@
 <body>
   <!-- Authentication Protection -->
   <script>
+    // Flag to prevent multiple redirects
+    let redirectInProgress = false;
+    
     // Check if BBB_AUTH is loaded
     document.addEventListener('DOMContentLoaded', function() {
+      // Only proceed if we're not already in a redirect
+      if (redirectInProgress) return;
+
+      console.log("Checking authentication...");
+      
       // Wait for auth module to initialize
       setTimeout(function() {
         if (typeof BBB_AUTH !== 'undefined') {
-          // If not authenticated and not on login page, redirect to login
-          if (!BBB_AUTH.isAuthenticated && window.location.pathname.indexOf('login.html') === -1) {
+          console.log("Auth module loaded. Authenticated:", BBB_AUTH.isAuthenticated);
+          
+          // Check if we're on the login page
+          const isLoginPage = window.location.pathname.indexOf('login.html') !== -1;
+          
+          // Only redirect if not authenticated, not on login page, and no redirect is in progress
+          if (!BBB_AUTH.isAuthenticated && !isLoginPage && !redirectInProgress) {
+            console.log("Not authenticated. Redirecting to login page.");
+            
+            // Set flag to prevent multiple redirects
+            redirectInProgress = true;
+            
             // Save the current URL to redirect back after login
-            sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+            sessionStorage.setItem('redirectAfterLogin', window.location.pathname + window.location.search);
+            
+            // Redirect to login page
             window.location.href = 'login.html';
+          } else {
+            console.log("Authentication check complete. No redirect needed.");
           }
         } else {
           console.error('BBB_AUTH module not found! Authentication check failed.');
         }
-      }, 100); // Small delay to ensure modules are loaded
+      }, 300); // Slightly longer delay to ensure modules are completely loaded
     });
   </script>
   
@@ -583,11 +605,29 @@
       const hasGalleryAccess = BBB_AUTH.isAuthenticated && 
         (BBB_AUTH.hasRole('gallery') || BBB_AUTH.hasRole('admin') || BBB_AUTH.hasRole('member'));
       
+      // Debug log for authentication status
+      console.log("Authentication status:", {
+        isAuthenticated: BBB_AUTH.isAuthenticated,
+        roles: BBB_AUTH.userRoles,
+        hasGalleryAccess
+      });
+      
       if (!hasGalleryAccess) {
-        // Show gallery login overlay
-        showGalleryLogin();
+        // Check if we need to show the gallery login or if we're already in a redirect
+        if (!redirectInProgress && BBB_AUTH.isAuthenticated) {
+          // User is authenticated but doesn't have gallery role - show gallery login overlay
+          console.log("User authenticated but missing gallery role. Showing gallery login.");
+          showGalleryLogin();
+        } else if (!BBB_AUTH.isAuthenticated && !redirectInProgress) {
+          // User is not authenticated - handle this differently to avoid loops
+          console.log("User not authenticated at all - should have been redirected to login page");
+          // If we got here, the redirect might have failed
+          BBB_UTILS.showMessage('Authentication required. Please log in.', 'error');
+          // We won't initiate another redirect here to avoid loops
+        }
       } else {
-        // Already authenticated, initialize gallery
+        // Already authenticated with gallery access, initialize gallery
+        console.log("User authenticated with gallery access. Initializing gallery.");
         initializeGallery();
       }
       
@@ -595,19 +635,50 @@
        * Show gallery login overlay
        */
       function showGalleryLogin() {
+        console.log("Displaying gallery login overlay");
+        
         const loginOverlay = document.createElement('div');
         loginOverlay.id = 'login-overlay';
+        loginOverlay.style.position = 'fixed';
+        loginOverlay.style.top = '0';
+        loginOverlay.style.left = '0';
+        loginOverlay.style.width = '100%';
+        loginOverlay.style.height = '100%';
+        loginOverlay.style.backgroundColor = 'rgba(0,0,0,0.8)';
+        loginOverlay.style.display = 'flex';
+        loginOverlay.style.alignItems = 'center';
+        loginOverlay.style.justifyContent = 'center';
+        loginOverlay.style.zIndex = '9999';
         
         const loginBox = document.createElement('div');
         loginBox.id = 'login-box';
+        loginBox.style.background = 'white';
+        loginBox.style.padding = '2rem';
+        loginBox.style.borderRadius = '8px';
+        loginBox.style.maxWidth = '90%';
+        loginBox.style.width = '400px';
+        loginBox.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)';
         
         const title = document.createElement('h2');
-        title.textContent = 'Enter Password';
+        title.textContent = 'Gallery Access Required';
+        title.style.marginTop = '0';
+        title.style.marginBottom = '1.5rem';
+        title.style.textAlign = 'center';
+        title.style.color = '#003300';
+        
+        const infoText = document.createElement('p');
+        infoText.textContent = 'Enter the gallery password to view photos:';
+        infoText.style.marginBottom = '1rem';
         
         const passwordInput = document.createElement('input');
         passwordInput.type = 'password';
         passwordInput.id = 'pw-input';
-        passwordInput.placeholder = 'Password';
+        passwordInput.placeholder = 'Gallery Password';
+        passwordInput.style.width = '100%';
+        passwordInput.style.padding = '0.75rem';
+        passwordInput.style.border = '1px solid #ddd';
+        passwordInput.style.borderRadius = '4px';
+        passwordInput.style.marginBottom = '1rem';
         
         const errorMsg = document.createElement('div');
         errorMsg.id = 'error-msg';
@@ -616,17 +687,39 @@
         errorMsg.style.fontSize = '0.9rem';
         errorMsg.style.display = 'none';
         errorMsg.style.marginTop = '0.5rem';
+        errorMsg.style.marginBottom = '1rem';
+        errorMsg.style.textAlign = 'center';
         
         const submitBtn = document.createElement('button');
         submitBtn.id = 'pw-submit';
         submitBtn.textContent = 'Unlock Gallery';
         submitBtn.className = 'btn';
+        submitBtn.style.width = '100%';
         submitBtn.style.marginTop = '1rem';
+        submitBtn.style.padding = '0.75rem';
+        submitBtn.style.backgroundColor = '#004d00';
+        submitBtn.style.color = 'white';
+        submitBtn.style.border = 'none';
+        submitBtn.style.borderRadius = '4px';
+        submitBtn.style.cursor = 'pointer';
+        submitBtn.style.fontWeight = 'bold';
+        
+        // Back to home button
+        const backButton = document.createElement('a');
+        backButton.href = 'index.html';
+        backButton.textContent = 'Return to Home';
+        backButton.style.display = 'block';
+        backButton.style.textAlign = 'center';
+        backButton.style.marginTop = '1.5rem';
+        backButton.style.color = '#666';
+        backButton.style.textDecoration = 'none';
         
         loginBox.appendChild(title);
+        loginBox.appendChild(infoText);
         loginBox.appendChild(passwordInput);
         loginBox.appendChild(errorMsg);
         loginBox.appendChild(submitBtn);
+        loginBox.appendChild(backButton);
         
         loginOverlay.appendChild(loginBox);
         document.body.appendChild(loginOverlay);
@@ -641,17 +734,43 @@
         });
         
         function handleLogin() {
+          console.log("Handling gallery login attempt");
           const password = passwordInput.value;
           
+          // Check if password is empty
+          if (!password) {
+            errorMsg.textContent = 'Please enter a password';
+            errorMsg.style.display = 'block';
+            return;
+          }
+          
+          // Store the default gallery password for quick testing
+          // In a real implementation, this should come from the server
+          const galleryPassword = BBB_CONFIG && BBB_CONFIG.gallery && BBB_CONFIG.gallery.password
+            ? BBB_CONFIG.gallery.password
+            : 'secret123';
+          
+          // First try direct login if the password matches our default
+          if (password === galleryPassword) {
+            console.log("Password matches default gallery password");
+            // Success - remove overlay and initialize gallery
+            loginOverlay.remove();
+            initializeGallery();
+            return;
+          }
+          
+          // Otherwise, try auth system
           BBB_AUTH.login('gallery', password)
             .then(() => {
+              console.log("Gallery login successful");
               // Login successful
               loginOverlay.remove();
               initializeGallery();
             })
             .catch(err => {
               // Login failed
-              console.error('Login error:', err);
+              console.error('Gallery login error:', err);
+              errorMsg.textContent = 'Incorrect password';
               errorMsg.style.display = 'block';
             });
         }
