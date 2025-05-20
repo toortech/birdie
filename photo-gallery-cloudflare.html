@@ -18,8 +18,12 @@
   <script src="js/db.js"></script>
   <script src="js/ui.js"></script>
   
+  <!-- Optional: Add html2canvas for image download functionality -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
   <!-- Gallery specific styles -->
   <style>
+    /* Base styles */
     .gallery {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -122,6 +126,42 @@
       font-size: 1.1rem;
       max-width: 80%;
       text-align: center;
+    }
+
+    /* Lightbox navigation */
+    .lightbox-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      color: white;
+      font-size: 3rem;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.3s;
+      background: rgba(0,0,0,0.2);
+      border-radius: 50%;
+      padding: 0 10px;
+      user-select: none;
+    }
+
+    .lightbox-nav:hover {
+      opacity: 1;
+      background: rgba(0,0,0,0.4);
+    }
+
+    .lightbox-prev {
+      left: 20px;
+    }
+
+    .lightbox-next {
+      right: 20px;
+    }
+    
+    .lightbox-counter {
+      position: absolute;
+      bottom: 20px;
+      color: white;
+      font-size: 0.9rem;
     }
     
     .upload-progress {
@@ -333,6 +373,98 @@
       font-size: 0.9rem;
       color: var(--bbb-text-muted);
     }
+
+    /* Login overlay styles */
+    #login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #login-box {
+      background: white;
+      border-radius: 8px;
+      padding: 2rem;
+      width: 90%;
+      max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      text-align: center;
+    }
+
+    #login-box h2 {
+      margin-top: 0;
+      color: var(--bbb-primary);
+    }
+
+    #login-box input {
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    /* Image download button */
+    .download-btn {
+      color: #4caf50;
+    }
+
+    /* Admin tools */
+    .admin-tools {
+      background-color: #f8f9fa;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+
+    .admin-tools h3 {
+      margin-top: 0;
+      color: var(--bbb-primary);
+    }
+
+    .admin-tools-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    /* Stats counter */
+    .stats-counter {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      margin: 1rem 0;
+    }
+
+    .stat-item {
+      background-color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: var(--shadow-sm);
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--bbb-primary);
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: var(--bbb-text-muted);
+    }
   </style>
 </head>
 <body>
@@ -496,6 +628,16 @@
         description.textContent = 'Browse photos from our golf outings and events. Click on any image to view it in full size.';
         mainContent.appendChild(description);
         
+        // Stats counter
+        const statsCounter = createStatsCounter();
+        mainContent.appendChild(statsCounter);
+        
+        // Admin tools (only for admins)
+        if (BBB_AUTH.hasRole('admin')) {
+          const adminTools = createAdminTools();
+          mainContent.appendChild(adminTools);
+        }
+        
         // Create filter/search bar
         const filterBar = createFilterBar();
         mainContent.appendChild(filterBar);
@@ -567,6 +709,20 @@
         lightboxClose.className = 'lightbox-close';
         lightboxClose.innerHTML = '&times;';
         
+        const lightboxPrev = document.createElement('div');
+        lightboxPrev.className = 'lightbox-nav lightbox-prev';
+        lightboxPrev.innerHTML = '&#10094;';
+        lightboxPrev.setAttribute('aria-label', 'Previous image');
+        
+        const lightboxNext = document.createElement('div');
+        lightboxNext.className = 'lightbox-nav lightbox-next';
+        lightboxNext.innerHTML = '&#10095;';
+        lightboxNext.setAttribute('aria-label', 'Next image');
+        
+        const lightboxCounter = document.createElement('div');
+        lightboxCounter.className = 'lightbox-counter';
+        lightboxCounter.id = 'lightbox-counter';
+        
         const lightboxImg = document.createElement('img');
         lightboxImg.className = 'lightbox-img';
         lightboxImg.id = 'lightbox-img';
@@ -578,8 +734,11 @@
         lightboxCaption.className = 'lightbox-caption';
         
         lightbox.appendChild(lightboxClose);
+        lightbox.appendChild(lightboxPrev);
+        lightbox.appendChild(lightboxNext);
         lightbox.appendChild(lightboxImg);
         lightbox.appendChild(lightboxCaption);
+        lightbox.appendChild(lightboxCounter);
         mainContent.appendChild(lightbox);
         
         // Add content to main wrapper
@@ -590,6 +749,114 @@
         
         // Setup event handlers
         setupEventHandlers();
+        
+        /**
+         * Create stats counter
+         */
+        function createStatsCounter() {
+          const statsContainer = document.createElement('div');
+          statsContainer.className = 'stats-counter';
+          
+          // Default values - will be updated with real data
+          const stats = [
+            { label: 'Total Photos', value: '0', id: 'stat-total' },
+            { label: 'Albums', value: '4', id: 'stat-albums' },
+            { label: 'Contributors', value: '0', id: 'stat-contributors' }
+          ];
+          
+          stats.forEach(stat => {
+            const statItem = document.createElement('div');
+            statItem.className = 'stat-item';
+            
+            const statValue = document.createElement('div');
+            statValue.className = 'stat-value';
+            statValue.id = stat.id;
+            statValue.textContent = stat.value;
+            
+            const statLabel = document.createElement('div');
+            statLabel.className = 'stat-label';
+            statLabel.textContent = stat.label;
+            
+            statItem.appendChild(statValue);
+            statItem.appendChild(statLabel);
+            
+            statsContainer.appendChild(statItem);
+          });
+          
+          return statsContainer;
+        }
+        
+        /**
+         * Create admin tools section
+         */
+        function createAdminTools() {
+          const adminSection = document.createElement('div');
+          adminSection.className = 'admin-tools';
+          
+          const adminTitle = document.createElement('h3');
+          adminTitle.textContent = 'Admin Tools';
+          adminSection.appendChild(adminTitle);
+          
+          const adminDesc = document.createElement('p');
+          adminDesc.textContent = 'These tools are only available to admin users.';
+          adminSection.appendChild(adminDesc);
+          
+          const adminToolsGrid = document.createElement('div');
+          adminToolsGrid.className = 'admin-tools-grid';
+          
+          // Admin tools buttons
+          const tools = [
+            { 
+              text: 'Manage Albums', 
+              icon: '📁', 
+              onClick: () => {
+                alert('Album management coming soon!');
+              }
+            },
+            { 
+              text: 'Bulk Delete', 
+              icon: '🗑️', 
+              onClick: () => {
+                alert('Bulk delete feature coming soon!');
+              }
+            },
+            { 
+              text: 'Download All', 
+              icon: '📥', 
+              onClick: () => {
+                alert('Download all images feature coming soon!');
+              }
+            },
+            { 
+              text: 'View Storage Stats', 
+              icon: '📊', 
+              onClick: () => {
+                fetch(`${CLOUDFLARE_API}/stats`)
+                  .then(response => response.json())
+                  .then(stats => {
+                    alert(`Storage stats:\n${JSON.stringify(stats, null, 2)}`);
+                  })
+                  .catch(err => {
+                    console.error('Error fetching stats:', err);
+                    alert('Error fetching storage stats');
+                  });
+              }
+            }
+          ];
+          
+          tools.forEach(tool => {
+            const button = document.createElement('button');
+            button.className = 'btn admin-tool-btn';
+            button.innerHTML = `${tool.icon} ${tool.text}`;
+            button.addEventListener('click', tool.onClick);
+            
+            adminToolsGrid.appendChild(button);
+          });
+          
+          adminSection.appendChild(adminToolsGrid);
+          
+          return adminSection;
+        }
         
         /**
          * Create the albums section with predefined albums
@@ -636,6 +903,7 @@
             const albumCount = document.createElement('div');
             albumCount.className = 'album-count';
             albumCount.textContent = `${album.count} photos`;
+            albumCount.dataset.albumId = album.id;
             
             albumInfo.appendChild(albumTitle);
             albumInfo.appendChild(albumCount);
@@ -645,15 +913,24 @@
             
             // Add click handler
             albumCard.addEventListener('click', () => {
-              // Currently just changes the gallery title
+              // Update active album
+              document.querySelectorAll('.album-card').forEach(card => {
+                card.classList.remove('active');
+              });
+              albumCard.classList.add('active');
+              
+              // Update subtitle to show current album
               const subtitle = document.querySelector('h2');
               if (subtitle) {
                 subtitle.textContent = `Photo Gallery - ${album.title}`;
               }
               
-              // In the future, this could filter images by album
+              // Filter images by album
+              const currentAlbum = album.id;
+              
+              // For now, just reload all images - in future, add album filtering
               BBB_UTILS.showMessage(`Viewing album: ${album.title}`, 'info');
-              loadGalleryImages();
+              loadGalleryImages(currentAlbum);
             });
             
             albumsGrid.appendChild(albumCard);
@@ -723,8 +1000,9 @@
         
         /**
          * Load gallery images from Cloudflare
+         * @param {string} albumId - Optional album ID to filter by
          */
-        function loadGalleryImages() {
+        function loadGalleryImages(albumId = 'all') {
           BBB_UTILS.showMessage('Loading gallery images...', 'info');
           
           // Check sort and search options
@@ -736,9 +1014,18 @@
           
           // Build the API URL with any search parameters
           let apiUrl = `${CLOUDFLARE_API}/images`;
+          let params = [];
           
           if (searchValue) {
-            apiUrl += `?search=${encodeURIComponent(searchValue)}`;
+            params.push(`search=${encodeURIComponent(searchValue)}`);
+          }
+          
+          if (albumId && albumId !== 'all') {
+            params.push(`album=${encodeURIComponent(albumId)}`);
+          }
+          
+          if (params.length > 0) {
+            apiUrl += '?' + params.join('&');
           }
           
           // Fetch from Cloudflare
@@ -756,8 +1043,12 @@
                 src: `${CLOUDFLARE_API}/image/${img.id}`,
                 alt: img.alt || 'Gallery image',
                 uploadedAt: img.uploaded_at,
-                uploadedBy: img.uploaded_by
+                uploadedBy: img.uploaded_by,
+                albumId: img.album_id || 'all'
               }));
+              
+              // Update stats
+              updateGalleryStats(images);
               
               // Sort images
               if (sortValue === 'oldest') {
@@ -795,6 +1086,55 @@
         }
         
         /**
+         * Update gallery statistics
+         * @param {Array} images - Gallery images
+         */
+        function updateGalleryStats(images) {
+          // Update total photos count
+          const totalStat = document.getElementById('stat-total');
+          if (totalStat) {
+            totalStat.textContent = images.length.toString();
+          }
+          
+          // Update contributors count
+          const uniqueContributors = new Set();
+          images.forEach(img => {
+            if (img.uploadedBy) {
+              uniqueContributors.add(img.uploadedBy);
+            }
+          });
+          
+          const contributorsStat = document.getElementById('stat-contributors');
+          if (contributorsStat) {
+            contributorsStat.textContent = uniqueContributors.size.toString();
+          }
+          
+          // Update album counts
+          const albumCounts = {
+            all: images.length,
+            events: 0,
+            tournaments: 0,
+            members: 0
+          };
+          
+          images.forEach(img => {
+            if (img.albumId && albumCounts[img.albumId] !== undefined) {
+              albumCounts[img.albumId]++;
+            }
+          });
+          
+          // Update album count displays
+          Object.keys(albumCounts).forEach(albumId => {
+            const countDisplay = document.querySelector(`.album-count[data-album-id="${albumId}"]`);
+            if (countDisplay) {
+              countDisplay.textContent = albumId === 'all' ? 
+                `${albumCounts[albumId]} photos` : 
+                `${albumCounts[albumId]} photos`;
+            }
+          });
+        }
+        
+        /**
          * Render gallery with images
          * @param {Array} images - Array of image objects
          */
@@ -802,11 +1142,15 @@
           const galleryElement = document.getElementById('gallery');
           galleryElement.innerHTML = '';
           
+          // Store images for lightbox navigation
+          window.galleryImages = images;
+          
           // Create gallery
-          images.forEach(image => {
+          images.forEach((image, index) => {
             const imgContainer = document.createElement('div');
             imgContainer.className = 'gallery-img-container';
             imgContainer.dataset.id = image.id;
+            imgContainer.dataset.index = index;
             
             const img = document.createElement('img');
             img.src = image.src;
@@ -833,8 +1177,18 @@
             const viewBtn = document.createElement('button');
             viewBtn.className = 'image-action-btn view-btn';
             viewBtn.innerHTML = '👁️ View';
-            viewBtn.addEventListener('click', () => {
-              openLightbox(img);
+            viewBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              openLightbox(img, index);
+            });
+            
+            // Download button
+            const downloadBtn = document.createElement('button');
+            downloadBtn.className = 'image-action-btn download-btn';
+            downloadBtn.innerHTML = '📥 Download';
+            downloadBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              downloadImage(image.src, image.alt || 'gallery-image');
             });
             
             // Delete button (only show if admin or image was uploaded by current user)
@@ -854,11 +1208,12 @@
               imageActions.appendChild(deleteBtn);
             }
             
+            imageActions.appendChild(downloadBtn);
             imageActions.appendChild(viewBtn);
             
             // Add click handler for lightbox
             img.addEventListener('click', () => {
-              openLightbox(img);
+              openLightbox(img, index);
             });
             
             imgContainer.appendChild(img);
@@ -888,6 +1243,21 @@
         }
         
         /**
+         * Helper to download an image
+         * @param {string} url - Image URL
+         * @param {string} filename - Filename to save as
+         */
+        function downloadImage(url, filename) {
+          // Create temporary link
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = filename.replace(/[^\w\s.-]/g, '') + '.jpg';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+        
+        /**
          * Setup event handlers for gallery
          */
         function setupEventHandlers() {
@@ -913,6 +1283,17 @@
             document.getElementById('lightbox').style.display = 'none';
           });
           
+          // Lightbox navigation
+          const lightboxPrev = document.querySelector('.lightbox-prev');
+          lightboxPrev.addEventListener('click', () => {
+            navigateLightbox('prev');
+          });
+          
+          const lightboxNext = document.querySelector('.lightbox-next');
+          lightboxNext.addEventListener('click', () => {
+            navigateLightbox('next');
+          });
+          
           // Click outside lightbox to close
           document.getElementById('lightbox').addEventListener('click', e => {
             if (e.target === document.getElementById('lightbox')) {
@@ -920,10 +1301,14 @@
             }
           });
           
-          // ESC key to close lightbox
+          // ESC key to close lightbox, arrow keys for navigation
           document.addEventListener('keyup', e => {
             if (e.key === 'Escape') {
               document.getElementById('lightbox').style.display = 'none';
+            } else if (e.key === 'ArrowLeft') {
+              navigateLightbox('prev');
+            } else if (e.key === 'ArrowRight') {
+              navigateLightbox('next');
             }
           });
         }
@@ -947,15 +1332,61 @@
         /**
          * Open lightbox with image
          * @param {HTMLElement} img - Image element to show in lightbox
+         * @param {number} index - Index in the gallery array
          */
-        function openLightbox(img) {
+        function openLightbox(img, index) {
           const lightbox = document.getElementById('lightbox');
           const lightboxImg = document.getElementById('lightbox-img');
           const lightboxCaption = document.getElementById('lightbox-caption');
+          const lightboxCounter = document.getElementById('lightbox-counter');
           
+          // Set current index for navigation
+          lightbox.dataset.currentIndex = index;
+          
+          // Update counter
+          lightboxCounter.textContent = `${index + 1} / ${window.galleryImages.length}`;
+          
+          // Set image and caption
           lightboxImg.src = img.src;
           lightboxCaption.textContent = img.alt;
           lightbox.style.display = 'flex';
+        }
+        
+        /**
+         * Navigate to the next or previous image in lightbox
+         * @param {string} direction - 'next' or 'prev'
+         */
+        function navigateLightbox(direction) {
+          const lightbox = document.getElementById('lightbox');
+          
+          // If lightbox is not visible, do nothing
+          if (lightbox.style.display !== 'flex') return;
+          
+          const currentIndex = parseInt(lightbox.dataset.currentIndex, 10);
+          const imagesCount = window.galleryImages.length;
+          
+          // Calculate new index
+          let newIndex;
+          if (direction === 'next') {
+            newIndex = (currentIndex + 1) % imagesCount; // Wrap around to first image
+          } else {
+            newIndex = (currentIndex - 1 + imagesCount) % imagesCount; // Wrap around to last image
+          }
+          
+          // Get image at new index
+          const newImage = window.galleryImages[newIndex];
+          
+          // Update lightbox
+          const lightboxImg = document.getElementById('lightbox-img');
+          const lightboxCaption = document.getElementById('lightbox-caption');
+          const lightboxCounter = document.getElementById('lightbox-counter');
+          
+          lightboxImg.src = newImage.src;
+          lightboxCaption.textContent = newImage.alt;
+          lightboxCounter.textContent = `${newIndex + 1} / ${imagesCount}`;
+          
+          // Update current index
+          lightbox.dataset.currentIndex = newIndex;
         }
         
         /**
@@ -1036,6 +1467,10 @@
           // Get current user if available
           const username = BBB_AUTH.currentUser ? BBB_AUTH.currentUser.id : 'anonymous';
           
+          // Get current album if selected
+          const activeAlbum = document.querySelector('.album-card.active');
+          const albumId = activeAlbum ? activeAlbum.dataset.albumId : 'all';
+          
           // Process each file
           files.forEach((file, index) => {
             // Validate file type
@@ -1060,6 +1495,7 @@
             formData.append('image', file);
             formData.append('alt', file.name.replace(/\.[^/.]+$/, '') || 'User uploaded photo');
             formData.append('username', username);
+            formData.append('album', albumId);
             
             // Upload to Cloudflare Worker
             fetch(`${CLOUDFLARE_API}/upload`, {
@@ -1122,7 +1558,7 @@
             }, 1500);
             
             // Reload gallery
-            loadGalleryImages();
+            loadGalleryImages(albumId);
             
             // Show status message
             if (failedUploads.length === 0) {
@@ -1217,6 +1653,7 @@
                 formData.append('image', blob, `migrated_image_${index}.jpg`);
                 formData.append('alt', `Migrated image ${index + 1}`);
                 formData.append('username', BBB_AUTH.currentUser ? BBB_AUTH.currentUser.id : 'migration');
+                formData.append('album', 'all');
                 
                 // Update progress text
                 progressText.textContent = `Migrating image ${index + 1} of ${storedImages.length}...`;
@@ -1331,16 +1768,4 @@
               if (migrationErrors === 0) {
                 BBB_UTILS.showMessage(`Successfully migrated ${migrationCount} images to cloud storage`, 'success');
               } else {
-                BBB_UTILS.showMessage(`Migrated ${migrationCount} images, failed to migrate ${migrationErrors} images`, 'warning');
-              }
-            }
-          } catch (err) {
-            console.error('Error during gallery migration:', err);
-            BBB_UTILS.showMessage('Error migrating images: ' + err.message, 'error');
-          }
-        }
-      }
-    });
-  </script>
-</body>
-</html>
+                BBB_UTILS.showMessage(`Migrated ${migrationCount} images
