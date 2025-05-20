@@ -1,1582 +1,528 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Birdie Bush Bandits – Photo Gallery</title>
-  <meta name="description" content="View photos from Birdie Bush Bandits golf outings and events.">
-  <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
-  <!-- Add Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
-  <!-- Global CSS -->
-  <link rel="stylesheet" href="css/style.css">
-  
-  <!-- Core Modules -->
-  <script src="js/config.js"></script>
-  <script src="js/utils.js"></script>
-  <script src="js/auth.js"></script>
-  <script src="js/db.js"></script>
-  <script src="js/ui.js"></script>
-  
-  <!-- Gallery specific styles -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Photo Albums</title>
   <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+    
+    body {
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h1, h2, h3 {
+      color: #004d00;
+    }
+    
+    /* Album styles */
+    .albums-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .album-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      cursor: pointer;
+      transition: transform 0.3s;
+    }
+    
+    .album-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    
+    .album-thumbnail {
+      height: 150px;
+      background-color: #eee;
+      background-size: cover;
+      background-position: center;
+    }
+    
+    .album-info {
+      padding: 15px;
+    }
+    
+    .album-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    
+    .album-count {
+      font-size: 0.9em;
+      color: #666;
+    }
+    
+    /* Gallery styles */
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 16px;
-      margin-top: 2rem;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
     }
     
-    @media (max-width: 768px) {
-      .gallery {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 12px;
-      }
-    }
-    
-    @media (max-width: 480px) {
-      .gallery {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 8px;
-      }
+    .gallery-item {
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
     
     .gallery-img {
       width: 100%;
       height: 200px;
       object-fit: cover;
-      border-radius: 8px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
     }
     
     .gallery-img:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+      transform: scale(1.05);
     }
     
-    .upload-section {
-      display: flex;
-      justify-content: center;
-      margin: 1.5rem 0;
-    }
-    
-    .upload-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-    }
-    
-    .upload-label::before {
-      content: '📸';
-      font-size: 1.25rem;
-    }
-    
-    .empty-gallery {
-      text-align: center;
-      padding: 3rem;
-      background-color: #f8f9fa;
-      border-radius: 8px;
-      margin-top: 2rem;
-    }
-    
-    /* Improved lightbox styles */
-    .lightbox {
+    /* Modal styles */
+    .modal {
       display: none;
-      position: fixed;
-      z-index: 1000;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9);
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-    }
-    
-    .lightbox-img {
-      max-width: 90%;
-      max-height: 80%;
-      border-radius: 4px;
-      box-shadow: 0 5px 25px rgba(0,0,0,0.5);
-    }
-    
-    .lightbox-close {
-      position: absolute;
-      top: 20px; right: 25px;
-      font-size: 2.5rem;
-      color: white;
-      cursor: pointer;
-      opacity: 0.8;
-      transition: opacity 0.3s;
-    }
-    
-    .lightbox-close:hover {
-      opacity: 1;
-    }
-    
-    .lightbox-caption {
-      color: white;
-      margin-top: 1rem;
-      font-size: 1.1rem;
-      max-width: 80%;
-      text-align: center;
-    }
-    
-    .upload-progress {
-      margin-top: 1rem;
-      width: 100%;
-      max-width: 500px;
-      background-color: #f8f9fa;
-      border-radius: 8px;
-      padding: 1rem;
-      text-align: center;
-      display: none;
-      margin: 0 auto;
-    }
-    
-    .progress-bar {
-      width: 100%;
-      height: 10px;
-      background-color: #e9ecef;
-      border-radius: 5px;
-      margin-top: 0.5rem;
-      overflow: hidden;
-    }
-    
-    .progress-bar-inner {
-      height: 100%;
-      background-color: var(--bbb-secondary);
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-    
-    /* Image container and actions styles */
-    .gallery-img-container {
-      position: relative;
-      overflow: hidden;
-      border-radius: 8px;
-    }
-    
-    .image-actions {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0,0,0,0.7);
-      padding: 8px;
-      display: flex;
-      justify-content: space-between;
-      opacity: 0;
-      transition: opacity 0.3s;
-      border-bottom-left-radius: 8px;
-      border-bottom-right-radius: 8px;
-    }
-    
-    .gallery-img-container:hover .image-actions {
-      opacity: 1;
-    }
-    
-    .image-action-btn {
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-      font-size: 1rem;
-      padding: 4px 8px;
-      border-radius: 4px;
-      transition: background-color 0.2s;
-    }
-    
-    .image-action-btn:hover {
-      background-color: rgba(255,255,255,0.2);
-    }
-    
-    .delete-btn {
-      color: #ff6b6b;
-    }
-    
-    .image-info {
-      position: absolute;
-      top: 0;
-      left: 0;
-      background-color: rgba(0,0,0,0.6);
-      color: white;
-      padding: 4px 8px;
-      font-size: 0.8rem;
-      border-top-left-radius: 8px;
-    }
-    
-    .filter-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    
-    .search-container {
-      position: relative;
-      flex-grow: 1;
-      max-width: 300px;
-    }
-    
-    .search-input {
-      width: 100%;
-      padding: 8px 12px 8px 36px;
-      border-radius: 20px;
-      border: 1px solid #ddd;
-      font-size: 0.9rem;
-    }
-    
-    .search-icon {
-      position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #666;
-    }
-    
-    .sort-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .sort-label {
-      font-size: 0.9rem;
-      color: #666;
-    }
-    
-    .sort-select {
-      padding: 6px 12px;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-      font-size: 0.9rem;
-    }
-
-    /* Migration button */
-    .migration-button {
-      display: block;
-      margin: 1rem auto;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-
-    /* Message styles */
-    .info-message {
-      background-color: #e3f2fd;
-      border: 1px solid #bbdefb;
-      color: #0d47a1;
-      padding: 0.75rem;
-      border-radius: 4px;
-      margin: 1rem auto;
-      max-width: 600px;
-      text-align: center;
-    }
-    
-    /* Albums section styles */
-    .albums-section {
-      margin: 2rem 0;
-    }
-
-    .albums-title {
-      margin-bottom: 1rem;
-      color: var(--bbb-primary);
-      font-weight: bold;
-    }
-
-    .albums-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 1rem;
-    }
-
-    .album-card {
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: var(--shadow-md);
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      cursor: pointer;
-    }
-
-    .album-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .album-thumbnail {
-      height: 150px;
-      background-color: #f0f0f0;
-      background-size: cover;
-      background-position: center;
-    }
-
-    .album-info {
-      padding: 1rem;
-    }
-
-    .album-title {
-      font-weight: 600;
-      margin-bottom: 0.25rem;
-    }
-
-    .album-count {
-      font-size: 0.9rem;
-      color: var(--bbb-text-muted);
-    }
-    
-    /* Album selector for photos */
-    .album-selector {
-      margin-top: 0.5rem;
-      position: relative;
-    }
-    
-    .album-dropdown {
-      position: absolute;
-      background: white;
-      border-radius: 4px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-      width: 100%;
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 10;
-      display: none;
-    }
-    
-    .album-option {
-      padding: 0.5rem 1rem;
-      cursor: pointer;
-      transition: background-color 0.2s;
-    }
-    
-    .album-option:hover {
-      background-color: #f0f0f0;
-    }
-    
-    .album-badge {
-      position: absolute;
-      top: 0;
-      right: 0;
-      background-color: var(--bbb-primary);
-      color: white;
-      padding: 3px 8px;
-      font-size: 0.7rem;
-      border-top-right-radius: 8px;
-      border-bottom-left-radius: 8px;
-    }
-    
-    /* Create album modal */
-    .modal-overlay {
       position: fixed;
       top: 0;
       left: 0;
       right: 0;
       bottom: 0;
       background-color: rgba(0,0,0,0.7);
-      display: flex;
+      z-index: 100;
       align-items: center;
       justify-content: center;
-      z-index: 1000;
-      display: none;
     }
     
     .modal-content {
       background-color: white;
+      padding: 20px;
       border-radius: 8px;
-      padding: 1.5rem;
       width: 90%;
-      max-width: 400px;
+      max-width: 500px;
     }
     
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 1rem;
+      margin-bottom: 20px;
     }
     
     .modal-title {
-      font-size: 1.25rem;
-      font-weight: bold;
       margin: 0;
+      font-size: 1.5em;
     }
     
     .modal-close {
       background: none;
       border: none;
-      font-size: 1.5rem;
+      font-size: 1.5em;
       cursor: pointer;
-      padding: 0;
     }
     
-    .modal-body {
-      margin-bottom: 1.5rem;
+    .form-group {
+      margin-bottom: 15px;
     }
     
-    .modal-footer {
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .form-group input,
+    .form-group textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .form-buttons {
       display: flex;
       justify-content: flex-end;
-      gap: 0.5rem;
+      gap: 10px;
+      margin-top: 20px;
     }
     
-    /* Album management */
-    .album-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
+    /* Buttons */
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      background-color: #004d00;
+      color: white;
+      font-weight: bold;
+    }
+    
+    .btn:hover {
+      background-color: #006600;
+    }
+    
+    /* Utility classes */
+    .mt-20 {
+      margin-top: 20px;
+    }
+    
+    .text-center {
+      text-align: center;
+    }
+    
+    /* Messages */
+    .message {
+      padding: 10px 15px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+    }
+    
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
     }
   </style>
 </head>
 <body>
-  <!-- Authentication Protection -->
-  <script>
-    // Check if BBB_AUTH is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-      // Wait for auth module to initialize
-      setTimeout(function() {
-        if (typeof BBB_AUTH !== 'undefined') {
-          // If not authenticated and not on login page, redirect to login
-          if (!BBB_AUTH.isAuthenticated && window.location.pathname.indexOf('login.html') === -1) {
-            // Save the current URL to redirect back after login
-            sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
-            window.location.href = 'login.html';
-          }
-        } else {
-          console.error('BBB_AUTH module not found! Authentication check failed.');
-        }
-      }, 100); // Small delay to ensure modules are loaded
-    });
-  </script>
-  
-  <!-- Rest of your page content -->
-  <a href="#main" class="skip-link">Skip to main content</a>
-  
-  <main id="main"></main>
+  <div class="container">
+    <h1>Photo Albums</h1>
+    
+    <div id="message-container"></div>
+    
+    <div class="actions">
+      <button id="create-album-button" class="btn">Create New Album</button>
+    </div>
+    
+    <h2>Albums</h2>
+    <div id="albums-container" class="albums-grid">
+      <!-- Albums will be loaded here -->
+    </div>
+    
+    <h2 id="current-gallery-title">All Photos</h2>
+    <div id="gallery-container" class="gallery">
+      <!-- Photos will be loaded here -->
+    </div>
+  </div>
   
   <!-- Create Album Modal -->
-  <div id="create-album-modal" class="modal-overlay">
+  <div id="create-album-modal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title">Create New Album</h3>
         <button class="modal-close">&times;</button>
       </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label for="album-name">Album Name</label>
-          <input type="text" id="album-name" class="search-input" placeholder="Enter album name">
-        </div>
-        <div class="form-group" style="margin-top: 1rem;">
-          <label for="album-description">Description (optional)</label>
-          <textarea id="album-description" class="search-input" placeholder="Enter album description" rows="3"></textarea>
-        </div>
+      
+      <div class="form-group">
+        <label for="album-name">Album Name</label>
+        <input type="text" id="album-name" placeholder="Enter album name">
       </div>
-      <div class="modal-footer">
-        <button class="btn" id="create-album-cancel">Cancel</button>
-        <button class="btn" id="create-album-submit">Create Album</button>
+      
+      <div class="form-group">
+        <label for="album-description">Description (optional)</label>
+        <textarea id="album-description" placeholder="Enter a description"></textarea>
+      </div>
+      
+      <div class="form-buttons">
+        <button id="cancel-album" class="btn">Cancel</button>
+        <button id="create-album" class="btn">Create Album</button>
       </div>
     </div>
   </div>
   
   <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize modules
-      BBB_AUTH.init({
-        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
-      });
-      
-      BBB_DB.init({
-        useCloudflare: BBB_CONFIG.cloudflareEnabled,
-        localStoragePrefix: 'bbb_'
-      });
-      
-      // Default albums
-      const DEFAULT_ALBUMS = [
-        { id: 'all', title: 'All Photos', description: 'All photos in the gallery', thumbnail: 'images/photo1.jpg' },
-        { id: 'events', title: 'Golf Events', description: 'Photos from golf events', thumbnail: 'images/photo2.jpg' },
-        { id: 'tournaments', title: 'Tournaments', description: 'Tournament photos', thumbnail: 'images/photo3.jpg' },
-        { id: 'members', title: 'Member Photos', description: 'Photos of our members', thumbnail: 'images/photo4.jpg' }
-      ];
-      
-      // Local storage key for albums
-      const ALBUMS_STORAGE_KEY = 'bbb_photo_albums';
-      const PHOTO_ALBUMS_KEY = 'bbb_photo_album_mapping';
-      
-      // Track current album
-      let currentAlbum = 'all';
-      
-      // Check if the user has access to the gallery
-      const hasGalleryAccess = BBB_AUTH.isAuthenticated && 
-        (BBB_AUTH.hasRole('gallery') || BBB_AUTH.hasRole('admin') || BBB_AUTH.hasRole('member'));
-      
-      if (!hasGalleryAccess) {
-        // Show gallery login overlay
-        showGalleryLogin();
-      } else {
-        // Already authenticated, initialize gallery
-        initializeGallery();
+    // DOM Elements
+    const albumsContainer = document.getElementById('albums-container');
+    const galleryContainer = document.getElementById('gallery-container');
+    const galleryTitle = document.getElementById('current-gallery-title');
+    const messageContainer = document.getElementById('message-container');
+    const createAlbumButton = document.getElementById('create-album-button');
+    const modal = document.getElementById('create-album-modal');
+    const modalClose = modal.querySelector('.modal-close');
+    const cancelAlbum = document.getElementById('cancel-album');
+    const createAlbum = document.getElementById('create-album');
+    const albumNameInput = document.getElementById('album-name');
+    const albumDescInput = document.getElementById('album-description');
+    
+    // Default Albums
+    const DEFAULT_ALBUMS = [
+      { id: 'all', title: 'All Photos', description: 'All photos in the gallery', count: 0 },
+      { id: 'events', title: 'Golf Events', description: 'Photos from golf events', count: 0 },
+      { id: 'tournaments', title: 'Tournaments', description: 'Tournament photos', count: 0 }
+    ];
+    
+    // Default Images (in case API doesn't work)
+    const DEFAULT_IMAGES = [
+      { id: 'img1', src: 'images/photo1.jpg', alt: 'Photo 1', albumId: 'events' },
+      { id: 'img2', src: 'images/photo2.jpg', alt: 'Photo 2', albumId: 'tournaments' },
+      { id: 'img3', src: 'images/photo3.jpg', alt: 'Photo 3', albumId: 'events' },
+      { id: 'img4', src: 'images/photo4.jpg', alt: 'Photo 4', albumId: 'all' }
+    ];
+    
+    // Constants
+    const ALBUMS_STORAGE_KEY = 'photo_albums';
+    const PHOTOS_STORAGE_KEY = 'photo_albums_photos';
+    let currentAlbumId = 'all';
+    
+    // Initialize
+    initializeAlbums();
+    loadAlbums();
+    loadPhotos();
+    
+    // Event Listeners
+    createAlbumButton.onclick = function() {
+      openModal();
+    };
+    
+    modalClose.onclick = function() {
+      closeModal();
+    };
+    
+    cancelAlbum.onclick = function() {
+      closeModal();
+    };
+    
+    createAlbum.onclick = function() {
+      createNewAlbum();
+    };
+    
+    // Close modal when clicking outside
+    window.onclick = function(event) {
+      if (event.target === modal) {
+        closeModal();
       }
+    };
+    
+    // Functions
+    function openModal() {
+      modal.style.display = 'flex';
+      albumNameInput.focus();
+    }
+    
+    function closeModal() {
+      modal.style.display = 'none';
+      albumNameInput.value = '';
+      albumDescInput.value = '';
+    }
+    
+    function showMessage(message, type) {
+      messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
       
-      /**
-       * Show gallery login overlay
-       */
-      function showGalleryLogin() {
-        const loginOverlay = document.createElement('div');
-        loginOverlay.id = 'login-overlay';
-        
-        const loginBox = document.createElement('div');
-        loginBox.id = 'login-box';
-        
-        const title = document.createElement('h2');
-        title.textContent = 'Enter Password';
-        
-        const passwordInput = document.createElement('input');
-        passwordInput.type = 'password';
-        passwordInput.id = 'pw-input';
-        passwordInput.placeholder = 'Password';
-        
-        const errorMsg = document.createElement('div');
-        errorMsg.id = 'error-msg';
-        errorMsg.textContent = 'Incorrect password';
-        errorMsg.style.color = 'red';
-        errorMsg.style.fontSize = '0.9rem';
-        errorMsg.style.display = 'none';
-        errorMsg.style.marginTop = '0.5rem';
-        
-        const submitBtn = document.createElement('button');
-        submitBtn.id = 'pw-submit';
-        submitBtn.textContent = 'Unlock Gallery';
-        submitBtn.className = 'btn';
-        submitBtn.style.marginTop = '1rem';
-        
-        loginBox.appendChild(title);
-        loginBox.appendChild(passwordInput);
-        loginBox.appendChild(errorMsg);
-        loginBox.appendChild(submitBtn);
-        
-        loginOverlay.appendChild(loginBox);
-        document.body.appendChild(loginOverlay);
-        
-        // Focus password input
-        setTimeout(() => passwordInput.focus(), 100);
-        
-        // Handle login events
-        submitBtn.addEventListener('click', handleLogin);
-        passwordInput.addEventListener('keypress', e => {
-          if (e.key === 'Enter') handleLogin();
-        });
-        
-        function handleLogin() {
-          const password = passwordInput.value;
-          
-          BBB_AUTH.login('gallery', password)
-            .then(() => {
-              // Login successful
-              loginOverlay.remove();
-              initializeGallery();
-            })
-            .catch(err => {
-              // Login failed
-              console.error('Login error:', err);
-              errorMsg.style.display = 'block';
-            });
-        }
+      // Clear message after 3 seconds
+      setTimeout(() => {
+        messageContainer.innerHTML = '';
+      }, 3000);
+    }
+    
+    function initializeAlbums() {
+      // Check if albums exist in storage
+      const albums = getAlbums();
+      
+      if (albums.length === 0) {
+        // Initialize with defaults
+        saveAlbums(DEFAULT_ALBUMS);
       }
+    }
+    
+    function getAlbums() {
+      try {
+        const albums = localStorage.getItem(ALBUMS_STORAGE_KEY);
+        return albums ? JSON.parse(albums) : [];
+      } catch (error) {
+        console.error('Error getting albums:', error);
+        return [];
+      }
+    }
+    
+    function saveAlbums(albums) {
+      try {
+        localStorage.setItem(ALBUMS_STORAGE_KEY, JSON.stringify(albums));
+      } catch (error) {
+        console.error('Error saving albums:', error);
+      }
+    }
+    
+    function getPhotos() {
+      try {
+        const photos = localStorage.getItem(PHOTOS_STORAGE_KEY);
+        return photos ? JSON.parse(photos) : DEFAULT_IMAGES;
+      } catch (error) {
+        console.error('Error getting photos:', error);
+        return DEFAULT_IMAGES;
+      }
+    }
+    
+    function savePhotos(photos) {
+      try {
+        localStorage.setItem(PHOTOS_STORAGE_KEY, JSON.stringify(photos));
+      } catch (error) {
+        console.error('Error saving photos:', error);
+      }
+    }
+    
+    function loadAlbums() {
+      const albums = getAlbums();
+      albumsContainer.innerHTML = '';
       
-      /**
-       * Initialize gallery after authentication
-       */
-      function initializeGallery() {
-        // Create header
-        const headerElements = BBB_UI.createHeader({
-          fixed: true,
-          showHomeLinkText: true
-        });
+      albums.forEach(album => {
+        // Get photo count for this album
+        const photos = getPhotos();
+        let count = 0;
         
-        document.body.insertBefore(headerElements.header, document.body.firstChild);
+        if (album.id === 'all') {
+          count = photos.length;
+        } else {
+          count = photos.filter(photo => photo.albumId === album.id).length;
+        }
         
-        // Get main content element
-        const main = document.getElementById('main');
-        main.appendChild(headerElements.mainWrapper);
+        // Update count
+        album.count = count;
         
-        // Create page content
-        const mainContent = document.createElement('div');
+        // Create album card
+        const albumCard = document.createElement('div');
+        albumCard.className = 'album-card';
         
-        // Create page title
-        const titleContainer = BBB_UI.createPageTitle({
-          title: 'Birdie Bush Bandits',
-          showFoundedText: true,
-          showGolfballs: true
-        });
-        mainContent.appendChild(titleContainer);
+        // Add active state if this is the current album
+        if (album.id === currentAlbumId) {
+          albumCard.style.borderLeft = '4px solid #004d00';
+        }
         
-        // Add page subtitle
-        const subtitle = document.createElement('h2');
-        subtitle.textContent = 'Photo Gallery';
-        subtitle.id = 'gallery-title';
-        mainContent.appendChild(subtitle);
+        const thumbnail = document.createElement('div');
+        thumbnail.className = 'album-thumbnail';
         
-        // Create status message container
-        const statusMessage = BBB_UI.createStatusMessage();
-        mainContent.appendChild(statusMessage);
+        // Try to get first image from album as thumbnail
+        if (album.id === 'all' && photos.length > 0) {
+          thumbnail.style.backgroundImage = `url('${photos[0].src}')`;
+        } else {
+          const albumPhotos = photos.filter(photo => photo.albumId === album.id);
+          if (albumPhotos.length > 0) {
+            thumbnail.style.backgroundImage = `url('${albumPhotos[0].src}')`;
+          } else {
+            // Default thumbnail
+            thumbnail.style.backgroundColor = '#' + Math.floor(Math.random()*16777215).toString(16);
+          }
+        }
         
-        // Add description text
-        const description = document.createElement('p');
-        description.className = 'gallery-description';
-        description.textContent = 'Browse photos from our golf outings and events. Click on any image to view it in full size.';
-        mainContent.appendChild(description);
+        const info = document.createElement('div');
+        info.className = 'album-info';
         
-        // Create filter/search bar
-        const filterBar = createFilterBar();
-        mainContent.appendChild(filterBar);
+        const title = document.createElement('div');
+        title.className = 'album-title';
+        title.textContent = album.title;
         
-        // Image upload section
-        const uploadSection = document.createElement('div');
-        uploadSection.className = 'upload-section';
+        const countElement = document.createElement('div');
+        countElement.className = 'album-count';
+        countElement.textContent = `${count} photos`;
         
-        const uploadLabel = document.createElement('label');
-        uploadLabel.htmlFor = 'image-upload';
-        uploadLabel.className = 'upload-label btn';
-        uploadLabel.textContent = 'Upload Photos';
+        info.appendChild(title);
+        info.appendChild(countElement);
         
-        const uploadInput = document.createElement('input');
-        uploadInput.type = 'file';
-        uploadInput.id = 'image-upload';
-        uploadInput.className = 'upload-input';
-        uploadInput.setAttribute('accept', 'image/*');
-        uploadInput.setAttribute('multiple', 'true');
-        uploadInput.style.display = 'none';
+        albumCard.appendChild(thumbnail);
+        albumCard.appendChild(info);
         
-        uploadSection.appendChild(uploadLabel);
-        uploadSection.appendChild(uploadInput);
-        mainContent.appendChild(uploadSection);
-        
-        // Info message about cloudflare
-        const infoMessage = document.createElement('div');
-        infoMessage.className = 'info-message';
-        infoMessage.textContent = 'Gallery images are now stored in the cloud for better performance and reliability.';
-        mainContent.appendChild(infoMessage);
-        
-        // Add albums section
-        const albumsSection = createAlbumsSection();
-        mainContent.appendChild(albumsSection);
-        
-        // Upload progress indicator
-        const progressContainer = document.createElement('div');
-        progressContainer.className = 'upload-progress';
-        progressContainer.id = 'upload-progress';
-        
-        const progressText = document.createElement('div');
-        progressText.id = 'progress-text';
-        progressText.textContent = 'Uploading photos...';
-        
-        const progressBar = document.createElement('div');
-        progressBar.className = 'progress-bar';
-        
-        const progressBarInner = document.createElement('div');
-        progressBarInner.className = 'progress-bar-inner';
-        progressBarInner.id = 'progress-bar-inner';
-        
-        progressBar.appendChild(progressBarInner);
-        progressContainer.appendChild(progressText);
-        progressContainer.appendChild(progressBar);
-        mainContent.appendChild(progressContainer);
-        
-        // Gallery container
-        const galleryContainer = document.createElement('div');
-        galleryContainer.id = 'gallery';
-        galleryContainer.className = 'gallery';
-        mainContent.appendChild(galleryContainer);
-        
-        // Lightbox for image viewing
-        const lightbox = document.createElement('div');
-        lightbox.id = 'lightbox';
-        lightbox.className = 'lightbox';
-        
-        const lightboxClose = document.createElement('span');
-        lightboxClose.className = 'lightbox-close';
-        lightboxClose.innerHTML = '&times;';
-        
-        const lightboxImg = document.createElement('img');
-        lightboxImg.className = 'lightbox-img';
-        lightboxImg.id = 'lightbox-img';
-        lightboxImg.setAttribute('src', '');
-        lightboxImg.setAttribute('alt', '');
-        
-        const lightboxCaption = document.createElement('div');
-        lightboxCaption.id = 'lightbox-caption';
-        lightboxCaption.className = 'lightbox-caption';
-        
-        lightbox.appendChild(lightboxClose);
-        lightbox.appendChild(lightboxImg);
-        lightbox.appendChild(lightboxCaption);
-        mainContent.appendChild(lightbox);
-        
-        // Add content to main wrapper
-        headerElements.mainWrapper.appendChild(mainContent);
-        
-        // Initialize albums
-        initializeAlbums();
-        
-        // Load gallery images
-        loadGalleryImages();
-        
-        // Setup event handlers
-        setupEventHandlers();
-        
-        // Setup create album modal
-        setupCreateAlbumModal();
-        
-        /**
-         * Initialize albums from local storage or create defaults
-         */
-        function initializeAlbums() {
-          let albums = getAlbums();
+        // Add click handler
+        albumCard.onclick = function() {
+          currentAlbumId = album.id;
+          galleryTitle.textContent = album.title;
+          loadPhotos();
           
-          // If no albums, initialize with defaults
-          if (albums.length === 0) {
-            saveAlbums(DEFAULT_ALBUMS);
-          }
-        }
-        
-        /**
-         * Get albums from local storage
-         * @returns {Array} - Albums
-         */
-        function getAlbums() {
-          try {
-            return JSON.parse(localStorage.getItem(ALBUMS_STORAGE_KEY) || '[]');
-          } catch (err) {
-            console.error('Error getting albums from localStorage:', err);
-            return [];
-          }
-        }
-        
-        /**
-         * Save albums to local storage
-         * @param {Array} albums - Albums to save
-         */
-        function saveAlbums(albums) {
-          try {
-            localStorage.setItem(ALBUMS_STORAGE_KEY, JSON.stringify(albums));
-          } catch (err) {
-            console.error('Error saving albums to localStorage:', err);
-          }
-        }
-        
-        /**
-         * Get photo album mappings (which photos belong to which albums)
-         * @returns {Object} - Photo album mappings
-         */
-        function getPhotoAlbumMappings() {
-          try {
-            return JSON.parse(localStorage.getItem(PHOTO_ALBUMS_KEY) || '{}');
-          } catch (err) {
-            console.error('Error getting photo album mappings:', err);
-            return {};
-          }
-        }
-        
-        /**
-         * Save photo album mappings
-         * @param {Object} mappings - Photo album mappings
-         */
-        function savePhotoAlbumMappings(mappings) {
-          try {
-            localStorage.setItem(PHOTO_ALBUMS_KEY, JSON.stringify(mappings));
-          } catch (err) {
-            console.error('Error saving photo album mappings:', err);
-          }
-        }
-        
-        /**
-         * Add photo to album
-         * @param {string} photoId - Photo ID
-         * @param {string} albumId - Album ID
-         */
-        function addPhotoToAlbum(photoId, albumId) {
-          const mappings = getPhotoAlbumMappings();
-          
-          if (!mappings[photoId]) {
-            mappings[photoId] = [];
-          }
-          
-          // Add to album if not already in it
-          if (!mappings[photoId].includes(albumId)) {
-            mappings[photoId].push(albumId);
-            savePhotoAlbumMappings(mappings);
-          }
-        }
-        
-        /**
-         * Remove photo from album
-         * @param {string} photoId - Photo ID
-         * @param {string} albumId - Album ID
-         */
-        function removePhotoFromAlbum(photoId, albumId) {
-          const mappings = getPhotoAlbumMappings();
-          
-          if (mappings[photoId]) {
-            mappings[photoId] = mappings[photoId].filter(id => id !== albumId);
-            savePhotoAlbumMappings(mappings);
-          }
-        }
-        
-        /**
-         * Get photos in album
-         * @param {string} albumId - Album ID
-         * @returns {Array} - Array of photo IDs
-         */
-        function getPhotosInAlbum(albumId) {
-          // Special case: 'all' album includes all photos
-          if (albumId === 'all') {
-            return null; // null means all photos
-          }
-          
-          const mappings = getPhotoAlbumMappings();
-          const photoIds = [];
-          
-          // Find all photos that belong to this album
-          Object.entries(mappings).forEach(([photoId, albums]) => {
-            if (albums.includes(albumId)) {
-              photoIds.push(photoId);
-            }
+          // Update active state
+          document.querySelectorAll('.album-card').forEach(card => {
+            card.style.borderLeft = card === albumCard ? '4px solid #004d00' : 'none';
           });
           
-          return photoIds;
-        }
-        
-        /**
-         * Get albums for a photo
-         * @param {string} photoId - Photo ID
-         * @returns {Array} - Array of album IDs
-         */
-        function getAlbumsForPhoto(photoId) {
-          const mappings = getPhotoAlbumMappings();
-          return mappings[photoId] || [];
-        }
-        
-        /**
-         * Setup create album modal
-         */
-        function setupCreateAlbumModal() {
-          const modal = document.getElementById('create-album-modal');
-          const closeBtn = modal.querySelector('.modal-close');
-          const cancelBtn = document.getElementById('create-album-cancel');
-          const submitBtn = document.getElementById('create-album-submit');
-          const nameInput = document.getElementById('album-name');
-          const descInput = document.getElementById('album-description');
-          
-          // Close modal when clicking close or cancel
-          closeBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-          });
-          
-          cancelBtn.addEventListener('click', () => {
-            modal.style.display = 'none';
-          });
-          
-          // Submit form
-          submitBtn.addEventListener('click', () => {
-            const name = nameInput.value.trim();
-            const description = descInput.value.trim();
-            
-            if (!name) {
-              BBB_UTILS.showMessage('Please enter an album name', 'error');
-              return;
-            }
-            
-            // Create new album
-            const album = {
-              id: 'album_' + Date.now(),
-              title: name,
-              description: description || name,
-              thumbnail: 'images/photo1.jpg' // Default thumbnail
-            };
-            
-            // Add to albums
-            const albums = getAlbums();
-            albums.push(album);
-            saveAlbums(albums);
-            
-            // Reset form
-            nameInput.value = '';
-            descInput.value = '';
-            
-            // Close modal
-            modal.style.display = 'none';
-            
-            // Show success message
-            BBB_UTILS.showMessage('Album created successfully', 'success');
-            
-            // Refresh albums section
-            refreshAlbumsSection();
-          });
-        }
-        
-        /**
-         * Refresh the albums section
-         */
-        function refreshAlbumsSection() {
-          const albumsSection = document.querySelector('.albums-section');
-          if (albumsSection) {
-            const newAlbumsSection = createAlbumsSection();
-            albumsSection.parentNode.replaceChild(newAlbumsSection, albumsSection);
-          }
-        }
-        
-        /**
-         * Create the albums section with albums from storage
-         */
-        function createAlbumsSection() {
-          // Create albums container
-          const albumsSection = document.createElement('div');
-          albumsSection.className = 'albums-section';
-          
-          // Add title and create album button
-          const albumsActions = document.createElement('div');
-          albumsActions.className = 'album-actions';
-          
-          const albumsTitle = document.createElement('h3');
-          albumsTitle.className = 'albums-title';
-          albumsTitle.textContent = 'Photo Albums';
-          
-          const createAlbumBtn = document.createElement('button');
-          createAlbumBtn.className = 'btn';
-          createAlbumBtn.textContent = 'Create New Album';
-          createAlbumBtn.addEventListener('click', () => {
-            const modal = document.getElementById('create-album-modal');
-            modal.style.display = 'flex';
-          });
-          
-          albumsActions.appendChild(albumsTitle);
-          albumsActions.appendChild(createAlbumBtn);
-          albumsSection.appendChild(albumsActions);
-          
-          // Create albums grid
-          const albumsGrid = document.createElement('div');
-          albumsGrid.className = 'albums-grid';
-          
-          // Get albums from storage
-          const albums = getAlbums();
-          
-          // Create album cards
-          albums.forEach(album => {
-            const albumCard = document.createElement('div');
-            albumCard.className = 'album-card';
-            albumCard.dataset.albumId = album.id;
-            
-            // Add selected state to current album
-            if (album.id === currentAlbum) {
-              albumCard.style.borderLeft = '4px solid var(--bbb-primary)';
-            }
-            
-            const albumThumb = document.createElement('div');
-            albumThumb.className = 'album-thumbnail';
-            albumThumb.style.backgroundImage = `url('${album.thumbnail}')`;
-            
-            const albumInfo = document.createElement('div');
-            albumInfo.className = 'album-info';
-            
-            const albumTitle = document.createElement('div');
-            albumTitle.className = 'album-title';
-            albumTitle.textContent = album.title;
-            
-            // Count photos in album
-            let photoCount = 0;
-            if (album.id === 'all') {
-              // For 'all' album, count all photos
-              const mappings = getPhotoAlbumMappings();
-              photoCount = Object.keys(mappings).length;
-              if (photoCount === 0) {
-                photoCount = '0';
-              }
-            } else {
-              // For other albums, count specific photos
-              const photosInAlbum = getPhotosInAlbum(album.id);
-              photoCount = photosInAlbum.length;
-            }
-            
-            const albumCount = document.createElement('div');
-            albumCount.className = 'album-count';
-            albumCount.textContent = `${photoCount} photos`;
-            
-            albumInfo.appendChild(albumTitle);
-            albumInfo.appendChild(albumCount);
-            
-            albumCard.appendChild(albumThumb);
-            albumCard.appendChild(albumInfo);
-            
-            // Add click handler to view album
-            albumCard.onclick = function() {
-              // Set current album
-              currentAlbum = album.id;
-              
-              // Update gallery title
-              const galleryTitle = document.getElementById('gallery-title');
-              if (galleryTitle) {
-                galleryTitle.textContent = `Photo Gallery - ${album.title}`;
-              }
-              
-              // Reload images with album filter
-              loadGalleryImages();
-              
-              // Update active state in albums
-              document.querySelectorAll('.album-card').forEach(card => {
-                if (card.dataset.albumId === album.id) {
-                  card.style.borderLeft = '4px solid var(--bbb-primary)';
-                } else {
-                  card.style.borderLeft = 'none';
-                }
-              });
-              
-              // Show info message
-              BBB_UTILS.showMessage(`Viewing album: ${album.title}`, 'info');
-            };
-            
-            albumsGrid.appendChild(albumCard);
-          });
-          
-          albumsSection.appendChild(albumsGrid);
-          return albumsSection;
-        }
-        
-        /**
-         * Create filter/search bar
-         */
-        function createFilterBar() {
-          const filterBar = document.createElement('div');
-          filterBar.className = 'filter-bar';
-          
-          // Search
-          const searchContainer = document.createElement('div');
-          searchContainer.className = 'search-container';
-          
-          const searchIcon = document.createElement('span');
-          searchIcon.className = 'search-icon';
-          searchIcon.innerHTML = '🔍';
-          
-          const searchInput = document.createElement('input');
-          searchInput.type = 'text';
-          searchInput.className = 'search-input';
-          searchInput.placeholder = 'Search gallery...';
-          searchInput.id = 'gallery-search';
-          
-          searchContainer.appendChild(searchIcon);
-          searchContainer.appendChild(searchInput);
-          
-          // Sort
-          const sortContainer = document.createElement('div');
-          sortContainer.className = 'sort-container';
-          
-          const sortLabel = document.createElement('span');
-          sortLabel.className = 'sort-label';
-          sortLabel.textContent = 'Sort by:';
-          
-          const sortSelect = document.createElement('select');
-          sortSelect.className = 'sort-select';
-          sortSelect.id = 'gallery-sort';
-          
-          const sortOptions = [
-            { value: 'newest', text: 'Newest first' },
-            { value: 'oldest', text: 'Oldest first' },
-            { value: 'name', text: 'Name (A-Z)' }
-          ];
-          
-          sortOptions.forEach(option => {
-            const optionEl = document.createElement('option');
-            optionEl.value = option.value;
-            optionEl.textContent = option.text;
-            sortSelect.appendChild(optionEl);
-          });
-          
-          sortContainer.appendChild(sortLabel);
-          sortContainer.appendChild(sortSelect);
-          
-          filterBar.appendChild(searchContainer);
-          filterBar.appendChild(sortContainer);
-          
-          return filterBar;
-        }
-        
-        /**
-         * Mock Cloudflare API for testing
-         * In a real implementation, you would use your actual API endpoint
-         */
-        const mockCloudflareAPI = {
-          // Get all images
-          getImages: function() {
-            return [
-              { id: 'pre_1', src: 'images/photo1.jpg', alt: 'Band on the green', uploaded_at: '2023-06-15T12:30:00Z', uploaded_by: 'admin' },
-              { id: 'pre_2', src: 'images/photo2.jpg', alt: 'Group shot', uploaded_at: '2023-06-20T14:45:00Z', uploaded_by: 'admin' },
-              { id: 'pre_3', src: 'images/photo3.jpg', alt: 'Trophy presentation', uploaded_at: '2023-07-05T10:15:00Z', uploaded_by: 'admin' },
-              { id: 'pre_4', src: 'images/photo4.jpg', alt: 'Action shot', uploaded_at: '2023-07-10T16:20:00Z', uploaded_by: 'admin' }
-            ];
-          }
+          showMessage(`Viewing album: ${album.title}`, 'info');
         };
         
-        /**
-         * Load gallery images from storage or mock API
-         */
-        function loadGalleryImages() {
-          BBB_UTILS.showMessage('Loading gallery images...', 'info');
-          
-          // Check sort and search options
-          const sortSelect = document.getElementById('gallery-sort');
-          const searchInput = document.getElementById('gallery-search');
-          
-          const sortValue = sortSelect ? sortSelect.value : 'newest';
-          const searchValue = searchInput ? searchInput.value.trim() : '';
-          
-          // For demonstration, use mock data
-          const allImages = mockCloudflareAPI.getImages();
-          let images = [...allImages];
-          
-          // Filter by album if not "all"
-          if (currentAlbum !== 'all') {
-            const photoIds = getPhotosInAlbum(currentAlbum);
-            if (photoIds && photoIds.length > 0) {
-              images = images.filter(img => photoIds.includes(img.id));
-            }
-          }
-          
-          // Filter by search term if provided
-          if (searchValue) {
-            images = images.filter(img => 
-              img.alt.toLowerCase().includes(searchValue.toLowerCase())
-            );
-          }
-          
-          // Sort images
-          if (sortValue === 'oldest') {
-            images.sort((a, b) => new Date(a.uploaded_at) - new Date(b.uploaded_at));
-          } else if (sortValue === 'name') {
-            images.sort((a, b) => a.alt.localeCompare(b.alt));
-          } else {
-            // Default: newest first
-            images.sort((a, b) => new Date(b.uploaded_at) - new Date(a.uploaded_at));
-          }
-          
-          // Format images for rendering
-          const formattedImages = images.map(img => ({
-            id: img.id,
-            src: img.src, // In a real implementation, this would be the full URL
-            alt: img.alt || 'Gallery image',
-            uploadedAt: img.uploaded_at,
-            uploadedBy: img.uploaded_by
-          }));
-          
-          // Render gallery
-          renderGallery(formattedImages);
-          
-          // Hide loading message
-          BBB_UTILS.showMessage('', 'info');
-        }
-        
-        /**
-         * Render gallery with images
-         * @param {Array} images - Array of image objects
-         */
-        function renderGallery(images) {
-          const galleryElement = document.getElementById('gallery');
-          galleryElement.innerHTML = '';
-          
-          // Create gallery
-          images.forEach(image => {
-            const imgContainer = document.createElement('div');
-            imgContainer.className = 'gallery-img-container';
-            imgContainer.dataset.id = image.id;
-            
-            const img = document.createElement('img');
-            img.src = image.src;
-            img.alt = image.alt || 'Gallery image';
-            img.className = 'gallery-img';
-            img.setAttribute('loading', 'lazy');
-            
-            // Add timestamp info
-            const imageInfo = document.createElement('div');
-            imageInfo.className = 'image-info';
-            
-            let uploadDate = 'Unknown date';
-            if (image.uploadedAt) {
-              uploadDate = new Date(image.uploadedAt).toLocaleDateString();
-            }
-            
-            imageInfo.textContent = uploadDate;
-            
-            // Add album badge if not in 'all' album view
-            if (currentAlbum !== 'all') {
-              const albumBadge = document.createElement('div');
-              albumBadge.className = 'album-badge';
-              
-              // Get album name
-              const albums = getAlbums();
-              const album = albums.find(a => a.id === currentAlbum);
-              if (album) {
-                albumBadge.textContent = album.title;
-              } else {
-                albumBadge.textContent = 'Album';
-              }
-              
-              imgContainer.appendChild(albumBadge);
-            }
-            
-            // Add action buttons
-            const imageActions = document.createElement('div');
-            imageActions.className = 'image-actions';
-            
-            // View button
-            const viewBtn = document.createElement('button');
-            viewBtn.className = 'image-action-btn view-btn';
-            viewBtn.innerHTML = '👁️ View';
-            viewBtn.onclick = function() {
-              openLightbox(img);
-            };
-            
-            // Add to album button
-            const albumBtn = document.createElement('button');
-            albumBtn.className = 'image-action-btn';
-            albumBtn.innerHTML = '📁 Album';
-            albumBtn.onclick = function(e) {
-              e.stopPropagation(); // Prevent lightbox
-              showAlbumSelector(image.id, imgContainer);
-            };
-            
-            // Delete button (only show if admin or image was uploaded by current user)
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'image-action-btn delete-btn';
-            deleteBtn.innerHTML = '🗑️ Delete';
-            
-            const canDelete = BBB_AUTH.hasRole('admin') || 
-                            (image.uploadedBy && BBB_AUTH.currentUser && 
-                             image.uploadedBy === BBB_AUTH.currentUser.id);
-            
-            if (canDelete) {
-              deleteBtn.onclick = function(e) {
-                e.stopPropagation(); // Prevent lightbox
-                deleteImage(image.id);
-              };
-              imageActions.appendChild(deleteBtn);
-            }
-            
-            imageActions.appendChild(albumBtn);
-            imageActions.appendChild(viewBtn);
-            
-            // Add click handler for lightbox
-            img.onclick = function() {
-              openLightbox(img);
-            };
-            
-            imgContainer.appendChild(img);
-            imgContainer.appendChild(imageInfo);
-            imgContainer.appendChild(imageActions);
-            
-            galleryElement.appendChild(imgContainer);
-          });
-          
-          // If no images, show message
-          if (images.length === 0) {
-            const noImages = document.createElement('div');
-            noImages.className = 'empty-gallery';
-            
-            const noImagesIcon = document.createElement('div');
-            noImagesIcon.innerHTML = '📷';
-            noImagesIcon.style.fontSize = '3rem';
-            noImagesIcon.style.marginBottom = '1rem';
-            
-            const noImagesText = document.createElement('p');
-            if (currentAlbum === 'all') {
-              noImagesText.textContent = 'No images in the gallery yet. Upload some photos to get started!';
-            } else {
-              noImagesText.textContent = 'No images in this album yet. Add photos from the gallery!';
-            }
-            
-            noImages.appendChild(noImagesIcon);
-            noImages.appendChild(noImagesText);
-            galleryElement.appendChild(noImages);
-          }
-        }
-        
-        /**
-         * Show album selector dropdown for an image
-         * @param {string} photoId - Photo ID
-         * @param {HTMLElement} container - Container element
-         */
-        function showAlbumSelector(photoId, container) {
-          // Remove any existing album selectors
-          document.querySelectorAll('.album-selector').forEach(el => el.remove());
-          
-          // Create album selector
-          const albumSelector = document.createElement('div');
-          albumSelector.className = 'album-selector';
-          
-          // Create album dropdown
-          const dropdown = document.createElement('div');
-          dropdown.className = 'album-dropdown';
-          dropdown.style.display = 'block';
-          
-          // Get all albums
-          const albums = getAlbums();
-          
-          // Get albums this photo is in
-          const photoAlbums = getAlbumsForPhoto(photoId);
-          
-          // Add album options (except 'all')
-          albums.filter(album => album.id !== 'all').forEach(album => {
-            const option = document.createElement('div');
-            option.className = 'album-option';
-            
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.id = `album-option-${album.id}`;
-            checkbox.checked = photoAlbums.includes(album.id);
-            checkbox.style.marginRight = '8px';
-            
-            // Add change handler
-            checkbox.onchange = function() {
-              if (checkbox.checked) {
-                addPhotoToAlbum(photoId, album.id);
-              } else {
-                removePhotoFromAlbum(photoId, album.id);
-              }
-              
-              // Show success message
-              if (checkbox.checked) {
-                BBB_UTILS.showMessage(`Added to album: ${album.title}`, 'success');
-              } else {
-                BBB_UTILS.showMessage(`Removed from album: ${album.title}`, 'success');
-              }
-              
-              // Update album counts
-              refreshAlbumsSection();
-            };
-            
-            const label = document.createElement('label');
-            label.setAttribute('for', `album-option-${album.id}`);
-            label.textContent = album.title;
-            label.style.cursor = 'pointer';
-            
-            option.appendChild(checkbox);
-            option.appendChild(label);
-            dropdown.appendChild(option);
-          });
-          
-          // Add close option
-          const closeOption = document.createElement('div');
-          closeOption.className = 'album-option';
-          closeOption.textContent = 'Close';
-          closeOption.style.textAlign = 'center';
-          closeOption.style.borderTop = '1px solid #eee';
-          closeOption.style.marginTop = '8px';
-          closeOption.style.paddingTop = '8px';
-          closeOption.style.cursor = 'pointer';
-          closeOption.onclick = function() {
-            albumSelector.remove();
-          };
-          dropdown.appendChild(closeOption);
-          
-          // Add dropdown to selector
-          albumSelector.appendChild(dropdown);
-          
-          // Add selector to container
-          container.appendChild(albumSelector);
-          
-          // Close when clicking outside
-          document.addEventListener('click', function closeDropdown(e) {
-            if (!albumSelector.contains(e.target) && 
-                !container.contains(e.target) || 
-                e.target === container) {
-              albumSelector.remove();
-              document.removeEventListener('click', closeDropdown);
-            }
-          });
-        }
-        
-        /**
-         * Setup event handlers for gallery
-         */
-        function setupEventHandlers() {
-          // Upload handler
-          const uploadInput = document.getElementById('image-upload');
-          uploadInput.onchange = function(e) {
-            handleImageUpload(e);
-          };
-          
-          // Search handler
-          const searchInput = document.getElementById('gallery-search');
-          searchInput.oninput = debounce(function() {
-            loadGalleryImages();
-          }, 500);
-          
-          // Sort handler
-          const sortSelect = document.getElementById('gallery-sort');
-          sortSelect.onchange = function() {
-            loadGalleryImages();
-          };
-          
-          // Lightbox close
-          const lightboxClose = document.querySelector('.lightbox-close');
-          lightboxClose.onclick = function() {
-            document.getElementById('lightbox').style.display = 'none';
-          };
-          
-          // Click outside lightbox to close
-          document.getElementById('lightbox').onclick = function(e) {
-            if (e.target === document.getElementById('lightbox')) {
-              document.getElementById('lightbox').style.display = 'none';
-            }
-          };
-          
-          // ESC key to close lightbox
-          document.onkeyup = function(e) {
-            if (e.key === 'Escape') {
-              document.getElementById('lightbox').style.display = 'none';
-              
-              // Also close any open album selector dropdowns
-              document.querySelectorAll('.album-selector').forEach(el => el.remove());
-              
-              // Also close modal if it's open
-              document.getElementById('create-album-modal').style.display = 'none';
-            }
-          };
-        }
-        
-        /**
-         * Debounce function to limit execution frequency
-         * @param {Function} func - Function to debounce
-         * @param {number} delay - Delay in milliseconds
-         * @returns {Function} - Debounced function
-         */
-        function debounce(func, delay = 300) {
-          let timerId;
-          return function(...args) {
-            clearTimeout(timerId);
-            timerId = setTimeout(() => {
-              func.apply(this, args);
-            }, delay);
-          };
-        }
-        
-        /**
-         * Open lightbox with image
-         * @param {HTMLElement} img - Image element to show in lightbox
-         */
-        function openLightbox(img) {
-          const lightbox = document.getElementById('lightbox');
-          const lightboxImg = document.getElementById('lightbox-img');
-          const lightboxCaption = document.getElementById('lightbox-caption');
-          
-          lightboxImg.src = img.src;
-          lightboxCaption.textContent = img.alt;
-          lightbox.style.display = 'flex';
-        }
-        
-        /**
-         * Delete an image
-         * @param {string} imageId - Image ID to delete
-         */
-        function deleteImage(imageId) {
-          if (!confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
-            return;
-          }
-          
-          BBB_UTILS.showMessage('Deleting image...', 'info');
-          
-          // For demo, just remove from DOM and update album counts
-          const imgContainer = document.querySelector(`.gallery-img-container[data-id="${imageId}"]`);
-          if (imgContainer) {
-            imgContainer.remove();
-          }
-          
-          // Remove from album mappings
-          const mappings = getPhotoAlbumMappings();
-          delete mappings[imageId];
-          savePhotoAlbumMappings(mappings);
-          
-          // Update album counts
-          refreshAlbumsSection();
-          
-          // Show success message
-          BBB_UTILS.showMessage('Image deleted successfully', 'success');
-          
-          // Reload gallery if needed
-          if (document.querySelectorAll('.gallery-img-container').length === 0) {
-            loadGalleryImages();
-          }
-        }
-        
-        /**
-         * Handle image upload
-         * @param {Event} e - Change event
-         */
-        function handleImageUpload(e) {
-          const files = Array.from(e.target.files);
-          
-          if (files.length === 0) {
-            return;
-          }
-          
-          // Show progress container
-          const progressContainer = document.getElementById('upload-progress');
-          const progressBarInner = document.getElementById('progress-bar-inner');
-          const progressText = document.getElementById('progress-text');
-          
-          progressContainer.style.display = 'block';
-          progressBarInner.style.width = '0%';
-          progressText.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}...`;
-          
-          // Simulate file upload progress for demo
-          let progress = 0;
-          const interval = setInterval(() => {
-            progress += 5;
-            progressBarInner.style.width = `${progress}%`;
-            progressText.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}... ${progress}%`;
-            
-            if (progress >= 100) {
-              clearInterval(interval);
-              
-              // Hide progress after a delay
-              setTimeout(() => {
-                progressContainer.style.display = 'none';
-                
-                // Add random IDs to images and add to current album
-                if (currentAlbum !== 'all') {
-                  files.forEach(file => {
-                    const photoId = 'photo_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-                    addPhotoToAlbum(photoId, currentAlbum);
-                  });
-                  
-                  // Update album counts
-                  refreshAlbumsSection();
-                }
-                
-                // Show success message
-                if (files.length > 1) {
-                  BBB_UTILS.showMessage(`Successfully uploaded ${files.length} images`, 'success');
-                } else {
-                  BBB_UTILS.showMessage('Image uploaded successfully', 'success');
-                }
-                
-                // Reload gallery
-                loadGalleryImages();
-              }, 500);
-            }
-          }, 100);
-          
-          // Reset file input
-          e.target.value = '';
-        }
+        albumsContainer.appendChild(albumCard);
+      });
+    }
+    
+    function loadPhotos() {
+      const photos = getPhotos();
+      galleryContainer.innerHTML = '';
+      
+      // Filter photos by current album
+      const filteredPhotos = currentAlbumId === 'all' 
+        ? photos 
+        : photos.filter(photo => photo.albumId === currentAlbumId);
+      
+      if (filteredPhotos.length === 0) {
+        galleryContainer.innerHTML = '<p class="text-center">No photos in this album yet.</p>';
+        return;
       }
-    });
+      
+      filteredPhotos.forEach(photo => {
+        const item = document.createElement('div');
+        item.className = 'gallery-item';
+        
+        const img = document.createElement('img');
+        img.src = photo.src;
+        img.alt = photo.alt;
+        img.className = 'gallery-img';
+        
+        item.appendChild(img);
+        galleryContainer.appendChild(item);
+      });
+    }
+    
+    function createNewAlbum() {
+      const name = albumNameInput.value.trim();
+      const description = albumDescInput.value.trim();
+      
+      if (!name) {
+        showMessage('Please enter an album name', 'error');
+        return;
+      }
+      
+      // Create new album
+      const newAlbum = {
+        id: 'album_' + Date.now(),
+        title: name,
+        description: description || name,
+        count: 0
+      };
+      
+      // Save album
+      const albums = getAlbums();
+      albums.push(newAlbum);
+      saveAlbums(albums);
+      
+      // Close modal
+      closeModal();
+      
+      // Reload albums
+      loadAlbums();
+      
+      showMessage('Album created successfully!', 'success');
+    }
   </script>
 </body>
 </html>
