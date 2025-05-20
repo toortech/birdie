@@ -281,6 +281,58 @@
       max-width: 600px;
       text-align: center;
     }
+    
+    /* Albums section styles */
+    .albums-section {
+      margin: 2rem 0;
+    }
+
+    .albums-title {
+      margin-bottom: 1rem;
+      color: var(--bbb-primary);
+      font-weight: bold;
+    }
+
+    .albums-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .album-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+
+    .album-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .album-thumbnail {
+      height: 150px;
+      background-color: #f0f0f0;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .album-info {
+      padding: 1rem;
+    }
+
+    .album-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .album-count {
+      font-size: 0.9rem;
+      color: var(--bbb-text-muted);
+    }
   </style>
 </head>
 <body>
@@ -475,6 +527,10 @@
         infoMessage.textContent = 'Gallery images are now stored in the cloud for better performance and reliability.';
         mainContent.appendChild(infoMessage);
         
+        // Add albums section
+        const albumsSection = createAlbumsSection();
+        mainContent.appendChild(albumsSection);
+        
         // Upload progress indicator
         const progressContainer = document.createElement('div');
         progressContainer.className = 'upload-progress';
@@ -534,6 +590,78 @@
         
         // Setup event handlers
         setupEventHandlers();
+        
+        /**
+         * Create the albums section with predefined albums
+         */
+        function createAlbumsSection() {
+          // Create albums container
+          const albumsSection = document.createElement('div');
+          albumsSection.className = 'albums-section';
+          
+          const albumsTitle = document.createElement('h3');
+          albumsTitle.className = 'albums-title';
+          albumsTitle.textContent = 'Photo Albums';
+          albumsSection.appendChild(albumsTitle);
+          
+          // Create albums grid
+          const albumsGrid = document.createElement('div');
+          albumsGrid.className = 'albums-grid';
+          
+          // Define albums 
+          const albums = [
+            { id: 'all', title: 'All Photos', thumbnail: 'images/photo1.jpg', count: 'All' },
+            { id: 'events', title: 'Golf Events', thumbnail: 'images/photo2.jpg', count: '0' },
+            { id: 'tournaments', title: 'Tournaments', thumbnail: 'images/photo3.jpg', count: '0' },
+            { id: 'members', title: 'Member Photos', thumbnail: 'images/photo4.jpg', count: '0' }
+          ];
+          
+          // Create album cards
+          albums.forEach(album => {
+            const albumCard = document.createElement('div');
+            albumCard.className = 'album-card';
+            albumCard.dataset.albumId = album.id;
+            
+            const albumThumb = document.createElement('div');
+            albumThumb.className = 'album-thumbnail';
+            albumThumb.style.backgroundImage = `url('${album.thumbnail}')`;
+            
+            const albumInfo = document.createElement('div');
+            albumInfo.className = 'album-info';
+            
+            const albumTitle = document.createElement('div');
+            albumTitle.className = 'album-title';
+            albumTitle.textContent = album.title;
+            
+            const albumCount = document.createElement('div');
+            albumCount.className = 'album-count';
+            albumCount.textContent = `${album.count} photos`;
+            
+            albumInfo.appendChild(albumTitle);
+            albumInfo.appendChild(albumCount);
+            
+            albumCard.appendChild(albumThumb);
+            albumCard.appendChild(albumInfo);
+            
+            // Add click handler
+            albumCard.addEventListener('click', () => {
+              // Currently just changes the gallery title
+              const subtitle = document.querySelector('h2');
+              if (subtitle) {
+                subtitle.textContent = `Photo Gallery - ${album.title}`;
+              }
+              
+              // In the future, this could filter images by album
+              BBB_UTILS.showMessage(`Viewing album: ${album.title}`, 'info');
+              loadGalleryImages();
+            });
+            
+            albumsGrid.appendChild(albumCard);
+          });
+          
+          albumsSection.appendChild(albumsGrid);
+          return albumsSection;
+        }
         
         /**
          * Create filter/search bar
@@ -719,7 +847,8 @@
                              image.uploadedBy === BBB_AUTH.currentUser.id);
             
             if (canDelete) {
-              deleteBtn.addEventListener('click', () => {
+              deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent lightbox
                 deleteImage(image.id);
               });
               imageActions.appendChild(deleteBtn);
@@ -840,16 +969,24 @@
           
           BBB_UTILS.showMessage('Deleting image...', 'info');
           
+          console.log("Attempting to delete image:", imageId);
+          console.log("Delete URL:", `${CLOUDFLARE_API}/delete/${imageId}`);
+          
           fetch(`${CLOUDFLARE_API}/delete/${imageId}`, {
-            method: 'DELETE'
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            }
           })
             .then(response => {
+              console.log("Delete response status:", response.status);
               if (!response.ok) {
-                throw new Error(`Error deleting image: ${response.status}`);
+                throw new Error(`Error deleting image: ${response.status} ${response.statusText}`);
               }
               return response.json();
             })
             .then(data => {
+              console.log("Delete response data:", data);
               if (data.success) {
                 BBB_UTILS.showMessage('Image deleted successfully', 'success');
                 
@@ -864,12 +1001,12 @@
                   loadGalleryImages();
                 }
               } else {
-                BBB_UTILS.showMessage('Error deleting image', 'error');
+                BBB_UTILS.showMessage(`Error deleting image: ${data.error || 'Unknown error'}`, 'error');
               }
             })
             .catch(err => {
               console.error('Error deleting image:', err);
-              BBB_UTILS.showMessage('Error deleting image', 'error');
+              BBB_UTILS.showMessage(`Error deleting image: ${err.message}`, 'error');
             });
         }
         
