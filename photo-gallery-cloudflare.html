@@ -60,6 +60,8 @@
       display: flex;
       justify-content: center;
       margin: 1.5rem 0;
+      gap: 1rem;
+      flex-wrap: wrap;
     }
     
     .upload-label {
@@ -291,6 +293,9 @@
       margin-bottom: 1rem;
       color: var(--bbb-primary);
       font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .albums-grid {
@@ -306,6 +311,7 @@
       box-shadow: var(--shadow-md);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
       cursor: pointer;
+      position: relative;
     }
 
     .album-card:hover {
@@ -318,6 +324,7 @@
       background-color: #f0f0f0;
       background-size: cover;
       background-position: center;
+      position: relative;
     }
 
     .album-info {
@@ -332,6 +339,162 @@
     .album-count {
       font-size: 0.9rem;
       color: var(--bbb-text-muted);
+    }
+
+    /* Album actions */
+    .album-actions {
+      position: absolute;
+      top: 0;
+      right: 0;
+      background-color: rgba(0,0,0,0.5);
+      border-bottom-left-radius: 8px;
+      padding: 4px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .album-card:hover .album-actions {
+      opacity: 1;
+    }
+
+    .album-action-btn {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 0.9rem;
+      padding: 4px 8px;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    .album-action-btn:hover {
+      background-color: rgba(255,255,255,0.2);
+    }
+
+    .delete-album-btn {
+      color: #ff6b6b;
+    }
+
+    /* Add album/image modals */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1100;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      border-radius: 8px;
+      max-width: 500px;
+      width: 100%;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .modal-title {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      color: var(--bbb-primary);
+      font-size: 1.5rem;
+      text-align: center;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.5rem;
+      cursor: pointer;
+      border: none;
+      background: none;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 1rem;
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 1rem;
+    }
+
+    .back-button {
+      display: inline-block;
+      margin-bottom: 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      background-color: #f0f0f0;
+      color: #333;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .back-button:hover {
+      background-color: #e0e0e0;
+    }
+
+    /* Badge for current album */
+    .current-album-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      background-color: var(--bbb-secondary);
+      color: white;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      margin-left: 1rem;
+    }
+    
+    /* Empty album state */
+    .empty-album {
+      text-align: center;
+      padding: 3rem;
+      background-color: #f8f9fa;
+      border-radius: 8px;
+      margin-top: 2rem;
+    }
+
+    /* Album selector */
+    .album-selector {
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      font-size: 0.9rem;
+      margin-right: 1rem;
+    }
+    
+    /* Upload to album section */
+    .upload-album-section {
+      display: flex;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .upload-album-label {
+      font-size: 0.9rem;
+      color: #666;
+      margin-right: 0.5rem;
     }
   </style>
 </head>
@@ -360,6 +523,28 @@
   <a href="#main" class="skip-link">Skip to main content</a>
   
   <main id="main"></main>
+
+  <!-- Add Album Modal -->
+  <div id="add-album-modal" class="modal">
+    <div class="modal-content">
+      <button class="modal-close">&times;</button>
+      <h3 class="modal-title">Create New Album</h3>
+      <form id="add-album-form">
+        <div class="form-group">
+          <label for="album-name">Album Name:</label>
+          <input type="text" id="album-name" class="form-control" placeholder="Enter album name" required>
+        </div>
+        <div class="form-group">
+          <label for="album-description">Description (optional):</label>
+          <textarea id="album-description" class="form-control" placeholder="Enter description"></textarea>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn" id="cancel-add-album">Cancel</button>
+          <button type="submit" class="btn">Create Album</button>
+        </div>
+      </form>
+    </div>
+  </div>
   
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -375,6 +560,24 @@
       
       // Cloudflare worker URL - Your actual worker URL
       const CLOUDFLARE_API = 'https://bbb-gallery-worker.cf1demouk.workers.dev';
+      
+      // Default albums (will be supplemented by saved albums in DB)
+      let defaultAlbums = [
+        { id: 'all', title: 'All Photos', description: 'All photos in the gallery', thumbnail: 'images/photo1.jpg', count: 0, default: true },
+        { id: 'events', title: 'Golf Events', description: 'Photos from our golf events', thumbnail: 'images/photo2.jpg', count: 0, default: true },
+        { id: 'tournaments', title: 'Tournaments', description: 'Photos from tournaments', thumbnail: 'images/photo3.jpg', count: 0, default: true },
+        { id: 'members', title: 'Member Photos', description: 'Photos of our members', thumbnail: 'images/photo4.jpg', count: 0, default: true }
+      ];
+      
+      // Track the current album being viewed
+      let currentAlbumId = 'all';
+      
+      // Get URL parameters to see if we need to show a specific album
+      const urlParams = new URLSearchParams(window.location.search);
+      const albumParam = urlParams.get('album');
+      if (albumParam) {
+        currentAlbumId = albumParam;
+      }
       
       // Check if the user has access to the gallery
       const hasGalleryAccess = BBB_AUTH.isAuthenticated && 
@@ -484,6 +687,7 @@
         // Add page subtitle
         const subtitle = document.createElement('h2');
         subtitle.textContent = 'Photo Gallery';
+        subtitle.id = 'gallery-title';
         mainContent.appendChild(subtitle);
         
         // Create status message container
@@ -500,10 +704,47 @@
         const filterBar = createFilterBar();
         mainContent.appendChild(filterBar);
         
+        // Back button when viewing an album (initially hidden)
+        const backButton = document.createElement('a');
+        backButton.href = 'javascript:void(0)';
+        backButton.className = 'back-button';
+        backButton.textContent = '← Back to Albums';
+        backButton.style.display = 'none';
+        backButton.id = 'back-to-albums';
+        backButton.addEventListener('click', () => {
+          showAlbumsView();
+        });
+        mainContent.appendChild(backButton);
+        
         // Image upload section
         const uploadSection = document.createElement('div');
         uploadSection.className = 'upload-section';
         
+        // Add album selector for uploads
+        const uploadAlbumSection = document.createElement('div');
+        uploadAlbumSection.className = 'upload-album-section';
+        uploadAlbumSection.style.display = 'none'; // Hide initially, show when viewing album
+        
+        const uploadAlbumLabel = document.createElement('span');
+        uploadAlbumLabel.className = 'upload-album-label';
+        uploadAlbumLabel.textContent = 'Upload to:';
+        
+        const albumSelector = document.createElement('select');
+        albumSelector.className = 'album-selector';
+        albumSelector.id = 'upload-album-selector';
+        
+        // Add album options
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = 'Select Album...';
+        albumSelector.appendChild(defaultOption);
+        
+        // Will be populated when albums are loaded
+        
+        uploadAlbumSection.appendChild(uploadAlbumLabel);
+        uploadAlbumSection.appendChild(albumSelector);
+        
+        // Upload button
         const uploadLabel = document.createElement('label');
         uploadLabel.htmlFor = 'image-upload';
         uploadLabel.className = 'upload-label btn';
@@ -517,8 +758,24 @@
         uploadInput.setAttribute('multiple', 'true');
         uploadInput.style.display = 'none';
         
+        // Create album button (only for admins)
+        const createAlbumButton = document.createElement('button');
+        createAlbumButton.className = 'btn';
+        createAlbumButton.textContent = 'Create Album';
+        createAlbumButton.id = 'create-album-btn';
+        
+        if (BBB_AUTH.hasRole('admin')) {
+          createAlbumButton.style.display = 'inline-block';
+        } else {
+          createAlbumButton.style.display = 'none';
+        }
+        
+        createAlbumButton.addEventListener('click', showAddAlbumModal);
+        
+        uploadSection.appendChild(uploadAlbumSection);
         uploadSection.appendChild(uploadLabel);
         uploadSection.appendChild(uploadInput);
+        uploadSection.appendChild(createAlbumButton);
         mainContent.appendChild(uploadSection);
         
         // Info message about cloudflare
@@ -528,7 +785,21 @@
         mainContent.appendChild(infoMessage);
         
         // Add albums section
-        const albumsSection = createAlbumsSection();
+        const albumsSection = document.createElement('div');
+        albumsSection.className = 'albums-section';
+        albumsSection.id = 'albums-section';
+        
+        const albumsTitle = document.createElement('h3');
+        albumsTitle.className = 'albums-title';
+        albumsTitle.innerHTML = 'Photo Albums';
+        albumsSection.appendChild(albumsTitle);
+        
+        // Create albums grid
+        const albumsGrid = document.createElement('div');
+        albumsGrid.className = 'albums-grid';
+        albumsGrid.id = 'albums-grid';
+        albumsSection.appendChild(albumsGrid);
+        
         mainContent.appendChild(albumsSection);
         
         // Upload progress indicator
@@ -585,82 +856,88 @@
         // Add content to main wrapper
         headerElements.mainWrapper.appendChild(mainContent);
         
-        // Load gallery images
-        loadGalleryImages();
+        // Load user custom albums from database
+        loadUserAlbums().then(() => {
+          // If we have an album parameter, show that album immediately
+          if (albumParam) {
+            const album = getAlbumById(albumParam);
+            if (album) {
+              viewAlbum(album);
+            } else {
+              // Album not found, show all albums
+              showAlbumsView();
+            }
+          } else {
+            // No album parameter, show the albums view
+            showAlbumsView();
+          }
+        });
         
         // Setup event handlers
         setupEventHandlers();
         
         /**
-         * Create the albums section with predefined albums
+         * Load user custom albums from database
          */
-        function createAlbumsSection() {
-          // Create albums container
-          const albumsSection = document.createElement('div');
-          albumsSection.className = 'albums-section';
-          
-          const albumsTitle = document.createElement('h3');
-          albumsTitle.className = 'albums-title';
-          albumsTitle.textContent = 'Photo Albums';
-          albumsSection.appendChild(albumsTitle);
-          
-          // Create albums grid
-          const albumsGrid = document.createElement('div');
-          albumsGrid.className = 'albums-grid';
-          
-          // Define albums 
-          const albums = [
-            { id: 'all', title: 'All Photos', thumbnail: 'images/photo1.jpg', count: 'All' },
-            { id: 'events', title: 'Golf Events', thumbnail: 'images/photo2.jpg', count: '0' },
-            { id: 'tournaments', title: 'Tournaments', thumbnail: 'images/photo3.jpg', count: '0' },
-            { id: 'members', title: 'Member Photos', thumbnail: 'images/photo4.jpg', count: '0' }
-          ];
-          
-          // Create album cards
-          albums.forEach(album => {
-            const albumCard = document.createElement('div');
-            albumCard.className = 'album-card';
-            albumCard.dataset.albumId = album.id;
+        async function loadUserAlbums() {
+          try {
+            // Custom endpoint to get all albums
+            const response = await fetch(`${CLOUDFLARE_API}/albums`);
             
-            const albumThumb = document.createElement('div');
-            albumThumb.className = 'album-thumbnail';
-            albumThumb.style.backgroundImage = `url('${album.thumbnail}')`;
+            if (!response.ok) {
+              throw new Error(`Error fetching albums: ${response.status}`);
+            }
             
-            const albumInfo = document.createElement('div');
-            albumInfo.className = 'album-info';
+            const data = await response.json();
             
-            const albumTitle = document.createElement('div');
-            albumTitle.className = 'album-title';
-            albumTitle.textContent = album.title;
-            
-            const albumCount = document.createElement('div');
-            albumCount.className = 'album-count';
-            albumCount.textContent = `${album.count} photos`;
-            
-            albumInfo.appendChild(albumTitle);
-            albumInfo.appendChild(albumCount);
-            
-            albumCard.appendChild(albumThumb);
-            albumCard.appendChild(albumInfo);
-            
-            // Add click handler
-            albumCard.addEventListener('click', () => {
-              // Currently just changes the gallery title
-              const subtitle = document.querySelector('h2');
-              if (subtitle) {
-                subtitle.textContent = `Photo Gallery - ${album.title}`;
+            // Merge with default albums
+            if (data && Array.isArray(data) && data.length > 0) {
+              // Filter out any user albums that match the default album IDs
+              const userAlbums = data.filter(album => 
+                !defaultAlbums.some(defaultAlbum => defaultAlbum.id === album.id)
+              );
+              
+              // Update default albums with counts from API if provided
+              defaultAlbums = defaultAlbums.map(defaultAlbum => {
+                const apiAlbum = data.find(a => a.id === defaultAlbum.id);
+                if (apiAlbum && apiAlbum.count !== undefined) {
+                  return {
+                    ...defaultAlbum,
+                    count: apiAlbum.count
+                  };
+                }
+                return defaultAlbum;
+              });
+              
+              // Combine default and user albums
+              const allAlbums = [...defaultAlbums, ...userAlbums];
+              
+              // Update the albums drop-down selector
+              const albumSelector = document.getElementById('upload-album-selector');
+              if (albumSelector) {
+                // Clear existing options
+                while (albumSelector.options.length > 1) {
+                  albumSelector.remove(1);
+                }
+                
+                // Add all albums except 'All Photos'
+                allAlbums.filter(album => album.id !== 'all').forEach(album => {
+                  const option = document.createElement('option');
+                  option.value = album.id;
+                  option.textContent = album.title;
+                  albumSelector.appendChild(option);
+                });
               }
               
-              // In the future, this could filter images by album
-              BBB_UTILS.showMessage(`Viewing album: ${album.title}`, 'info');
-              loadGalleryImages();
-            });
+              console.log("Loaded albums:", allAlbums);
+              return allAlbums;
+            }
             
-            albumsGrid.appendChild(albumCard);
-          });
-          
-          albumsSection.appendChild(albumsGrid);
-          return albumsSection;
+            return defaultAlbums;
+          } catch (err) {
+            console.error('Error loading albums:', err);
+            return defaultAlbums;
+          }
         }
         
         /**
@@ -722,9 +999,210 @@
         }
         
         /**
-         * Load gallery images from Cloudflare
+         * Load and render all albums
          */
-        function loadGalleryImages() {
+        async function showAlbumsView() {
+          // Update current view
+          currentAlbumId = 'all';
+          
+          // Update URL without reloading page
+          const url = new URL(window.location);
+          url.searchParams.delete('album');
+          window.history.pushState({}, '', url);
+          
+          // Update page title
+          const galleryTitle = document.getElementById('gallery-title');
+          if (galleryTitle) {
+            galleryTitle.textContent = 'Photo Gallery';
+          }
+          
+          // Hide back button and album selection in upload
+          const backButton = document.getElementById('back-to-albums');
+          if (backButton) {
+            backButton.style.display = 'none';
+          }
+          
+          // Hide upload album section for selection
+          const uploadAlbumSection = document.querySelector('.upload-album-section');
+          if (uploadAlbumSection) {
+            uploadAlbumSection.style.display = 'none';
+          }
+          
+          // Show albums section
+          const albumsSection = document.getElementById('albums-section');
+          if (albumsSection) {
+            albumsSection.style.display = 'block';
+          }
+          
+          // Hide the gallery
+          const galleryContainer = document.getElementById('gallery');
+          if (galleryContainer) {
+            galleryContainer.style.display = 'none';
+          }
+          
+          // Reload albums
+          const albums = await loadUserAlbums();
+          
+          // Render albums
+          renderAlbums(albums);
+        }
+        
+        /**
+         * Render all albums in the grid
+         * @param {Array} albums - Array of album objects
+         */
+        function renderAlbums(albums) {
+          const albumsGrid = document.getElementById('albums-grid');
+          if (!albumsGrid) return;
+          
+          // Clear existing albums
+          albumsGrid.innerHTML = '';
+          
+          albums.forEach(album => {
+            const albumCard = document.createElement('div');
+            albumCard.className = 'album-card';
+            albumCard.dataset.albumId = album.id;
+            
+            const albumThumb = document.createElement('div');
+            albumThumb.className = 'album-thumbnail';
+            
+            // Use thumbnail if provided, otherwise use a placeholder
+            if (album.thumbnail) {
+              albumThumb.style.backgroundImage = `url('${album.thumbnail}')`;
+            } else {
+              albumThumb.style.backgroundColor = '#e9ecef';
+              // Add a placeholder icon
+              const placeholderIcon = document.createElement('div');
+              placeholderIcon.style.position = 'absolute';
+              placeholderIcon.style.top = '50%';
+              placeholderIcon.style.left = '50%';
+              placeholderIcon.style.transform = 'translate(-50%, -50%)';
+              placeholderIcon.style.fontSize = '3rem';
+              placeholderIcon.innerHTML = '📷';
+              albumThumb.appendChild(placeholderIcon);
+            }
+            
+            // Album actions for admins
+            if (BBB_AUTH.hasRole('admin') && !album.default) {
+              const albumActions = document.createElement('div');
+              albumActions.className = 'album-actions';
+              
+              const editBtn = document.createElement('button');
+              editBtn.className = 'album-action-btn';
+              editBtn.innerHTML = '✏️';
+              editBtn.title = 'Edit Album';
+              editBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // TODO: Implement edit album functionality
+                alert('Edit album functionality coming soon!');
+              });
+              
+              const deleteBtn = document.createElement('button');
+              deleteBtn.className = 'album-action-btn delete-album-btn';
+              deleteBtn.innerHTML = '🗑️';
+              deleteBtn.title = 'Delete Album';
+              deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                deleteAlbum(album.id);
+              });
+              
+              albumActions.appendChild(editBtn);
+              albumActions.appendChild(deleteBtn);
+              albumThumb.appendChild(albumActions);
+            }
+            
+            const albumInfo = document.createElement('div');
+            albumInfo.className = 'album-info';
+            
+            const albumTitle = document.createElement('div');
+            albumTitle.className = 'album-title';
+            albumTitle.textContent = album.title;
+            
+            const albumCount = document.createElement('div');
+            albumCount.className = 'album-count';
+            albumCount.textContent = album.count === undefined ? 'Loading...' : 
+                                    album.count === 0 ? 'No photos' : 
+                                    `${album.count} photo${album.count !== 1 ? 's' : ''}`;
+            
+            albumInfo.appendChild(albumTitle);
+            albumInfo.appendChild(albumCount);
+            
+            albumCard.appendChild(albumThumb);
+            albumCard.appendChild(albumInfo);
+            
+            // Add click handler to view album
+            albumCard.addEventListener('click', () => {
+              viewAlbum(album);
+            });
+            
+            albumsGrid.appendChild(albumCard);
+          });
+        }
+        
+        /**
+         * View a specific album
+         * @param {Object} album - Album object
+         */
+        function viewAlbum(album) {
+          // Update current album
+          currentAlbumId = album.id;
+          
+          // Update URL without reloading page
+          const url = new URL(window.location);
+          url.searchParams.set('album', album.id);
+          window.history.pushState({}, '', url);
+          
+          // Update page title
+          const galleryTitle = document.getElementById('gallery-title');
+          if (galleryTitle) {
+            galleryTitle.textContent = `Photo Gallery - ${album.title}`;
+          }
+          
+          // Show back button
+          const backButton = document.getElementById('back-to-albums');
+          if (backButton) {
+            backButton.style.display = 'inline-block';
+          }
+          
+          // Update album selector in upload section
+          const albumSelector = document.getElementById('upload-album-selector');
+          if (albumSelector) {
+            // Select current album
+            for (let i = 0; i < albumSelector.options.length; i++) {
+              if (albumSelector.options[i].value === album.id) {
+                albumSelector.selectedIndex = i;
+                break;
+              }
+            }
+          }
+          
+          // Show upload album section
+          const uploadAlbumSection = document.querySelector('.upload-album-section');
+          if (uploadAlbumSection) {
+            uploadAlbumSection.style.display = album.id === 'all' ? 'none' : 'flex';
+          }
+          
+          // Hide albums section
+          const albumsSection = document.getElementById('albums-section');
+          if (albumsSection) {
+            albumsSection.style.display = 'none';
+          }
+          
+          // Show the gallery
+          const galleryContainer = document.getElementById('gallery');
+          if (galleryContainer) {
+            galleryContainer.style.display = 'grid';
+          }
+          
+          // Load images for this album
+          loadGalleryImages(album.id);
+        }
+        
+        /**
+         * Load gallery images from Cloudflare
+         * @param {string} albumId - Album ID to load images for (optional, defaults to currentAlbumId)
+         */
+        function loadGalleryImages(albumId = currentAlbumId) {
           BBB_UTILS.showMessage('Loading gallery images...', 'info');
           
           // Check sort and search options
@@ -737,8 +1215,22 @@
           // Build the API URL with any search parameters
           let apiUrl = `${CLOUDFLARE_API}/images`;
           
+          // Add query parameters
+          const params = new URLSearchParams();
+          
           if (searchValue) {
-            apiUrl += `?search=${encodeURIComponent(searchValue)}`;
+            params.append('search', searchValue);
+          }
+          
+          if (albumId && albumId !== 'all') {
+            params.append('album', albumId);
+          }
+          
+          params.append('sort', sortValue);
+          
+          // Add params to URL if we have any
+          if (params.toString()) {
+            apiUrl += `?${params.toString()}`;
           }
           
           // Fetch from Cloudflare
@@ -756,7 +1248,8 @@
                 src: `${CLOUDFLARE_API}/image/${img.id}`,
                 alt: img.alt || 'Gallery image',
                 uploadedAt: img.uploaded_at,
-                uploadedBy: img.uploaded_by
+                uploadedBy: img.uploaded_by,
+                album: img.album
               }));
               
               // Sort images
@@ -838,15 +1331,14 @@
             });
             
             // Delete button (only show if admin or image was uploaded by current user)
-            const deleteBtn = document.createElement('button');
-            deleteBtn.className = 'image-action-btn delete-btn';
-            deleteBtn.innerHTML = '🗑️ Delete';
-            
             const canDelete = BBB_AUTH.hasRole('admin') || 
                             (image.uploadedBy && BBB_AUTH.currentUser && 
                              image.uploadedBy === BBB_AUTH.currentUser.id);
             
             if (canDelete) {
+              const deleteBtn = document.createElement('button');
+              deleteBtn.className = 'image-action-btn delete-btn';
+              deleteBtn.innerHTML = '🗑️ Delete';
               deleteBtn.addEventListener('click', (e) => {
                 e.stopPropagation(); // Prevent lightbox
                 deleteImage(image.id);
@@ -879,12 +1371,46 @@
             noImagesIcon.style.marginBottom = '1rem';
             
             const noImagesText = document.createElement('p');
-            noImagesText.textContent = 'No images in the gallery yet. Upload some photos to get started!';
+            noImagesText.textContent = 'No images in this album. Upload some photos or select a different album.';
             
             noImages.appendChild(noImagesIcon);
             noImages.appendChild(noImagesText);
             galleryElement.appendChild(noImages);
           }
+          
+          // Update album count in the database
+          updateAlbumCount(currentAlbumId, images.length);
+        }
+        
+        /**
+         * Update album count in the database
+         * @param {string} albumId - Album ID
+         * @param {number} count - New count
+         */
+        function updateAlbumCount(albumId, count) {
+          if (albumId === 'all') return; // Don't update count for 'all' album
+          
+          // Find the album in our array
+          const album = getAlbumById(albumId);
+          if (album) {
+            album.count = count;
+          }
+          
+          // TODO: Update album count on server if needed
+        }
+        
+        /**
+         * Get album by ID
+         * @param {string} albumId - Album ID
+         * @returns {Object|null} - Album object or null if not found
+         */
+        function getAlbumById(albumId) {
+          // Check default albums first
+          const defaultAlbum = defaultAlbums.find(a => a.id === albumId);
+          if (defaultAlbum) return defaultAlbum;
+          
+          // TODO: Check custom albums if not found in defaults
+          return null;
         }
         
         /**
@@ -907,6 +1433,18 @@
             loadGalleryImages();
           });
           
+          // Album selector handler
+          const albumSelector = document.getElementById('upload-album-selector');
+          albumSelector.addEventListener('change', () => {
+            // If an album is selected, update the current album
+            if (albumSelector.value) {
+              const album = getAlbumById(albumSelector.value);
+              if (album) {
+                viewAlbum(album);
+              }
+            }
+          });
+          
           // Lightbox close
           const lightboxClose = document.querySelector('.lightbox-close');
           lightboxClose.addEventListener('click', () => {
@@ -926,6 +1464,20 @@
               document.getElementById('lightbox').style.display = 'none';
             }
           });
+          
+          // Modal close buttons
+          const modalCloseButtons = document.querySelectorAll('.modal-close, #cancel-add-album');
+          modalCloseButtons.forEach(button => {
+            button.addEventListener('click', () => {
+              document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
+              });
+            });
+          });
+          
+          // Add album form handler
+          const addAlbumForm = document.getElementById('add-album-form');
+          addAlbumForm.addEventListener('submit', handleAddAlbum);
         }
         
         /**
@@ -959,6 +1511,136 @@
         }
         
         /**
+         * Show the add album modal
+         */
+        function showAddAlbumModal() {
+          const modal = document.getElementById('add-album-modal');
+          modal.style.display = 'flex';
+          
+          // Focus album name input
+          setTimeout(() => {
+            document.getElementById('album-name').focus();
+          }, 100);
+        }
+        
+        /**
+         * Handle adding a new album
+         * @param {Event} e - Form submit event
+         */
+        function handleAddAlbum(e) {
+          e.preventDefault();
+          
+          const nameInput = document.getElementById('album-name');
+          const descInput = document.getElementById('album-description');
+          
+          const name = nameInput.value.trim();
+          const description = descInput.value.trim();
+          
+          if (!name) {
+            BBB_UTILS.showMessage('Please enter an album name', 'error');
+            return;
+          }
+          
+          // Generate an ID from the name
+          const id = 'album_' + name.toLowerCase().replace(/[^a-z0-9]/g, '_') + '_' + Date.now();
+          
+          // Album data
+          const albumData = {
+            id,
+            title: name,
+            description,
+            count: 0,
+            created_at: new Date().toISOString(),
+            created_by: BBB_AUTH.currentUser ? BBB_AUTH.currentUser.id : 'anonymous'
+          };
+          
+          // Show loading message
+          BBB_UTILS.showMessage('Creating album...', 'info');
+          
+          // Send to server
+          fetch(`${CLOUDFLARE_API}/albums`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(albumData)
+          })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`Error creating album: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              // Add to our albums list
+              defaultAlbums.push({
+                ...albumData,
+                default: false
+              });
+              
+              // Close modal
+              document.getElementById('add-album-modal').style.display = 'none';
+              
+              // Clear form
+              nameInput.value = '';
+              descInput.value = '';
+              
+              // Show success message
+              BBB_UTILS.showMessage('Album created successfully!', 'success');
+              
+              // Reload albums view
+              showAlbumsView();
+            })
+            .catch(err => {
+              console.error('Error creating album:', err);
+              BBB_UTILS.showMessage(`Error creating album: ${err.message}`, 'error');
+            });
+        }
+        
+        /**
+         * Delete an album
+         * @param {string} albumId - Album ID to delete
+         */
+        function deleteAlbum(albumId) {
+          if (!confirm('Are you sure you want to delete this album? All images in the album will remain in the gallery.')) {
+            return;
+          }
+          
+          // Cannot delete default albums
+          if (defaultAlbums.some(a => a.id === albumId && a.default)) {
+            BBB_UTILS.showMessage('Cannot delete default albums', 'error');
+            return;
+          }
+          
+          BBB_UTILS.showMessage('Deleting album...', 'info');
+          
+          // Send delete request to server
+          fetch(`${CLOUDFLARE_API}/albums/${albumId}`, {
+            method: 'DELETE'
+          })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`Error deleting album: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              // Remove from our albums list
+              defaultAlbums = defaultAlbums.filter(a => a.id !== albumId);
+              
+              // Show success message
+              BBB_UTILS.showMessage('Album deleted successfully!', 'success');
+              
+              // Reload albums view
+              showAlbumsView();
+            })
+            .catch(err => {
+              console.error('Error deleting album:', err);
+              BBB_UTILS.showMessage(`Error deleting album: ${err.message}`, 'error');
+            });
+        }
+
+        /**
          * Delete an image
          * @param {string} imageId - Image ID to delete
          */
@@ -969,10 +1651,12 @@
           
           BBB_UTILS.showMessage('Deleting image...', 'info');
           
+          // For debugging
           console.log("Attempting to delete image:", imageId);
-          console.log("Delete URL:", `${CLOUDFLARE_API}/delete/${imageId}`);
+          console.log("Delete URL:", `${CLOUDFLARE_API}/images/${imageId}`);
           
-          fetch(`${CLOUDFLARE_API}/delete/${imageId}`, {
+          // FIXED: Changed the delete URL format to use images/[id] instead of delete/[id]
+          fetch(`${CLOUDFLARE_API}/images/${imageId}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json'
@@ -1000,6 +1684,12 @@
                 if (document.querySelectorAll('.gallery-img-container').length === 0) {
                   loadGalleryImages();
                 }
+                
+                // If we're viewing an album, update its count
+                if (currentAlbumId !== 'all') {
+                  const remainingImages = document.querySelectorAll('.gallery-img-container').length;
+                  updateAlbumCount(currentAlbumId, remainingImages);
+                }
               } else {
                 BBB_UTILS.showMessage(`Error deleting image: ${data.error || 'Unknown error'}`, 'error');
               }
@@ -1019,6 +1709,20 @@
           
           if (files.length === 0) {
             return;
+          }
+          
+          // Determine album to upload to
+          let targetAlbum = null;
+          
+          // If we're viewing an album, use that
+          if (currentAlbumId !== 'all') {
+            targetAlbum = currentAlbumId;
+          } else {
+            // Check if an album is selected in the dropdown
+            const albumSelector = document.getElementById('upload-album-selector');
+            if (albumSelector && albumSelector.value) {
+              targetAlbum = albumSelector.value;
+            }
           }
           
           // Show progress container
@@ -1061,8 +1765,13 @@
             formData.append('alt', file.name.replace(/\.[^/.]+$/, '') || 'User uploaded photo');
             formData.append('username', username);
             
+            // Add album if specified
+            if (targetAlbum) {
+              formData.append('album', targetAlbum);
+            }
+            
             // Upload to Cloudflare Worker
-            fetch(`${CLOUDFLARE_API}/upload`, {
+            fetch(`${CLOUDFLARE_API}/images`, {
               method: 'POST',
               body: formData
             })
@@ -1093,254 +1802,3 @@
                 
                 // Check if all uploads complete
                 if (uploadedCount + failedUploads.length === files.length) {
-                  finishUploads();
-                }
-              });
-          });
-          
-          // Reset file input
-          e.target.value = '';
-          
-          /**
-           * Update upload progress bar
-           * @param {number} total - Total number of files
-           * @param {number} completed - Number of completed uploads
-           */
-          function updateUploadProgress(total, completed) {
-            const percentage = Math.round((completed / total) * 100);
-            progressBarInner.style.width = `${percentage}%`;
-            progressText.textContent = `Uploading ${completed} of ${total} (${percentage}%)`;
-          }
-          
-          /**
-           * Finish the upload process
-           */
-          function finishUploads() {
-            // Hide progress container after a delay
-            setTimeout(() => {
-              progressContainer.style.display = 'none';
-            }, 1500);
-            
-            // Reload gallery
-            loadGalleryImages();
-            
-            // Show status message
-            if (failedUploads.length === 0) {
-              if (uploadedCount > 1) {
-                BBB_UTILS.showMessage(`Successfully uploaded ${uploadedCount} images`, 'success');
-              } else {
-                BBB_UTILS.showMessage('Image uploaded successfully', 'success');
-              }
-            } else {
-              if (uploadedCount > 0) {
-                BBB_UTILS.showMessage(`Uploaded ${uploadedCount} images, ${failedUploads.length} failed`, 'warning');
-              } else {
-                BBB_UTILS.showMessage(`Failed to upload ${failedUploads.length} images`, 'error');
-              }
-            }
-          }
-        }
-        
-        /**
-         * Check if image migration is needed
-         */
-        function checkMigrationNeeded() {
-          try {
-            // Check if we have already migrated
-            const migrated = localStorage.getItem('bbb_gallery_migrated_to_cloudflare');
-            if (migrated === 'true') {
-              return;
-            }
-            
-            // Get stored images from original localStorage
-            const storedImages = JSON.parse(localStorage.getItem('uploadedImages') || '[]');
-            
-            if (storedImages.length === 0) {
-              // No images to migrate
-              localStorage.setItem('bbb_gallery_migrated_to_cloudflare', 'true');
-              return;
-            }
-            
-            // Create migration button
-            const migrationBtn = document.createElement('button');
-            migrationBtn.className = 'btn migration-button';
-            migrationBtn.textContent = `Migrate ${storedImages.length} Images to Cloud`;
-            migrationBtn.addEventListener('click', () => migrateLocalStorageImages(storedImages));
-            
-            // Add before the gallery
-            const galleryElement = document.getElementById('gallery');
-            galleryElement.parentNode.insertBefore(migrationBtn, galleryElement);
-            
-            // Show migration message
-            BBB_UTILS.showMessage(`Found ${storedImages.length} images in your browser. Click the migration button to move them to the cloud.`, 'info');
-          } catch (err) {
-            console.error('Error checking for migration:', err);
-          }
-        }
-        
-        /**
-         * Migrate images from localStorage to Cloudflare
-         * @param {Array} storedImages - Array of data URLs
-         */
-        function migrateLocalStorageImages(storedImages) {
-          try {
-            // Show migration message
-            BBB_UTILS.showMessage(`Migrating ${storedImages.length} existing images to cloud storage...`, 'info');
-            
-            // Get migration button and disable it
-            const migrationBtn = document.querySelector('.migration-button');
-            if (migrationBtn) {
-              migrationBtn.disabled = true;
-              migrationBtn.textContent = 'Migration in progress...';
-            }
-            
-            // Show progress container
-            const progressContainer = document.getElementById('upload-progress');
-            const progressBarInner = document.getElementById('progress-bar-inner');
-            const progressText = document.getElementById('progress-text');
-            
-            progressContainer.style.display = 'block';
-            progressBarInner.style.width = '0%';
-            progressText.textContent = 'Preparing migration...';
-            
-            // Convert and upload each image
-            let migrationCount = 0;
-            let migrationErrors = 0;
-            
-            storedImages.forEach((dataURL, index) => {
-              try {
-                // Convert data URL to blob
-                const blob = dataURLtoBlob(dataURL);
-                
-                // Create form data for upload
-                const formData = new FormData();
-                formData.append('image', blob, `migrated_image_${index}.jpg`);
-                formData.append('alt', `Migrated image ${index + 1}`);
-                formData.append('username', BBB_AUTH.currentUser ? BBB_AUTH.currentUser.id : 'migration');
-                
-                // Update progress text
-                progressText.textContent = `Migrating image ${index + 1} of ${storedImages.length}...`;
-                progressBarInner.style.width = `${Math.round((index / storedImages.length) * 100)}%`;
-                
-                // Upload to Cloudflare Worker
-                fetch(`${CLOUDFLARE_API}/upload`, {
-                  method: 'POST',
-                  body: formData
-                })
-                  .then(response => {
-                    if (!response.ok) {
-                      throw new Error(`Upload failed: ${response.status}`);
-                    }
-                    return response.json();
-                  })
-                  .then(data => {
-                    if (data.success) {
-                      migrationCount++;
-                    } else {
-                      migrationErrors++;
-                    }
-                    
-                    // Update progress
-                    const completed = migrationCount + migrationErrors;
-                    const percentage = Math.round((completed / storedImages.length) * 100);
-                    progressBarInner.style.width = `${percentage}%`;
-                    progressText.textContent = `Migrated ${migrationCount} of ${storedImages.length} images (${percentage}%)`;
-                    
-                    // Check if all migrations complete
-                    if (completed === storedImages.length) {
-                      finishMigration();
-                    }
-                  })
-                  .catch(err => {
-                    console.error('Error migrating image:', err);
-                    migrationErrors++;
-                    
-                    // Update progress
-                    const completed = migrationCount + migrationErrors;
-                    const percentage = Math.round((completed / storedImages.length) * 100);
-                    progressBarInner.style.width = `${percentage}%`;
-                    progressText.textContent = `Migrated ${migrationCount} of ${storedImages.length} images (${percentage}%)`;
-                    
-                    // Check if all migrations complete
-                    if (completed === storedImages.length) {
-                      finishMigration();
-                    }
-                  });
-              } catch (err) {
-                console.error('Error processing image for migration:', err);
-                migrationErrors++;
-                
-                // Update progress
-                const completed = migrationCount + migrationErrors;
-                const percentage = Math.round((completed / storedImages.length) * 100);
-                progressBarInner.style.width = `${percentage}%`;
-                
-                // Check if all migrations complete
-                if (completed === storedImages.length) {
-                  finishMigration();
-                }
-              }
-            });
-            
-            /**
-             * Convert data URL to Blob
-             * @param {string} dataURL - Data URL string
-             * @returns {Blob} - Blob data
-             */
-            function dataURLtoBlob(dataURL) {
-              try {
-                const arr = dataURL.split(',');
-                const mime = arr[0].match(/:(.*?);/)[1];
-                const bstr = atob(arr[1]);
-                let n = bstr.length;
-                const u8arr = new Uint8Array(n);
-                
-                while (n--) {
-                  u8arr[n] = bstr.charCodeAt(n);
-                }
-                
-                return new Blob([u8arr], { type: mime });
-              } catch (err) {
-                console.error('Error converting data URL to blob:', err);
-                throw err;
-              }
-            }
-            
-            /**
-             * Finish the migration process
-             */
-            function finishMigration() {
-              // Mark as migrated
-              localStorage.setItem('bbb_gallery_migrated_to_cloudflare', 'true');
-              
-              // Clear old localStorage to free up space
-              localStorage.removeItem('uploadedImages');
-              
-              // Hide progress
-              progressContainer.style.display = 'none';
-              
-              // Remove migration button
-              if (migrationBtn) {
-                migrationBtn.remove();
-              }
-              
-              // Reload gallery
-              loadGalleryImages();
-              
-              // Show status message
-              if (migrationErrors === 0) {
-                BBB_UTILS.showMessage(`Successfully migrated ${migrationCount} images to cloud storage`, 'success');
-              } else {
-                BBB_UTILS.showMessage(`Migrated ${migrationCount} images, failed to migrate ${migrationErrors} images`, 'warning');
-              }
-            }
-          } catch (err) {
-            console.error('Error during gallery migration:', err);
-            BBB_UTILS.showMessage('Error migrating images: ' + err.message, 'error');
-          }
-        }
-      }
-    });
-  </script>
-</body>
-</html>
