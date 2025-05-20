@@ -1,4 +1,65 @@
-<!DOCTYPE html>
+/**
+     * Show a status message
+     * @param {string} message - Message to display
+     * @param {string} type - Message type (success, error, warning, info)
+     */
+    function showMessage(message, type = 'info') {
+      try {
+        // Try using BBB_UTILS if available
+        if (typeof BBB_UTILS !== 'undefined' && typeof BBB_UTILS.showMessage === 'function') {
+          BBB_UTILS.showMessage(message, type);
+          return;
+        }
+        
+        // Fallback to manual message display
+        const statusMessage = document.getElementById('status-message');
+        if (!statusMessage) {
+          // Create status message container if it doesn't exist
+          const newStatusMessage = document.createElement('div');
+          newStatusMessage.id = 'status-message';
+          newStatusMessage.style.padding = '1rem';
+          newStatusMessage.style.margin = '1rem 0';
+          newStatusMessage.style.borderRadius = '4px';
+          newStatusMessage.style.textAlign = 'center';
+          newStatusMessage.style.display = 'none';
+          
+          // Insert after the first h2 if possible
+          const h2 = document.querySelector('h2');
+          if (h2 && h2.parentNode) {
+            h2.parentNode.insertBefore(newStatusMessage, h2.nextSibling);
+          } else {
+            // Otherwise add to main
+            const main = document.getElementById('main');
+            if (main) {
+              main.appendChild(newStatusMessage);
+            }
+          }
+        }
+        
+        const messageEl = document.getElementById('status-message');
+        if (!messageEl) return; // Give up if we still can't find it
+        
+        if (!message) {
+          messageEl.style.display = 'none';
+          return;
+        }
+        
+        messageEl.textContent = message;
+        messageEl.className = type || 'info';
+        messageEl.style.display = 'block';
+        
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+          messageEl.style.display = 'none';
+        }, 3000);
+      } catch (err) {
+        console.error('Error showing message:', err);
+        // Last resort - alert for critical errors
+        if (type === 'error' && message) {
+          console.error(message);
+        }
+      }
+    }<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -110,26 +171,15 @@
     }
   </style>
   
-  <!-- Gallery-specific JavaScript module -->
-  <script src="js/gallery.js" defer></script>
+  <!-- Only this one script reference -->
+  <!-- <script src="js/gallery.js" defer></script> -->
 </head>
-<body>
-  <!-- Authentication Protection -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      setTimeout(function() {
-        if (typeof BBB_AUTH !== 'undefined') {
-          if (!BBB_AUTH.isAuthenticated && window.location.pathname.indexOf('login.html') === -1) {
-            sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
-            window.location.href = 'login.html';
-          }
-        }
-      }, 100);
-    });
-  </script>
-  
+  <body>
   <!-- Skip link for accessibility -->
   <a href="#main" class="skip-link">Skip to main content</a>
+  
+  <!-- Status message container -->
+  <div id="status-message" style="display:none;"></div>
   
   <main id="main"></main>
   
@@ -140,27 +190,48 @@
     // State variables 
     let currentAlbumId = 'all';
     let galleryAlbums = [];
+    let isAuthenticated = false;
+    let isAdmin = false;
     
     document.addEventListener('DOMContentLoaded', function() {
       // Initialize modules
-      BBB_AUTH.init({
-        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
-      });
-      
-      BBB_DB.init({
-        useCloudflare: BBB_CONFIG.cloudflareEnabled,
-        localStoragePrefix: 'bbb_'
-      });
+      try {
+        if (typeof BBB_AUTH !== 'undefined') {
+          BBB_AUTH.init({
+            cloudflareEnabled: typeof BBB_CONFIG !== 'undefined' ? BBB_CONFIG.cloudflareEnabled : false
+          });
+        }
+        
+        if (typeof BBB_DB !== 'undefined') {
+          BBB_DB.init({
+            useCloudflare: typeof BBB_CONFIG !== 'undefined' ? BBB_CONFIG.cloudflareEnabled : false,
+            localStoragePrefix: 'bbb_'
+          });
+        }
+      } catch (e) {
+        console.error('Error initializing modules:', e);
+      }
       
       // Check if the user has access to the gallery
-      const hasGalleryAccess = BBB_AUTH.isAuthenticated && 
-        (BBB_AUTH.hasRole('gallery') || BBB_AUTH.hasRole('admin') || BBB_AUTH.hasRole('member'));
-      
-      if (!hasGalleryAccess) {
-        // Show gallery login overlay
-        showGalleryLogin();
-      } else {
-        // Already authenticated, initialize gallery
+      try {
+        const hasGalleryAccess = typeof BBB_AUTH !== 'undefined' && BBB_AUTH.isAuthenticated && 
+          (BBB_AUTH.hasRole('gallery') || BBB_AUTH.hasRole('admin') || BBB_AUTH.hasRole('member'));
+          
+        if (typeof BBB_AUTH !== 'undefined') {
+          isAuthenticated = BBB_AUTH.isAuthenticated || false;
+          isAdmin = BBB_AUTH.hasRole('admin') || false;
+        }
+        
+        if (!hasGalleryAccess) {
+          // Show gallery login overlay
+          showGalleryLogin();
+        } else {
+          // Already authenticated, initialize gallery
+          initializeGallery();
+        }
+      } catch (e) {
+        console.error('Error checking gallery access:', e);
+        // Assume access for now since there was an error checking
         initializeGallery();
       }
     });
@@ -557,56 +628,79 @@
       
       // Show loading state
       const albumsGrid = document.getElementById('albums-grid');
-      albumsGrid.innerHTML = '<div style="text-align:center;grid-column:1/-1;padding:2rem;">Loading albums...</div>';
+      if (albumsGrid) {
+        albumsGrid.innerHTML = '<div style="text-align:center;grid-column:1/-1;padding:2rem;">Loading albums...</div>';
+      }
       
-      // Fetch albums from API
-      fetch(`${CLOUDFLARE_API}/albums`)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Error fetching albums: ${response.status}`);
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data && Array.isArray(data)) {
-            // Update default albums with counts
-            galleryAlbums = galleryAlbums.map(defaultAlbum => {
-              const apiAlbum = data.find(a => a.id === defaultAlbum.id);
-              if (apiAlbum && apiAlbum.count !== undefined) {
-                return { ...defaultAlbum, count: apiAlbum.count };
-              }
-              return defaultAlbum;
-            });
-            
-            // Add custom albums
-            const customAlbums = data.filter(album => 
-              !galleryAlbums.some(a => a.id === album.id)
-            );
-            
-            galleryAlbums = [...galleryAlbums, ...customAlbums];
-          }
-          
-          // Update album selector
-          updateAlbumSelector();
-          
-          // Render albums
-          renderAlbums();
-          
-          // If URL has album parameter, load that album
-          if (currentAlbumId !== 'all') {
-            const album = galleryAlbums.find(a => a.id === currentAlbumId);
-            if (album) {
-              viewAlbum(album);
+      // Try fetching albums from API, gracefully handle if error
+      try {
+        fetch(`${CLOUDFLARE_API}/albums`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Error fetching albums: ${response.status}`);
             }
-          }
-        })
-        .catch(err => {
-          console.error('Error loading albums:', err);
-          BBB_UTILS.showMessage('Error loading albums', 'error');
-          
-          // Render default albums
-          renderAlbums();
-        });
+            return response.json();
+          })
+          .then(data => {
+            if (data && Array.isArray(data)) {
+              // Update default albums with counts
+              galleryAlbums = galleryAlbums.map(defaultAlbum => {
+                const apiAlbum = data.find(a => a.id === defaultAlbum.id);
+                if (apiAlbum && apiAlbum.count !== undefined) {
+                  return { ...defaultAlbum, count: apiAlbum.count };
+                }
+                return defaultAlbum;
+              });
+              
+              // Add custom albums
+              const customAlbums = data.filter(album => 
+                !galleryAlbums.some(a => a.id === album.id)
+              );
+              
+              galleryAlbums = [...galleryAlbums, ...customAlbums];
+            }
+            
+            // Update album selector
+            updateAlbumSelector();
+            
+            // Render albums
+            renderAlbums();
+            
+            // If URL has album parameter, load that album
+            if (currentAlbumId !== 'all') {
+              const album = galleryAlbums.find(a => a.id === currentAlbumId);
+              if (album) {
+                viewAlbum(album);
+              }
+            }
+          })
+          .catch(err => {
+            console.error('Error loading albums:', err);
+            // Still show message but don't rely on BBB_UTILS in case it's not properly initialized
+            try {
+              if (typeof BBB_UTILS !== 'undefined' && typeof BBB_UTILS.showMessage === 'function') {
+                BBB_UTILS.showMessage('Error loading albums, using default albums instead', 'warning');
+              }
+            } catch (e) {
+              console.error('Could not show error message:', e);
+            }
+            
+            // Render default albums
+            renderAlbums();
+            
+            // Check URL parameter for direct album view
+            if (currentAlbumId !== 'all') {
+              const album = galleryAlbums.find(a => a.id === currentAlbumId);
+              if (album) {
+                viewAlbum(album);
+              }
+            }
+          });
+      } catch (err) {
+        console.error('Error in album loading process:', err);
+        // Render default albums as fallback
+        renderAlbums();
+      }
     }
     
     /**
@@ -809,67 +903,115 @@
      * @param {string} albumId - Album ID to load images for
      */
     function loadGalleryImages(albumId = 'all') {
-      // Get sort and search values
-      const sortSelect = document.getElementById('gallery-sort');
-      const searchInput = document.getElementById('gallery-search');
-      
-      const sortValue = sortSelect ? sortSelect.value : 'newest';
-      const searchValue = searchInput ? searchInput.value.trim() : '';
-      
-      // Build API URL
-      let apiUrl = `${CLOUDFLARE_API}/images`;
-      const params = new URLSearchParams();
-      
-      if (searchValue) {
-        params.append('search', searchValue);
-      }
-      
-      if (albumId && albumId !== 'all') {
-        params.append('album', albumId);
-      }
-      
-      params.append('sort', sortValue);
-      
-      if (params.toString()) {
-        apiUrl += `?${params.toString()}`;
-      }
-      
-      // Fetch images
-      fetch(apiUrl)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`Error fetching images: ${response.status}`);
+      try {
+        // First show a loading indicator
+        const gallery = document.getElementById('gallery');
+        if (gallery) {
+          gallery.innerHTML = '<div style="text-align:center;grid-column:1/-1;padding:2rem;">Loading images...</div>';
+        }
+        
+        // Try to show a message if available
+        try {
+          if (typeof BBB_UTILS !== 'undefined' && typeof BBB_UTILS.showMessage === 'function') {
+            BBB_UTILS.showMessage('Loading gallery images...', 'info');
           }
-          return response.json();
-        })
-        .then(data => {
-          // Format images
-          const images = data.map(img => ({
-            id: img.id,
-            src: `${CLOUDFLARE_API}/image/${img.id}`,
-            alt: img.alt || 'Gallery image',
-            uploadedAt: img.uploaded_at,
-            uploadedBy: img.uploaded_by
-          }));
-          
-          // Render gallery
-          renderGallery(images);
-          
-          // Update album count
-          if (albumId !== 'all') {
-            const album = galleryAlbums.find(a => a.id === albumId);
-            if (album) {
-              album.count = images.length;
+        } catch (e) {
+          console.warn('Could not show loading message:', e);
+        }
+
+        // Get sort and search values
+        const sortSelect = document.getElementById('gallery-sort');
+        const searchInput = document.getElementById('gallery-search');
+        
+        const sortValue = sortSelect ? sortSelect.value : 'newest';
+        const searchValue = searchInput ? searchInput.value.trim() : '';
+        
+        // Build API URL
+        let apiUrl = `${CLOUDFLARE_API}/images`;
+        const params = new URLSearchParams();
+        
+        if (searchValue) {
+          params.append('search', searchValue);
+        }
+        
+        if (albumId && albumId !== 'all') {
+          params.append('album', albumId);
+        }
+        
+        params.append('sort', sortValue);
+        
+        if (params.toString()) {
+          apiUrl += `?${params.toString()}`;
+        }
+        
+        // Fetch images
+        fetch(apiUrl)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Error fetching images: ${response.status}`);
             }
-          }
-        })
-        .catch(err => {
-          console.error('Error loading images:', err);
-          BBB_UTILS.showMessage('Error loading images', 'error');
+            return response.json();
+          })
+          .then(data => {
+            // Format images
+            const images = data.map(img => ({
+              id: img.id,
+              src: `${CLOUDFLARE_API}/image/${img.id}`,
+              alt: img.alt || 'Gallery image',
+              uploadedAt: img.uploaded_at,
+              uploadedBy: img.uploaded_by
+            }));
+            
+            // Render gallery
+            renderGallery(images);
+            
+            // Update album count
+            if (albumId !== 'all') {
+              const album = galleryAlbums.find(a => a.id === albumId);
+              if (album) {
+                album.count = images.length;
+              }
+            }
+            
+            // Clear status message
+            try {
+              if (typeof BBB_UTILS !== 'undefined' && typeof BBB_UTILS.showMessage === 'function') {
+                BBB_UTILS.showMessage('', 'info');
+              }
+            } catch (e) {
+              console.warn('Could not clear status message:', e);
+            }
+          })
+          .catch(err => {
+            console.error('Error loading images:', err);
+            
+            try {
+              if (typeof BBB_UTILS !== 'undefined' && typeof BBB_UTILS.showMessage === 'function') {
+                BBB_UTILS.showMessage('Error loading images, showing default images instead', 'warning');
+              }
+            } catch (e) {
+              console.warn('Could not show error message:', e);
+            }
+            
+            // Show fallback images
+            const fallbackImages = [
+              { id: 'pre_1', src: 'images/photo1.jpg', alt: 'Band on the green' },
+              { id: 'pre_2', src: 'images/photo2.jpg', alt: 'Group shot' },
+              { id: 'pre_3', src: 'images/photo3.jpg', alt: 'Trophy presentation' },
+              { id: 'pre_4', src: 'images/photo4.jpg', alt: 'Action shot' }
+            ];
+            
+            renderGallery(fallbackImages);
+          });
           
-          // Show empty state
-          renderGallery([]);
-        });
+      } catch (err) {
+        console.error('Error in loadGalleryImages function:', err);
+        // Show empty state as fallback
+        renderGallery([]);
+      }
+      
+      // Check if we need to migrate images from localStorage
+      checkMigrationNeeded();
     }
     
     /**
