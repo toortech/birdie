@@ -1794,6 +1794,8 @@
                 if (uploadedCount + failedUploads.length === files.length) {
                   finishUploads();
                 }
+              finishUploads();
+                }
               })
               .catch(err => {
                 console.error('Error uploading image:', err);
