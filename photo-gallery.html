@@ -56,262 +56,24 @@
       box-shadow: 0 5px 15px rgba(0,0,0,0.15);
     }
     
-    /* Category styling */
-    .category-tile {
-      position: relative;
-      border-radius: 8px;
-      overflow: hidden;
-      height: 200px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-      cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .category-tile:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-    }
-    
-    .category-cover {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    
-    .category-info {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      padding: 12px;
-      background: linear-gradient(transparent, rgba(0,0,0,0.7));
-      color: white;
-      text-align: left;
-    }
-    
-    .category-title {
-      margin: 0;
-      font-size: 1.1rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-    
-    .category-count {
-      font-size: 0.8rem;
-      opacity: 0.9;
-    }
-    
-    .category-description {
-      font-size: 0.85rem;
-      margin-top: 4px;
-      opacity: 0.9;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    
-    /* For creating a new category tile */
-    .new-category-tile {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      background-color: #f8f9fa;
-      border: 2px dashed #ddd;
-      border-radius: 8px;
-      height: 200px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .new-category-tile:hover {
-      background-color: #e9ecef;
-      transform: translateY(-5px);
-      border-color: #adb5bd;
-    }
-    
-    .new-category-tile .plus-icon {
-      font-size: 3rem;
-      color: #6c757d;
-      margin-bottom: 8px;
-    }
-    
-    .new-category-tile .text {
-      color: #6c757d;
-      font-weight: 500;
-    }
-    
-    /* Modals */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0,0,0,0.7);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 2000;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.3s, visibility 0.3s;
-    }
-    
-    .modal-overlay.active {
-      opacity: 1;
-      visibility: visible;
-    }
-    
-    .modal-container {
-      background-color: white;
-      border-radius: 8px;
-      padding: 24px;
-      width: 90%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 5px 25px rgba(0,0,0,0.3);
-      transform: translateY(20px);
-      transition: transform 0.3s;
-    }
-    
-    .modal-overlay.active .modal-container {
-      transform: translateY(0);
-    }
-    
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-    }
-    
-    .modal-title {
-      margin: 0;
-      font-size: 1.5rem;
-    }
-    
-    .modal-close {
-      font-size: 1.5rem;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: #6c757d;
-    }
-    
-    .modal-body {
-      margin-bottom: 24px;
-    }
-    
-    .form-group {
-      margin-bottom: 16px;
-    }
-    
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
-    
-    .form-control {
-      width: 100%;
-      padding: 10px;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-      font-size: 1rem;
-    }
-    
-    .form-control:focus {
-      outline: none;
-      border-color: var(--bbb-secondary);
-    }
-    
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-    }
-    
-    /* Breadcrumb navigation */
-    .breadcrumb {
-      display: flex;
-      align-items: center;
-      margin: 1rem 0;
-      font-size: 0.9rem;
-    }
-    
-    .breadcrumb-item {
-      display: flex;
-      align-items: center;
-    }
-    
-    .breadcrumb-item a {
-      color: var(--bbb-secondary);
-      text-decoration: none;
-    }
-    
-    .breadcrumb-item a:hover {
-      text-decoration: underline;
-    }
-    
-    .breadcrumb-separator {
-      margin: 0 8px;
-      color: #adb5bd;
-    }
-    
-    .breadcrumb-item.active {
-      color: var(--bbb-text);
-      font-weight: 500;
-    }
-    
-    /* Gallery actions */
-    .gallery-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin: 1rem 0;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    
-    .gallery-actions .left-actions,
-    .gallery-actions .right-actions {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    /* Category selector for upload */
-    .category-select {
-      padding: 8px 12px;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-      font-size: 0.9rem;
-      min-width: 150px;
-    }
-    
-    /* Upload button styling */
     .upload-section {
       display: flex;
-      align-items: center;
-      gap: 8px;
+      justify-content: center;
+      margin: 1.5rem 0;
     }
     
     .upload-label {
       display: flex;
       align-items: center;
       gap: 8px;
-      padding: 10px 16px;
+      padding: 10px 20px;
     }
     
     .upload-label::before {
       content: '📸';
-      font-size: 1.1rem;
+      font-size: 1.25rem;
     }
     
-    /* Empty states */
     .empty-gallery {
       text-align: center;
       padding: 3rem;
@@ -320,15 +82,7 @@
       margin-top: 2rem;
     }
     
-    .empty-category {
-      text-align: center;
-      padding: 3rem;
-      background-color: #f8f9fa;
-      border-radius: 8px;
-      margin-top: 2rem;
-    }
-    
-    /* Enhanced lightbox styles */
+    /* Improved lightbox styles */
     .lightbox {
       display: none;
       position: fixed;
@@ -356,7 +110,6 @@
       cursor: pointer;
       opacity: 0.8;
       transition: opacity 0.3s;
-      z-index: 1002;
     }
     
     .lightbox-close:hover {
@@ -371,65 +124,6 @@
       text-align: center;
     }
     
-    .lightbox-nav {
-      position: absolute;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      z-index: 1001;
-    }
-    
-    .nav-btn {
-      color: white;
-      font-size: 3rem;
-      opacity: 0.7;
-      cursor: pointer;
-      padding: 20px;
-      transition: opacity 0.3s, transform 0.2s;
-      background: none;
-      border: none;
-      text-shadow: 0 0 10px rgba(0,0,0,0.5);
-    }
-    
-    .nav-btn:hover {
-      opacity: 1;
-      transform: scale(1.1);
-    }
-    
-    .prev-btn {
-      margin-left: 20px;
-    }
-    
-    .next-btn {
-      margin-right: 20px;
-    }
-    
-    .image-counter {
-      position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      color: white;
-      background-color: rgba(0,0,0,0.5);
-      padding: 5px 10px;
-      border-radius: 15px;
-      font-size: 0.9rem;
-    }
-    
-    .category-badge {
-      position: absolute;
-      top: 20px;
-      left: 20px;
-      background-color: rgba(0,0,0,0.5);
-      color: white;
-      padding: 5px 10px;
-      border-radius: 15px;
-      font-size: 0.9rem;
-    }
-    
     .upload-progress {
       margin-top: 1rem;
       width: 100%;
@@ -439,6 +133,7 @@
       padding: 1rem;
       text-align: center;
       display: none;
+      margin: 0 auto;
     }
     
     .progress-bar {
@@ -457,44 +152,186 @@
       transition: width 0.3s ease;
     }
     
-    .error-container {
-      padding: 1rem;
-      background-color: #f8d7da;
-      color: #721c24;
+    /* Image container and actions styles */
+    .gallery-img-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+    }
+    
+    .image-actions {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.7);
+      padding: 8px;
+      display: flex;
+      justify-content: space-between;
+      opacity: 0;
+      transition: opacity 0.3s;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+    
+    .gallery-img-container:hover .image-actions {
+      opacity: 1;
+    }
+    
+    .image-action-btn {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 4px 8px;
       border-radius: 4px;
-      margin: 1rem 0;
-      display: none;
+      transition: background-color 0.2s;
     }
     
-    .error-list {
-      margin-top: 0.5rem;
-      padding-left: 1rem;
+    .image-action-btn:hover {
+      background-color: rgba(255,255,255,0.2);
     }
     
-    @media (max-width: 480px) {
-      .gallery-actions {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      
-      .gallery-actions .left-actions,
-      .gallery-actions .right-actions {
-        width: 100%;
-        justify-content: space-between;
-      }
-      
-      .nav-btn {
-        font-size: 2rem;
-        padding: 10px;
-      }
-      
-      .prev-btn {
-        margin-left: 5px;
-      }
-      
-      .next-btn {
-        margin-right: 5px;
-      }
+    .delete-btn {
+      color: #ff6b6b;
+    }
+    
+    .image-info {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-color: rgba(0,0,0,0.6);
+      color: white;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      border-top-left-radius: 8px;
+    }
+    
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .search-container {
+      position: relative;
+      flex-grow: 1;
+      max-width: 300px;
+    }
+    
+    .search-input {
+      width: 100%;
+      padding: 8px 12px 8px 36px;
+      border-radius: 20px;
+      border: 1px solid #ddd;
+      font-size: 0.9rem;
+    }
+    
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #666;
+    }
+    
+    .sort-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .sort-label {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    .sort-select {
+      padding: 6px 12px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      font-size: 0.9rem;
+    }
+
+    /* Migration button */
+    .migration-button {
+      display: block;
+      margin: 1rem auto;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    /* Message styles */
+    .info-message {
+      background-color: #e3f2fd;
+      border: 1px solid #bbdefb;
+      color: #0d47a1;
+      padding: 0.75rem;
+      border-radius: 4px;
+      margin: 1rem auto;
+      max-width: 600px;
+      text-align: center;
+    }
+    
+    /* Albums section styles */
+    .albums-section {
+      margin: 2rem 0;
+    }
+
+    .albums-title {
+      margin-bottom: 1rem;
+      color: var(--bbb-primary);
+      font-weight: bold;
+    }
+
+    .albums-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .album-card {
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+    }
+
+    .album-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .album-thumbnail {
+      height: 150px;
+      background-color: #f0f0f0;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .album-info {
+      padding: 1rem;
+    }
+
+    .album-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .album-count {
+      font-size: 0.9rem;
+      color: var(--bbb-text-muted);
     }
   </style>
 </head>
@@ -524,111 +361,103 @@
   
   <main id="main"></main>
   
-  <!-- Create Category Modal Template -->
-  <div id="category-modal" class="modal-overlay">
-    <div class="modal-container">
-      <div class="modal-header">
-        <h3 class="modal-title">Create New Album</h3>
-        <button class="modal-close">&times;</button>
-      </div>
-      <div class="modal-body">
-        <form id="category-form">
-          <div class="form-group">
-            <label for="category-name">Album Name</label>
-            <input type="text" id="category-name" class="form-control" required placeholder="e.g. Tournament June 2023">
-          </div>
-          <div class="form-group">
-            <label for="category-description">Description (optional)</label>
-            <textarea id="category-description" class="form-control" rows="3" placeholder="Describe this collection of photos"></textarea>
-          </div>
-        </form>
-      </div>
-      <div class="modal-footer">
-        <button class="btn" id="cancel-category">Cancel</button>
-        <button class="btn" id="save-category">Create Album</button>
-      </div>
-    </div>
-  </div>
-  
   <script>
-    // Main Gallery Application
-    const BBB_GALLERY = (function() {
-      // Private variables
-      let allImages = [];
-      let allCategories = [];
-      let currentImageIndex = 0;
-      let currentCategoryId = null;
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize modules
+      BBB_AUTH.init({
+        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+      });
       
-      // Gallery configuration
-      const config = {
-        itemsPerPage: 24,
-        lazyLoad: true,
-        sortOrder: 'newest',
-        defaultCategory: {
-          id: 'uncategorized',
-          name: 'Uncategorized',
-          description: 'Photos not assigned to any album',
-        }
-      };
+      BBB_DB.init({
+        useCloudflare: BBB_CONFIG.cloudflareEnabled,
+        localStoragePrefix: 'bbb_'
+      });
       
-      /**
-       * Initialize the gallery
-       */
-      function init() {
-        // Initialize modules
-        BBB_AUTH.init({
-          cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
-        });
-        
-        BBB_DB.init({
-          useCloudflare: BBB_CONFIG.cloudflareEnabled,
-          localStoragePrefix: 'bbb_'
-        });
-        
-        // Check if the user has access to the gallery
-        const hasGalleryAccess = BBB_AUTH.isAuthenticated && 
-          (BBB_AUTH.hasRole('gallery') || BBB_AUTH.hasRole('admin') || BBB_AUTH.hasRole('member'));
-        
-        if (!hasGalleryAccess) {
-          // Not authorized - redirect to login
-          sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
-          window.location.href = 'login.html';
-          return;
-        }
-        
-        // User is authenticated, initialize the gallery
-        createGalleryUI();
-        
-        // Check URL parameters for category view
-        const urlParams = new URLSearchParams(window.location.search);
-        currentCategoryId = urlParams.get('category');
-        
-        // Load gallery data
-        loadGalleryData()
-          .then(() => {
-            // Display the correct view based on URL parameters
-            if (currentCategoryId) {
-              showCategoryView(currentCategoryId);
-            } else {
-              showCategoriesView();
-            }
-            
-            // Check if we need to migrate images from localStorage
-            return migrateLocalStorageImages();
-          })
-          .catch(error => {
-            console.error('Gallery initialization error:', error);
-            showErrorMessage('Failed to initialize gallery. Please try refreshing the page.');
-          });
-          
-        // Set up event handlers for modals
-        setupModalHandlers();
+      // Cloudflare worker URL - Your actual worker URL
+      const CLOUDFLARE_API = 'https://bbb-gallery-worker.cf1demouk.workers.dev';
+      
+      // Check if the user has access to the gallery
+      const hasGalleryAccess = BBB_AUTH.isAuthenticated && 
+        (BBB_AUTH.hasRole('gallery') || BBB_AUTH.hasRole('admin') || BBB_AUTH.hasRole('member'));
+      
+      if (!hasGalleryAccess) {
+        // Show gallery login overlay
+        showGalleryLogin();
+      } else {
+        // Already authenticated, initialize gallery
+        initializeGallery();
       }
       
       /**
-       * Create the main gallery UI elements
+       * Show gallery login overlay
        */
-      function createGalleryUI() {
+      function showGalleryLogin() {
+        const loginOverlay = document.createElement('div');
+        loginOverlay.id = 'login-overlay';
+        
+        const loginBox = document.createElement('div');
+        loginBox.id = 'login-box';
+        
+        const title = document.createElement('h2');
+        title.textContent = 'Enter Password';
+        
+        const passwordInput = document.createElement('input');
+        passwordInput.type = 'password';
+        passwordInput.id = 'pw-input';
+        passwordInput.placeholder = 'Password';
+        
+        const errorMsg = document.createElement('div');
+        errorMsg.id = 'error-msg';
+        errorMsg.textContent = 'Incorrect password';
+        errorMsg.style.color = 'red';
+        errorMsg.style.fontSize = '0.9rem';
+        errorMsg.style.display = 'none';
+        errorMsg.style.marginTop = '0.5rem';
+        
+        const submitBtn = document.createElement('button');
+        submitBtn.id = 'pw-submit';
+        submitBtn.textContent = 'Unlock Gallery';
+        submitBtn.className = 'btn';
+        submitBtn.style.marginTop = '1rem';
+        
+        loginBox.appendChild(title);
+        loginBox.appendChild(passwordInput);
+        loginBox.appendChild(errorMsg);
+        loginBox.appendChild(submitBtn);
+        
+        loginOverlay.appendChild(loginBox);
+        document.body.appendChild(loginOverlay);
+        
+        // Focus password input
+        setTimeout(() => passwordInput.focus(), 100);
+        
+        // Handle login events
+        submitBtn.addEventListener('click', handleLogin);
+        passwordInput.addEventListener('keypress', e => {
+          if (e.key === 'Enter') handleLogin();
+        });
+        
+        function handleLogin() {
+          const password = passwordInput.value;
+          
+          BBB_AUTH.login('gallery', password)
+            .then(() => {
+              // Login successful
+              loginOverlay.remove();
+              initializeGallery();
+            })
+            .catch(err => {
+              // Login failed
+              console.error('Login error:', err);
+              errorMsg.style.display = 'block';
+            });
+        }
+      }
+      
+      /**
+       * Initialize gallery after authentication
+       */
+      function initializeGallery() {
         // Create header
         const headerElements = BBB_UI.createHeader({
           fixed: true,
@@ -664,50 +493,14 @@
         // Add description text
         const description = document.createElement('p');
         description.className = 'gallery-description';
-        description.textContent = 'Browse photos from our golf outings and events organized into albums. Click on any album to view the photos inside.';
+        description.textContent = 'Browse photos from our golf outings and events. Click on any image to view it in full size.';
         mainContent.appendChild(description);
         
-        // Error container for displaying errors
-        const errorContainer = document.createElement('div');
-        errorContainer.className = 'error-container';
-        errorContainer.id = 'error-container';
+        // Create filter/search bar
+        const filterBar = createFilterBar();
+        mainContent.appendChild(filterBar);
         
-        const errorTitle = document.createElement('strong');
-        errorTitle.id = 'error-title';
-        errorTitle.textContent = 'Error';
-        
-        const errorList = document.createElement('ul');
-        errorList.className = 'error-list';
-        errorList.id = 'error-list';
-        
-        errorContainer.appendChild(errorTitle);
-        errorContainer.appendChild(errorList);
-        mainContent.appendChild(errorContainer);
-        
-        // Breadcrumb navigation
-        const breadcrumb = document.createElement('nav');
-        breadcrumb.className = 'breadcrumb';
-        breadcrumb.id = 'breadcrumb';
-        breadcrumb.setAttribute('aria-label', 'Breadcrumb');
-        mainContent.appendChild(breadcrumb);
-        
-        // Gallery actions container
-        const galleryActions = document.createElement('div');
-        galleryActions.className = 'gallery-actions';
-        galleryActions.id = 'gallery-actions';
-        
-        // Left actions (Create Album, Upload)
-        const leftActions = document.createElement('div');
-        leftActions.className = 'left-actions';
-        
-        // Create Album button
-        const createAlbumBtn = document.createElement('button');
-        createAlbumBtn.className = 'btn';
-        createAlbumBtn.id = 'create-album-btn';
-        createAlbumBtn.innerHTML = '<span style="margin-right: 6px;">📁</span> Create Album';
-        createAlbumBtn.addEventListener('click', showCreateCategoryModal);
-        
-        // Upload section
+        // Image upload section
         const uploadSection = document.createElement('div');
         uploadSection.className = 'upload-section';
         
@@ -726,65 +519,17 @@
         
         uploadSection.appendChild(uploadLabel);
         uploadSection.appendChild(uploadInput);
+        mainContent.appendChild(uploadSection);
         
-        // Category selector (for uploads) - will be shown in category view
-        const categorySelectContainer = document.createElement('div');
-        categorySelectContainer.id = 'category-select-container';
-        categorySelectContainer.style.display = 'none';
+        // Info message about cloudflare
+        const infoMessage = document.createElement('div');
+        infoMessage.className = 'info-message';
+        infoMessage.textContent = 'Gallery images are now stored in the cloud for better performance and reliability.';
+        mainContent.appendChild(infoMessage);
         
-        const categorySelectLabel = document.createElement('label');
-        categorySelectLabel.htmlFor = 'category-select';
-        categorySelectLabel.textContent = 'Album:';
-        categorySelectLabel.style.marginRight = '8px';
-        
-        const categorySelect = document.createElement('select');
-        categorySelect.id = 'category-select';
-        categorySelect.className = 'category-select';
-        
-        categorySelectContainer.appendChild(categorySelectLabel);
-        categorySelectContainer.appendChild(categorySelect);
-        
-        leftActions.appendChild(createAlbumBtn);
-        leftActions.appendChild(uploadSection);
-        leftActions.appendChild(categorySelectContainer);
-        
-        // Right actions (sorting, etc.)
-        const rightActions = document.createElement('div');
-        rightActions.className = 'right-actions';
-        
-        // Sort options
-        const sortFilter = document.createElement('div');
-        sortFilter.className = 'gallery-filter';
-        
-        const sortLabel = document.createElement('label');
-        sortLabel.htmlFor = 'sort-select';
-        sortLabel.textContent = 'Sort by:';
-        
-        const sortSelect = document.createElement('select');
-        sortSelect.id = 'sort-select';
-        
-        const sortOptions = [
-          { value: 'newest', text: 'Newest first' },
-          { value: 'oldest', text: 'Oldest first' },
-          { value: 'name-asc', text: 'Name (A-Z)' },
-          { value: 'name-desc', text: 'Name (Z-A)' }
-        ];
-        
-        sortOptions.forEach(option => {
-          const optionEl = document.createElement('option');
-          optionEl.value = option.value;
-          optionEl.textContent = option.text;
-          sortSelect.appendChild(optionEl);
-        });
-        
-        sortFilter.appendChild(sortLabel);
-        sortFilter.appendChild(sortSelect);
-        
-        rightActions.appendChild(sortFilter);
-        
-        galleryActions.appendChild(leftActions);
-        galleryActions.appendChild(rightActions);
-        mainContent.appendChild(galleryActions);
+        // Add albums section
+        const albumsSection = createAlbumsSection();
+        mainContent.appendChild(albumsSection);
         
         // Upload progress indicator
         const progressContainer = document.createElement('div');
@@ -818,1239 +563,783 @@
         lightbox.id = 'lightbox';
         lightbox.className = 'lightbox';
         
-        // Lightbox close button
         const lightboxClose = document.createElement('span');
         lightboxClose.className = 'lightbox-close';
         lightboxClose.innerHTML = '&times;';
         
-        // Lightbox navigation
-        const lightboxNav = document.createElement('div');
-        lightboxNav.className = 'lightbox-nav';
-        
-        const prevBtn = document.createElement('button');
-        prevBtn.className = 'nav-btn prev-btn';
-        prevBtn.innerHTML = '&#10094;';
-        prevBtn.setAttribute('aria-label', 'Previous image');
-        
-        const nextBtn = document.createElement('button');
-        nextBtn.className = 'nav-btn next-btn';
-        nextBtn.innerHTML = '&#10095;';
-        nextBtn.setAttribute('aria-label', 'Next image');
-        
-        lightboxNav.appendChild(prevBtn);
-        lightboxNav.appendChild(nextBtn);
-        
-        // Image counter
-        const imageCounter = document.createElement('div');
-        imageCounter.className = 'image-counter';
-        imageCounter.id = 'image-counter';
-        
-        // Category badge
-        const categoryBadge = document.createElement('div');
-        categoryBadge.className = 'category-badge';
-        categoryBadge.id = 'lightbox-category';
-        
-        // Lightbox image
         const lightboxImg = document.createElement('img');
         lightboxImg.className = 'lightbox-img';
         lightboxImg.id = 'lightbox-img';
         lightboxImg.setAttribute('src', '');
         lightboxImg.setAttribute('alt', '');
         
-        // Lightbox caption
         const lightboxCaption = document.createElement('div');
         lightboxCaption.id = 'lightbox-caption';
         lightboxCaption.className = 'lightbox-caption';
         
-        // Add lightbox elements
         lightbox.appendChild(lightboxClose);
-        lightbox.appendChild(lightboxNav);
-        lightbox.appendChild(categoryBadge);
         lightbox.appendChild(lightboxImg);
         lightbox.appendChild(lightboxCaption);
-        lightbox.appendChild(imageCounter);
         mainContent.appendChild(lightbox);
         
         // Add content to main wrapper
         headerElements.mainWrapper.appendChild(mainContent);
         
-        // Add event listeners
+        // Load gallery images
+        loadGalleryImages();
+        
+        // Setup event handlers
         setupEventHandlers();
-      }
-      
-      /**
-       * Set up all event handlers for the gallery
-       */
-      function setupEventHandlers() {
-        // Upload handler
-        const uploadInput = document.getElementById('image-upload');
-        if (uploadInput) {
-          uploadInput.addEventListener('change', handleImageUpload);
-        }
         
-        // Lightbox close button
-        const lightboxClose = document.querySelector('.lightbox-close');
-        if (lightboxClose) {
-          lightboxClose.addEventListener('click', closeLightbox);
-        }
-        
-        // Lightbox navigation buttons
-        const prevBtn = document.querySelector('.prev-btn');
-        if (prevBtn) {
-          prevBtn.addEventListener('click', showPreviousImage);
-        }
-        
-        const nextBtn = document.querySelector('.next-btn');
-        if (nextBtn) {
-          nextBtn.addEventListener('click', showNextImage);
-        }
-        
-        // Sort select
-        const sortSelect = document.getElementById('sort-select');
-        if (sortSelect) {
-          sortSelect.addEventListener('change', handleSortChange);
-        }
-        
-        // Click outside lightbox to close
-        const lightbox = document.getElementById('lightbox');
-        if (lightbox) {
-          lightbox.addEventListener('click', e => {
-            if (e.target === lightbox) {
-              closeLightbox();
-            }
-          });
-        }
-        
-        // Keyboard navigation
-        document.addEventListener('keydown', handleKeyboardNavigation);
-      }
-      
-      /**
-       * Set up event handlers for modals
-       */
-      function setupModalHandlers() {
-        // Category modal elements
-        const categoryModal = document.getElementById('category-modal');
-        const closeButtons = categoryModal.querySelectorAll('.modal-close, #cancel-category');
-        const saveButton = document.getElementById('save-category');
-        
-        // Close modal handlers
-        closeButtons.forEach(button => {
-          button.addEventListener('click', () => {
-            categoryModal.classList.remove('active');
-          });
-        });
-        
-        // Save category handler
-        saveButton.addEventListener('click', createNewCategory);
-        
-        // Click outside to close
-        categoryModal.addEventListener('click', e => {
-          if (e.target === categoryModal) {
-            categoryModal.classList.remove('active');
-          }
-        });
-        
-        // Listen for escape key to close modals
-        document.addEventListener('keydown', e => {
-          if (e.key === 'Escape' && categoryModal.classList.contains('active')) {
-            categoryModal.classList.remove('active');
-          }
-        });
-      }
-      
-      /**
-       * Show the create category modal
-       */
-      function showCreateCategoryModal() {
-        const categoryModal = document.getElementById('category-modal');
-        
-        // Reset form
-        const form = document.getElementById('category-form');
-        if (form) form.reset();
-        
-        // Show modal
-        categoryModal.classList.add('active');
-        
-        // Focus first input
-        const nameInput = document.getElementById('category-name');
-        if (nameInput) {
-          setTimeout(() => nameInput.focus(), 100);
-        }
-      }
-      
-      /**
-       * Create a new category
-       */
-      function createNewCategory() {
-        const nameInput = document.getElementById('category-name');
-        const descInput = document.getElementById('category-description');
-        
-        if (!nameInput.value.trim()) {
-          alert('Please enter an album name');
-          nameInput.focus();
-          return;
-        }
-        
-        const newCategory = {
-          id: 'cat_' + Date.now() + '_' + Math.floor(Math.random() * 10000),
-          name: nameInput.value.trim(),
-          description: descInput.value.trim(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        
-        // Add to categories
-        allCategories.push(newCategory);
-        
-        // Save to database
-        saveGalleryData()
-          .then(() => {
-            // Hide modal
-            const categoryModal = document.getElementById('category-modal');
-            categoryModal.classList.remove('active');
-            
-            // Show success message
-            BBB_UTILS.showMessage(`Album "${newCategory.name}" created successfully`, 'success');
-            
-            // Refresh categories view
-            showCategoriesView();
-          })
-          .catch(error => {
-            console.error('Error creating category:', error);
-            showErrorMessage('Failed to create album. Please try again.');
-          });
-      }
-      
-      /**
-       * Handle keyboard navigation for lightbox
-       * @param {KeyboardEvent} e - Keyboard event
-       */
-      function handleKeyboardNavigation(e) {
-        const lightbox = document.getElementById('lightbox');
-        if (!lightbox || lightbox.style.display !== 'flex') return;
-        
-        switch (e.key) {
-          case 'Escape':
-            closeLightbox();
-            break;
-          case 'ArrowLeft':
-            showPreviousImage();
-            break;
-          case 'ArrowRight':
-            showNextImage();
-            break;
-        }
-      }
-      
-      /**
-       * Handle sort option change
-       * @param {Event} e - Change event
-       */
-      function handleSortChange(e) {
-        const sortOrder = e.target.value;
-        config.sortOrder = sortOrder;
-        
-        // Re-render current view
-        if (currentCategoryId) {
-          // Sort images in current category
-          sortImages();
-          showCategoryView(currentCategoryId);
-        } else {
-          // Sort categories
-          sortCategories();
-          showCategoriesView();
-        }
-      }
-      
-      /**
-       * Sort categories based on current sort order
-       */
-      function sortCategories() {
-        if (!allCategories || !allCategories.length) return;
-        
-        allCategories.sort((a, b) => {
-          switch (config.sortOrder) {
-            case 'newest':
-              return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-            case 'oldest':
-              return new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
-            case 'name-asc':
-              return a.name.localeCompare(b.name);
-            case 'name-desc':
-              return b.name.localeCompare(a.name);
-            default:
-              return new Date(b.createdAt || 0) - new Date(a.createdAt || 0);
-          }
-        });
-      }
-      
-      /**
-       * Sort images based on current sort order
-       */
-      function sortImages() {
-        if (!allImages || !allImages.length) return;
-        
-        allImages.sort((a, b) => {
-          switch (config.sortOrder) {
-            case 'newest':
-              return new Date(b.uploadedAt || 0) - new Date(a.uploadedAt || 0);
-            case 'oldest':
-              return new Date(a.uploadedAt || 0) - new Date(b.uploadedAt || 0);
-            case 'name-asc':
-              return a.alt.localeCompare(b.alt);
-            case 'name-desc':
-              return b.alt.localeCompare(a.alt);
-            default:
-              return new Date(b.uploadedAt || 0) - new Date(a.uploadedAt || 0);
-          }
-        });
-      }
-      
-      /**
-       * Load gallery data from database
-       * @returns {Promise} - Promise that resolves when data is loaded
-       */
-      function loadGalleryData() {
-        return new Promise((resolve, reject) => {
-          // First load from database
-          BBB_DB.getGalleryImages()
-            .then(galleryData => {
-              // Get images
-              const dbImages = galleryData.images || [];
-              
-              // Add preloaded images (from original site) if we don't have any yet
-              if (dbImages.length < 4) {
-                const preloadedImages = [
-                  { 
-                    id: 'pre_1', 
-                    src: 'images/photo1.jpg', 
-                    alt: 'Band on the green',
-                    categoryId: null,
-                    uploadedAt: new Date('2020-08-01').toISOString()
-                  },
-                  { 
-                    id: 'pre_2', 
-                    src: 'images/photo2.jpg', 
-                    alt: 'Group shot',
-                    categoryId: null,
-                    uploadedAt: new Date('2020-08-02').toISOString()
-                  },
-                  { 
-                    id: 'pre_3', 
-                    src: 'images/photo3.jpg', 
-                    alt: 'Trophy presentation',
-                    categoryId: null,
-                    uploadedAt: new Date('2020-08-03').toISOString()
-                  },
-                  { 
-                    id: 'pre_4', 
-                    src: 'images/photo4.jpg', 
-                    alt: 'Action shot',
-                    categoryId: null,
-                    uploadedAt: new Date('2020-08-04').toISOString()
-                  }
-                ];
-                
-                // Add preloaded images only if they don't exist
-                preloadedImages.forEach(img => {
-                  if (!dbImages.some(dbImg => dbImg.id === img.id)) {
-                    dbImages.push(img);
-                  }
-                });
-              }
-              
-              // Get categories
-              const dbCategories = galleryData.categories || [];
-              
-              // Store data
-              allImages = dbImages;
-              allCategories = dbCategories;
-              
-              // Sort based on current settings
-              sortCategories();
-              sortImages();
-              
-              resolve();
-            })
-            .catch(err => {
-              console.error('Error loading gallery data:', err);
-              showErrorMessage('Error loading gallery data. Please try again.');
-              
-              // Initialize with empty arrays
-              allImages = [];
-              allCategories = [];
-              
-              reject(err);
-            });
-        });
-      }
-      
-      /**
-       * Save gallery data to database
-       * @returns {Promise} - Promise that resolves when data is saved
-       */
-      function saveGalleryData() {
-        return new Promise((resolve, reject) => {
-          // Create gallery data object
-          const galleryData = {
-            images: allImages,
-            categories: allCategories
-          };
+        /**
+         * Create the albums section with predefined albums
+         */
+        function createAlbumsSection() {
+          // Create albums container
+          const albumsSection = document.createElement('div');
+          albumsSection.className = 'albums-section';
           
-          // Save to database
-          BBB_DB.save(BBB_DB.collections.GALLERY, 'images', galleryData)
-            .then(() => {
-              resolve();
-            })
-            .catch(err => {
-              console.error('Error saving gallery data:', err);
-              reject(err);
-            });
-        });
-      }
-      
-      /**
-       * Render the categories view
-       */
-      function showCategoriesView() {
-        // Set current category to null
-        currentCategoryId = null;
-        
-        // Update URL
-        history.pushState(null, '', window.location.pathname);
-        
-        // Update breadcrumb
-        updateBreadcrumb();
-        
-        // Update category selector visibility
-        document.getElementById('category-select-container').style.display = 'none';
-        
-        // Update gallery container
-        const galleryElement = document.getElementById('gallery');
-        if (!galleryElement) return;
-        
-        galleryElement.innerHTML = '';
-        
-        // Create grid of category tiles
-        if (allCategories && allCategories.length > 0) {
-          // First add the "New Category" tile
-          const newCategoryTile = createNewCategoryTile();
-          galleryElement.appendChild(newCategoryTile);
+          const albumsTitle = document.createElement('h3');
+          albumsTitle.className = 'albums-title';
+          albumsTitle.textContent = 'Photo Albums';
+          albumsSection.appendChild(albumsTitle);
           
-          // Then add all user-created categories
-          allCategories.forEach(category => {
-            const categoryTile = createCategoryTile(category);
-            galleryElement.appendChild(categoryTile);
-          });
+          // Create albums grid
+          const albumsGrid = document.createElement('div');
+          albumsGrid.className = 'albums-grid';
           
-          // Then add the "Uncategorized" category if it has images
-          const uncategorizedImages = allImages.filter(img => !img.categoryId);
-          if (uncategorizedImages.length > 0) {
-            const uncategorizedTile = createCategoryTile({
-              id: 'uncategorized',
-              name: 'Uncategorized',
-              description: 'Photos not assigned to any album',
-              coverImage: uncategorizedImages[0].id
-            }, uncategorizedImages.length);
-            
-            galleryElement.appendChild(uncategorizedTile);
-          }
-        } else {
-          // No categories, show empty state with new category button
-          const emptyGallery = document.createElement('div');
-          emptyGallery.className = 'empty-gallery';
-          
-          const icon = document.createElement('div');
-          icon.innerHTML = '📁';
-          icon.style.fontSize = '3rem';
-          icon.style.marginBottom = '1rem';
-          
-          const text = document.createElement('p');
-          text.textContent = 'No albums yet. Create your first album to organize your photos.';
-          
-          const createButton = document.createElement('button');
-          createButton.className = 'btn';
-          createButton.innerHTML = '<span style="margin-right: 6px;">📁</span> Create Album';
-          createButton.style.marginTop = '1rem';
-          createButton.addEventListener('click', showCreateCategoryModal);
-          
-          emptyGallery.appendChild(icon);
-          emptyGallery.appendChild(text);
-          emptyGallery.appendChild(createButton);
-          
-          galleryElement.appendChild(emptyGallery);
-        }
-        
-        // Update sort options
-        const sortSelect = document.getElementById('sort-select');
-        if (sortSelect) {
-          // Update sort options for categories
-          sortSelect.innerHTML = '';
-          
-          const categoryOptions = [
-            { value: 'newest', text: 'Newest first' },
-            { value: 'oldest', text: 'Oldest first' },
-            { value: 'name-asc', text: 'Name (A-Z)' },
-            { value: 'name-desc', text: 'Name (Z-A)' }
+          // Define albums 
+          const albums = [
+            { id: 'all', title: 'All Photos', thumbnail: 'images/photo1.jpg', count: 'All' },
+            { id: 'events', title: 'Golf Events', thumbnail: 'images/photo2.jpg', count: '0' },
+            { id: 'tournaments', title: 'Tournaments', thumbnail: 'images/photo3.jpg', count: '0' },
+            { id: 'members', title: 'Member Photos', thumbnail: 'images/photo4.jpg', count: '0' }
           ];
           
-          categoryOptions.forEach(option => {
+          // Create album cards
+          albums.forEach(album => {
+            const albumCard = document.createElement('div');
+            albumCard.className = 'album-card';
+            albumCard.dataset.albumId = album.id;
+            
+            const albumThumb = document.createElement('div');
+            albumThumb.className = 'album-thumbnail';
+            albumThumb.style.backgroundImage = `url('${album.thumbnail}')`;
+            
+            const albumInfo = document.createElement('div');
+            albumInfo.className = 'album-info';
+            
+            const albumTitle = document.createElement('div');
+            albumTitle.className = 'album-title';
+            albumTitle.textContent = album.title;
+            
+            const albumCount = document.createElement('div');
+            albumCount.className = 'album-count';
+            albumCount.textContent = `${album.count} photos`;
+            
+            albumInfo.appendChild(albumTitle);
+            albumInfo.appendChild(albumCount);
+            
+            albumCard.appendChild(albumThumb);
+            albumCard.appendChild(albumInfo);
+            
+            // Add click handler
+            albumCard.addEventListener('click', () => {
+              // Currently just changes the gallery title
+              const subtitle = document.querySelector('h2');
+              if (subtitle) {
+                subtitle.textContent = `Photo Gallery - ${album.title}`;
+              }
+              
+              // In the future, this could filter images by album
+              BBB_UTILS.showMessage(`Viewing album: ${album.title}`, 'info');
+              loadGalleryImages();
+            });
+            
+            albumsGrid.appendChild(albumCard);
+          });
+          
+          albumsSection.appendChild(albumsGrid);
+          return albumsSection;
+        }
+        
+        /**
+         * Create filter/search bar
+         */
+        function createFilterBar() {
+          const filterBar = document.createElement('div');
+          filterBar.className = 'filter-bar';
+          
+          // Search
+          const searchContainer = document.createElement('div');
+          searchContainer.className = 'search-container';
+          
+          const searchIcon = document.createElement('span');
+          searchIcon.className = 'search-icon';
+          searchIcon.innerHTML = '🔍';
+          
+          const searchInput = document.createElement('input');
+          searchInput.type = 'text';
+          searchInput.className = 'search-input';
+          searchInput.placeholder = 'Search gallery...';
+          searchInput.id = 'gallery-search';
+          
+          searchContainer.appendChild(searchIcon);
+          searchContainer.appendChild(searchInput);
+          
+          // Sort
+          const sortContainer = document.createElement('div');
+          sortContainer.className = 'sort-container';
+          
+          const sortLabel = document.createElement('span');
+          sortLabel.className = 'sort-label';
+          sortLabel.textContent = 'Sort by:';
+          
+          const sortSelect = document.createElement('select');
+          sortSelect.className = 'sort-select';
+          sortSelect.id = 'gallery-sort';
+          
+          const sortOptions = [
+            { value: 'newest', text: 'Newest first' },
+            { value: 'oldest', text: 'Oldest first' },
+            { value: 'name', text: 'Name (A-Z)' }
+          ];
+          
+          sortOptions.forEach(option => {
             const optionEl = document.createElement('option');
             optionEl.value = option.value;
             optionEl.textContent = option.text;
             sortSelect.appendChild(optionEl);
           });
           
-          sortSelect.value = config.sortOrder;
-        }
-      }
-      
-      /**
-       * Render the category view showing images in a category
-       * @param {string} categoryId - Category ID to display
-       */
-      function showCategoryView(categoryId) {
-        // Set current category
-        currentCategoryId = categoryId;
-        
-        // Special case for uncategorized
-        const isUncategorized = categoryId === 'uncategorized';
-        
-        // Find category
-        let category = null;
-        if (isUncategorized) {
-          category = config.defaultCategory;
-        } else {
-          category = allCategories.find(cat => cat.id === categoryId);
+          sortContainer.appendChild(sortLabel);
+          sortContainer.appendChild(sortSelect);
+          
+          filterBar.appendChild(searchContainer);
+          filterBar.appendChild(sortContainer);
+          
+          return filterBar;
         }
         
-        if (!category && !isUncategorized) {
-          showErrorMessage('Album not found');
-          showCategoriesView();
-          return;
-        }
-        
-        // Update URL
-        history.pushState(null, '', `${window.location.pathname}?category=${categoryId}`);
-        
-        // Update breadcrumb
-        updateBreadcrumb(category);
-        
-        // Update category selector
-        updateCategorySelector();
-        document.getElementById('category-select-container').style.display = 'inline-block';
-        
-        // Find images in this category
-        let categoryImages = [];
-        if (isUncategorized) {
-          categoryImages = allImages.filter(img => !img.categoryId);
-        } else {
-          categoryImages = allImages.filter(img => img.categoryId === categoryId);
-        }
-        
-        // Sort images
-        categoryImages.sort((a, b) => {
-          switch (config.sortOrder) {
-            case 'newest':
-              return new Date(b.uploadedAt || 0) - new Date(a.uploadedAt || 0);
-            case 'oldest':
-              return new Date(a.uploadedAt || 0) - new Date(b.uploadedAt || 0);
-            case 'name-asc':
-              return a.alt.localeCompare(b.alt);
-            case 'name-desc':
-              return b.alt.localeCompare(a.alt);
-            default:
-              return new Date(b.uploadedAt || 0) - new Date(a.uploadedAt || 0);
+        /**
+         * Load gallery images from Cloudflare
+         */
+        function loadGalleryImages() {
+          BBB_UTILS.showMessage('Loading gallery images...', 'info');
+          
+          // Check sort and search options
+          const sortSelect = document.getElementById('gallery-sort');
+          const searchInput = document.getElementById('gallery-search');
+          
+          const sortValue = sortSelect ? sortSelect.value : 'newest';
+          const searchValue = searchInput ? searchInput.value.trim() : '';
+          
+          // Build the API URL with any search parameters
+          let apiUrl = `${CLOUDFLARE_API}/images`;
+          
+          if (searchValue) {
+            apiUrl += `?search=${encodeURIComponent(searchValue)}`;
           }
-        });
+          
+          // Fetch from Cloudflare
+          fetch(apiUrl)
+            .then(response => {
+              if (!response.ok) {
+                throw new Error(`Error fetching gallery: ${response.status}`);
+              }
+              return response.json();
+            })
+            .then(data => {
+              // Convert to our format
+              const images = data.map(img => ({
+                id: img.id,
+                src: `${CLOUDFLARE_API}/image/${img.id}`,
+                alt: img.alt || 'Gallery image',
+                uploadedAt: img.uploaded_at,
+                uploadedBy: img.uploaded_by
+              }));
+              
+              // Sort images
+              if (sortValue === 'oldest') {
+                images.sort((a, b) => new Date(a.uploadedAt) - new Date(b.uploadedAt));
+              } else if (sortValue === 'name') {
+                images.sort((a, b) => a.alt.localeCompare(b.alt));
+              } else {
+                // Default: newest first
+                images.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+              }
+              
+              // Render gallery
+              renderGallery(images);
+              
+              // Hide loading message
+              BBB_UTILS.showMessage('', 'info');
+            })
+            .catch(err => {
+              console.error('Error loading gallery images:', err);
+              BBB_UTILS.showMessage('Error loading gallery images', 'error');
+              
+              // Show fallback gallery with preloaded images
+              const preloadedImages = [
+                { id: 'pre_1', src: 'images/photo1.jpg', alt: 'Band on the green' },
+                { id: 'pre_2', src: 'images/photo2.jpg', alt: 'Group shot' },
+                { id: 'pre_3', src: 'images/photo3.jpg', alt: 'Trophy presentation' },
+                { id: 'pre_4', src: 'images/photo4.jpg', alt: 'Action shot' }
+              ];
+              
+              renderGallery(preloadedImages);
+            });
+            
+          // Check if we need to migrate images from localStorage
+          checkMigrationNeeded();
+        }
         
-        // Update gallery container
-        const galleryElement = document.getElementById('gallery');
-        if (!galleryElement) return;
-        
-        galleryElement.innerHTML = '';
-        
-        // Create grid of images
-        if (categoryImages.length > 0) {
-          categoryImages.forEach((image, index) => {
+        /**
+         * Render gallery with images
+         * @param {Array} images - Array of image objects
+         */
+        function renderGallery(images) {
+          const galleryElement = document.getElementById('gallery');
+          galleryElement.innerHTML = '';
+          
+          // Create gallery
+          images.forEach(image => {
+            const imgContainer = document.createElement('div');
+            imgContainer.className = 'gallery-img-container';
+            imgContainer.dataset.id = image.id;
+            
             const img = document.createElement('img');
             img.src = image.src;
             img.alt = image.alt || 'Gallery image';
             img.className = 'gallery-img';
-            img.dataset.id = image.id;
-            img.dataset.index = index;
+            img.setAttribute('loading', 'lazy'); // Add lazy loading
             
-            if (config.lazyLoad) {
-              img.setAttribute('loading', 'lazy');
+            // Add timestamp info
+            const imageInfo = document.createElement('div');
+            imageInfo.className = 'image-info';
+            
+            let uploadDate = 'Unknown date';
+            if (image.uploadedAt) {
+              uploadDate = new Date(image.uploadedAt).toLocaleDateString();
             }
+            
+            imageInfo.textContent = uploadDate;
+            
+            // Add action buttons
+            const imageActions = document.createElement('div');
+            imageActions.className = 'image-actions';
+            
+            // View button
+            const viewBtn = document.createElement('button');
+            viewBtn.className = 'image-action-btn view-btn';
+            viewBtn.innerHTML = '👁️ View';
+            viewBtn.addEventListener('click', () => {
+              openLightbox(img);
+            });
+            
+            // Delete button (only show if admin or image was uploaded by current user)
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'image-action-btn delete-btn';
+            deleteBtn.innerHTML = '🗑️ Delete';
+            
+            const canDelete = BBB_AUTH.hasRole('admin') || 
+                            (image.uploadedBy && BBB_AUTH.currentUser && 
+                             image.uploadedBy === BBB_AUTH.currentUser.id);
+            
+            if (canDelete) {
+              deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent lightbox
+                deleteImage(image.id);
+              });
+              imageActions.appendChild(deleteBtn);
+            }
+            
+            imageActions.appendChild(viewBtn);
             
             // Add click handler for lightbox
             img.addEventListener('click', () => {
-              openLightbox(index, categoryImages);
+              openLightbox(img);
             });
             
-            galleryElement.appendChild(img);
-          });
-        } else {
-          // No images in this category
-          const emptyCategory = document.createElement('div');
-          emptyCategory.className = 'empty-category';
-          
-          const icon = document.createElement('div');
-          icon.innerHTML = '📷';
-          icon.style.fontSize = '3rem';
-          icon.style.marginBottom = '1rem';
-          
-          const text = document.createElement('p');
-          text.textContent = `No photos in this album yet. Upload some photos to "${category.name}".`;
-          
-          emptyCategory.appendChild(icon);
-          emptyCategory.appendChild(text);
-          
-          galleryElement.appendChild(emptyCategory);
-        }
-        
-        // Update sort options
-        const sortSelect = document.getElementById('sort-select');
-        if (sortSelect) {
-          // Update sort options for images
-          sortSelect.innerHTML = '';
-          
-          const imageOptions = [
-            { value: 'newest', text: 'Newest first' },
-            { value: 'oldest', text: 'Oldest first' },
-            { value: 'name-asc', text: 'Name (A-Z)' },
-            { value: 'name-desc', text: 'Name (Z-A)' }
-          ];
-          
-          imageOptions.forEach(option => {
-            const optionEl = document.createElement('option');
-            optionEl.value = option.value;
-            optionEl.textContent = option.text;
-            sortSelect.appendChild(optionEl);
+            imgContainer.appendChild(img);
+            imgContainer.appendChild(imageInfo);
+            imgContainer.appendChild(imageActions);
+            
+            galleryElement.appendChild(imgContainer);
           });
           
-          sortSelect.value = config.sortOrder;
-        }
-      }
-      
-      /**
-       * Create a new category tile
-       * @returns {HTMLElement} - New category tile element
-       */
-      function createNewCategoryTile() {
-        const tile = document.createElement('div');
-        tile.className = 'new-category-tile';
-        tile.addEventListener('click', showCreateCategoryModal);
-        
-        const plusIcon = document.createElement('div');
-        plusIcon.className = 'plus-icon';
-        plusIcon.textContent = '+';
-        
-        const text = document.createElement('div');
-        text.className = 'text';
-        text.textContent = 'Create New Album';
-        
-        tile.appendChild(plusIcon);
-        tile.appendChild(text);
-        
-        return tile;
-      }
-      
-      /**
-       * Create a category tile
-       * @param {Object} category - Category object
-       * @param {number} imageCount - Optional count of images
-       * @returns {HTMLElement} - Category tile element
-       */
-      function createCategoryTile(category, imageCount) {
-        const tile = document.createElement('div');
-        tile.className = 'category-tile';
-        tile.dataset.id = category.id;
-        tile.addEventListener('click', () => {
-          showCategoryView(category.id);
-        });
-        
-        // Find cover image
-        let coverImage = null;
-        
-        if (category.id === 'uncategorized') {
-          // For uncategorized, find first uncategorized image
-          const uncategorizedImages = allImages.filter(img => !img.categoryId);
-          if (uncategorizedImages.length > 0) {
-            coverImage = uncategorizedImages[0];
-          }
-        } else if (category.coverImage) {
-          // If category has a cover image, use it
-          coverImage = allImages.find(img => img.id === category.coverImage);
-        } else {
-          // Otherwise find first image in this category
-          coverImage = allImages.find(img => img.categoryId === category.id);
-        }
-        
-        // Create cover image
-        const cover = document.createElement('img');
-        cover.className = 'category-cover';
-        
-        if (coverImage) {
-          cover.src = coverImage.src;
-          cover.alt = `Cover image for ${category.name}`;
-        } else {
-          // Default cover if no images found
-          cover.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200"%3E%3Crect width="200" height="200" fill="%23f0f0f0"/%3E%3Cpath d="M100,80 L120,120 L80,120 Z" fill="%23999"/%3E%3Ccircle cx="150" cy="50" r="15" fill="%23999"/%3E%3C/svg%3E';
-          cover.alt = 'Default album cover';
-        }
-        
-        // Create info section
-        const info = document.createElement('div');
-        info.className = 'category-info';
-        
-        const title = document.createElement('h3');
-        title.className = 'category-title';
-        title.textContent = category.name;
-        
-        // Calculate image count if not provided
-        if (imageCount === undefined) {
-          if (category.id === 'uncategorized') {
-            imageCount = allImages.filter(img => !img.categoryId).length;
-          } else {
-            imageCount = allImages.filter(img => img.categoryId === category.id).length;
-          }
-        }
-        
-        const count = document.createElement('div');
-        count.className = 'category-count';
-        count.textContent = `${imageCount} photo${imageCount !== 1 ? 's' : ''}`;
-        
-        info.appendChild(title);
-        info.appendChild(count);
-        
-        // Add description if available
-        if (category.description) {
-          const description = document.createElement('div');
-          description.className = 'category-description';
-          description.textContent = category.description;
-          info.appendChild(description);
-        }
-        
-        tile.appendChild(cover);
-        tile.appendChild(info);
-        
-        return tile;
-      }
-      
-      /**
-       * Update the breadcrumb navigation
-       * @param {Object} category - Current category (if in category view)
-       */
-      function updateBreadcrumb(category = null) {
-        const breadcrumb = document.getElementById('breadcrumb');
-        if (!breadcrumb) return;
-        
-        breadcrumb.innerHTML = '';
-        
-        // Home
-        const homeItem = document.createElement('div');
-        homeItem.className = 'breadcrumb-item';
-        
-        const homeLink = document.createElement('a');
-        homeLink.href = '#';
-        homeLink.textContent = 'Albums';
-        homeLink.addEventListener('click', e => {
-          e.preventDefault();
-          showCategoriesView();
-        });
-        
-        homeItem.appendChild(homeLink);
-        breadcrumb.appendChild(homeItem);
-        
-        // Category
-        if (category) {
-          // Add separator
-          const separator = document.createElement('div');
-          separator.className = 'breadcrumb-separator';
-          separator.textContent = '/';
-          breadcrumb.appendChild(separator);
-          
-          // Add category
-          const categoryItem = document.createElement('div');
-          categoryItem.className = 'breadcrumb-item active';
-          categoryItem.textContent = category.name;
-          breadcrumb.appendChild(categoryItem);
-        }
-      }
-      
-      /**
-       * Update the category selector dropdown
-       */
-      function updateCategorySelector() {
-        const select = document.getElementById('category-select');
-        if (!select) return;
-        
-        select.innerHTML = '';
-        
-        // Add all categories
-        allCategories.forEach(category => {
-          const option = document.createElement('option');
-          option.value = category.id;
-          option.textContent = category.name;
-          select.appendChild(option);
-        });
-        
-        // Add uncategorized option
-        const option = document.createElement('option');
-        option.value = 'uncategorized';
-        option.textContent = 'Uncategorized';
-        select.appendChild(option);
-        
-        // Set current selection
-        select.value = currentCategoryId;
-      }
-      
-      /**
-       * Open lightbox and display image at specified index
-       * @param {number} index - Index of image to display
-       * @param {Array} images - Array of images to navigate (defaults to all images)
-       */
-      function openLightbox(index, images = null) {
-        // Use provided images or all images
-        const imageList = images || allImages;
-        
-        if (!imageList || !imageList.length) return;
-        
-        // Validate index
-        if (index < 0) index = 0;
-        if (index >= imageList.length) index = imageList.length - 1;
-        
-        currentImageIndex = index;
-        
-        const lightbox = document.getElementById('lightbox');
-        const lightboxImg = document.getElementById('lightbox-img');
-        const lightboxCaption = document.getElementById('lightbox-caption');
-        const imageCounter = document.getElementById('image-counter');
-        const categoryBadge = document.getElementById('lightbox-category');
-        
-        // Update image and caption
-        const image = imageList[index];
-        lightboxImg.src = image.src;
-        lightboxCaption.textContent = image.alt || '';
-        
-        // Update counter
-        imageCounter.textContent = `${index + 1} / ${imageList.length}`;
-        
-        // Update category badge
-        if (image.categoryId) {
-          const category = allCategories.find(cat => cat.id === image.categoryId);
-          if (category) {
-            categoryBadge.textContent = category.name;
-            categoryBadge.style.display = 'block';
-          } else {
-            categoryBadge.style.display = 'none';
-          }
-        } else {
-          categoryBadge.textContent = 'Uncategorized';
-          categoryBadge.style.display = 'block';
-        }
-        
-        // Show lightbox
-        lightbox.style.display = 'flex';
-        
-        // Disable scrolling on body
-        document.body.style.overflow = 'hidden';
-      }
-      
-      /**
-       * Close lightbox
-       */
-      function closeLightbox() {
-        const lightbox = document.getElementById('lightbox');
-        lightbox.style.display = 'none';
-        
-        // Re-enable scrolling
-        document.body.style.overflow = '';
-      }
-      
-      /**
-       * Show next image in lightbox
-       */
-      function showNextImage() {
-        let imageList;
-        if (currentCategoryId) {
-          if (currentCategoryId === 'uncategorized') {
-            imageList = allImages.filter(img => !img.categoryId);
-          } else {
-            imageList = allImages.filter(img => img.categoryId === currentCategoryId);
-          }
-        } else {
-          imageList = allImages;
-        }
-        
-        if (!imageList || !imageList.length) return;
-        
-        currentImageIndex = (currentImageIndex + 1) % imageList.length;
-        
-        const lightboxImg = document.getElementById('lightbox-img');
-        const lightboxCaption = document.getElementById('lightbox-caption');
-        const imageCounter = document.getElementById('image-counter');
-        const categoryBadge = document.getElementById('lightbox-category');
-        
-        // Update image and caption
-        const image = imageList[currentImageIndex];
-        lightboxImg.src = image.src;
-        lightboxCaption.textContent = image.alt || '';
-        
-        // Update counter
-        imageCounter.textContent = `${currentImageIndex + 1} / ${imageList.length}`;
-        
-        // Update category badge
-        if (image.categoryId) {
-          const category = allCategories.find(cat => cat.id === image.categoryId);
-          if (category) {
-            categoryBadge.textContent = category.name;
-            categoryBadge.style.display = 'block';
-          } else {
-            categoryBadge.style.display = 'none';
-          }
-        } else {
-          categoryBadge.textContent = 'Uncategorized';
-          categoryBadge.style.display = 'block';
-        }
-      }
-      
-      /**
-       * Show previous image in lightbox
-       */
-      function showPreviousImage() {
-        let imageList;
-        if (currentCategoryId) {
-          if (currentCategoryId === 'uncategorized') {
-            imageList = allImages.filter(img => !img.categoryId);
-          } else {
-            imageList = allImages.filter(img => img.categoryId === currentCategoryId);
-          }
-        } else {
-          imageList = allImages;
-        }
-        
-        if (!imageList || !imageList.length) return;
-        
-        currentImageIndex = (currentImageIndex - 1 + imageList.length) % imageList.length;
-        
-        const lightboxImg = document.getElementById('lightbox-img');
-        const lightboxCaption = document.getElementById('lightbox-caption');
-        const imageCounter = document.getElementById('image-counter');
-        const categoryBadge = document.getElementById('lightbox-category');
-        
-        // Update image and caption
-        const image = imageList[currentImageIndex];
-        lightboxImg.src = image.src;
-        lightboxCaption.textContent = image.alt || '';
-        
-        // Update counter
-        imageCounter.textContent = `${currentImageIndex + 1} / ${imageList.length}`;
-        
-        // Update category badge
-        if (image.categoryId) {
-          const category = allCategories.find(cat => cat.id === image.categoryId);
-          if (category) {
-            categoryBadge.textContent = category.name;
-            categoryBadge.style.display = 'block';
-          } else {
-            categoryBadge.style.display = 'none';
-          }
-        } else {
-          categoryBadge.textContent = 'Uncategorized';
-          categoryBadge.style.display = 'block';
-        }
-      }
-      
-      /**
-       * Handle image upload
-       * @param {Event} e - Change event
-       */
-      function handleImageUpload(e) {
-        const files = Array.from(e.target.files);
-        
-        if (files.length === 0) {
-          return;
-        }
-        
-        // Clear previous errors
-        clearErrorMessages();
-        
-        // Get target category ID (if in category view)
-        const categoryId = currentCategoryId === 'uncategorized' ? null : currentCategoryId;
-        
-        // If category selector is visible, use its value
-        const categorySelect = document.getElementById('category-select');
-        if (categorySelect && categorySelect.style.display !== 'none') {
-          const selectedCategory = categorySelect.value;
-          if (selectedCategory === 'uncategorized') {
-            // Special case for uncategorized
-            categoryId = null;
-          } else {
-            categoryId = selectedCategory;
-          }
-        }
-        
-        // Show progress container
-        const progressContainer = document.getElementById('upload-progress');
-        const progressBarInner = document.getElementById('progress-bar-inner');
-        const progressText = document.getElementById('progress-text');
-        
-        progressContainer.style.display = 'block';
-        progressBarInner.style.width = '0%';
-        progressText.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}...`;
-        
-        let uploadedCount = 0;
-        const failedUploads = [];
-        
-        files.forEach((file, index) => {
-          // Validate file type
-          if (!file.type.startsWith('image/')) {
-            failedUploads.push({ file, error: `"${file.name}" is not an image file` });
-            updateUploadProgress(files.length, uploadedCount + failedUploads.length);
-            return;
-          }
-          
-          // Validate file size
-          if (file.size > BBB_CONFIG.gallery.maxUploadSize) {
-            failedUploads.push({ 
-              file, 
-              error: `"${file.name}" is too large (max ${BBB_CONFIG.gallery.maxUploadSize / 1000000}MB)` 
-            });
-            updateUploadProgress(files.length, uploadedCount + failedUploads.length);
-            return;
-          }
-          
-          // Read file as data URL
-          const reader = new FileReader();
-          
-          reader.onload = function(event) {
-            const dataURL = event.target.result;
+          // If no images, show message
+          if (images.length === 0) {
+            const noImages = document.createElement('div');
+            noImages.className = 'empty-gallery';
             
-            // Generate unique ID
-            const imageId = `img_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+            const noImagesIcon = document.createElement('div');
+            noImagesIcon.innerHTML = '📷';
+            noImagesIcon.style.fontSize = '3rem';
+            noImagesIcon.style.marginBottom = '1rem';
             
-            // Create image object
-            const imageData = {
-              id: imageId,
-              src: dataURL,
-              alt: file.name.replace(/\.[^/.]+$/, '') || 'User uploaded photo',
-              categoryId: categoryId,
-              uploadedAt: new Date().toISOString()
-            };
+            const noImagesText = document.createElement('p');
+            noImagesText.textContent = 'No images in the gallery yet. Upload some photos to get started!';
             
-            // Add to allImages
-            allImages.push(imageData);
-            
-            uploadedCount++;
-            updateUploadProgress(files.length, uploadedCount + failedUploads.length);
-            
-            // Check if all uploads complete
-            if (uploadedCount + failedUploads.length === files.length) {
-              finishUploads();
-            }
-          };
-          
-          reader.onerror = function() {
-            failedUploads.push({ file, error: `Failed to read "${file.name}"` });
-            updateUploadProgress(files.length, uploadedCount + failedUploads.length);
-            
-            // Check if all uploads complete
-            if (uploadedCount + failedUploads.length === files.length) {
-              finishUploads();
-            }
-          };
-          
-          reader.readAsDataURL(file);
-        });
-        
-        // Reset file input
-        e.target.value = '';
-        
-        /**
-         * Update upload progress bar
-         * @param {number} total - Total number of files
-         * @param {number} completed - Number of completed uploads
-         */
-        function updateUploadProgress(total, completed) {
-          const percentage = Math.round((completed / total) * 100);
-          progressBarInner.style.width = `${percentage}%`;
-          progressText.textContent = `Uploading ${completed} of ${total} (${percentage}%)`;
+            noImages.appendChild(noImagesIcon);
+            noImages.appendChild(noImagesText);
+            galleryElement.appendChild(noImages);
+          }
         }
         
         /**
-         * Finish the upload process
+         * Setup event handlers for gallery
          */
-        function finishUploads() {
-          // Save to database
-          saveGalleryData()
-            .then(() => {
-              // Hide progress container
-              setTimeout(() => {
-                progressContainer.style.display = 'none';
-              }, 1500);
-              
-              // Show error messages for failed uploads
-              if (failedUploads.length > 0) {
-                const errorMessages = failedUploads.map(item => item.error);
-                showErrorMessage('Some uploads failed:', errorMessages);
+        function setupEventHandlers() {
+          // Upload handler
+          const uploadInput = document.getElementById('image-upload');
+          uploadInput.addEventListener('change', handleImageUpload);
+          
+          // Search handler
+          const searchInput = document.getElementById('gallery-search');
+          searchInput.addEventListener('input', debounce(() => {
+            loadGalleryImages();
+          }, 500));
+          
+          // Sort handler
+          const sortSelect = document.getElementById('gallery-sort');
+          sortSelect.addEventListener('change', () => {
+            loadGalleryImages();
+          });
+          
+          // Lightbox close
+          const lightboxClose = document.querySelector('.lightbox-close');
+          lightboxClose.addEventListener('click', () => {
+            document.getElementById('lightbox').style.display = 'none';
+          });
+          
+          // Click outside lightbox to close
+          document.getElementById('lightbox').addEventListener('click', e => {
+            if (e.target === document.getElementById('lightbox')) {
+              document.getElementById('lightbox').style.display = 'none';
+            }
+          });
+          
+          // ESC key to close lightbox
+          document.addEventListener('keyup', e => {
+            if (e.key === 'Escape') {
+              document.getElementById('lightbox').style.display = 'none';
+            }
+          });
+        }
+        
+        /**
+         * Debounce function to limit execution frequency
+         * @param {Function} func - Function to debounce
+         * @param {number} delay - Delay in milliseconds
+         * @returns {Function} - Debounced function
+         */
+        function debounce(func, delay = 300) {
+          let timerId;
+          return function(...args) {
+            clearTimeout(timerId);
+            timerId = setTimeout(() => {
+              func.apply(this, args);
+            }, delay);
+          };
+        }
+        
+        /**
+         * Open lightbox with image
+         * @param {HTMLElement} img - Image element to show in lightbox
+         */
+        function openLightbox(img) {
+          const lightbox = document.getElementById('lightbox');
+          const lightboxImg = document.getElementById('lightbox-img');
+          const lightboxCaption = document.getElementById('lightbox-caption');
+          
+          lightboxImg.src = img.src;
+          lightboxCaption.textContent = img.alt;
+          lightbox.style.display = 'flex';
+        }
+        
+        /**
+         * Delete an image
+         * @param {string} imageId - Image ID to delete
+         */
+        function deleteImage(imageId) {
+          if (!confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
+            return;
+          }
+          
+          BBB_UTILS.showMessage('Deleting image...', 'info');
+          
+          console.log("Attempting to delete image:", imageId);
+          console.log("Delete URL:", `${CLOUDFLARE_API}/delete/${imageId}`);
+          
+          fetch(`${CLOUDFLARE_API}/delete/${imageId}`, {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            }
+          })
+            .then(response => {
+              console.log("Delete response status:", response.status);
+              if (!response.ok) {
+                throw new Error(`Error deleting image: ${response.status} ${response.statusText}`);
               }
-              
-              // Show status message
-              if (failedUploads.length === 0) {
-                if (uploadedCount > 1) {
-                  BBB_UTILS.showMessage(`Successfully uploaded ${uploadedCount} images`, 'success');
-                } else {
-                  BBB_UTILS.showMessage('Image uploaded successfully', 'success');
+              return response.json();
+            })
+            .then(data => {
+              console.log("Delete response data:", data);
+              if (data.success) {
+                BBB_UTILS.showMessage('Image deleted successfully', 'success');
+                
+                // Remove image from DOM
+                const imgContainer = document.querySelector(`.gallery-img-container[data-id="${imageId}"]`);
+                if (imgContainer) {
+                  imgContainer.remove();
+                }
+                
+                // Reload gallery if needed
+                if (document.querySelectorAll('.gallery-img-container').length === 0) {
+                  loadGalleryImages();
                 }
               } else {
-                if (uploadedCount > 0) {
-                  BBB_UTILS.showMessage(`Uploaded ${uploadedCount} images, ${failedUploads.length} failed`, 'warning');
-                } else {
-                  BBB_UTILS.showMessage(`Failed to upload ${failedUploads.length} images`, 'error');
-                }
-              }
-              
-              // Refresh current view
-              if (currentCategoryId) {
-                showCategoryView(currentCategoryId);
-              } else {
-                showCategoriesView();
+                BBB_UTILS.showMessage(`Error deleting image: ${data.error || 'Unknown error'}`, 'error');
               }
             })
-            .catch(error => {
-              console.error('Error saving images:', error);
-              showErrorMessage('Failed to save images. Please try again.');
-              
-              // Hide progress container
-              progressContainer.style.display = 'none';
+            .catch(err => {
+              console.error('Error deleting image:', err);
+              BBB_UTILS.showMessage(`Error deleting image: ${err.message}`, 'error');
             });
         }
-      }
-      
-      /**
-       * Migrate images from localStorage (original site) to new system
-       * @returns {Promise} - Promise that resolves when migration completes
-       */
-      function migrateLocalStorageImages() {
-        return new Promise((resolve) => {
-          try {
-            // Check if we have already migrated
-            const migrated = localStorage.getItem('bbb_gallery_migrated');
-            if (migrated === 'true') {
-              return resolve();
+        
+        /**
+         * Handle image upload
+         * @param {Event} e - Change event
+         */
+        function handleImageUpload(e) {
+          const files = Array.from(e.target.files);
+          
+          if (files.length === 0) {
+            return;
+          }
+          
+          // Show progress container
+          const progressContainer = document.getElementById('upload-progress');
+          const progressBarInner = document.getElementById('progress-bar-inner');
+          const progressText = document.getElementById('progress-text');
+          
+          progressContainer.style.display = 'block';
+          progressBarInner.style.width = '0%';
+          progressText.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}...`;
+          
+          let uploadedCount = 0;
+          const failedUploads = [];
+          
+          // Get current user if available
+          const username = BBB_AUTH.currentUser ? BBB_AUTH.currentUser.id : 'anonymous';
+          
+          // Process each file
+          files.forEach((file, index) => {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+              failedUploads.push({ file, error: 'Not an image file' });
+              updateUploadProgress(files.length, uploadedCount + failedUploads.length);
+              return;
             }
             
-            // Get stored images from original code
+            // Validate file size
+            if (file.size > BBB_CONFIG.gallery.maxUploadSize) {
+              failedUploads.push({ 
+                file, 
+                error: `File too large (max ${BBB_CONFIG.gallery.maxUploadSize / 1000000}MB)` 
+              });
+              updateUploadProgress(files.length, uploadedCount + failedUploads.length);
+              return;
+            }
+            
+            // Create form data for upload
+            const formData = new FormData();
+            formData.append('image', file);
+            formData.append('alt', file.name.replace(/\.[^/.]+$/, '') || 'User uploaded photo');
+            formData.append('username', username);
+            
+            // Upload to Cloudflare Worker
+            fetch(`${CLOUDFLARE_API}/upload`, {
+              method: 'POST',
+              body: formData
+            })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error(`Upload failed: ${response.status}`);
+                }
+                return response.json();
+              })
+              .then(data => {
+                if (data.success) {
+                  uploadedCount++;
+                } else {
+                  failedUploads.push({ file, error: data.error || 'Upload failed' });
+                }
+                
+                updateUploadProgress(files.length, uploadedCount + failedUploads.length);
+                
+                // Check if all uploads complete
+                if (uploadedCount + failedUploads.length === files.length) {
+                  finishUploads();
+                }
+              })
+              .catch(err => {
+                console.error('Error uploading image:', err);
+                failedUploads.push({ file, error: 'Failed to upload' });
+                updateUploadProgress(files.length, uploadedCount + failedUploads.length);
+                
+                // Check if all uploads complete
+                if (uploadedCount + failedUploads.length === files.length) {
+                  finishUploads();
+                }
+              });
+          });
+          
+          // Reset file input
+          e.target.value = '';
+          
+          /**
+           * Update upload progress bar
+           * @param {number} total - Total number of files
+           * @param {number} completed - Number of completed uploads
+           */
+          function updateUploadProgress(total, completed) {
+            const percentage = Math.round((completed / total) * 100);
+            progressBarInner.style.width = `${percentage}%`;
+            progressText.textContent = `Uploading ${completed} of ${total} (${percentage}%)`;
+          }
+          
+          /**
+           * Finish the upload process
+           */
+          function finishUploads() {
+            // Hide progress container after a delay
+            setTimeout(() => {
+              progressContainer.style.display = 'none';
+            }, 1500);
+            
+            // Reload gallery
+            loadGalleryImages();
+            
+            // Show status message
+            if (failedUploads.length === 0) {
+              if (uploadedCount > 1) {
+                BBB_UTILS.showMessage(`Successfully uploaded ${uploadedCount} images`, 'success');
+              } else {
+                BBB_UTILS.showMessage('Image uploaded successfully', 'success');
+              }
+            } else {
+              if (uploadedCount > 0) {
+                BBB_UTILS.showMessage(`Uploaded ${uploadedCount} images, ${failedUploads.length} failed`, 'warning');
+              } else {
+                BBB_UTILS.showMessage(`Failed to upload ${failedUploads.length} images`, 'error');
+              }
+            }
+          }
+        }
+        
+        /**
+         * Check if image migration is needed
+         */
+        function checkMigrationNeeded() {
+          try {
+            // Check if we have already migrated
+            const migrated = localStorage.getItem('bbb_gallery_migrated_to_cloudflare');
+            if (migrated === 'true') {
+              return;
+            }
+            
+            // Get stored images from original localStorage
             const storedImages = JSON.parse(localStorage.getItem('uploadedImages') || '[]');
             
             if (storedImages.length === 0) {
               // No images to migrate
-              localStorage.setItem('bbb_gallery_migrated', 'true');
-              return resolve();
+              localStorage.setItem('bbb_gallery_migrated_to_cloudflare', 'true');
+              return;
             }
             
-            // Show migration message
-            BBB_UTILS.showMessage(`Migrating ${storedImages.length} existing images...`, 'info');
+            // Create migration button
+            const migrationBtn = document.createElement('button');
+            migrationBtn.className = 'btn migration-button';
+            migrationBtn.textContent = `Migrate ${storedImages.length} Images to Cloud`;
+            migrationBtn.addEventListener('click', () => migrateLocalStorageImages(storedImages));
             
-            // Convert and save each image
+            // Add before the gallery
+            const galleryElement = document.getElementById('gallery');
+            galleryElement.parentNode.insertBefore(migrationBtn, galleryElement);
+            
+            // Show migration message
+            BBB_UTILS.showMessage(`Found ${storedImages.length} images in your browser. Click the migration button to move them to the cloud.`, 'info');
+          } catch (err) {
+            console.error('Error checking for migration:', err);
+          }
+        }
+        
+        /**
+         * Migrate images from localStorage to Cloudflare
+         * @param {Array} storedImages - Array of data URLs
+         */
+        function migrateLocalStorageImages(storedImages) {
+          try {
+            // Show migration message
+            BBB_UTILS.showMessage(`Migrating ${storedImages.length} existing images to cloud storage...`, 'info');
+            
+            // Get migration button and disable it
+            const migrationBtn = document.querySelector('.migration-button');
+            if (migrationBtn) {
+              migrationBtn.disabled = true;
+              migrationBtn.textContent = 'Migration in progress...';
+            }
+            
+            // Show progress container
+            const progressContainer = document.getElementById('upload-progress');
+            const progressBarInner = document.getElementById('progress-bar-inner');
+            const progressText = document.getElementById('progress-text');
+            
+            progressContainer.style.display = 'block';
+            progressBarInner.style.width = '0%';
+            progressText.textContent = 'Preparing migration...';
+            
+            // Convert and upload each image
             let migrationCount = 0;
+            let migrationErrors = 0;
             
             storedImages.forEach((dataURL, index) => {
-              // Create image object
-              const imageData = {
-                id: `migrated_${Date.now()}_${index}`,
-                src: dataURL,
-                alt: 'Migrated image',
-                categoryId: null,
-                uploadedAt: new Date().toISOString()
-              };
-              
-              // Add to allImages
-              allImages.push(imageData);
-              migrationCount++;
+              try {
+                // Convert data URL to blob
+                const blob = dataURLtoBlob(dataURL);
+                
+                // Create form data for upload
+                const formData = new FormData();
+                formData.append('image', blob, `migrated_image_${index}.jpg`);
+                formData.append('alt', `Migrated image ${index + 1}`);
+                formData.append('username', BBB_AUTH.currentUser ? BBB_AUTH.currentUser.id : 'migration');
+                
+                // Update progress text
+                progressText.textContent = `Migrating image ${index + 1} of ${storedImages.length}...`;
+                progressBarInner.style.width = `${Math.round((index / storedImages.length) * 100)}%`;
+                
+                // Upload to Cloudflare Worker
+                fetch(`${CLOUDFLARE_API}/upload`, {
+                  method: 'POST',
+                  body: formData
+                })
+                  .then(response => {
+                    if (!response.ok) {
+                      throw new Error(`Upload failed: ${response.status}`);
+                    }
+                    return response.json();
+                  })
+                  .then(data => {
+                    if (data.success) {
+                      migrationCount++;
+                    } else {
+                      migrationErrors++;
+                    }
+                    
+                    // Update progress
+                    const completed = migrationCount + migrationErrors;
+                    const percentage = Math.round((completed / storedImages.length) * 100);
+                    progressBarInner.style.width = `${percentage}%`;
+                    progressText.textContent = `Migrated ${migrationCount} of ${storedImages.length} images (${percentage}%)`;
+                    
+                    // Check if all migrations complete
+                    if (completed === storedImages.length) {
+                      finishMigration();
+                    }
+                  })
+                  .catch(err => {
+                    console.error('Error migrating image:', err);
+                    migrationErrors++;
+                    
+                    // Update progress
+                    const completed = migrationCount + migrationErrors;
+                    const percentage = Math.round((completed / storedImages.length) * 100);
+                    progressBarInner.style.width = `${percentage}%`;
+                    progressText.textContent = `Migrated ${migrationCount} of ${storedImages.length} images (${percentage}%)`;
+                    
+                    // Check if all migrations complete
+                    if (completed === storedImages.length) {
+                      finishMigration();
+                    }
+                  });
+              } catch (err) {
+                console.error('Error processing image for migration:', err);
+                migrationErrors++;
+                
+                // Update progress
+                const completed = migrationCount + migrationErrors;
+                const percentage = Math.round((completed / storedImages.length) * 100);
+                progressBarInner.style.width = `${percentage}%`;
+                
+                // Check if all migrations complete
+                if (completed === storedImages.length) {
+                  finishMigration();
+                }
+              }
             });
             
-            // Save to database
-            saveGalleryData()
-              .then(() => {
-                // Mark as migrated
-                localStorage.setItem('bbb_gallery_migrated', 'true');
+            /**
+             * Convert data URL to Blob
+             * @param {string} dataURL - Data URL string
+             * @returns {Blob} - Blob data
+             */
+            function dataURLtoBlob(dataURL) {
+              try {
+                const arr = dataURL.split(',');
+                const mime = arr[0].match(/:(.*?);/)[1];
+                const bstr = atob(arr[1]);
+                let n = bstr.length;
+                const u8arr = new Uint8Array(n);
                 
-                // Refresh current view
-                if (currentCategoryId) {
-                  showCategoryView(currentCategoryId);
-                } else {
-                  showCategoriesView();
+                while (n--) {
+                  u8arr[n] = bstr.charCodeAt(n);
                 }
                 
-                // Show status message
-                BBB_UTILS.showMessage(`Successfully migrated ${migrationCount} images`, 'success');
-                
-                resolve();
-              })
-              .catch(err => {
-                console.error('Error during migration:', err);
-                resolve();
-              });
+                return new Blob([u8arr], { type: mime });
+              } catch (err) {
+                console.error('Error converting data URL to blob:', err);
+                throw err;
+              }
+            }
+            
+            /**
+             * Finish the migration process
+             */
+            function finishMigration() {
+              // Mark as migrated
+              localStorage.setItem('bbb_gallery_migrated_to_cloudflare', 'true');
+              
+              // Clear old localStorage to free up space
+              localStorage.removeItem('uploadedImages');
+              
+              // Hide progress
+              progressContainer.style.display = 'none';
+              
+              // Remove migration button
+              if (migrationBtn) {
+                migrationBtn.remove();
+              }
+              
+              // Reload gallery
+              loadGalleryImages();
+              
+              // Show status message
+              if (migrationErrors === 0) {
+                BBB_UTILS.showMessage(`Successfully migrated ${migrationCount} images to cloud storage`, 'success');
+              } else {
+                BBB_UTILS.showMessage(`Migrated ${migrationCount} images, failed to migrate ${migrationErrors} images`, 'warning');
+              }
+            }
           } catch (err) {
             console.error('Error during gallery migration:', err);
-            resolve();
+            BBB_UTILS.showMessage('Error migrating images: ' + err.message, 'error');
           }
-        });
-      }
-      
-      /**
-       * Show error message in error container
-       * @param {string} message - Main error message
-       * @param {Array} details - Optional array of error details
-       */
-      function showErrorMessage(message, details) {
-        const errorContainer = document.getElementById('error-container');
-        const errorTitle = document.getElementById('error-title');
-        const errorList = document.getElementById('error-list');
-        
-        if (!errorContainer || !errorTitle || !errorList) return;
-        
-        errorTitle.textContent = message;
-        errorList.innerHTML = '';
-        
-        if (Array.isArray(details) && details.length > 0) {
-          details.forEach(detail => {
-            const listItem = document.createElement('li');
-            listItem.textContent = detail;
-            errorList.appendChild(listItem);
-          });
-          errorList.style.display = 'block';
-        } else {
-          errorList.style.display = 'none';
-        }
-        
-        errorContainer.style.display = 'block';
-      }
-      
-      /**
-       * Clear error messages
-       */
-      function clearErrorMessages() {
-        const errorContainer = document.getElementById('error-container');
-        if (errorContainer) {
-          errorContainer.style.display = 'none';
         }
       }
-      
-      // Public methods
-      return {
-        init: init
-      };
-    })();
-    
-    // Initialize gallery when document is ready
-    document.addEventListener('DOMContentLoaded', function() {
-      BBB_GALLERY.init();
     });
   </script>
 </body>
