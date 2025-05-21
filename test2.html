@@ -2073,6 +2073,129 @@
     });
   </script>
 </body>
+</html>
+        
+        /**
+         * Copy image URL to clipboard
+         * @param {string} url - URL to copy
+         */
+        function copyImageUrlToClipboard(url) {
+          navigator.clipboard.writeText(url)
+            .then(() => {
+              BBB_UTILS.showMessage('Image URL copied to clipboard', 'success');
+            })
+            .catch(err => {
+              console.error('Error copying to clipboard:', err);
+              BBB_UTILS.showMessage('Failed to copy URL', 'error');
+              
+              // Fallback for older browsers
+              const textarea = document.createElement('textarea');
+              textarea.value = url;
+              document.body.appendChild(textarea);
+              textarea.select();
+              
+              try {
+                document.execCommand('copy');
+                BBB_UTILS.showMessage('Image URL copied to clipboard', 'success');
+              } catch (err) {
+                console.error('Error copying to clipboard (fallback):', err);
+                BBB_UTILS.showMessage('Failed to copy URL', 'error');
+              }
+              
+              document.body.removeChild(textarea);
+            });
+        }
+        
+        /**
+         * Share image
+         * @param {string} imageUrl - Image URL
+         * @param {string} title - Image title
+         */
+        function shareImage(imageUrl, title) {
+          if (navigator.share) {
+            navigator.share({
+              title: title || 'Shared Image',
+              text: 'Check out this image from Birdie Bush Bandits Gallery',
+              url: imageUrl
+            })
+              .then(() => {
+                BBB_UTILS.showMessage('Image shared successfully', 'success');
+              })
+              .catch(err => {
+                console.error('Error sharing:', err);
+                // If sharing fails, fall back to copying URL
+                copyImageUrlToClipboard(imageUrl);
+              });
+          } else {
+            // Fallback for browsers that don't support navigator.share
+            copyImageUrlToClipboard(imageUrl);
+          }
+        }
+        
+        /**
+         * Download image
+         * @param {string} imageUrl - Image URL
+         * @param {string} filename - Filename to save as
+         */
+        function downloadImage(imageUrl, filename) {
+          const a = document.createElement('a');
+          a.href = imageUrl;
+          a.download = filename || 'bbb-gallery-image.jpg';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          
+          BBB_UTILS.showMessage('Image download started', 'success');
+        }
+        
+        /**
+         * View image in full screen
+         * @param {HTMLElement} img - Image element
+         */
+        function viewFullscreen(img) {
+          if (img.requestFullscreen) {
+            img.requestFullscreen();
+          } else if (img.webkitRequestFullscreen) { /* Safari */
+            img.webkitRequestFullscreen();
+          } else if (img.msRequestFullscreen) { /* IE11 */
+            img.msRequestFullscreen();
+          }
+        }
+        
+        /**
+         * Set active album in UI
+         * @param {string} albumId - Album ID
+         */
+        function setActiveAlbum(albumId) {
+          // Update current album
+          currentAlbum = albumId;
+          
+          // Update all album cards
+          document.querySelectorAll('.album-card').forEach(card => {
+            if (card.dataset.albumId === albumId) {
+              card.style.borderLeft = '4px solid var(--bbb-primary)';
+            } else {
+              card.style.borderLeft = 'none';
+            }
+          });
+          
+          // Fetch album title and update gallery title
+          fetch(`${CLOUDFLARE_API}/album/${albumId}`)
+            .then(response => response.json())
+            .then(album => {
+              const galleryTitle = document.getElementById('gallery-title');
+              if (galleryTitle && album.title) {
+                galleryTitle.textContent = `Photo Gallery - ${album.title}`;
+              }
+            })
+            .catch(err => {
+              console.error('Error fetching album details:', err);
+            });
+        }
+      }
+    });
+  </script>
+</body>
 </html> option
                 const deleteOption = document.createElement('div');
                 deleteOption.className = 'album-menu-option delete';
