@@ -958,57 +958,148 @@
           lightbox.style.display = 'flex';
         }
         
-        /**
-         * Delete an image
-         * @param {string} imageId - Image ID to delete
-         */
-        function deleteImage(imageId) {
-          if (!confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
-            return;
-          }
+        // REPLACE the existing deleteImage function (around line 650-690) with this enhanced version:
+
+/**
+ * Enhanced delete function for the photo gallery
+ * @param {string} imageId - Image ID to delete
+ */
+function deleteImage(imageId) {
+  // Validate input
+  if (!imageId || imageId.trim() === '') {
+    BBB_UTILS.showMessage('Invalid image ID provided', 'error');
+    return;
+  }
+
+  if (!confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
+    return;
+  }
+  
+  console.log("Attempting to delete image:", imageId);
+  
+  // Show loading message
+  BBB_UTILS.showMessage('Deleting image...', 'info');
+  
+  // Construct the delete URL
+  const deleteUrl = `${CLOUDFLARE_API}/delete/${encodeURIComponent(imageId)}`;
+  console.log("Delete URL:", deleteUrl);
+  
+  // Make the delete request
+  fetch(deleteUrl, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    }
+  })
+    .then(response => {
+      console.log("Delete response status:", response.status);
+      console.log("Delete response headers:", [...response.headers.entries()]);
+      
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        return response.json().then(data => ({
+          ok: response.ok,
+          status: response.status,
+          data: data
+        }));
+      } else {
+        // Handle non-JSON response
+        return response.text().then(text => ({
+          ok: response.ok,
+          status: response.status,
+          data: { success: false, error: `Non-JSON response: ${text}` }
+        }));
+      }
+    })
+    .then(result => {
+      console.log("Delete response result:", result);
+      
+      if (result.ok && result.data.success) {
+        console.log("Delete successful");
+        BBB_UTILS.showMessage('Image deleted successfully', 'success');
+        
+        // Remove image from DOM immediately
+        const imgContainer = document.querySelector(`.gallery-img-container[data-id="${imageId}"]`);
+        if (imgContainer) {
+          imgContainer.style.transition = 'opacity 0.3s ease';
+          imgContainer.style.opacity = '0';
           
-          BBB_UTILS.showMessage('Deleting image...', 'info');
-          
-          console.log("Attempting to delete image:", imageId);
-          console.log("Delete URL:", `${CLOUDFLARE_API}/delete/${imageId}`);
-          
-          fetch(`${CLOUDFLARE_API}/delete/${imageId}`, {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json'
+          setTimeout(() => {
+            imgContainer.remove();
+            
+            // Check if gallery is empty and reload if needed
+            const remainingImages = document.querySelectorAll('.gallery-img-container');
+            if (remainingImages.length === 0) {
+              console.log("Gallery is empty, reloading...");
+              loadGalleryImages();
             }
-          })
-            .then(response => {
-              console.log("Delete response status:", response.status);
-              if (!response.ok) {
-                throw new Error(`Error deleting image: ${response.status} ${response.statusText}`);
-              }
-              return response.json();
-            })
-            .then(data => {
-              console.log("Delete response data:", data);
-              if (data.success) {
-                BBB_UTILS.showMessage('Image deleted successfully', 'success');
-                
-                // Remove image from DOM
-                const imgContainer = document.querySelector(`.gallery-img-container[data-id="${imageId}"]`);
-                if (imgContainer) {
-                  imgContainer.remove();
-                }
-                
-                // Reload gallery if needed
-                if (document.querySelectorAll('.gallery-img-container').length === 0) {
-                  loadGalleryImages();
-                }
-              } else {
-                BBB_UTILS.showMessage(`Error deleting image: ${data.error || 'Unknown error'}`, 'error');
-              }
-            })
-            .catch(err => {
-              console.error('Error deleting image:', err);
-              BBB_UTILS.showMessage(`Error deleting image: ${err.message}`, 'error');
-            });
+          }, 300);
+        } else {
+          console.log("Image container not found in DOM, reloading gallery");
+          loadGalleryImages();
         }
+        
+      } else {
+        console.error("Delete failed:", result.data);
+        const errorMessage = result.data.error || `Delete failed with status ${result.status}`;
+        BBB_UTILS.showMessage(`Error deleting image: ${errorMessage}`, 'error');
+      }
+    })
+    .catch(err => {
+      console.error('Network or parsing error during delete:', err);
+      BBB_UTILS.showMessage(`Error deleting image: ${err.message}`, 'error');
+    });
+}
+
+// ADD these debug functions after the deleteImage function:
+
+/**
+ * Test function to check if the delete endpoint is working
+ */
+function testDeleteEndpoint() {
+  const testUrl = `${CLOUDFLARE_API}/health`;
+  
+  console.log("Testing worker health:", testUrl);
+  
+  fetch(testUrl)
+    .then(response => response.json())
+    .then(data => {
+      console.log("Worker health check:", data);
+      BBB_UTILS.showMessage(`Worker is ${data.status}. Environment check: Bucket=${data.environment.hasGalleryBucket}, DB=${data.environment.hasGalleryDB}`, 'info');
+    })
+    .catch(err => {
+      console.error("Health check failed:", err);
+      BBB_UTILS.showMessage(`Health check failed: ${err.message}`, 'error');
+    });
+}
+
+/**
+ * Debug function to list all images and their IDs
+ */
+function debugListImages() {
+  console.log("=== DEBUG: Listing all images ===");
+  
+  fetch(`${CLOUDFLARE_API}/images`)
+    .then(response => response.json())
+    .then(images => {
+      console.log(`Found ${images.length} images:`);
+      images.forEach((img, index) => {
+        console.log(`${index + 1}. ID: ${img.id}, Filename: ${img.filename}, Path: ${img.path}`);
+      });
+      
+      // Also check DOM elements
+      const domImages = document.querySelectorAll('.gallery-img-container[data-id]');
+      console.log(`Found ${domImages.length} images in DOM:`);
+      domImages.forEach((container, index) => {
+        console.log(`${index + 1}. DOM data-id: ${container.dataset.id}`);
+      });
+    })
+    .catch(err => {
+      console.error("Error listing images:", err);
+    });
+}
         
         /**
          * Handle image upload
