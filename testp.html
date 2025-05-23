@@ -872,66 +872,6 @@
         // Setup event handlers
         setupEventHandlers();
         
-        /**
-         * Create the albums section with predefined albums
-         */
-          // Create albums grid
-          const albumsGrid = document.createElement('div');
-          albumsGrid.className = 'albums-grid';
-          
-          // Define albums 
-          const albums = [
-            { id: 'all', title: 'All Photos', thumbnail: 'images/photo1.jpg', count: 'All' },
-            { id: 'events', title: 'Golf Events', thumbnail: 'images/photo2.jpg', count: '0' },
-            { id: 'tournaments', title: 'Tournaments', thumbnail: 'images/photo3.jpg', count: '0' },
-            { id: 'members', title: 'Member Photos', thumbnail: 'images/photo4.jpg', count: '0' }
-          ];
-          
-          // Create album cards
-          albums.forEach(album => {
-            const albumCard = document.createElement('div');
-            albumCard.className = 'album-card';
-            albumCard.dataset.albumId = album.id;
-            
-            const albumThumb = document.createElement('div');
-            albumThumb.className = 'album-thumbnail';
-            albumThumb.style.backgroundImage = `url('${album.thumbnail}')`;
-            
-            const albumInfo = document.createElement('div');
-            albumInfo.className = 'album-info';
-            
-            const albumTitle = document.createElement('div');
-            albumTitle.className = 'album-title';
-            albumTitle.textContent = album.title;
-            
-            const albumCount = document.createElement('div');
-            albumCount.className = 'album-count';
-            albumCount.textContent = `${album.count} photos`;
-            
-            albumInfo.appendChild(albumTitle);
-            albumInfo.appendChild(albumCount);
-            
-            albumCard.appendChild(albumThumb);
-            albumCard.appendChild(albumInfo);
-            
-            // Add click handler
-            albumCard.addEventListener('click', () => {
-              // Currently just changes the gallery title
-              const subtitle = document.querySelector('h2');
-              if (subtitle) {
-                subtitle.textContent = `Photo Gallery - ${album.title}`;
-              }
-              
-              // In the future, this could filter images by album
-              BBB_UTILS.showMessage(`Viewing album: ${album.title}`, 'info');
-              loadGalleryImages();
-            });
-            
-            albumsGrid.appendChild(albumCard);
-          });
-          
-          albumsSection.appendChild(albumsGrid);
-          return albumsSection;
         }
         
         /**
