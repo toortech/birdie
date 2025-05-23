@@ -930,20 +930,30 @@
       }
   
       // =============================================================================
-      // ALBUM MANAGEMENT FUNCTIONS
+      // ALBUM MANAGEMENT FUNCTIONS - COMPLETE IMPLEMENTATIONS
       // =============================================================================
 
       // Global variable for current album
       window.currentAlbumId = null;
 
+      /**
+       * 1. Load albums from API
+       */
       function loadAlbums() {
         console.log("Loading albums...");
+        BBB_UTILS.showMessage('Loading albums...', 'info');
         
         fetch(`${CLOUDFLARE_API}/albums`)
-          .then(response => response.json())
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to load albums: ${response.status}`);
+            }
+            return response.json();
+          })
           .then(albums => {
             console.log("Albums loaded:", albums);
             displayAlbums(albums);
+            BBB_UTILS.showMessage('', 'info'); // Clear loading message
           })
           .catch(err => {
             console.error('Error loading albums:', err);
@@ -951,6 +961,9 @@
           });
       }
 
+      /**
+       * 2. Display albums in grid format
+       */
       function displayAlbums(albums) {
         const albumsContainer = document.getElementById('albums-container');
         if (!albumsContainer) {
@@ -961,8 +974,9 @@
         if (albums.length === 0) {
           albumsContainer.innerHTML = `
             <div class="text-center p-4">
+              <div style="font-size: 3rem; margin-bottom: 1rem;">📁</div>
               <p>No albums found. Create your first album!</p>
-              <button onclick="showCreateAlbumModal()" class="btn">Create Album</button>
+              <button onclick="showCreateAlbumModal()" class="btn btn-success">Create Album</button>
             </div>
           `;
           return;
@@ -973,22 +987,25 @@
             <div class="card-header">
               <h3 class="card-title">${escapeHtml(album.name)}</h3>
               <div class="album-actions">
-                <button onclick="renameAlbum('${album.id}', '${escapeHtml(album.name)}')" class="btn btn-sm">Rename</button>
-                <button onclick="deleteAlbum('${album.id}', '${escapeHtml(album.name)}')" class="btn btn-sm btn-danger">Delete</button>
+                <button onclick="renameAlbum('${album.id}', '${escapeHtml(album.name)}')" class="btn btn-sm" title="Rename Album">✏️</button>
+                <button onclick="deleteAlbum('${album.id}', '${escapeHtml(album.name)}')" class="btn btn-sm btn-danger" title="Delete Album">🗑️</button>
               </div>
             </div>
             <div class="card-body">
-              ${album.description ? `<p>${escapeHtml(album.description)}</p>` : ''}
-              <p><strong>${album.image_count}</strong> images</p>
+              ${album.description ? `<p>${escapeHtml(album.description)}</p>` : '<p class="text-muted">No description</p>'}
+              <p><strong>${album.image_count || 0}</strong> image${album.image_count === 1 ? '' : 's'}</p>
               <div class="album-buttons">
-                <button onclick="viewAlbum('${album.id}', '${escapeHtml(album.name)}')" class="btn">View Album</button>
-                <button onclick="uploadToAlbum('${album.id}')" class="btn btn-success">Add Photos</button>
+                <button onclick="viewAlbum('${album.id}', '${escapeHtml(album.name)}')" class="btn">📂 View Album</button>
+                <button onclick="uploadToAlbum('${album.id}')" class="btn btn-success">📸 Add Photos</button>
               </div>
             </div>
           </div>
         `).join('');
       }
 
+      /**
+       * 3. Show create album modal
+       */
       function showCreateAlbumModal() {
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
@@ -996,7 +1013,7 @@
           <div class="modal-content">
             <div class="modal-header">
               <h3>Create New Album</h3>
-              <button onclick="closeModal()" class="btn-close">&times;</button>
+              <button onclick="closeModal()" class="btn-close" title="Close">&times;</button>
             </div>
             <div class="modal-body">
               <div class="form-group">
@@ -1016,16 +1033,53 @@
         `;
         
         document.body.appendChild(modal);
-        document.getElementById('album-name').focus();
+        
+        // Focus the name input
+        setTimeout(() => {
+          const nameInput = document.getElementById('album-name');
+          if (nameInput) nameInput.focus();
+        }, 100);
+
+        // Handle Enter key in form
+        const nameInput = document.getElementById('album-name');
+        const descInput = document.getElementById('album-description');
+        
+        if (nameInput) {
+          nameInput.addEventListener('keypress', e => {
+            if (e.key === 'Enter') createAlbum();
+          });
+        }
       }
 
+      /**
+       * 4. Create new album
+       */
       function createAlbum() {
-        const name = document.getElementById('album-name').value.trim();
-        const description = document.getElementById('album-description').value.trim();
+        const nameInput = document.getElementById('album-name');
+        const descInput = document.getElementById('album-description');
+        
+        if (!nameInput) {
+          BBB_UTILS.showMessage('Form elements not found', 'error');
+          return;
+        }
+        
+        const name = nameInput.value.trim();
+        const description = descInput ? descInput.value.trim() : '';
         
         if (!name) {
           BBB_UTILS.showMessage('Album name is required', 'error');
+          nameInput.focus();
           return;
+        }
+        
+        // Disable form while creating
+        nameInput.disabled = true;
+        if (descInput) descInput.disabled = true;
+        
+        const createBtn = document.querySelector('.modal-footer .btn-success');
+        if (createBtn) {
+          createBtn.disabled = true;
+          createBtn.textContent = 'Creating...';
         }
         
         BBB_UTILS.showMessage('Creating album...', 'info');
@@ -1042,18 +1096,279 @@
             if (result.success) {
               BBB_UTILS.showMessage('Album created successfully!', 'success');
               closeModal();
-              loadAlbums();
+              loadAlbums(); // Refresh the albums list
             } else {
               BBB_UTILS.showMessage(`Error creating album: ${result.error}`, 'error');
+              // Re-enable form
+              nameInput.disabled = false;
+              if (descInput) descInput.disabled = false;
+              if (createBtn) {
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create Album';
+              }
             }
           })
           .catch(err => {
             console.error('Error creating album:', err);
             BBB_UTILS.showMessage(`Error creating album: ${err.message}`, 'error');
+            // Re-enable form
+            nameInput.disabled = false;
+            if (descInput) descInput.disabled = false;
+            if (createBtn) {
+              createBtn.disabled = false;
+              createBtn.textContent = 'Create Album';
+            }
           });
       }
 
+      /**
+       * 5. View specific album
+       */
+      function viewAlbum(albumId, albumName) {
+        if (!albumId) {
+          BBB_UTILS.showMessage('Invalid album ID', 'error');
+          return;
+        }
+        
+        console.log(`Viewing album: ${albumId} - ${albumName}`);
+        
+        // Update UI state
+        window.currentAlbumId = albumId;
+        document.getElementById('page-title').textContent = `Album: ${albumName}`;
+        
+        // Show back button
+        const backButton = document.getElementById('back-to-albums') || createBackButton();
+        backButton.style.display = 'block';
+        
+        // Hide albums section, show gallery
+        document.getElementById('albums-section').style.display = 'none';
+        document.getElementById('gallery-container').style.display = 'block';
+        document.getElementById('upload-section').style.display = 'block';
+        
+        // Update upload button to upload to this album
+        const uploadLabel = document.querySelector('.upload-label');
+        if (uploadLabel) {
+          uploadLabel.textContent = `Add Photos to ${albumName}`;
+        }
+        
+        // Load images for this album
+        loadGalleryImages(albumId);
+      }
+
+      /**
+       * 6. Rename album
+       */
+      function renameAlbum(albumId, currentName) {
+        if (!albumId) {
+          BBB_UTILS.showMessage('Invalid album ID', 'error');
+          return;
+        }
+        
+        // Get current album data first
+        fetch(`${CLOUDFLARE_API}/albums/${albumId}`)
+          .then(response => response.json())
+          .then(album => {
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h3>Rename Album</h3>
+                  <button onclick="closeModal()" class="btn-close" title="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label for="rename-album-name">Album Name *</label>
+                    <input type="text" id="rename-album-name" required maxlength="100" value="${escapeHtml(album.name)}">
+                  </div>
+                  <div class="form-group">
+                    <label for="rename-album-description">Description (optional)</label>
+                    <textarea id="rename-album-description" rows="3" maxlength="500">${escapeHtml(album.description || '')}</textarea>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button onclick="closeModal()" class="btn">Cancel</button>
+                  <button onclick="updateAlbum('${albumId}')" class="btn btn-success">Save Changes</button>
+                </div>
+              </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Focus and select the name input
+            setTimeout(() => {
+              const nameInput = document.getElementById('rename-album-name');
+              if (nameInput) {
+                nameInput.focus();
+                nameInput.select();
+              }
+            }, 100);
+
+            // Handle Enter key
+            const nameInput = document.getElementById('rename-album-name');
+            if (nameInput) {
+              nameInput.addEventListener('keypress', e => {
+                if (e.key === 'Enter') updateAlbum(albumId);
+              });
+            }
+          })
+          .catch(err => {
+            console.error('Error loading album details:', err);
+            BBB_UTILS.showMessage('Error loading album details', 'error');
+          });
+      }
+
+      /**
+       * 7. Update album (helper for rename)
+       */
+      function updateAlbum(albumId) {
+        const nameInput = document.getElementById('rename-album-name');
+        const descInput = document.getElementById('rename-album-description');
+        
+        if (!nameInput) {
+          BBB_UTILS.showMessage('Form elements not found', 'error');
+          return;
+        }
+        
+        const name = nameInput.value.trim();
+        const description = descInput ? descInput.value.trim() : '';
+        
+        if (!name) {
+          BBB_UTILS.showMessage('Album name is required', 'error');
+          nameInput.focus();
+          return;
+        }
+        
+        // Disable form
+        nameInput.disabled = true;
+        if (descInput) descInput.disabled = true;
+        
+        const saveBtn = document.querySelector('.modal-footer .btn-success');
+        if (saveBtn) {
+          saveBtn.disabled = true;
+          saveBtn.textContent = 'Saving...';
+        }
+        
+        BBB_UTILS.showMessage('Updating album...', 'info');
+        
+        fetch(`${CLOUDFLARE_API}/albums/${albumId}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name, description })
+        })
+          .then(response => response.json())
+          .then(result => {
+            if (result.success) {
+              BBB_UTILS.showMessage('Album updated successfully!', 'success');
+              closeModal();
+              
+              // If we're currently viewing this album, update the title
+              if (window.currentAlbumId === albumId) {
+                document.getElementById('page-title').textContent = `Album: ${name}`;
+              }
+              
+              loadAlbums(); // Refresh the albums list
+            } else {
+              BBB_UTILS.showMessage(`Error updating album: ${result.error}`, 'error');
+              // Re-enable form
+              nameInput.disabled = false;
+              if (descInput) descInput.disabled = false;
+              if (saveBtn) {
+                saveBtn.disabled = false;
+                saveBtn.textContent = 'Save Changes';
+              }
+            }
+          })
+          .catch(err => {
+            console.error('Error updating album:', err);
+            BBB_UTILS.showMessage(`Error updating album: ${err.message}`, 'error');
+            // Re-enable form
+            nameInput.disabled = false;
+            if (descInput) descInput.disabled = false;
+            if (saveBtn) {
+              saveBtn.disabled = false;
+              saveBtn.textContent = 'Save Changes';
+            }
+          });
+      }
+
+      /**
+       * 8. Delete album with confirmation
+       */
+      function deleteAlbum(albumId, albumName) {
+        if (!albumId) {
+          BBB_UTILS.showMessage('Invalid album ID', 'error');
+          return;
+        }
+        
+        // Double confirmation for album deletion
+        const confirmed = confirm(
+          `Are you sure you want to delete the album "${albumName}"?\n\n` +
+          `This will permanently delete the album and ALL images inside it.\n\n` +
+          `This action cannot be undone.`
+        );
+        
+        if (!confirmed) {
+          return;
+        }
+        
+        BBB_UTILS.showMessage('Deleting album and all images...', 'info');
+        
+        fetch(`${CLOUDFLARE_API}/albums/${albumId}`, {
+          method: 'DELETE'
+        })
+          .then(response => response.json())
+          .then(result => {
+            if (result.success) {
+              BBB_UTILS.showMessage(`Album "${albumName}" and ${result.deletedImageCount || 0} images deleted successfully`, 'success');
+              
+              // If we're currently viewing this album, go back to albums
+              if (window.currentAlbumId === albumId) {
+                goBackToAlbums();
+              } else {
+                loadAlbums(); // Refresh the albums list
+              }
+            } else {
+              BBB_UTILS.showMessage(`Error deleting album: ${result.error}`, 'error');
+            }
+          })
+          .catch(err => {
+            console.error('Error deleting album:', err);
+            BBB_UTILS.showMessage(`Error deleting album: ${err.message}`, 'error');
+          });
+      }
+
+      /**
+       * 9. Upload to specific album
+       */
+      function uploadToAlbum(albumId) {
+        if (!albumId) {
+          BBB_UTILS.showMessage('Invalid album ID', 'error');
+          return;
+        }
+        
+        console.log(`Uploading to album: ${albumId}`);
+        
+        // Set the current album context
+        window.currentAlbumId = albumId;
+        
+        // Trigger the file input
+        const uploadInput = document.getElementById('image-upload');
+        if (uploadInput) {
+          uploadInput.click();
+        } else {
+          BBB_UTILS.showMessage('Upload input not found', 'error');
+        }
+      }
+
+      /**
+       * 10. View all images (not album-specific)
+       */
       function viewAllImages() {
+        console.log('Viewing all images');
+        
         document.getElementById('page-title').textContent = 'All Images';
         
         const backButton = document.getElementById('back-to-albums') || createBackButton();
@@ -1063,10 +1378,213 @@
         document.getElementById('gallery-container').style.display = 'block';
         document.getElementById('upload-section').style.display = 'block';
         
+        // Reset upload button text
+        const uploadLabel = document.querySelector('.upload-label');
+        if (uploadLabel) {
+          uploadLabel.textContent = 'Upload Photos';
+        }
+        
         window.currentAlbumId = null;
-        loadGalleryImages();
+        loadGalleryImages(); // Load all images
       }
 
+      // =============================================================================
+      // ENHANCED IMAGE MANAGEMENT FUNCTIONS
+      // =============================================================================
+
+      /**
+       * Enhanced load gallery images with album support
+       */
+      function loadGalleryImages(albumId = null) {
+        // Use the current album context if no albumId provided
+        const targetAlbumId = albumId || window.currentAlbumId;
+        
+        BBB_UTILS.showMessage('Loading images...', 'info');
+        
+        // Check sort and search options
+        const sortSelect = document.getElementById('gallery-sort');
+        const searchInput = document.getElementById('gallery-search');
+        
+        const sortValue = sortSelect ? sortSelect.value : 'newest';
+        const searchValue = searchInput ? searchInput.value.trim() : '';
+        
+        // Build the API URL
+        let apiUrl = `${CLOUDFLARE_API}/images`;
+        const params = new URLSearchParams();
+        
+        if (targetAlbumId) {
+          params.append('albumId', targetAlbumId);
+        }
+        
+        if (searchValue) {
+          params.append('search', searchValue);
+        }
+        
+        if (params.toString()) {
+          apiUrl += `?${params.toString()}`;
+        }
+        
+        console.log('Loading images from:', apiUrl);
+        
+        // Fetch from Cloudflare
+        fetch(apiUrl)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Error fetching gallery: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(data => {
+            // Convert to our format
+            const images = data.map(img => ({
+              id: img.id,
+              src: `${CLOUDFLARE_API}/image/${img.id}`,
+              alt: img.alt || img.filename || 'Gallery image',
+              uploadedAt: img.uploaded_at,
+              uploadedBy: img.uploaded_by,
+              filename: img.filename,
+              albumId: img.album_id
+            }));
+            
+            // Sort images
+            if (sortValue === 'oldest') {
+              images.sort((a, b) => new Date(a.uploadedAt) - new Date(b.uploadedAt));
+            } else if (sortValue === 'name') {
+              images.sort((a, b) => a.alt.localeCompare(b.alt));
+            } else {
+              // Default: newest first
+              images.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
+            }
+            
+            // Render gallery
+            renderGallery(images);
+            
+            // Clear loading message
+            BBB_UTILS.showMessage('', 'info');
+          })
+          .catch(err => {
+            console.error('Error loading gallery images:', err);
+            BBB_UTILS.showMessage('Error loading gallery images', 'error');
+            
+            // Show empty gallery on error
+            renderGallery([]);
+          });
+      }
+
+      /**
+       * Enhanced render gallery function
+       */
+      function renderGallery(images) {
+        const galleryElement = document.getElementById('gallery');
+        if (!galleryElement) {
+          console.error('Gallery element not found');
+          return;
+        }
+        
+        galleryElement.innerHTML = '';
+        
+        // If no images, show message
+        if (images.length === 0) {
+          const noImages = document.createElement('div');
+          noImages.className = 'empty-gallery';
+          
+          const noImagesIcon = document.createElement('div');
+          noImagesIcon.innerHTML = '📷';
+          noImagesIcon.style.fontSize = '3rem';
+          noImagesIcon.style.marginBottom = '1rem';
+          
+          const noImagesText = document.createElement('p');
+          const contextText = window.currentAlbumId ? 'this album' : 'the gallery';
+          noImagesText.textContent = `No images in ${contextText} yet. Upload some photos to get started!`;
+          
+          noImages.appendChild(noImagesIcon);
+          noImages.appendChild(noImagesText);
+          galleryElement.appendChild(noImages);
+          return;
+        }
+        
+        // Create gallery
+        images.forEach(image => {
+          const imgContainer = document.createElement('div');
+          imgContainer.className = 'gallery-img-container';
+          imgContainer.dataset.id = image.id;
+          
+          const img = document.createElement('img');
+          img.src = image.src;
+          img.alt = image.alt || 'Gallery image';
+          img.className = 'gallery-img';
+          img.setAttribute('loading', 'lazy');
+          
+          // Add timestamp info
+          const imageInfo = document.createElement('div');
+          imageInfo.className = 'image-info';
+          
+          let uploadDate = 'Unknown date';
+          if (image.uploadedAt) {
+            uploadDate = new Date(image.uploadedAt).toLocaleDateString();
+          }
+          
+          imageInfo.textContent = uploadDate;
+          
+          // Add filename overlay
+          const imageFilename = document.createElement('div');
+          imageFilename.className = 'image-filename';
+          imageFilename.textContent = image.filename || 'Unknown file';
+          
+          // Add action buttons
+          const imageActions = document.createElement('div');
+          imageActions.className = 'image-actions';
+          
+          // View button
+          const viewBtn = document.createElement('button');
+          viewBtn.className = 'image-action-btn view-btn';
+          viewBtn.innerHTML = '👁️';
+          viewBtn.title = 'View full size';
+          viewBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openLightbox(img);
+          });
+          
+          // Delete button (show if admin or image was uploaded by current user)
+          const canDelete = BBB_AUTH.hasRole('admin') || 
+                          (image.uploadedBy && BBB_AUTH.currentUser && 
+                           image.uploadedBy === BBB_AUTH.currentUser.id);
+          
+          if (canDelete) {
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'image-action-btn delete-btn';
+            deleteBtn.innerHTML = '🗑️';
+            deleteBtn.title = 'Delete image';
+            deleteBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              deleteImage(image.id);
+            });
+            imageActions.appendChild(deleteBtn);
+          }
+          
+          imageActions.appendChild(viewBtn);
+          
+          // Add click handler for lightbox
+          img.addEventListener('click', () => {
+            openLightbox(img);
+          });
+          
+          imgContainer.appendChild(img);
+          imgContainer.appendChild(imageInfo);
+          imgContainer.appendChild(imageFilename);
+          imgContainer.appendChild(imageActions);
+          
+          galleryElement.appendChild(imgContainer);
+        });
+      }
+
+      // =============================================================================
+      // UTILITY FUNCTIONS
+      // =============================================================================
+
+      /**
+       * Close modal utility
+       */
       function closeModal() {
         const modal = document.querySelector('.modal-overlay');
         if (modal) {
@@ -1074,12 +1592,19 @@
         }
       }
 
+      /**
+       * Escape HTML utility
+       */
       function escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
       }
 
+      /**
+       * Create back button utility
+       */
       function createBackButton() {
         const backButton = document.createElement('button');
         backButton.id = 'back-to-albums';
@@ -1089,17 +1614,35 @@
         backButton.style.display = 'none';
         
         const pageTitle = document.getElementById('page-title');
-        pageTitle.parentNode.insertBefore(backButton, pageTitle.nextSibling);
+        if (pageTitle) {
+          pageTitle.parentNode.insertBefore(backButton, pageTitle.nextSibling);
+        }
         
         return backButton;
       }
 
+      /**
+       * Go back to albums utility
+       */
       function goBackToAlbums() {
+        console.log('Going back to albums');
+        
         document.getElementById('page-title').textContent = 'Photo Albums';
-        document.getElementById('back-to-albums').style.display = 'none';
+        
+        const backButton = document.getElementById('back-to-albums');
+        if (backButton) {
+          backButton.style.display = 'none';
+        }
+        
         document.getElementById('albums-section').style.display = 'block';
         document.getElementById('gallery-container').style.display = 'none';
         document.getElementById('upload-section').style.display = 'none';
+        
+        // Reset upload button text
+        const uploadLabel = document.querySelector('.upload-label');
+        if (uploadLabel) {
+          uploadLabel.textContent = 'Upload Photos';
+        }
         
         window.currentAlbumId = null;
         loadAlbums();
@@ -1164,207 +1707,63 @@
       }
       
       /**
-       * Load gallery images from Cloudflare
-       */
-      function loadGalleryImages() {
-        BBB_UTILS.showMessage('Loading gallery images...', 'info');
-        
-        // Check sort and search options
-        const sortSelect = document.getElementById('gallery-sort');
-        const searchInput = document.getElementById('gallery-search');
-        
-        const sortValue = sortSelect ? sortSelect.value : 'newest';
-        const searchValue = searchInput ? searchInput.value.trim() : '';
-        
-        // Build the API URL with any search parameters
-        let apiUrl = `${CLOUDFLARE_API}/images`;
-        
-        if (searchValue) {
-          apiUrl += `?search=${encodeURIComponent(searchValue)}`;
-        }
-        
-        // Fetch from Cloudflare
-        fetch(apiUrl)
-          .then(response => {
-            if (!response.ok) {
-              throw new Error(`Error fetching gallery: ${response.status}`);
-            }
-            return response.json();
-          })
-          .then(data => {
-            // Convert to our format
-            const images = data.map(img => ({
-              id: img.id,
-              src: `${CLOUDFLARE_API}/image/${img.id}`,
-              alt: img.alt || 'Gallery image',
-              uploadedAt: img.uploaded_at,
-              uploadedBy: img.uploaded_by
-            }));
-            
-            // Sort images
-            if (sortValue === 'oldest') {
-              images.sort((a, b) => new Date(a.uploadedAt) - new Date(b.uploadedAt));
-            } else if (sortValue === 'name') {
-              images.sort((a, b) => a.alt.localeCompare(b.alt));
-            } else {
-              // Default: newest first
-              images.sort((a, b) => new Date(b.uploadedAt) - new Date(a.uploadedAt));
-            }
-            
-            // Render gallery
-            renderGallery(images);
-            
-            // Hide loading message
-            BBB_UTILS.showMessage('', 'info');
-          })
-          .catch(err => {
-            console.error('Error loading gallery images:', err);
-            BBB_UTILS.showMessage('Error loading gallery images', 'error');
-            
-            // Show fallback gallery with preloaded images
-            const preloadedImages = [
-              { id: 'pre_1', src: 'images/photo1.jpg', alt: 'Band on the green' },
-              { id: 'pre_2', src: 'images/photo2.jpg', alt: 'Group shot' },
-              { id: 'pre_3', src: 'images/photo3.jpg', alt: 'Trophy presentation' },
-              { id: 'pre_4', src: 'images/photo4.jpg', alt: 'Action shot' }
-            ];
-            
-            renderGallery(preloadedImages);
-          });
-          
-        // Check if we need to migrate images from localStorage
-        checkMigrationNeeded();
-      }
-      
-      /**
-       * Render gallery with images
-       */
-      function renderGallery(images) {
-        const galleryElement = document.getElementById('gallery');
-        galleryElement.innerHTML = '';
-        
-        // Create gallery
-        images.forEach(image => {
-          const imgContainer = document.createElement('div');
-          imgContainer.className = 'gallery-img-container';
-          imgContainer.dataset.id = image.id;
-          
-          const img = document.createElement('img');
-          img.src = image.src;
-          img.alt = image.alt || 'Gallery image';
-          img.className = 'gallery-img';
-          img.setAttribute('loading', 'lazy'); // Add lazy loading
-          
-          // Add timestamp info
-          const imageInfo = document.createElement('div');
-          imageInfo.className = 'image-info';
-          
-          let uploadDate = 'Unknown date';
-          if (image.uploadedAt) {
-            uploadDate = new Date(image.uploadedAt).toLocaleDateString();
-          }
-          
-          imageInfo.textContent = uploadDate;
-          
-          // Add action buttons
-          const imageActions = document.createElement('div');
-          imageActions.className = 'image-actions';
-          
-          // View button
-          const viewBtn = document.createElement('button');
-          viewBtn.className = 'image-action-btn view-btn';
-          viewBtn.innerHTML = '👁️ View';
-          viewBtn.addEventListener('click', () => {
-            openLightbox(img);
-          });
-          
-          // Delete button (only show if admin or image was uploaded by current user)
-          const deleteBtn = document.createElement('button');
-          deleteBtn.className = 'image-action-btn delete-btn';
-          deleteBtn.innerHTML = '🗑️ Delete';
-          
-          const canDelete = BBB_AUTH.hasRole('admin') || 
-                          (image.uploadedBy && BBB_AUTH.currentUser && 
-                           image.uploadedBy === BBB_AUTH.currentUser.id);
-          
-          if (canDelete) {
-            deleteBtn.addEventListener('click', (e) => {
-              e.stopPropagation(); // Prevent lightbox
-              deleteImage(image.id);
-            });
-            imageActions.appendChild(deleteBtn);
-          }
-          
-          imageActions.appendChild(viewBtn);
-          
-          // Add click handler for lightbox
-          img.addEventListener('click', () => {
-            openLightbox(img);
-          });
-          
-          imgContainer.appendChild(img);
-          imgContainer.appendChild(imageInfo);
-          imgContainer.appendChild(imageActions);
-          
-          galleryElement.appendChild(imgContainer);
-        });
-        
-        // If no images, show message
-        if (images.length === 0) {
-          const noImages = document.createElement('div');
-          noImages.className = 'empty-gallery';
-          
-          const noImagesIcon = document.createElement('div');
-          noImagesIcon.innerHTML = '📷';
-          noImagesIcon.style.fontSize = '3rem';
-          noImagesIcon.style.marginBottom = '1rem';
-          
-          const noImagesText = document.createElement('p');
-          noImagesText.textContent = 'No images in the gallery yet. Upload some photos to get started!';
-          
-          noImages.appendChild(noImagesIcon);
-          noImages.appendChild(noImagesText);
-          galleryElement.appendChild(noImages);
-        }
-      }
-      
-      /**
        * Setup event handlers for gallery
        */
       function setupEventHandlers() {
         // Upload handler
         const uploadInput = document.getElementById('image-upload');
-        uploadInput.addEventListener('change', handleImageUpload);
+        if (uploadInput) {
+          uploadInput.addEventListener('change', handleImageUpload);
+        }
         
         // Search handler
         const searchInput = document.getElementById('gallery-search');
-        searchInput.addEventListener('input', debounce(() => {
-          loadGalleryImages();
-        }, 500));
+        if (searchInput) {
+          searchInput.addEventListener('input', debounce(() => {
+            loadGalleryImages();
+          }, 500));
+        }
         
         // Sort handler
         const sortSelect = document.getElementById('gallery-sort');
-        sortSelect.addEventListener('change', () => {
-          loadGalleryImages();
-        });
+        if (sortSelect) {
+          sortSelect.addEventListener('change', () => {
+            loadGalleryImages();
+          });
+        }
         
         // Lightbox close
         const lightboxClose = document.querySelector('.lightbox-close');
-        lightboxClose.addEventListener('click', () => {
-          document.getElementById('lightbox').style.display = 'none';
-        });
+        if (lightboxClose) {
+          lightboxClose.addEventListener('click', () => {
+            document.getElementById('lightbox').style.display = 'none';
+          });
+        }
         
         // Click outside lightbox to close
-        document.getElementById('lightbox').addEventListener('click', e => {
-          if (e.target === document.getElementById('lightbox')) {
-            document.getElementById('lightbox').style.display = 'none';
-          }
-        });
+        const lightbox = document.getElementById('lightbox');
+        if (lightbox) {
+          lightbox.addEventListener('click', e => {
+            if (e.target === lightbox) {
+              lightbox.style.display = 'none';
+            }
+          });
+        }
         
-        // ESC key to close lightbox
+        // ESC key to close lightbox and modals
         document.addEventListener('keyup', e => {
           if (e.key === 'Escape') {
-            document.getElementById('lightbox').style.display = 'none';
+            // Close lightbox
+            const lightbox = document.getElementById('lightbox');
+            if (lightbox && lightbox.style.display === 'flex') {
+              lightbox.style.display = 'none';
+            }
+            
+            // Close modal
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+              modal.remove();
+            }
           }
         });
       }
@@ -1390,16 +1789,17 @@
         const lightboxImg = document.getElementById('lightbox-img');
         const lightboxCaption = document.getElementById('lightbox-caption');
         
-        lightboxImg.src = img.src;
-        lightboxCaption.textContent = img.alt;
-        lightbox.style.display = 'flex';
+        if (lightbox && lightboxImg && lightboxCaption) {
+          lightboxImg.src = img.src;
+          lightboxCaption.textContent = img.alt;
+          lightbox.style.display = 'flex';
+        }
       }
       
       /**
-       * Enhanced delete function for the photo gallery
+       * Enhanced delete function with better error handling
        */
       function deleteImage(imageId) {
-        // Validate input
         if (!imageId || imageId.trim() === '') {
           BBB_UTILS.showMessage('Invalid image ID provided', 'error');
           return;
@@ -1411,14 +1811,11 @@
         
         console.log("Attempting to delete image:", imageId);
         
-        // Show loading message
         BBB_UTILS.showMessage('Deleting image...', 'info');
         
-        // Construct the delete URL
         const deleteUrl = `${CLOUDFLARE_API}/delete/${encodeURIComponent(imageId)}`;
         console.log("Delete URL:", deleteUrl);
         
-        // Make the delete request
         fetch(deleteUrl, {
           method: 'DELETE',
           headers: {
@@ -1428,9 +1825,7 @@
         })
           .then(response => {
             console.log("Delete response status:", response.status);
-            console.log("Delete response headers:", [...response.headers.entries()]);
             
-            // Check if response is JSON
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
               return response.json().then(data => ({
@@ -1439,7 +1834,6 @@
                 data: data
               }));
             } else {
-              // Handle non-JSON response
               return response.text().then(text => ({
                 ok: response.ok,
                 status: response.status,
@@ -1486,55 +1880,9 @@
             BBB_UTILS.showMessage(`Error deleting image: ${err.message}`, 'error');
           });
       }
-
-      /**
-       * Test function to check if the delete endpoint is working
-       */
-      function testDeleteEndpoint() {
-        const testUrl = `${CLOUDFLARE_API}/health`;
-        
-        console.log("Testing worker health:", testUrl);
-        
-        fetch(testUrl)
-          .then(response => response.json())
-          .then(data => {
-            console.log("Worker health check:", data);
-            BBB_UTILS.showMessage(`Worker is ${data.status}. Environment check: Bucket=${data.environment.hasGalleryBucket}, DB=${data.environment.hasGalleryDB}`, 'info');
-          })
-          .catch(err => {
-            console.error("Health check failed:", err);
-            BBB_UTILS.showMessage(`Health check failed: ${err.message}`, 'error');
-          });
-      }
-
-      /**
-       * Debug function to list all images and their IDs
-       */
-      function debugListImages() {
-        console.log("=== DEBUG: Listing all images ===");
-        
-        fetch(`${CLOUDFLARE_API}/images`)
-          .then(response => response.json())
-          .then(images => {
-            console.log(`Found ${images.length} images:`);
-            images.forEach((img, index) => {
-              console.log(`${index + 1}. ID: ${img.id}, Filename: ${img.filename}, Path: ${img.path}`);
-            });
-            
-            // Also check DOM elements
-            const domImages = document.querySelectorAll('.gallery-img-container[data-id]');
-            console.log(`Found ${domImages.length} images in DOM:`);
-            domImages.forEach((container, index) => {
-              console.log(`${index + 1}. DOM data-id: ${container.dataset.id}`);
-            });
-          })
-          .catch(err => {
-            console.error("Error listing images:", err);
-          });
-      }
       
       /**
-       * Handle image upload
+       * Enhanced handle image upload with album support
        */
       function handleImageUpload(e) {
         const files = Array.from(e.target.files);
@@ -1543,14 +1891,18 @@
           return;
         }
         
+        console.log(`Uploading ${files.length} files to album:`, window.currentAlbumId);
+        
         // Show progress container
         const progressContainer = document.getElementById('upload-progress');
         const progressBarInner = document.getElementById('progress-bar-inner');
         const progressText = document.getElementById('progress-text');
         
-        progressContainer.style.display = 'block';
-        progressBarInner.style.width = '0%';
-        progressText.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}...`;
+        if (progressContainer && progressBarInner && progressText) {
+          progressContainer.style.display = 'block';
+          progressBarInner.style.width = '0%';
+          progressText.textContent = `Uploading ${files.length} photo${files.length > 1 ? 's' : ''}...`;
+        }
         
         let uploadedCount = 0;
         const failedUploads = [];
@@ -1584,6 +1936,11 @@
           formData.append('alt', file.name.replace(/\.[^/.]+$/, '') || 'User uploaded photo');
           formData.append('username', username);
           
+          // Add album ID if we're uploading to a specific album
+          if (window.currentAlbumId) {
+            formData.append('albumId', window.currentAlbumId);
+          }
+          
           // Upload to Cloudflare Worker
           fetch(`${CLOUDFLARE_API}/upload`, {
             method: 'POST',
@@ -1598,6 +1955,7 @@
             .then(data => {
               if (data.success) {
                 uploadedCount++;
+                console.log(`Upload ${index + 1} successful:`, data);
               } else {
                 failedUploads.push({ file, error: data.error || 'Upload failed' });
               }
@@ -1611,7 +1969,7 @@
             })
             .catch(err => {
               console.error('Error uploading image:', err);
-              failedUploads.push({ file, error: 'Failed to upload' });
+              failedUploads.push({ file, error: err.message || 'Failed to upload' });
               updateUploadProgress(files.length, uploadedCount + failedUploads.length);
               
               // Check if all uploads complete
@@ -1625,24 +1983,33 @@
         e.target.value = '';
         
         function updateUploadProgress(total, completed) {
-          const percentage = Math.round((completed / total) * 100);
-          progressBarInner.style.width = `${percentage}%`;
-          progressText.textContent = `Uploading ${completed} of ${total} (${percentage}%)`;
+          if (progressBarInner && progressText) {
+            const percentage = Math.round((completed / total) * 100);
+            progressBarInner.style.width = `${percentage}%`;
+            progressText.textContent = `Uploading ${completed} of ${total} (${percentage}%)`;
+          }
         }
         
         function finishUploads() {
           // Hide progress container after a delay
-          setTimeout(() => {
-            progressContainer.style.display = 'none';
-          }, 1500);
+          if (progressContainer) {
+            setTimeout(() => {
+              progressContainer.style.display = 'none';
+            }, 1500);
+          }
           
-          // Reload gallery
-          loadGalleryImages();
+          // Reload gallery to show new images
+          if (window.currentAlbumId) {
+            loadGalleryImages(window.currentAlbumId);
+          } else {
+            loadGalleryImages();
+          }
           
           // Show status message
           if (failedUploads.length === 0) {
             if (uploadedCount > 1) {
-              BBB_UTILS.showMessage(`Successfully uploaded ${uploadedCount} images`, 'success');
+              const albumText = window.currentAlbumId ? ' to album' : '';
+              BBB_UTILS.showMessage(`Successfully uploaded ${uploadedCount} images${albumText}`, 'success');
             } else {
               BBB_UTILS.showMessage('Image uploaded successfully', 'success');
             }
@@ -1652,6 +2019,11 @@
             } else {
               BBB_UTILS.showMessage(`Failed to upload ${failedUploads.length} images`, 'error');
             }
+          }
+          
+          // If we're in albums view, refresh the album list to update image counts
+          if (document.getElementById('albums-section').style.display !== 'none') {
+            loadAlbums();
           }
         }
       }
@@ -1684,7 +2056,9 @@
           
           // Add before the gallery
           const galleryElement = document.getElementById('gallery');
-          galleryElement.parentNode.insertBefore(migrationBtn, galleryElement);
+          if (galleryElement) {
+            galleryElement.parentNode.insertBefore(migrationBtn, galleryElement);
+          }
           
           // Show migration message
           BBB_UTILS.showMessage(`Found ${storedImages.length} images in your browser. Click the migration button to move them to the cloud.`, 'info');
@@ -1713,9 +2087,11 @@
           const progressBarInner = document.getElementById('progress-bar-inner');
           const progressText = document.getElementById('progress-text');
           
-          progressContainer.style.display = 'block';
-          progressBarInner.style.width = '0%';
-          progressText.textContent = 'Preparing migration...';
+          if (progressContainer && progressBarInner && progressText) {
+            progressContainer.style.display = 'block';
+            progressBarInner.style.width = '0%';
+            progressText.textContent = 'Preparing migration...';
+          }
           
           // Convert and upload each image
           let migrationCount = 0;
@@ -1728,13 +2104,15 @@
               
               // Create form data for upload
               const formData = new FormData();
-              formData.append('image', blob, `migrated_image_${index}.jpg`);
+              formData.append('image', blob, `migrated_image_${index + 1}.jpg`);
               formData.append('alt', `Migrated image ${index + 1}`);
               formData.append('username', BBB_AUTH.currentUser ? BBB_AUTH.currentUser.id : 'migration');
               
               // Update progress text
-              progressText.textContent = `Migrating image ${index + 1} of ${storedImages.length}...`;
-              progressBarInner.style.width = `${Math.round((index / storedImages.length) * 100)}%`;
+              if (progressText && progressBarInner) {
+                progressText.textContent = `Migrating image ${index + 1} of ${storedImages.length}...`;
+                progressBarInner.style.width = `${Math.round((index / storedImages.length) * 100)}%`;
+              }
               
               // Upload to Cloudflare Worker
               fetch(`${CLOUDFLARE_API}/upload`, {
@@ -1757,8 +2135,10 @@
                   // Update progress
                   const completed = migrationCount + migrationErrors;
                   const percentage = Math.round((completed / storedImages.length) * 100);
-                  progressBarInner.style.width = `${percentage}%`;
-                  progressText.textContent = `Migrated ${migrationCount} of ${storedImages.length} images (${percentage}%)`;
+                  if (progressBarInner && progressText) {
+                    progressBarInner.style.width = `${percentage}%`;
+                    progressText.textContent = `Migrated ${migrationCount} of ${storedImages.length} images (${percentage}%)`;
+                  }
                   
                   // Check if all migrations complete
                   if (completed === storedImages.length) {
@@ -1772,8 +2152,10 @@
                   // Update progress
                   const completed = migrationCount + migrationErrors;
                   const percentage = Math.round((completed / storedImages.length) * 100);
-                  progressBarInner.style.width = `${percentage}%`;
-                  progressText.textContent = `Migrated ${migrationCount} of ${storedImages.length} images (${percentage}%)`;
+                  if (progressBarInner && progressText) {
+                    progressBarInner.style.width = `${percentage}%`;
+                    progressText.textContent = `Migrated ${migrationCount} of ${storedImages.length} images (${percentage}%)`;
+                  }
                   
                   // Check if all migrations complete
                   if (completed === storedImages.length) {
@@ -1787,7 +2169,9 @@
               // Update progress
               const completed = migrationCount + migrationErrors;
               const percentage = Math.round((completed / storedImages.length) * 100);
-              progressBarInner.style.width = `${percentage}%`;
+              if (progressBarInner) {
+                progressBarInner.style.width = `${percentage}%`;
+              }
               
               // Check if all migrations complete
               if (completed === storedImages.length) {
@@ -1829,7 +2213,9 @@
             localStorage.removeItem('uploadedImages');
             
             // Hide progress
-            progressContainer.style.display = 'none';
+            if (progressContainer) {
+              progressContainer.style.display = 'none';
+            }
             
             // Remove migration button
             if (migrationBtn) {
@@ -1852,14 +2238,98 @@
         }
       }
 
-      // Make functions globally available for onclick handlers
+      // =============================================================================
+      // DEBUG AND TESTING FUNCTIONS
+      // =============================================================================
+
+      /**
+       * Test function to check if the delete endpoint is working
+       */
+      function testDeleteEndpoint() {
+        const testUrl = `${CLOUDFLARE_API}/health`;
+        
+        console.log("Testing worker health:", testUrl);
+        
+        fetch(testUrl)
+          .then(response => response.json())
+          .then(data => {
+            console.log("Worker health check:", data);
+            BBB_UTILS.showMessage(`Worker is ${data.status}. Environment check: Bucket=${data.environment.hasGalleryBucket}, DB=${data.environment.hasGalleryDB}`, 'info');
+          })
+          .catch(err => {
+            console.error("Health check failed:", err);
+            BBB_UTILS.showMessage(`Health check failed: ${err.message}`, 'error');
+          });
+      }
+
+      /**
+       * Debug function to list all images and their IDs
+       */
+      function debugListImages() {
+        console.log("=== DEBUG: Listing all images ===");
+        
+        fetch(`${CLOUDFLARE_API}/images`)
+          .then(response => response.json())
+          .then(images => {
+            console.log(`Found ${images.length} images:`);
+            images.forEach((img, index) => {
+              console.log(`${index + 1}. ID: ${img.id}, Filename: ${img.filename}, Path: ${img.path}, Album: ${img.album_id || 'none'}`);
+            });
+            
+            // Also check DOM elements
+            const domImages = document.querySelectorAll('.gallery-img-container[data-id]');
+            console.log(`Found ${domImages.length} images in DOM:`);
+            domImages.forEach((container, index) => {
+              console.log(`${index + 1}. DOM data-id: ${container.dataset.id}`);
+            });
+          })
+          .catch(err => {
+            console.error("Error listing images:", err);
+          });
+      }
+
+      /**
+       * Initialize database (for testing/setup)
+       */
+      function initializeDatabase() {
+        console.log('Initializing database...');
+        
+        fetch(`${CLOUDFLARE_API}/init-db`, {
+          method: 'POST'
+        })
+          .then(response => response.json())
+          .then(result => {
+            if (result.success) {
+              BBB_UTILS.showMessage('Database initialized successfully', 'success');
+            } else {
+              BBB_UTILS.showMessage(`Database initialization failed: ${result.error}`, 'error');
+            }
+          })
+          .catch(err => {
+            console.error('Error initializing database:', err);
+            BBB_UTILS.showMessage(`Error initializing database: ${err.message}`, 'error');
+          });
+      }
+
+      // =============================================================================
+      // MAKE FUNCTIONS GLOBALLY AVAILABLE
+      // =============================================================================
+
+      // Make functions globally available for onclick handlers and debugging
       window.showCreateAlbumModal = showCreateAlbumModal;
       window.createAlbum = createAlbum;
+      window.viewAlbum = viewAlbum;
+      window.renameAlbum = renameAlbum;
+      window.deleteAlbum = deleteAlbum;
+      window.uploadToAlbum = uploadToAlbum;
       window.viewAllImages = viewAllImages;
       window.closeModal = closeModal;
       window.goBackToAlbums = goBackToAlbums;
       window.testDeleteEndpoint = testDeleteEndpoint;
       window.debugListImages = debugListImages;
+      window.initializeDatabase = initializeDatabase;
+      window.loadAlbums = loadAlbums;
+      window.loadGalleryImages = loadGalleryImages;
     });
   </script>
 </body>
