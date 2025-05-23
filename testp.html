@@ -831,11 +831,17 @@
         progressContainer.appendChild(progressBar);
         mainContent.appendChild(progressContainer);
         
+        // Gallery container wrapper
+        const galleryContainerWrapper = document.createElement('div');
+        galleryContainerWrapper.id = 'gallery-container';
+
         // Gallery container
         const galleryContainer = document.createElement('div');
         galleryContainer.id = 'gallery';
         galleryContainer.className = 'gallery';
-        mainContent.appendChild(galleryContainer);
+
+        galleryContainerWrapper.appendChild(galleryContainer);
+        mainContent.appendChild(galleryContainerWrapper);
         
         // Lightbox for image viewing
         const lightbox = document.createElement('div');
