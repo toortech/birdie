@@ -1156,18 +1156,37 @@
       }
 
       /**
-       * 6. Rename album
+       * 6. Rename album (ENHANCED DEBUG VERSION)
        */
       function renameAlbum(albumId, currentName) {
+        console.log('=== RENAME ALBUM DEBUG START ===');
+        console.log('albumId:', albumId);
+        console.log('currentName:', currentName);
+        console.log('CLOUDFLARE_API:', CLOUDFLARE_API);
+        
         if (!albumId) {
+          console.error('Invalid album ID provided');
           BBB_UTILS.showMessage('Invalid album ID', 'error');
           return;
         }
         
         // Get current album data first
-        fetch(`${CLOUDFLARE_API}/albums/${albumId}`)
-          .then(response => response.json())
+        const fetchUrl = `${CLOUDFLARE_API}/albums/${albumId}`;
+        console.log('Fetching album details from:', fetchUrl);
+        
+        fetch(fetchUrl)
+          .then(response => {
+            console.log('Fetch response status:', response.status);
+            console.log('Fetch response ok:', response.ok);
+            
+            if (!response.ok) {
+              throw new Error(`Failed to fetch album: ${response.status}`);
+            }
+            return response.json();
+          })
           .then(album => {
+            console.log('Album data received:', album);
+            
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
             modal.innerHTML = `
@@ -1194,6 +1213,7 @@
             `;
             
             document.body.appendChild(modal);
+            console.log('Modal created and added to DOM');
             
             // Focus and select the name input
             setTimeout(() => {
@@ -1201,6 +1221,9 @@
               if (nameInput) {
                 nameInput.focus();
                 nameInput.select();
+                console.log('Name input focused and selected');
+              } else {
+                console.error('Name input not found after modal creation');
               }
             }, 100);
 
@@ -1208,24 +1231,40 @@
             const nameInput = document.getElementById('rename-album-name');
             if (nameInput) {
               nameInput.addEventListener('keypress', e => {
-                if (e.key === 'Enter') updateAlbum(albumId);
+                if (e.key === 'Enter') {
+                  console.log('Enter key pressed, calling updateAlbum');
+                  updateAlbum(albumId);
+                }
               });
+              console.log('Enter key listener added');
+            } else {
+              console.error('Could not add enter key listener - input not found');
             }
           })
           .catch(err => {
             console.error('Error loading album details:', err);
+            console.error('Error details:', err.message);
             BBB_UTILS.showMessage('Error loading album details', 'error');
           });
+          
+        console.log('=== RENAME ALBUM DEBUG END ===');
       }
 
       /**
-       * 7. Update album (helper for rename)
+       * 7. Update album (helper for rename) - ENHANCED DEBUG VERSION
        */
       function updateAlbum(albumId) {
+        console.log('=== UPDATE ALBUM DEBUG START ===');
+        console.log('albumId:', albumId);
+        
         const nameInput = document.getElementById('rename-album-name');
         const descInput = document.getElementById('rename-album-description');
         
+        console.log('nameInput found:', !!nameInput);
+        console.log('descInput found:', !!descInput);
+        
         if (!nameInput) {
+          console.error('Form elements not found');
           BBB_UTILS.showMessage('Form elements not found', 'error');
           return;
         }
@@ -1233,7 +1272,11 @@
         const name = nameInput.value.trim();
         const description = descInput ? descInput.value.trim() : '';
         
+        console.log('name:', name);
+        console.log('description:', description);
+        
         if (!name) {
+          console.error('Album name is required');
           BBB_UTILS.showMessage('Album name is required', 'error');
           nameInput.focus();
           return;
@@ -1247,31 +1290,77 @@
         if (saveBtn) {
           saveBtn.disabled = true;
           saveBtn.textContent = 'Saving...';
+          console.log('Save button disabled and text updated');
+        } else {
+          console.error('Save button not found');
         }
         
         BBB_UTILS.showMessage('Updating album...', 'info');
         
-        fetch(`${CLOUDFLARE_API}/albums/${albumId}`, {
+        const updateUrl = `${CLOUDFLARE_API}/albums/${albumId}`;
+        const updateData = { name, description };
+        
+        console.log('Update URL:', updateUrl);
+        console.log('Update data:', updateData);
+        
+        fetch(updateUrl, {
           method: 'PUT',
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
           },
-          body: JSON.stringify({ name, description })
+          body: JSON.stringify(updateData)
         })
-          .then(response => response.json())
+          .then(response => {
+            console.log('Update response status:', response.status);
+            console.log('Update response ok:', response.ok);
+            console.log('Update response headers:', [...response.headers.entries()]);
+            
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            console.log('Content-Type:', contentType);
+            
+            if (contentType && contentType.includes('application/json')) {
+              return response.json().then(data => {
+                console.log('Parsed JSON response:', data);
+                return {
+                  ok: response.ok,
+                  status: response.status,
+                  data: data
+                };
+              });
+            } else {
+              return response.text().then(text => {
+                console.log('Non-JSON response:', text);
+                return {
+                  ok: response.ok,
+                  status: response.status,
+                  data: { success: false, error: `Non-JSON response: ${text}` }
+                };
+              });
+            }
+          })
           .then(result => {
-            if (result.success) {
+            console.log('Final update result:', result);
+            
+            if (result.ok && result.data.success) {
+              console.log('Update successful!');
               BBB_UTILS.showMessage('Album updated successfully!', 'success');
               closeModal();
               
               // If we're currently viewing this album, update the title
               if (window.currentAlbumId === albumId) {
+                console.log('Updating current album title');
                 document.getElementById('page-title').textContent = `Album: ${name}`;
               }
               
+              console.log('Refreshing albums list');
               loadAlbums(); // Refresh the albums list
             } else {
-              BBB_UTILS.showMessage(`Error updating album: ${result.error}`, 'error');
+              console.error('Update failed:', result.data);
+              const errorMessage = result.data.error || `Update failed with status ${result.status}`;
+              BBB_UTILS.showMessage(`Error updating album: ${errorMessage}`, 'error');
+              
               // Re-enable form
               nameInput.disabled = false;
               if (descInput) descInput.disabled = false;
@@ -1282,8 +1371,11 @@
             }
           })
           .catch(err => {
-            console.error('Error updating album:', err);
+            console.error('Network or parsing error during album update:', err);
+            console.error('Error details:', err.message);
+            console.error('Error stack:', err.stack);
             BBB_UTILS.showMessage(`Error updating album: ${err.message}`, 'error');
+            
             // Re-enable form
             nameInput.disabled = false;
             if (descInput) descInput.disabled = false;
@@ -1292,6 +1384,8 @@
               saveBtn.textContent = 'Save Changes';
             }
           });
+          
+        console.log('=== UPDATE ALBUM DEBUG END ===');
       }
 
       /**
@@ -1605,6 +1699,12 @@
                           (image.uploadedBy && BBB_AUTH.currentUser && 
                            image.uploadedBy === BBB_AUTH.currentUser.id);
           
+          console.log('Delete button check for image:', image.id);
+          console.log('BBB_AUTH.hasRole("admin"):', BBB_AUTH.hasRole('admin'));
+          console.log('image.uploadedBy:', image.uploadedBy);
+          console.log('BBB_AUTH.currentUser:', BBB_AUTH.currentUser);
+          console.log('canDelete result:', canDelete);
+          
           if (canDelete) {
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'image-action-btn delete-btn';
@@ -1615,6 +1715,9 @@
               deleteImage(image.id);
             });
             imageActions.appendChild(deleteBtn);
+            console.log('Delete button added for image:', image.id);
+          } else {
+            console.log('Delete button NOT added for image:', image.id, '- insufficient permissions');
           }
           
           imageActions.appendChild(viewBtn);
