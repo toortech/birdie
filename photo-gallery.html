@@ -1706,6 +1706,16 @@
             openLightbox(img);
           });
           
+          // Move to Album button (show for all images)
+          const moveBtn = document.createElement('button');
+          moveBtn.className = 'image-action-btn move-btn';
+          moveBtn.innerHTML = '📁';
+          moveBtn.title = 'Move to album';
+          moveBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showMoveToAlbumModal(image.id, image.filename, image.albumId);
+          });
+          
           // Delete button (show if admin or image was uploaded by current user)
           const canDelete = BBB_AUTH.hasRole('admin') || 
                           (image.uploadedBy && BBB_AUTH.currentUser && 
@@ -1733,6 +1743,7 @@
           }
           
           imageActions.appendChild(viewBtn);
+          imageActions.appendChild(moveBtn);
           
           // Add click handler for lightbox
           img.addEventListener('click', () => {
@@ -2406,6 +2417,207 @@
           console.error('Error during gallery migration:', err);
           BBB_UTILS.showMessage('Error migrating images: ' + err.message, 'error');
         }
+      }
+
+      // =============================================================================
+      // IMAGE MOVE TO ALBUM FUNCTIONALITY
+      // =============================================================================
+
+      /**
+       * Show modal to select album for moving image
+       */
+      function showMoveToAlbumModal(imageId, imageName, currentAlbumId) {
+        console.log('=== MOVE TO ALBUM MODAL START ===');
+        console.log('imageId:', imageId);
+        console.log('imageName:', imageName);
+        console.log('currentAlbumId:', currentAlbumId);
+        
+        if (!imageId) {
+          BBB_UTILS.showMessage('Invalid image ID', 'error');
+          return;
+        }
+        
+        // Load available albums
+        BBB_UTILS.showMessage('Loading albums...', 'info');
+        
+        fetch(`${CLOUDFLARE_API}/albums`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to load albums: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(albums => {
+            console.log('Albums loaded for move modal:', albums);
+            BBB_UTILS.showMessage('', 'info'); // Clear loading message
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            
+            // Create options HTML
+            let albumOptions = '<option value="">📷 General Gallery (No Album)</option>';
+            albums.forEach(album => {
+              const selected = album.id === currentAlbumId ? 'selected' : '';
+              albumOptions += `<option value="${album.id}" ${selected}>📁 ${escapeHtml(album.name)} (${album.image_count || 0} images)</option>`;
+            });
+            
+            modal.innerHTML = `
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h3>Move Image to Album</h3>
+                  <button onclick="closeModal()" class="btn-close" title="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                  <p>Move "<strong>${escapeHtml(imageName)}</strong>" to:</p>
+                  <div class="form-group">
+                    <label for="move-album-select">Select Album:</label>
+                    <select id="move-album-select" class="form-control">
+                      ${albumOptions}
+                    </select>
+                  </div>
+                  <p class="text-muted" style="font-size: 0.9rem; margin-top: 1rem;">
+                    Current location: ${currentAlbumId ? '📁 Album' : '📷 General Gallery'}
+                  </p>
+                </div>
+                <div class="modal-footer">
+                  <button onclick="closeModal()" class="btn">Cancel</button>
+                  <button id="move-image-btn" class="btn btn-success">Move Image</button>
+                </div>
+              </div>
+            `;
+            
+            document.body.appendChild(modal);
+            console.log('Move modal created and added to DOM');
+            
+            // Add click event listener to move button
+            const moveBtn = document.getElementById('move-image-btn');
+            if (moveBtn) {
+              moveBtn.addEventListener('click', function() {
+                console.log('Move button clicked!');
+                const selectedAlbumId = document.getElementById('move-album-select').value;
+                moveImageToAlbum(imageId, selectedAlbumId, currentAlbumId);
+              });
+              console.log('Move button event listener added');
+            } else {
+              console.error('Move button not found after modal creation');
+            }
+            
+            // Focus the select
+            setTimeout(() => {
+              const selectElement = document.getElementById('move-album-select');
+              if (selectElement) {
+                selectElement.focus();
+              }
+            }, 100);
+          })
+          .catch(err => {
+            console.error('Error loading albums for move modal:', err);
+            BBB_UTILS.showMessage('Error loading albums', 'error');
+          });
+      }
+
+      /**
+       * Move image to selected album
+       */
+      function moveImageToAlbum(imageId, targetAlbumId, currentAlbumId) {
+        console.log('=== MOVE IMAGE TO ALBUM START ===');
+        console.log('imageId:', imageId);
+        console.log('targetAlbumId:', targetAlbumId);
+        console.log('currentAlbumId:', currentAlbumId);
+        
+        // Check if already in target location
+        if (targetAlbumId === currentAlbumId) {
+          BBB_UTILS.showMessage('Image is already in the selected location', 'info');
+          closeModal();
+          return;
+        }
+        
+        const moveBtn = document.getElementById('move-image-btn');
+        const selectElement = document.getElementById('move-album-select');
+        
+        // Disable form while moving
+        if (moveBtn) {
+          moveBtn.disabled = true;
+          moveBtn.textContent = 'Moving...';
+        }
+        if (selectElement) {
+          selectElement.disabled = true;
+        }
+        
+        const targetName = targetAlbumId ? 'selected album' : 'General Gallery';
+        BBB_UTILS.showMessage(`Moving image to ${targetName}...`, 'info');
+        
+        // Create the update payload
+        const updateData = {
+          albumId: targetAlbumId || null
+        };
+        
+        console.log('Update data:', updateData);
+        
+        // Make API call to update image's album
+        fetch(`${CLOUDFLARE_API}/images/${imageId}/move`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(updateData)
+        })
+          .then(response => {
+            console.log('Move response status:', response.status);
+            console.log('Move response ok:', response.ok);
+            
+            if (!response.ok) {
+              throw new Error(`Move failed: ${response.status}`);
+            }
+            
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+              return response.json();
+            } else {
+              return response.text().then(text => {
+                throw new Error(`Non-JSON response: ${text}`);
+              });
+            }
+          })
+          .then(result => {
+            console.log('Move result:', result);
+            
+            if (result.success) {
+              const targetLocationName = targetAlbumId ? 'album' : 'General Gallery';
+              BBB_UTILS.showMessage(`Image moved to ${targetLocationName} successfully!`, 'success');
+              closeModal();
+              
+              // Refresh the current view
+              if (window.currentAlbumId) {
+                // If viewing an album, reload that album
+                loadGalleryImages(window.currentAlbumId);
+              } else {
+                // If viewing all images, reload all
+                loadGalleryImages();
+              }
+              
+              // Also refresh albums list to update image counts
+              if (document.getElementById('albums-section').style.display !== 'none') {
+                loadAlbums();
+              }
+            } else {
+              throw new Error(result.error || 'Move failed');
+            }
+          })
+          .catch(err => {
+            console.error('Error moving image:', err);
+            BBB_UTILS.showMessage(`Error moving image: ${err.message}`, 'error');
+            
+            // Re-enable form
+            if (moveBtn) {
+              moveBtn.disabled = false;
+              moveBtn.textContent = 'Move Image';
+            }
+            if (selectElement) {
+              selectElement.disabled = false;
+            }
+          });
       }
 
       // =============================================================================
