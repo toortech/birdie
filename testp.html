@@ -873,6 +873,186 @@
         // Setup event handlers
         setupEventHandlers();
       }
+
+      // =============================================================================
+      // ALBUM MANAGEMENT FUNCTIONS - ADD THESE
+      // =============================================================================
+
+      // Global variable for current album
+      window.currentAlbumId = null;
+
+      function loadAlbums() {
+        console.log("Loading albums...");
+        
+        fetch(`${CLOUDFLARE_API}/albums`)
+          .then(response => response.json())
+          .then(albums => {
+            console.log("Albums loaded:", albums);
+            displayAlbums(albums);
+          })
+          .catch(err => {
+            console.error('Error loading albums:', err);
+            BBB_UTILS.showMessage(`Error loading albums: ${err.message}`, 'error');
+          });
+      }
+
+      function displayAlbums(albums) {
+        const albumsContainer = document.getElementById('albums-container');
+        if (!albumsContainer) {
+          console.error('Albums container not found');
+          return;
+        }
+        
+        if (albums.length === 0) {
+          albumsContainer.innerHTML = `
+            <div class="text-center p-4">
+              <p>No albums found. Create your first album!</p>
+              <button onclick="showCreateAlbumModal()" class="btn">Create Album</button>
+            </div>
+          `;
+          return;
+        }
+        
+        albumsContainer.innerHTML = albums.map(album => `
+          <div class="album-card card" data-album-id="${album.id}">
+            <div class="card-header">
+              <h3 class="card-title">${escapeHtml(album.name)}</h3>
+              <div class="album-actions">
+                <button onclick="renameAlbum('${album.id}', '${escapeHtml(album.name)}')" class="btn btn-sm">Rename</button>
+                <button onclick="deleteAlbum('${album.id}', '${escapeHtml(album.name)}')" class="btn btn-sm btn-danger">Delete</button>
+              </div>
+            </div>
+            <div class="card-body">
+              ${album.description ? `<p>${escapeHtml(album.description)}</p>` : ''}
+              <p><strong>${album.image_count}</strong> images</p>
+              <div class="album-buttons">
+                <button onclick="viewAlbum('${album.id}', '${escapeHtml(album.name)}')" class="btn">View Album</button>
+                <button onclick="uploadToAlbum('${album.id}')" class="btn btn-success">Add Photos</button>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function showCreateAlbumModal() {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+          <div class="modal-content">
+            <div class="modal-header">
+              <h3>Create New Album</h3>
+              <button onclick="closeModal()" class="btn-close">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div class="form-group">
+                <label for="album-name">Album Name *</label>
+                <input type="text" id="album-name" required maxlength="100" placeholder="Enter album name">
+              </div>
+              <div class="form-group">
+                <label for="album-description">Description (optional)</label>
+                <textarea id="album-description" rows="3" maxlength="500" placeholder="Enter album description"></textarea>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button onclick="closeModal()" class="btn">Cancel</button>
+              <button onclick="createAlbum()" class="btn btn-success">Create Album</button>
+            </div>
+          </div>
+        `;
+        
+        document.body.appendChild(modal);
+        document.getElementById('album-name').focus();
+      }
+
+      function createAlbum() {
+        const name = document.getElementById('album-name').value.trim();
+        const description = document.getElementById('album-description').value.trim();
+        
+        if (!name) {
+          BBB_UTILS.showMessage('Album name is required', 'error');
+          return;
+        }
+        
+        BBB_UTILS.showMessage('Creating album...', 'info');
+        
+        fetch(`${CLOUDFLARE_API}/albums`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ name, description })
+        })
+          .then(response => response.json())
+          .then(result => {
+            if (result.success) {
+              BBB_UTILS.showMessage('Album created successfully!', 'success');
+              closeModal();
+              loadAlbums();
+            } else {
+              BBB_UTILS.showMessage(`Error creating album: ${result.error}`, 'error');
+            }
+          })
+          .catch(err => {
+            console.error('Error creating album:', err);
+            BBB_UTILS.showMessage(`Error creating album: ${err.message}`, 'error');
+          });
+      }
+
+      function viewAllImages() {
+        document.getElementById('page-title').textContent = 'All Images';
+        
+        const backButton = document.getElementById('back-to-albums') || createBackButton();
+        backButton.style.display = 'block';
+        
+        document.getElementById('albums-section').style.display = 'none';
+        document.getElementById('gallery-container').style.display = 'block';
+        document.getElementById('upload-section').style.display = 'block';
+        
+        window.currentAlbumId = null;
+        loadGalleryImages();
+      }
+
+      function closeModal() {
+        const modal = document.querySelector('.modal-overlay');
+        if (modal) {
+          modal.remove();
+        }
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      function createBackButton() {
+        const backButton = document.createElement('button');
+        backButton.id = 'back-to-albums';
+        backButton.className = 'btn mb-3';
+        backButton.innerHTML = '← Back to Albums';
+        backButton.onclick = goBackToAlbums;
+        backButton.style.display = 'none';
+        
+        const pageTitle = document.getElementById('page-title');
+        pageTitle.parentNode.insertBefore(backButton, pageTitle.nextSibling);
+        
+        return backButton;
+      }
+
+      function goBackToAlbums() {
+        document.getElementById('page-title').textContent = 'Photo Albums';
+        document.getElementById('back-to-albums').style.display = 'none';
+        document.getElementById('albums-section').style.display = 'block';
+        document.getElementById('gallery-container').style.display = 'none';
+        document.getElementById('upload-section').style.display = 'none';
+        
+        window.currentAlbumId = null;
+        loadAlbums();
+      }
+
+        /**
+         * Create filter/search bar
+         */
         /**
          * Create filter/search bar
          */
