@@ -735,7 +735,8 @@
         
         // Add page subtitle
         const subtitle = document.createElement('h2');
-        subtitle.textContent = 'Photo Gallery';
+        subtitle.id = 'page-title';
+        subtitle.textContent = 'Photo Albums';
         mainContent.appendChild(subtitle);
         
         // Create status message container
@@ -747,6 +748,31 @@
         description.className = 'gallery-description';
         description.textContent = 'Browse photos from our golf outings and events. Click on any image to view it in full size.';
         mainContent.appendChild(description);
+
+        // Albums Section - THIS IS NEW
+        const albumsSection = document.createElement('div');
+        albumsSection.id = 'albums-section';
+
+        const albumsButtonsContainer = document.createElement('div');
+        albumsButtonsContainer.className = 'text-center mb-3';
+
+        const createAlbumBtn = document.createElement('button');
+        createAlbumBtn.className = 'btn btn-success';
+        createAlbumBtn.textContent = 'Create New Album';
+        createAlbumBtn.onclick = showCreateAlbumModal;
+
+        const viewAllBtn = document.createElement('button');
+        viewAllBtn.className = 'btn';
+        viewAllBtn.textContent = 'View All Images';
+        viewAllBtn.onclick = viewAllImages;
+        albumsButtonsContainer.appendChild(createAlbumBtn);
+        albumsButtonsContainer.appendChild(viewAllBtn);
+
+        const albumsContainer = document.createElement('div');
+        albumsContainer.id = 'albums-container';
+        albumsSection.appendChild(albumsButtonsContainer);
+        albumsSection.appendChild(albumsContainer);
+        mainContent.appendChild(albumsSection);
         
         // Create filter/search bar
         const filterBar = createFilterBar();
