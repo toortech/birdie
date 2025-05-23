@@ -470,15 +470,16 @@
   min-height: 80px;
 }
 
-/* Enhanced gallery image containers for rename functionality */
 .gallery-img-container {
   position: relative;
   display: inline-block;
   margin: var(--spacing-sm);
 }
-    .image-actions {
-  opacity: 1; /* Always show on mobile */
+
+.gallery-img-container:hover .image-actions {
+  opacity: 1;
 }
+
 .image-actions {
   position: absolute;
   top: 5px;
