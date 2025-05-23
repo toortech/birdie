@@ -1207,13 +1207,25 @@
                 </div>
                 <div class="modal-footer">
                   <button onclick="closeModal()" class="btn">Cancel</button>
-                  <button onclick="updateAlbum('${albumId}')" class="btn btn-success">Save Changes</button>
+                  <button id="save-album-btn" class="btn btn-success">Save Changes</button>
                 </div>
               </div>
             `;
             
             document.body.appendChild(modal);
             console.log('Modal created and added to DOM');
+            
+            // Add click event listener to save button
+            const saveBtn = document.getElementById('save-album-btn');
+            if (saveBtn) {
+              saveBtn.addEventListener('click', function() {
+                console.log('Save button clicked!');
+                updateAlbum(albumId);
+              });
+              console.log('Save button event listener added');
+            } else {
+              console.error('Save button not found after modal creation');
+            }
             
             // Focus and select the name input
             setTimeout(() => {
@@ -2478,6 +2490,7 @@
       window.createAlbum = createAlbum;
       window.viewAlbum = viewAlbum;
       window.renameAlbum = renameAlbum;
+      window.updateAlbum = updateAlbum; // ADD THIS LINE
       window.deleteAlbum = deleteAlbum;
       window.uploadToAlbum = uploadToAlbum;
       window.viewAllImages = viewAllImages;
