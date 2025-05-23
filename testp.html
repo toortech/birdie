@@ -1295,10 +1295,16 @@
       }
 
       /**
-       * 8. Delete album with confirmation
+       * 8. Delete album with confirmation (ENHANCED DEBUG VERSION)
        */
       function deleteAlbum(albumId, albumName) {
+        console.log('=== DELETE ALBUM DEBUG START ===');
+        console.log('albumId:', albumId);
+        console.log('albumName:', albumName);
+        console.log('CLOUDFLARE_API:', CLOUDFLARE_API);
+        
         if (!albumId) {
+          console.error('Invalid album ID provided');
           BBB_UTILS.showMessage('Invalid album ID', 'error');
           return;
         }
@@ -1311,33 +1317,82 @@
         );
         
         if (!confirmed) {
+          console.log('User cancelled album deletion');
           return;
         }
         
+        console.log('User confirmed deletion, proceeding...');
         BBB_UTILS.showMessage('Deleting album and all images...', 'info');
         
-        fetch(`${CLOUDFLARE_API}/albums/${albumId}`, {
-          method: 'DELETE'
+        const deleteUrl = `${CLOUDFLARE_API}/albums/${albumId}`;
+        console.log('DELETE URL:', deleteUrl);
+        
+        fetch(deleteUrl, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
         })
-          .then(response => response.json())
+          .then(response => {
+            console.log('Delete response received');
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+            console.log('Response headers:', [...response.headers.entries()]);
+            
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            console.log('Content-Type:', contentType);
+            
+            if (contentType && contentType.includes('application/json')) {
+              return response.json().then(data => {
+                console.log('Parsed JSON response:', data);
+                return {
+                  ok: response.ok,
+                  status: response.status,
+                  data: data
+                };
+              });
+            } else {
+              return response.text().then(text => {
+                console.log('Non-JSON response:', text);
+                return {
+                  ok: response.ok,
+                  status: response.status,
+                  data: { success: false, error: `Non-JSON response: ${text}` }
+                };
+              });
+            }
+          })
           .then(result => {
-            if (result.success) {
-              BBB_UTILS.showMessage(`Album "${albumName}" and ${result.deletedImageCount || 0} images deleted successfully`, 'success');
+            console.log('Final result object:', result);
+            
+            if (result.ok && result.data.success) {
+              console.log('Delete successful!');
+              BBB_UTILS.showMessage(`Album "${albumName}" and ${result.data.deletedImageCount || 0} images deleted successfully`, 'success');
               
               // If we're currently viewing this album, go back to albums
               if (window.currentAlbumId === albumId) {
+                console.log('Currently viewing deleted album, going back to albums');
                 goBackToAlbums();
               } else {
+                console.log('Refreshing albums list');
                 loadAlbums(); // Refresh the albums list
               }
             } else {
-              BBB_UTILS.showMessage(`Error deleting album: ${result.error}`, 'error');
+              console.error('Delete failed:', result.data);
+              const errorMessage = result.data.error || `Delete failed with status ${result.status}`;
+              BBB_UTILS.showMessage(`Error deleting album: ${errorMessage}`, 'error');
             }
           })
           .catch(err => {
-            console.error('Error deleting album:', err);
+            console.error('Network or parsing error during album delete:', err);
+            console.error('Error details:', err.message);
+            console.error('Error stack:', err.stack);
             BBB_UTILS.showMessage(`Error deleting album: ${err.message}`, 'error');
           });
+          
+        console.log('=== DELETE ALBUM DEBUG END ===');
       }
 
       /**
