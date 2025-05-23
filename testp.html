@@ -867,12 +867,12 @@
         // Add content to main wrapper
         headerElements.mainWrapper.appendChild(mainContent);
         
-        // Load gallery images
-        loadGalleryImages();
+        // Load albums instead of gallery (since we start in albums mode)
+        loadAlbums();
         
         // Setup event handlers
         setupEventHandlers();
-      }
+      } // This closing brace is for the initializeGallery function
   
       // =============================================================================
       // ALBUM MANAGEMENT FUNCTIONS - ADD THESE
