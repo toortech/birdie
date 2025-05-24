@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About BBB - Birdie Bush Bandits</title>
+  <meta name="description" content="Learn about the Birdie Bush Bandits golf group - our story, mission, and what makes us special since August 2020.">
+  <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  
+  <!-- Add Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Core Modules -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+
+  <style>
+    /* About Page Specific Styles - Softer Hero Section */
+    .about-hero {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+      color: var(--bbb-text);
+      text-align: center;
+      padding: 4rem 2rem 3rem 2rem;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 3px solid #dee2e6;
+    }
+
+    .about-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 77, 0, 0.03) 0%, transparent 70%);
+      animation: rotate 30s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .about-hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .about-hero-title-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .about-hero-logo {
+      height: 70px;
+      width: auto;
+      filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.2));
+      transition: transform 0.3s ease;
+      animation: fadeInUp 1s ease-out;
+    }
+
+    .about-hero-logo:hover {
+      transform: scale(1.05) rotate(3deg);
+    }
+
+    .about-hero h1 {
+      font-family: var(--font-family-accent);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      color: var(--bbb-primary);
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+      animation: fadeInUp 1s ease-out;
+      margin: 0;
+    }
+
+    .about-hero .tagline {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--bbb-text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+      animation: fadeInUp 1s ease-out 0.3s both;
+      font-weight: 500;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .about-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* Modified: Full width story section without image */
+    .about-story-section {
+      margin: 4rem 0;
+    }
+
+    .about-text {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .about-text:hover {
+      border-color: var(--bbb-gold);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    .about-story .lead {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: var(--bbb-secondary);
+      margin-bottom: 1.5rem;
+      line-height: 1.7;
+    }
+
+    .about-story p {
+      margin-bottom: 1.5rem;
+      line-height: 1.7;
+      color: var(--bbb-text);
+    }
+
+    .mission-box {
+      background: linear-gradient(135deg, var(--bbb-light-green), rgba(255, 215, 0, 0.1));
+      padding: 2rem;
+      border-radius: 15px;
+      margin: 2rem 0;
+      border-left: 4px solid var(--bbb-gold);
+      transition: transform 0.3s ease;
+    }
+
+    .mission-box:hover {
+      transform: translateX(10px);
+    }
+
+    .mission-box h3 {
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+
+    .values-section {
+      background: white;
+      padding: 4rem 0;
+      margin: 4rem 0;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .values-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .values-header h2 {
+      font-family: var(--font-family-accent);
+      font-size: 2.5rem;
+      color: var(--bbb-primary);
+      margin-bottom: 1rem;
+    }
+
+    .values-header p {
+      font-size: 1.1rem;
+      color: var(--bbb-text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      padding: 0 3rem;
+    }
+
+    .value-item {
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, var(--bbb-light-green), white);
+      border-radius: 15px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 3px solid transparent;
+    }
+
+    .value-item:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+      border-color: var(--bbb-gold);
+    }
+
+    .value-icon {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .value-item h4 {
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+
+    .value-item p {
+      color: var(--bbb-text-muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .timeline-section {
+      background: linear-gradient(135deg, var(--bbb-light-green), white);
+      padding: 4rem 0;
+      margin: 4rem 0;
+      border-radius: 20px;
+    }
+
+    .timeline-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .timeline-header h2 {
+      font-family: var(--font-family-accent);
+      font-size: 2.5rem;
+      color: var(--bbb-primary);
+      margin-bottom: 1rem;
+    }
+
+    .timeline {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 3rem;
+    }
+
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 3rem;
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      border: 3px solid transparent;
+    }
+
+    .timeline-item:hover {
+      transform: translateX(10px);
+      border-color: var(--bbb-gold);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    .timeline-icon {
+      font-size: 2.5rem;
+      margin-right: 2rem;
+      flex-shrink: 0;
+    }
+
+    .timeline-content h4 {
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    .timeline-content p {
+      color: var(--bbb-text);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    /* Modified: Softer CTA section colors */
+    .cta-section {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      color: var(--bbb-text);
+      text-align: center;
+      padding: 4rem 2rem;
+      border-radius: 20px;
+      margin: 4rem 0;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #dee2e6;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 77, 0, 0.05) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+
+    .cta-section h2 {
+      font-family: var(--font-family-accent);
+      font-size: clamp(2rem, 4vw, 2.5rem);
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 2;
+      color: var(--bbb-primary);
+    }
+
+    .cta-section p {
+      font-size: clamp(1.1rem, 3vw, 1.3rem);
+      margin-bottom: 2.5rem;
+      line-height: 1.5;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+      z-index: 2;
+      color: var(--bbb-text-muted);
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Modified: Much softer button colors */
+    .cta-btn {
+      background: #6c757d;
+      color: white;
+      padding: 1rem 2.5rem;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+      transition: all 0.3s ease;
+      display: inline-block;
+      box-shadow: 0 4px 15px rgba(108, 117, 125, 0.2);
+      min-width: 180px;
+      text-align: center;
+      border: 2px solid transparent;
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
+      background: #5a6268;
+    }
+
+    .cta-btn.secondary {
+      background: transparent;
+      color: var(--bbb-secondary);
+      border: 2px solid var(--bbb-secondary);
+      box-shadow: 0 4px 15px rgba(0, 70, 173, 0.15);
+    }
+
+    .cta-btn.secondary:hover {
+      background: var(--bbb-secondary);
+      color: white;
+      box-shadow: 0 6px 20px rgba(0, 70, 173, 0.25);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .about-hero {
+        padding: 3rem 1rem 2rem 1rem;
+        margin-top: 70px;
+      }
+
+      .about-main {
+        padding: 0 1rem;
+      }
+
+      .about-story-section {
+        margin: 2rem 0;
+      }
+
+      .about-text {
+        padding: 2rem;
+      }
+
+      .values-grid {
+        grid-template-columns: 1fr;
+        padding: 0 2rem;
+      }
+
+      .timeline {
+        padding: 0 2rem;
+      }
+
+      .timeline-item {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .timeline-icon {
+        margin-right: 0;
+        margin-bottom: 1rem;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .cta-btn {
+        width: 100%;
+        max-width: 280px;
+        padding: 1.2rem 1rem;
+        font-size: 1.1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  
+  <main id="main"></main>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if BBB modules are loaded
+      if (typeof BBB_CONFIG === 'undefined' || 
+          typeof BBB_AUTH === 'undefined' || 
+          typeof BBB_DB === 'undefined' || 
+          typeof BBB_UI === 'undefined' || 
+          typeof BBB_UTILS === 'undefined') {
+        console.error('Required BBB modules not found!');
+        return;
+      }
+      
+      // Initialize modules
+      try {
+        BBB_AUTH.init({
+          cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+        });
+        
+        BBB_DB.init({
+          useCloudflare: BBB_CONFIG.cloudflareEnabled,
+          localStoragePrefix: 'bbb_'
+        });
+      } catch (error) {
+        console.error('Error initializing modules:', error);
+        return;
+      }
+      
+      // Create header
+      const headerElements = BBB_UI.createHeader({
+        fixed: true,
+        showHomeLinkText: true
+      });
+      
+      document.body.insertBefore(headerElements.header, document.body.firstChild);
+      
+      // Get main content element
+      const main = document.getElementById('main');
+      main.appendChild(headerElements.mainWrapper);
+      
+      // Create page content
+      const mainContent = document.createElement('div');
+      
+      // Hero Section
+      const heroSection = document.createElement('section');
+      heroSection.className = 'about-hero';
+      heroSection.innerHTML = `
+        <div class="about-hero-content">
+          <div class="about-hero-title-container">
+            <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="about-hero-logo">
+            <h1>About the Birdie Bush Bandits</h1>
+          </div>
+          <p class="tagline">Discover our story, our mission, and what makes our golf group special</p>
+        </div>
+      `;
+      mainContent.appendChild(heroSection);
+
+      // Main About Content
+      const aboutMainDiv = document.createElement('div');
+      aboutMainDiv.className = 'about-main';
+
+      // Modified: Story Section (no image grid, full width)
+      const aboutStorySection = document.createElement('section');
+      aboutStorySection.className = 'about-story-section';
+      aboutStorySection.innerHTML = `
+        <div class="about-text">
+          <div class="about-story">
+            <p class="lead">It all started when the world slowed down during the COVID pandemic. Amrit, missing the game he loved and wanting to reconnect with friends, made a few phone calls that would change everything. Despite not having played for years - life, family, and work had gotten in the way - a small group decided to dust off their clubs and head back to the course.</p>
+            
+            <p>What began as a simple reunion round in August 2020 quickly became something much more meaningful. The Birdie Bush Bandits weren't just rediscovering golf; we were rediscovering friendship. Fast forward five years to 2025, and we've grown into a great bunch of friends who've turned our shared love of the game into lasting bonds that extend far beyond the 18th hole.</p>
+
+            <p>We're living proof that it's never too late to get back into golf, and that sometimes the best things come from the simplest ideas. What started as "let's play a round" has become a brotherhood that celebrates every birdie, laughs at every shank, and supports each other through all of life's ups and downs.</p>
+            
+            <div class="mission-box">
+              <h3>🎯 Our Mission</h3>
+              <p>To create lasting friendships through our shared passion for golf, while continuously improving our games and having an absolute blast doing it.</p>
+            </div>
+          </div>
+        </div>
+      `;
+      aboutMainDiv.appendChild(aboutStorySection);
+
+      // Values Section
+      const valuesSection = document.createElement('section');
+      valuesSection.className = 'values-section';
+      valuesSection.innerHTML = `
+        <div class="values-header">
+          <h2>Our Core Values</h2>
+          <p>These principles guide everything we do, from how we play to how we treat each other</p>
+        </div>
+        <div class="values-grid">
+          <div class="value-item">
+            <span class="value-icon">🤝</span>
+            <h4>Fellowship</h4>
+            <p>Building lasting friendships on and off the course. Golf brings us together, but friendship keeps us coming back.</p>
+          </div>
+          <div class="value-item">
+            <span class="value-icon">📈</span>
+            <h4>Improvement</h4>
+            <p>Supporting each other's journey to better golf. We celebrate progress, no matter how small, and learn from every round.</p>
+          </div>
+          <div class="value-item">
+            <span class="value-icon">🎉</span>
+            <h4>Fun</h4>
+            <p>Making every round memorable and enjoyable. Win or lose, we always find something to laugh about and enjoy together.</p>
+          </div>
+        </div>
+      `;
+      aboutMainDiv.appendChild(valuesSection);
+
+      // Timeline Section
+      const timelineSection = document.createElement('section');
+      timelineSection.className = 'timeline-section';
+      timelineSection.innerHTML = `
+        <div class="timeline-header">
+          <h2>Our Journey</h2>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <span class="timeline-icon">🚀</span>
+            <div class="timeline-content">
+              <h4>August 2020 - Amrit's Call</h4>
+              <p>During the COVID pandemic, Amrit reached out to old friends who hadn't played golf in years. Despite busy lives with family and work, a few answered the call to dust off their clubs.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-icon">⛳</span>
+            <div class="timeline-content">
+              <h4>The First Round Back</h4>
+              <p>Rusty swings, forgotten rules, and plenty of laughs marked our return to the course. What started as a simple reunion became the foundation of something special.</p>
+KKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKK
+          <div class="timeline-item">
+            <span class="timeline-icon">🤝</span>
+            <div class="timeline-content">
+              <h4>Building the Brotherhood</h4>
+              <p>Regular rounds turned into lasting friendships. We discovered that golf was the perfect excuse to reconnect and stay connected as our group grew.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-icon">📱</span>
+            <div class="timeline-content">
+              <h4>Digital Evolution</h4>
+              <p>We embraced technology to track our progress, with custom scorecards, handicap calculators, and photo galleries to capture our memories.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-icon">🌟</span>
+            <div class="timeline-content">
+              <h4>Five Years Strong</h4>
+              <p>From a pandemic phone call to a great bunch of friends - we've proven that it's never too late to get back into golf and rediscover friendship.</p>
+            </div>
+          </div>
+        </div>
+      `;
+      aboutMainDiv.appendChild(timelineSection);
+
+      // Modified: Softer Call to Action Section
+      const ctaSection = document.createElement('section');
+      ctaSection.className = 'cta-section';
+      ctaSection.innerHTML = `
+        <h2>Ready to Join the Adventure?</h2>
+        <p>Whether you're a seasoned pro or just starting out, there's a place for you with the Birdie Bush Bandits.</p>
+        <div class="cta-buttons">
+          <a href="photo-gallery.html" class="cta-btn">View Our Gallery</a>
+          <a href="members.html" class="cta-btn secondary">Meet the Team</a>
+          <a href="index.html" class="cta-btn secondary">Back to Home</a>
+        </div>
+      `;
+      aboutMainDiv.appendChild(ctaSection);
+
+      mainContent.appendChild(aboutMainDiv);
+      
+      // Add content to main wrapper
+      headerElements.mainWrapper.appendChild(mainContent);
+
+      // Add scroll animations
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, observerOptions);
+
+      // Apply animation styles and observe elements
+      const animatedElements = document.querySelectorAll('.value-item, .timeline-item, .about-text');
+      animatedElements.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(30px)';
+        element.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+        observer.observe(element);
+      });
+    });
+  </script>
+</body>
+</html>
