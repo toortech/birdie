@@ -388,11 +388,30 @@
       box-shadow: 0 6px 20px rgba(0, 70, 173, 0.25);
     }
 
-    /* Responsive Design */
+    /* Enhanced Mobile Responsive Design */
     @media (max-width: 768px) {
       .about-hero {
-        padding: 3rem 1rem 2rem 1rem;
+        padding: 2rem 1rem 1.5rem 1rem;
         margin-top: 70px;
+      }
+
+      .about-hero-title-container {
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      .about-hero-logo {
+        height: 60px;
+      }
+
+      .about-hero h1 {
+        font-size: 2rem;
+        line-height: 1.2;
+      }
+
+      .about-hero .tagline {
+        font-size: 1rem;
+        padding: 0 1rem;
       }
 
       .about-main {
@@ -404,26 +423,114 @@
       }
 
       .about-text {
-        padding: 2rem;
+        padding: 1.5rem;
+        border-radius: 15px;
+      }
+
+      .about-story .lead {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+
+      .about-story p {
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+      }
+
+      .mission-box {
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+      }
+
+      .mission-box h3 {
+        font-size: 1.1rem;
+      }
+
+      .values-section {
+        padding: 3rem 0;
+        margin: 3rem 0;
+      }
+
+      .values-header h2 {
+        font-size: 2rem;
+      }
+
+      .values-header p {
+        font-size: 1rem;
+        padding: 0 1rem;
       }
 
       .values-grid {
         grid-template-columns: 1fr;
-        padding: 0 2rem;
+        gap: 1.5rem;
+        padding: 0 1rem;
+      }
+
+      .value-item {
+        padding: 1.5rem;
+      }
+
+      .value-icon {
+        font-size: 2.5rem;
+      }
+
+      .value-item h4 {
+        font-size: 1.2rem;
+      }
+
+      .value-item p {
+        font-size: 0.95rem;
+      }
+
+      .timeline-section {
+        padding: 3rem 0;
+        margin: 3rem 0;
+      }
+
+      .timeline-header h2 {
+        font-size: 2rem;
       }
 
       .timeline {
-        padding: 0 2rem;
+        padding: 0 1rem;
       }
 
       .timeline-item {
         flex-direction: column;
         text-align: center;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
       }
 
       .timeline-icon {
         margin-right: 0;
         margin-bottom: 1rem;
+        font-size: 2rem;
+      }
+
+      .timeline-content h4 {
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .timeline-content p {
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .cta-section {
+        padding: 3rem 1rem;
+        margin: 3rem 0;
+      }
+
+      .cta-section h2 {
+        font-size: 1.8rem;
+      }
+
+      .cta-section p {
+        font-size: 1rem;
+        padding: 0 1rem;
       }
 
       .cta-buttons {
@@ -435,8 +542,86 @@
       .cta-btn {
         width: 100%;
         max-width: 280px;
-        padding: 1.2rem 1rem;
-        font-size: 1.1rem;
+        padding: 1rem;
+        font-size: 1rem;
+      }
+    }
+
+    /* Extra small mobile devices */
+    @media (max-width: 480px) {
+      .about-hero {
+        padding: 1.5rem 0.75rem 1rem 0.75rem;
+      }
+
+      .about-hero h1 {
+        font-size: 1.75rem;
+      }
+
+      .about-hero .tagline {
+        font-size: 0.95rem;
+      }
+
+      .about-main {
+        padding: 0 0.75rem;
+      }
+
+      .about-text {
+        padding: 1.25rem;
+      }
+
+      .about-story .lead {
+        font-size: 1rem;
+      }
+
+      .about-story p {
+        font-size: 0.9rem;
+      }
+
+      .mission-box {
+        padding: 1.25rem;
+      }
+
+      .values-section,
+      .timeline-section,
+      .cta-section {
+        margin: 2rem 0;
+      }
+
+      .values-header h2,
+      .timeline-header h2 {
+        font-size: 1.75rem;
+      }
+
+      .values-grid,
+      .timeline {
+        padding: 0 0.75rem;
+      }
+
+      .value-item,
+      .timeline-item {
+        padding: 1.25rem;
+      }
+
+      .value-icon {
+        font-size: 2.25rem;
+      }
+
+      .timeline-icon {
+        font-size: 1.75rem;
+      }
+
+      .cta-section {
+        padding: 2.5rem 0.75rem;
+      }
+
+      .cta-section h2 {
+        font-size: 1.6rem;
+      }
+
+      .cta-btn {
+        max-width: 260px;
+        padding: 0.9rem;
+        font-size: 0.95rem;
       }
     }
   </style>
