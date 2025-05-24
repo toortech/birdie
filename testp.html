@@ -21,17 +21,15 @@
   <script src="js/ui.js"></script>
 
   <style>
-    /* About Page Specific Styles */
+    /* About Page Specific Styles - Softer Hero Section */
     .about-hero {
-      background: linear-gradient(rgba(0, 77, 0, 0.7), rgba(0, 77, 0, 0.7)), 
-                  url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="golf-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="3" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="1200" height="600" fill="url(%23golf-pattern)"/></svg>');
-      background-size: cover;
-      background-position: center;
-      color: white;
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+      color: var(--bbb-text);
       text-align: center;
       padding: 4rem 2rem 3rem 2rem;
       position: relative;
       overflow: hidden;
+      border-bottom: 3px solid #dee2e6;
     }
 
     .about-hero::before {
@@ -41,8 +39,8 @@
       left: -50%;
       width: 200%;
       height: 200%;
-      background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-      animation: rotate 20s linear infinite;
+      background: radial-gradient(circle, rgba(0, 77, 0, 0.03) 0%, transparent 70%);
+      animation: rotate 30s linear infinite;
     }
 
     @keyframes rotate {
@@ -69,30 +67,32 @@
     .about-hero-logo {
       height: 70px;
       width: auto;
-      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
+      filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.2));
       transition: transform 0.3s ease;
       animation: fadeInUp 1s ease-out;
     }
 
     .about-hero-logo:hover {
-      transform: scale(1.1) rotate(5deg);
+      transform: scale(1.05) rotate(3deg);
     }
 
     .about-hero h1 {
       font-family: var(--font-family-accent);
       font-size: clamp(2rem, 4vw, 3.5rem);
       font-weight: 700;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      color: var(--bbb-primary);
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
       animation: fadeInUp 1s ease-out;
       margin: 0;
     }
 
     .about-hero .tagline {
       font-size: clamp(1rem, 2vw, 1.3rem);
-      opacity: 0.9;
+      color: var(--bbb-text-muted);
       max-width: 600px;
       margin: 0 auto;
       animation: fadeInUp 1s ease-out 0.3s both;
+      font-weight: 500;
     }
 
     @keyframes fadeInUp {
