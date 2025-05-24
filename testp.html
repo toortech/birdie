@@ -23,87 +23,26 @@
   <style>
     /* About Page Specific Styles */
     .about-hero {
-      background: linear-gradient(rgba(0, 77, 0, 0.7), rgba(0, 77, 0, 0.7)), 
-                  url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="golf-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="3" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="1200" height="600" fill="url(%23golf-pattern)"/></svg>');
-      background-size: cover;
-      background-position: center;
-      color: white;
+      background: linear-gradient(135deg, var(--bbb-light-green) 0%, var(--bbb-background) 100%);
+      color: var(--bbb-text);
       text-align: center;
       padding: 4rem 2rem 3rem 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .about-hero::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-      animation: rotate 20s linear infinite;
-    }
-
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .about-hero-content {
-      position: relative;
-      z-index: 2;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .about-hero-title-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 1.5rem;
-      margin-bottom: 1rem;
-    }
-
-    .about-hero-logo {
-      height: 70px;
-      width: auto;
-      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
-      transition: transform 0.3s ease;
-      animation: fadeInUp 1s ease-out;
-    }
-
-    .about-hero-logo:hover {
-      transform: scale(1.1) rotate(5deg);
+      margin-top: 80px; /* Account for fixed header */
     }
 
     .about-hero h1 {
       font-family: var(--font-family-accent);
-      font-size: clamp(2rem, 4vw, 3.5rem);
-      font-weight: 700;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-      animation: fadeInUp 1s ease-out;
-      margin: 0;
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      margin-bottom: 1rem;
+      color: var(--bbb-primary);
+      text-shadow: none;
     }
 
     .about-hero .tagline {
       font-size: clamp(1rem, 2vw, 1.3rem);
-      opacity: 0.9;
+      color: var(--bbb-text-muted);
       max-width: 600px;
       margin: 0 auto;
-      animation: fadeInUp 1s ease-out 0.3s both;
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
 
     .about-main {
@@ -125,14 +64,6 @@
       padding: 3rem;
       border-radius: 20px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      border: 3px solid transparent;
-      transition: all 0.3s ease;
-    }
-
-    .about-text:hover {
-      border-color: var(--bbb-gold);
-      transform: translateY(-5px);
-      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
     }
 
     .about-story .lead {
@@ -155,11 +86,6 @@
       border-radius: 15px;
       margin: 2rem 0;
       border-left: 4px solid var(--bbb-gold);
-      transition: transform 0.3s ease;
-    }
-
-    .mission-box:hover {
-      transform: translateX(10px);
     }
 
     .mission-box h3 {
@@ -174,11 +100,6 @@
       border-radius: 20px;
       overflow: hidden;
       box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-      transition: transform 0.3s ease;
-    }
-
-    .about-image-container:hover {
-      transform: scale(1.02);
     }
 
     .about-image {
@@ -221,34 +142,15 @@
 
     .values-section {
       background: white;
-      padding: 4rem 2rem;
+      padding: 4rem 0;
       margin: 4rem 0;
       border-radius: 20px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .values-section::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.1), transparent);
-      transition: left 0.8s ease;
-    }
-
-    .values-section:hover::before {
-      left: 100%;
     }
 
     .values-header {
       text-align: center;
       margin-bottom: 3rem;
-      position: relative;
-      z-index: 2;
     }
 
     .values-header h2 {
@@ -269,9 +171,7 @@
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
       gap: 2rem;
-      padding: 0 2rem;
-      position: relative;
-      z-index: 2;
+      padding: 0 3rem;
     }
 
     .value-item {
@@ -280,13 +180,12 @@
       background: linear-gradient(135deg, var(--bbb-light-green), white);
       border-radius: 15px;
       transition: transform 0.3s ease, box-shadow 0.3s ease;
-      border: 3px solid transparent;
+      border: 1px solid var(--bbb-border);
     }
 
     .value-item:hover {
       transform: translateY(-10px);
       box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-      border-color: var(--bbb-gold);
     }
 
     .value-icon {
@@ -310,10 +209,9 @@
 
     .timeline-section {
       background: linear-gradient(135deg, var(--bbb-light-green), white);
-      padding: 4rem 2rem;
+      padding: 4rem 0;
       margin: 4rem 0;
       border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
 
     .timeline-header {
@@ -331,7 +229,7 @@
     .timeline {
       max-width: 800px;
       margin: 0 auto;
-      padding: 0 2rem;
+      padding: 0 3rem;
     }
 
     .timeline-item {
@@ -342,14 +240,11 @@
       padding: 2rem;
       border-radius: 15px;
       box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-      border: 3px solid transparent;
+      transition: transform 0.3s ease;
     }
 
     .timeline-item:hover {
       transform: translateX(10px);
-      border-color: var(--bbb-gold);
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
     }
 
     .timeline-icon {
@@ -372,46 +267,34 @@
     }
 
     .cta-section {
-      background: linear-gradient(135deg, var(--bbb-primary), var(--bbb-secondary));
-      color: white;
+      background: white;
+      color: var(--bbb-text);
       text-align: center;
       padding: 4rem 2rem;
       border-radius: 20px;
       margin: 4rem 0;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .cta-section::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-      animation: rotate 20s linear infinite;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 3px solid var(--bbb-primary);
     }
 
     .cta-section h2 {
       font-family: var(--font-family-accent);
       font-size: clamp(2rem, 4vw, 2.5rem);
       margin-bottom: 1.5rem;
-      position: relative;
-      z-index: 2;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      color: var(--bbb-primary);
+      font-weight: 700;
+      line-height: 1.2;
     }
 
     .cta-section p {
       font-size: clamp(1.1rem, 3vw, 1.3rem);
       margin-bottom: 2.5rem;
+      color: var(--bbb-text);
+      font-weight: 500;
       line-height: 1.5;
       max-width: 500px;
       margin-left: auto;
       margin-right: auto;
-      position: relative;
-      z-index: 2;
-      opacity: 0.9;
     }
 
     .cta-buttons {
@@ -419,72 +302,49 @@
       gap: 1.5rem;
       justify-content: center;
       flex-wrap: wrap;
-      position: relative;
-      z-index: 2;
     }
 
     .cta-btn {
-      background: var(--bbb-gold);
-      color: var(--bbb-primary);
+      background: var(--bbb-primary);
+      color: white;
       padding: 1rem 2.5rem;
-      border-radius: 25px;
+      border-radius: 10px;
       text-decoration: none;
       font-weight: 700;
       font-size: clamp(1rem, 2.5vw, 1.1rem);
       transition: all 0.3s ease;
       display: inline-block;
-      box-shadow: 0 6px 20px rgba(255, 215, 0, 0.3);
+      box-shadow: 0 6px 20px rgba(0, 77, 0, 0.3);
+      border: 3px solid var(--bbb-primary);
       min-width: 180px;
       text-align: center;
     }
 
     .cta-btn:hover {
       transform: translateY(-3px);
-      box-shadow: 0 10px 30px rgba(255, 215, 0, 0.4);
-      background: #ffed4e;
+      box-shadow: 0 10px 30px rgba(0, 77, 0, 0.4);
+      background: var(--bbb-secondary);
+      border-color: var(--bbb-secondary);
     }
 
     .cta-btn.secondary {
-      background: transparent;
-      color: white;
-      border: 3px solid white;
-      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.2);
+      background: white;
+      color: var(--bbb-primary);
+      border: 3px solid var(--bbb-primary);
+      box-shadow: 0 6px 20px rgba(0, 77, 0, 0.2);
     }
 
     .cta-btn.secondary:hover {
-      background: white;
-      color: var(--bbb-primary);
-      box-shadow: 0 10px 30px rgba(255, 255, 255, 0.3);
-    }
-
-    /* Under Construction Banner */
-    .construction-banner {
-      background: linear-gradient(45deg, var(--bbb-gold), #ffed4e);
-      color: var(--bbb-primary);
-      padding: 1rem;
-      text-align: center;
-      font-weight: 600;
-      animation: pulse 2s infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.8; }
+      background: var(--bbb-light-green);
+      box-shadow: 0 10px 30px rgba(0, 77, 0, 0.3);
+      transform: translateY(-3px);
     }
 
     /* Responsive Design */
     @media (max-width: 768px) {
       .about-hero {
         padding: 3rem 1rem 2rem 1rem;
-      }
-
-      .about-hero-title-container {
-        flex-direction: column;
-        gap: 1rem;
-      }
-
-      .about-hero-logo {
-        height: 50px;
+        margin-top: 70px;
       }
 
       .about-main {
@@ -503,11 +363,11 @@
 
       .values-grid {
         grid-template-columns: 1fr;
-        padding: 0 1rem;
+        padding: 0 2rem;
       }
 
       .timeline {
-        padding: 0 1rem;
+        padding: 0 2rem;
       }
 
       .timeline-item {
@@ -582,147 +442,18 @@
       // Create page content
       const mainContent = document.createElement('div');
       
-  <!-- Under Construction Banner -->
-  <div class="construction-banner">
-    🚧 This site is under construction - New features coming soon! 🚧
-  </div>
-
-  <!-- Hero Section -->
-  <section class="about-hero">
-    <div class="about-hero-content">
-      <div class="about-hero-title-container">
-        <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="about-hero-logo">
+      // Hero Section
+      const heroSection = document.createElement('section');
+      heroSection.className = 'about-hero';
+      heroSection.innerHTML = `
         <h1>About the Birdie Bush Bandits</h1>
-      </div>
-      <p class="tagline">Discover our story, our mission, and what makes our golf group special</p>
-    </div>
-  </section>
+        <p class="tagline">Discover our story, our mission, and what makes our golf group special</p>
+      `;
+      mainContent.appendChild(heroSection);
 
       // Main About Content
       const aboutMainDiv = document.createElement('div');
       aboutMainDiv.className = 'about-main';
-
-      // About Grid Section
-      const aboutGridSection = document.createElement('section');
-      aboutGridSection.className = 'about-grid';
-      aboutGridSection.innerHTML = `
-        <div class="about-text">
-          <div class="about-story">
-            <p class="lead">It all started when the world slowed down during the COVID pandemic. Amrit, missing the game he loved and wanting to reconnect with friends, made a few phone calls that would change everything. Despite not having played for years - life, family, and work had gotten in the way - a small group decided to dust off their clubs and head back to the course.</p>
-            
-            <p>What began as a simple reunion round in August 2020 quickly became something much more meaningful. The Birdie Bush Bandits weren't just rediscovering golf; we were rediscovering friendship. Fast forward five years to 2025, and we've grown into a great bunch of friends who've turned our shared love of the game into lasting bonds that extend far beyond the 18th hole.</p>
-
-            <p>We're living proof that it's never too late to get back into golf, and that sometimes the best things come from the simplest ideas. What started as "let's play a round" has become a brotherhood that celebrates every birdie, laughs at every shank, and supports each other through all of life's ups and downs.</p>
-            
-            <div class="mission-box">
-              <h3>🎯 Our Mission</h3>
-              <p>To create lasting friendships through our shared passion for golf, while continuously improving our games and having an absolute blast doing it.</p>
-            </div>
-          </div>
-        </div>
-        
-        <div class="about-image-container">
-          <img src="golf-flag.jpeg" alt="Golfer holding the flag on a golf course" class="about-image" loading="lazy">
-          <div class="image-overlay">
-            <div class="overlay-text">
-              <h3>Every Round Tells a Story</h3>
-              <p>From epic shots to hilarious mishaps, we capture it all</p>
-            </div>
-          </div>
-        </div>
-      `;
-      aboutMainDiv.appendChild(aboutGridSection);
-
-      // Values Section
-      const valuesSection = document.createElement('section');
-      valuesSection.className = 'values-section';
-      valuesSection.innerHTML = `
-        <div class="values-header">
-          <h2>Our Core Values</h2>
-          <p>These principles guide everything we do, from how we play to how we treat each other</p>
-        </div>
-        <div class="values-grid">
-          <div class="value-item">
-            <span class="value-icon">🤝</span>
-            <h4>Fellowship</h4>
-            <p>Building lasting friendships on and off the course. Golf brings us together, but friendship keeps us coming back.</p>
-          </div>
-          <div class="value-item">
-            <span class="value-icon">📈</span>
-            <h4>Improvement</h4>
-            <p>Supporting each other's journey to better golf. We celebrate progress, no matter how small, and learn from every round.</p>
-          </div>
-          <div class="value-item">
-            <span class="value-icon">🎉</span>
-            <h4>Fun</h4>
-            <p>Making every round memorable and enjoyable. Win or lose, we always find something to laugh about and enjoy together.</p>
-          </div>
-        </div>
-      `;
-      aboutMainDiv.appendChild(valuesSection);
-
-      // Timeline Section
-      const timelineSection = document.createElement('section');
-      timelineSection.className = 'timeline-section';
-      timelineSection.innerHTML = `
-        <div class="timeline-header">
-          <h2>Our Journey</h2>
-        </div>
-        <div class="timeline">
-          <div class="timeline-item">
-            <span class="timeline-icon">🚀</span>
-            <div class="timeline-content">
-              <h4>August 2020 - Amrit's Call</h4>
-              <p>During the COVID pandemic, Amrit reached out to old friends who hadn't played golf in years. Despite busy lives with family and work, a few answered the call to dust off their clubs.</p>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <span class="timeline-icon">⛳</span>
-            <div class="timeline-content">
-              <h4>The First Round Back</h4>
-              <p>Rusty swings, forgotten rules, and plenty of laughs marked our return to the course. What started as a simple reunion became the foundation of something special.</p>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <span class="timeline-icon">🤝</span>
-            <div class="timeline-content">
-              <h4>Building the Brotherhood</h4>
-              <p>Regular rounds turned into lasting friendships. We discovered that golf was the perfect excuse to reconnect and stay connected as our group grew.</p>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <span class="timeline-icon">📱</span>
-            <div class="timeline-content">
-              <h4>Digital Evolution</h4>
-              <p>We embraced technology to track our progress, with custom scorecards, handicap calculators, and photo galleries to capture our memories.</p>
-            </div>
-          </div>
-          <div class="timeline-item">
-            <span class="timeline-icon">🌟</span>
-            <div class="timeline-content">
-              <h4>Five Years Strong</h4>
-              <p>From a pandemic phone call to a great bunch of friends - we've proven that it's never too late to get back into golf and rediscover friendship.</p>
-            </div>
-          </div>
-        </div>
-      `;
-      aboutMainDiv.appendChild(timelineSection);
-
-      // Call to Action Section
-      const ctaSection = document.createElement('section');
-      ctaSection.className = 'cta-section';
-      ctaSection.innerHTML = `
-        <h2>Ready to Join the Adventure?</h2>
-        <p>Whether you're a seasoned pro or just starting out, there's a place for you with the Birdie Bush Bandits.</p>
-        <div class="cta-buttons">
-          <a href="photo-gallery.html" class="cta-btn">View Our Gallery</a>
-          <a href="members.html" class="cta-btn secondary">Meet the Team</a>
-          <a href="index.html" class="cta-btn secondary">Back to Home</a>
-        </div>
-      `;
-      aboutMainDiv.appendChild(ctaSection);
-
-      mainContent.appendChild(aboutMainDiv);
 
       // About Grid Section
       const aboutGridSection = document.createElement('section');
