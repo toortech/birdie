@@ -23,8 +23,8 @@
   <style>
     /* About Page Specific Styles */
     .about-hero {
-      background: linear-gradient(135deg, var(--bbb-primary), var(--bbb-secondary));
-      color: white;
+      background: linear-gradient(135deg, var(--bbb-light-green) 0%, var(--bbb-background) 100%);
+      color: var(--bbb-text);
       text-align: center;
       padding: 4rem 2rem 3rem 2rem;
       margin-top: 80px; /* Account for fixed header */
@@ -34,12 +34,13 @@
       font-family: var(--font-family-accent);
       font-size: clamp(2.5rem, 5vw, 3.5rem);
       margin-bottom: 1rem;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      color: var(--bbb-primary);
+      text-shadow: none;
     }
 
     .about-hero .tagline {
       font-size: clamp(1rem, 2vw, 1.3rem);
-      opacity: 0.9;
+      color: var(--bbb-text-muted);
       max-width: 600px;
       margin: 0 auto;
     }
@@ -266,24 +267,27 @@
     }
 
     .cta-section {
-      background: linear-gradient(135deg, var(--bbb-primary), var(--bbb-secondary));
-      color: white;
+      background: white;
+      color: var(--bbb-text);
       text-align: center;
       padding: 4rem 2rem;
       border-radius: 20px;
       margin: 4rem 0;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 2px solid var(--bbb-light-green);
     }
 
     .cta-section h2 {
       font-family: var(--font-family-accent);
       font-size: 2.5rem;
       margin-bottom: 1rem;
+      color: var(--bbb-primary);
     }
 
     .cta-section p {
       font-size: 1.1rem;
       margin-bottom: 2rem;
-      opacity: 0.9;
+      color: var(--bbb-text-muted);
     }
 
     .cta-buttons {
@@ -294,30 +298,30 @@
     }
 
     .cta-btn {
-      background: var(--bbb-gold);
-      color: var(--bbb-primary);
+      background: linear-gradient(135deg, var(--bbb-secondary), var(--bbb-primary));
+      color: white;
       padding: 0.75rem 2rem;
       border-radius: 25px;
       text-decoration: none;
       font-weight: 600;
       transition: all 0.3s ease;
       display: inline-block;
+      box-shadow: 0 4px 15px rgba(0, 70, 173, 0.3);
     }
 
     .cta-btn:hover {
       transform: translateY(-3px);
-      box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+      box-shadow: 0 8px 25px rgba(0, 70, 173, 0.4);
     }
 
     .cta-btn.secondary {
-      background: transparent;
-      color: white;
-      border: 2px solid white;
+      background: linear-gradient(135deg, var(--bbb-gold), #ffed4e);
+      color: var(--bbb-primary);
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
     }
 
     .cta-btn.secondary:hover {
-      background: white;
-      color: var(--bbb-primary);
+      box-shadow: 0 8px 25px rgba(255, 215, 0, 0.4);
     }
 
     /* Responsive Design */
