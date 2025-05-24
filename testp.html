@@ -3,354 +3,69 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Birdie Bush Bandits - Golf Group</title>
-  <meta name="description" content="Birdie Bush Bandits - A golf group founded in August 2020. View photo galleries, scorecards, calculate handicaps, and meet our members.">
+  <title>About BBB - Birdie Bush Bandits</title>
+  <meta name="description" content="Learn about the Birdie Bush Bandits golf group - our story, mission, and what makes us special since August 2020.">
+  <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
   
   <!-- Add Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
   
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Core Modules -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+
   <style>
-    /* Enhanced CSS Variables */
-    :root {
-      --bbb-primary: #004d00;
-      --bbb-secondary: #0046ad;
-      --bbb-gold: #ffd700;
-      --bbb-light-green: #e8f5e8;
-      --bbb-background: #f5f5f5;
-      --bbb-text: #212529;
-      --bbb-text-muted: #6c757d;
-      --bbb-border: #dee2e6;
-      --font-family-base: 'Inter', sans-serif;
-      --font-family-accent: 'Montserrat', serif;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: var(--font-family-base);
-      line-height: 1.6;
-      color: var(--bbb-text);
-      background: linear-gradient(135deg, var(--bbb-light-green) 0%, var(--bbb-background) 100%);
-      min-height: 100vh;
-    }
-
-    /* Hero Section */
-    .hero {
-      background: linear-gradient(rgba(0, 77, 0, 0.7), rgba(0, 77, 0, 0.7)), 
-                  url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><pattern id="golf-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="3" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="1200" height="600" fill="url(%23golf-pattern)"/></svg>');
-      background-size: cover;
-      background-position: center;
-      color: white;
-      text-align: center;
-      padding: 4rem 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .hero::before {
-      content: '';
-      position: absolute;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
-      animation: rotate 20s linear infinite;
-    }
-
-    @keyframes rotate {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .hero h1 {
-      font-family: var(--font-family-accent);
-      font-size: clamp(2.5rem, 5vw, 4rem);
-      font-weight: 700;
-      margin-bottom: 1rem;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-      animation: fadeInUp 1s ease-out;
-    }
-
-    .hero .tagline {
-      font-size: clamp(1.1rem, 2vw, 1.5rem);
-      margin-bottom: 2rem;
-      opacity: 0.95;
-      animation: fadeInUp 1s ease-out 0.3s both;
-    }
-
-    .founded-badge {
-      display: inline-block;
-      background: var(--bbb-gold);
-      color: var(--bbb-primary);
-      padding: 0.5rem 1.5rem;
-      border-radius: 25px;
-      font-weight: 600;
-      margin-bottom: 2rem;
-      animation: fadeInUp 1s ease-out 0.6s both;
-      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-    }
-
-    @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    /* Stats Section */
-    .stats-section {
-      padding: 3rem 2rem;
-      background: white;
-      margin: -2rem 1rem 0 1rem;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      position: relative;
-      z-index: 3;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 2rem;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .stat-item {
-      text-align: center;
-      padding: 1.5rem;
-      background: linear-gradient(135deg, var(--bbb-light-green), white);
-      border-radius: 15px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .stat-item:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-
-    .stat-number {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: var(--bbb-primary);
-      font-family: var(--font-family-accent);
-    }
-
-    .stat-label {
-      color: var(--bbb-text-muted);
-      font-weight: 500;
-      margin-top: 0.5rem;
-    }
-
-    /* Navigation Section */
-    .nav-section {
-      padding: 4rem 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .nav-title {
-      text-align: center;
-      font-family: var(--font-family-accent);
-      font-size: 2.5rem;
-      color: var(--bbb-primary);
-      margin-bottom: 3rem;
-    }
-
-    .nav-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2rem;
-    }
-
-    .nav-card {
-      background: white;
-      border-radius: 20px;
-      padding: 2rem;
-      text-align: center;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-      border: 3px solid transparent;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .nav-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.2), transparent);
-      transition: left 0.5s ease;
-    }
-
-    .nav-card:hover::before {
-      left: 100%;
-    }
-
-    .nav-card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-      border-color: var(--bbb-gold);
-    }
-
-    .nav-icon {
-      font-size: 3rem;
-      margin-bottom: 1rem;
-      display: block;
-    }
-
-    .nav-card h3 {
-      font-family: var(--font-family-accent);
-      color: var(--bbb-primary);
-      margin-bottom: 1rem;
-      font-size: 1.5rem;
-    }
-
-    .nav-card p {
-      color: var(--bbb-text-muted);
-      margin-bottom: 1.5rem;
-    }
-
-    .nav-card .btn {
-      background: linear-gradient(135deg, var(--bbb-secondary), var(--bbb-primary));
-      color: white;
-      padding: 0.75rem 2rem;
-      border: none;
-      border-radius: 25px;
-      font-weight: 600;
-      text-decoration: none;
-      display: inline-block;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .nav-card .btn:hover {
-      transform: scale(1.05);
-      box-shadow: 0 5px 15px rgba(0, 70, 173, 0.4);
-    }
-
-    /* Featured Image Section */
-    .featured-section {
-      padding: 4rem 2rem;
+    /* About Page Specific Styles */
+    .about-hero {
       background: linear-gradient(135deg, var(--bbb-primary), var(--bbb-secondary));
       color: white;
       text-align: center;
+      padding: 4rem 2rem 3rem 2rem;
+      margin-top: 80px; /* Account for fixed header */
     }
 
-    .featured-content {
-      max-width: 800px;
+    .about-hero h1 {
+      font-family: var(--font-family-accent);
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .about-hero .tagline {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      opacity: 0.9;
+      max-width: 600px;
       margin: 0 auto;
     }
 
-    .featured-image {
-      max-width: 100%;
-      height: 400px;
-      object-fit: cover;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      margin-top: 2rem;
+    .about-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
     }
 
-    /* Modal Styles */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4rem;
       align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      backdrop-filter: blur(5px);
+      margin: 4rem 0;
     }
 
-    .modal-content {
+    .about-text {
       background: white;
+      padding: 3rem;
       border-radius: 20px;
-      max-width: 800px;
-      width: 90%;
-      max-height: 90vh;
-      overflow-y: auto;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      animation: modalSlideIn 0.3s ease-out;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
 
-    @keyframes modalSlideIn {
-      from {
-        opacity: 0;
-        transform: scale(0.9) translateY(-20px);
-      }
-      to {
-        opacity: 1;
-        transform: scale(1) translateY(0);
-      }
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 2rem;
-      border-bottom: 1px solid var(--bbb-border);
-      background: linear-gradient(135deg, var(--bbb-light-green), white);
-      border-radius: 20px 20px 0 0;
-    }
-
-    .modal-header h2 {
-      margin: 0;
-      color: var(--bbb-primary);
-      font-family: var(--font-family-accent);
-      font-size: 2rem;
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      font-size: 2rem;
-      cursor: pointer;
-      color: var(--bbb-text-muted);
-      padding: 0;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-radius: 50%;
-      transition: all 0.3s ease;
-    }
-
-    .modal-close:hover {
-      background: rgba(0,0,0,0.1);
-      color: var(--bbb-primary);
-    }
-
-    .modal-body {
-      padding: 2rem;
-    }
-
-    .modal-body .lead {
+    .about-story .lead {
       font-size: 1.2rem;
       font-weight: 500;
       color: var(--bbb-secondary);
@@ -358,13 +73,13 @@
       line-height: 1.7;
     }
 
-    .modal-body p {
+    .about-story p {
       margin-bottom: 1.5rem;
       line-height: 1.7;
       color: var(--bbb-text);
     }
 
-    .modal-body .mission-box {
+    .mission-box {
       background: linear-gradient(135deg, var(--bbb-light-green), rgba(255, 215, 0, 0.1));
       padding: 2rem;
       border-radius: 15px;
@@ -372,355 +87,366 @@
       border-left: 4px solid var(--bbb-gold);
     }
 
-    .modal-body .mission-box h3 {
+    .mission-box h3 {
       color: var(--bbb-primary);
       font-family: var(--font-family-accent);
       margin-bottom: 1rem;
       font-size: 1.3rem;
     }
 
-    .modal-body .values-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 1.5rem;
-      margin: 2rem 0;
+    .about-image-container {
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.1);
     }
 
-    .modal-body .value-item {
-      text-align: center;
-      padding: 1.5rem 1rem;
-      background: rgba(0, 77, 0, 0.05);
-      border-radius: 12px;
+    .about-image {
+      width: 100%;
+      height: 500px;
+      object-fit: cover;
       transition: transform 0.3s ease;
     }
 
-    .modal-body .value-item:hover {
-      transform: translateY(-5px);
+    .about-image-container:hover .about-image {
+      transform: scale(1.05);
     }
 
-    .modal-body .value-icon {
-      font-size: 2rem;
-      display: block;
-      margin-bottom: 0.5rem;
+    .image-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: linear-gradient(transparent, rgba(0,0,0,0.8));
+      padding: 2rem;
+      color: white;
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
     }
 
-    .modal-body .value-item h4 {
-      color: var(--bbb-primary);
+    .about-image-container:hover .image-overlay {
+      transform: translateY(0);
+    }
+
+    .overlay-text h3 {
       font-family: var(--font-family-accent);
       margin-bottom: 0.5rem;
-      font-size: 1.1rem;
+      font-size: 1.5rem;
     }
 
-    .modal-body .value-item p {
-      font-size: 0.9rem;
-      color: var(--bbb-text-muted);
+    .overlay-text p {
+      opacity: 0.9;
       margin: 0;
     }
 
-    .modal-image-container {
-      margin: 2rem 0;
+    .values-section {
+      background: white;
+      padding: 4rem 0;
+      margin: 4rem 0;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .values-header {
       text-align: center;
+      margin-bottom: 3rem;
     }
 
-    .modal-image {
-      width: 100%;
-      max-width: 500px;
-      height: 300px;
-      object-fit: cover;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    }
-
-    .image-caption {
-      margin-top: 1rem;
-      color: var(--bbb-text-muted);
-      font-style: italic;
-    }
-
-    /* Features Grid in Featured Section */
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 2rem;
-      margin-top: 3rem;
-    }
-
-    .feature-item {
-      text-align: center;
-      padding: 2rem 1rem;
-      background: rgba(255,255,255,0.1);
-      border-radius: 15px;
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.2);
-      transition: transform 0.3s ease;
-    }
-
-    .feature-item:hover {
-      transform: translateY(-5px);
-    }
-
-    .feature-icon {
+    .values-header h2 {
+      font-family: var(--font-family-accent);
       font-size: 2.5rem;
+      color: var(--bbb-primary);
+      margin-bottom: 1rem;
+    }
+
+    .values-header p {
+      font-size: 1.1rem;
+      color: var(--bbb-text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      padding: 0 3rem;
+    }
+
+    .value-item {
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, var(--bbb-light-green), white);
+      border-radius: 15px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 1px solid var(--bbb-border);
+    }
+
+    .value-item:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    .value-icon {
+      font-size: 3rem;
       display: block;
       margin-bottom: 1rem;
     }
 
-    .feature-item h4 {
-      color: white;
+    .value-item h4 {
+      color: var(--bbb-primary);
       font-family: var(--font-family-accent);
       margin-bottom: 1rem;
-      font-size: 1.2rem;
+      font-size: 1.3rem;
     }
 
-    .feature-item p {
-      color: rgba(255,255,255,0.9);
+    .value-item p {
+      color: var(--bbb-text-muted);
       margin: 0;
       line-height: 1.6;
     }
-    .footer {
-      background: var(--bbb-primary);
-      color: white;
-      text-align: center;
-      padding: 2rem;
+
+    .timeline-section {
+      background: linear-gradient(135deg, var(--bbb-light-green), white);
+      padding: 4rem 0;
+      margin: 4rem 0;
+      border-radius: 20px;
     }
 
-    .return-text {
-      font-style: italic;
-      opacity: 0.8;
+    .timeline-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .timeline-header h2 {
+      font-family: var(--font-family-accent);
+      font-size: 2.5rem;
+      color: var(--bbb-primary);
       margin-bottom: 1rem;
     }
 
-    /* Under Construction Banner */
-    .construction-banner {
-      background: linear-gradient(45deg, var(--bbb-gold), #ffed4e);
+    .timeline {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 3rem;
+    }
+
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 3rem;
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .timeline-item:hover {
+      transform: translateX(10px);
+    }
+
+    .timeline-icon {
+      font-size: 2.5rem;
+      margin-right: 2rem;
+      flex-shrink: 0;
+    }
+
+    .timeline-content h4 {
       color: var(--bbb-primary);
-      padding: 1rem;
-      text-align: center;
-      font-weight: 600;
-      animation: pulse 2s infinite;
+      font-family: var(--font-family-accent);
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.8; }
+    .timeline-content p {
+      color: var(--bbb-text);
+      margin: 0;
+      line-height: 1.6;
     }
 
-    /* Footer Section */
-    .footer {
-      background: var(--bbb-primary);
+    .cta-section {
+      background: linear-gradient(135deg, var(--bbb-primary), var(--bbb-secondary));
       color: white;
       text-align: center;
-      padding: 2rem;
+      padding: 4rem 2rem;
+      border-radius: 20px;
+      margin: 4rem 0;
     }
 
-    .return-text {
-      font-style: italic;
-      opacity: 0.8;
+    .cta-section h2 {
+      font-family: var(--font-family-accent);
+      font-size: 2.5rem;
       margin-bottom: 1rem;
     }
 
-    /* Under Construction Banner */
-    .construction-banner {
-      background: linear-gradient(45deg, var(--bbb-gold), #ffed4e);
-      color: var(--bbb-primary);
-      padding: 1rem;
-      text-align: center;
-      font-weight: 600;
-      animation: pulse 2s infinite;
+    .cta-section p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      opacity: 0.9;
     }
 
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.8; }
+    .cta-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .cta-btn {
+      background: var(--bbb-gold);
+      color: var(--bbb-primary);
+      padding: 0.75rem 2rem;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      display: inline-block;
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 10px 25px rgba(255, 215, 0, 0.4);
+    }
+
+    .cta-btn.secondary {
+      background: transparent;
+      color: white;
+      border: 2px solid white;
+    }
+
+    .cta-btn.secondary:hover {
+      background: white;
+      color: var(--bbb-primary);
     }
 
     /* Responsive Design */
     @media (max-width: 768px) {
-      .hero {
-        padding: 3rem 1rem;
+      .about-hero {
+        padding: 3rem 1rem 2rem 1rem;
+        margin-top: 70px;
       }
-      
-      .stats-section {
-        margin: -1rem 0.5rem 0 0.5rem;
+
+      .about-main {
+        padding: 0 1rem;
       }
-      
-      .nav-section, .featured-section {
-        padding: 3rem 1rem;
-      }
-      
-      .nav-grid {
+
+      .about-grid {
         grid-template-columns: 1fr;
+        gap: 2rem;
+        margin: 2rem 0;
       }
 
-      .features-grid {
+      .about-text {
+        padding: 2rem;
+      }
+
+      .values-grid {
         grid-template-columns: 1fr;
+        padding: 0 2rem;
       }
 
-      .modal-content {
-        width: 95%;
-        margin: 1rem;
+      .timeline {
+        padding: 0 2rem;
       }
 
-      .modal-header {
-        padding: 1.5rem;
+      .timeline-item {
+        flex-direction: column;
+        text-align: center;
       }
 
-      .modal-header h2 {
-        font-size: 1.5rem;
+      .timeline-icon {
+        margin-right: 0;
+        margin-bottom: 1rem;
       }
 
-      .modal-body {
-        padding: 1.5rem;
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
       }
 
-      .modal-body .values-grid {
-        grid-template-columns: 1fr;
+      .cta-btn {
+        width: 100%;
+        max-width: 300px;
       }
-    }
-
-    /* Golf-specific decorative elements */
-    .golf-ball {
-      width: 20px;
-      height: 20px;
-      background: white;
-      border-radius: 50%;
-      position: relative;
-      display: inline-block;
-      margin: 0 10px;
-      box-shadow: inset -3px -3px 5px rgba(0,0,0,0.2);
-    }
-
-    .golf-ball::before {
-      content: '';
-      position: absolute;
-      width: 2px;
-      height: 2px;
-      background: #ccc;
-      border-radius: 50%;
-      top: 4px;
-      left: 6px;
-      box-shadow: 4px 0 #ccc, 8px 0 #ccc, 2px 4px #ccc, 6px 4px #ccc, 10px 4px #ccc, 4px 8px #ccc, 8px 8px #ccc;
     }
   </style>
 </head>
 <body>
-  <!-- Under Construction Banner -->
-  <div class="construction-banner">
-    🚧 This site is under construction - New features coming soon! 🚧
-  </div>
+  <a href="#main" class="skip-link">Skip to main content</a>
+  
+  <main id="main"></main>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Check if BBB modules are loaded
+      if (typeof BBB_CONFIG === 'undefined' || 
+          typeof BBB_AUTH === 'undefined' || 
+          typeof BBB_DB === 'undefined' || 
+          typeof BBB_UI === 'undefined' || 
+          typeof BBB_UTILS === 'undefined') {
+        console.error('Required BBB modules not found!');
+        return;
+      }
+      
+      // Initialize modules
+      try {
+        BBB_AUTH.init({
+          cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+        });
+        
+        BBB_DB.init({
+          useCloudflare: BBB_CONFIG.cloudflareEnabled,
+          localStoragePrefix: 'bbb_'
+        });
+      } catch (error) {
+        console.error('Error initializing modules:', error);
+        return;
+      }
+      
+      // Create header
+      const headerElements = BBB_UI.createHeader({
+        fixed: true,
+        showHomeLinkText: true
+      });
+      
+      document.body.insertBefore(headerElements.header, document.body.firstChild);
+      
+      // Get main content element
+      const main = document.getElementById('main');
+      main.appendChild(headerElements.mainWrapper);
+      
+      // Create page content
+      const mainContent = document.createElement('div');
+      
+      // Hero Section
+      const heroSection = document.createElement('section');
+      heroSection.className = 'about-hero';
+      heroSection.innerHTML = `
+        <h1>About the Birdie Bush Bandits</h1>
+        <p class="tagline">Discover our story, our mission, and what makes our golf group special</p>
+      `;
+      mainContent.appendChild(heroSection);
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content">
-      <h1>
-        Birdie Bush Bandits
-        <span class="golf-ball"></span>
-      </h1>
-      <p class="tagline">Where every round is an adventure and every shot tells a story</p>
-      <div class="founded-badge">
-        🏌️ Founded August 2020
-      </div>
-    </div>
-  </section>
+      // Main About Content
+      const aboutMainDiv = document.createElement('div');
+      aboutMainDiv.className = 'about-main';
 
-  <!-- Stats Section -->
-  <section class="stats-section">
-    <div class="stats-grid">
-      <div class="stat-item">
-        <div class="stat-number">4+</div>
-        <div class="stat-label">Years Golfing</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number">∞</div>
-        <div class="stat-label">Great Memories</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number">⭐</div>
-        <div class="stat-label">Premium Experience</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Navigation Section -->
-  <section class="nav-section">
-    <h2 class="nav-title">Explore Our Features</h2>
-    <div class="nav-grid">
-      <div class="nav-card">
-        <span class="nav-icon">📸</span>
-        <h3>Photo Gallery</h3>
-        <p>Browse through our collection of memorable moments on the course. Every swing captured!</p>
-        <a href="photo-gallery.html" class="btn">View Gallery</a>
-      </div>
-      
-      <div class="nav-card">
-        <span class="nav-icon">📊</span>
-        <h3>Scorecards</h3>
-        <p>Track your progress and view historical scorecards. See how your game improves over time.</p>
-        <a href="view-saved-scores.html" class="btn">View Scores</a>
-      </div>
-      
-      <div class="nav-card">
-        <span class="nav-icon">🏆</span>
-        <h3>Handicap Calculator</h3>
-        <p>Calculate and track your handicap with our advanced calculator. Know your true skill level.</p>
-        <a href="handicap-calculator.html" class="btn">Calculate</a>
-      </div>
-      
-      <div class="nav-card">
-        <span class="nav-icon">👥</span>
-        <h3>Members</h3>
-        <p>Meet the Birdie Bush Bandits! Get to know your fellow golfers and their achievements.</p>
-        <a href="members.html" class="btn">Meet Us</a>
-      </div>
-      
-      <div class="nav-card">
-        <span class="nav-icon">ℹ️</span>
-        <h3>About BBB</h3>
-        <p>Learn about our story, mission, and what makes the Birdie Bush Bandits special.</p>
-        <a href="about.html" class="btn">Learn More</a>
-      </div>
-      
-      <div class="nav-card">
-        <span class="nav-icon">🎨</span>
-        <h3>Logos</h3>
-        <p>Check out our awesome logo collection and brand materials. Show your BBB pride!</p>
-        <a href="logos.html" class="btn">View Logos</a>
-      </div>
-    </div>
-  </section>
-
-  <!-- About BBB Section -->
-  <section class="about-section">
-    <div class="about-content">
-      <div class="about-grid">
+      // About Grid Section
+      const aboutGridSection = document.createElement('section');
+      aboutGridSection.className = 'about-grid';
+      aboutGridSection.innerHTML = `
         <div class="about-text">
-          <h2>About the Birdie Bush Bandits</h2>
           <div class="about-story">
-            <p class="lead">What started as a casual group of golf enthusiasts in August 2020 has grown into something special - a brotherhood bound by our love for the game and our shared pursuit of that perfect shot.</p>
+            <p class="lead">It all started when the world slowed down during the COVID pandemic. Amrit, missing the game he loved and wanting to reconnect with friends, made a few phone calls that would change everything. Despite not having played for years - life, family, and work had gotten in the way - a small group decided to dust off their clubs and head back to the course.</p>
             
-            <p>The Birdie Bush Bandits aren't just another golf group. We're a collection of friends who believe that golf is about more than just the scorecard. It's about the early morning drives to the course, the friendly competition, the celebration of great shots, and yes, even laughing at the not-so-great ones.</p>
+            <p>What began as a simple reunion round in August 2020 quickly became something much more meaningful. The Birdie Bush Bandits weren't just rediscovering golf; we were rediscovering friendship. Fast forward five years to 2025, and we've grown into a great bunch of friends who've turned our shared love of the game into lasting bonds that extend far beyond the 18th hole.</p>
+
+            <p>We're living proof that it's never too late to get back into golf, and that sometimes the best things come from the simplest ideas. What started as "let's play a round" has become a brotherhood that celebrates every birdie, laughs at every shank, and supports each other through all of life's ups and downs.</p>
             
             <div class="mission-box">
               <h3>🎯 Our Mission</h3>
               <p>To create lasting friendships through our shared passion for golf, while continuously improving our games and having an absolute blast doing it.</p>
-            </div>
-            
-            <div class="values-grid">
-              <div class="value-item">
-                <span class="value-icon">🤝</span>
-                <h4>Fellowship</h4>
-                <p>Building lasting friendships on and off the course</p>
-              </div>
-              <div class="value-item">
-                <span class="value-icon">📈</span>
-                <h4>Improvement</h4>
-                <p>Supporting each other's journey to better golf</p>
-              </div>
-              <div class="value-item">
-                <span class="value-icon">🎉</span>
-                <h4>Fun</h4>
-                <p>Making every round memorable and enjoyable</p>
-              </div>
             </div>
           </div>
         </div>
@@ -734,83 +460,125 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
+      `;
+      aboutMainDiv.appendChild(aboutGridSection);
 
-  <!-- Featured Image Section -->
-  <section class="featured-section">
-    <div class="featured-content">
-      <h2>What Makes Us Special</h2>
-      <div class="features-grid">
-        <div class="feature-item">
-          <span class="feature-icon">📱</span>
-          <h4>Digital Scorekeeping</h4>
-          <p>Track every round with our custom scorecard system</p>
+      // Values Section
+      const valuesSection = document.createElement('section');
+      valuesSection.className = 'values-section';
+      valuesSection.innerHTML = `
+        <div class="values-header">
+          <h2>Our Core Values</h2>
+          <p>These principles guide everything we do, from how we play to how we treat each other</p>
         </div>
-        <div class="feature-item">
-          <span class="feature-icon">📊</span>
-          <h4>Handicap Tracking</h4>
-          <p>Monitor your progress with our advanced calculator</p>
+        <div class="values-grid">
+          <div class="value-item">
+            <span class="value-icon">🤝</span>
+            <h4>Fellowship</h4>
+            <p>Building lasting friendships on and off the course. Golf brings us together, but friendship keeps us coming back.</p>
+          </div>
+          <div class="value-item">
+            <span class="value-icon">📈</span>
+            <h4>Improvement</h4>
+            <p>Supporting each other's journey to better golf. We celebrate progress, no matter how small, and learn from every round.</p>
+          </div>
+          <div class="value-item">
+            <span class="value-icon">🎉</span>
+            <h4>Fun</h4>
+            <p>Making every round memorable and enjoyable. Win or lose, we always find something to laugh about and enjoy together.</p>
+          </div>
         </div>
-        <div class="feature-item">
-          <span class="feature-icon">📸</span>
-          <h4>Memory Keeping</h4>
-          <p>Every great shot and funny moment captured forever</p>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">🏆</span>
-          <h4>Friendly Competition</h4>
-          <p>May the best golfer win (and buy the drinks!)</p>
-        </div>
-      </div>
-    </div>
-  </section>
+      `;
+      aboutMainDiv.appendChild(valuesSection);
 
-  <!-- Footer -->
-  <footer class="footer">
-    <p class="return-text">If found please return to BBB Headquarters</p>
-    <p>&copy; 2024 Birdie Bush Bandits - Founded August 2020</p>
-  </footer>
+      // Timeline Section
+      const timelineSection = document.createElement('section');
+      timelineSection.className = 'timeline-section';
+      timelineSection.innerHTML = `
+        <div class="timeline-header">
+          <h2>Our Journey</h2>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <span class="timeline-icon">🚀</span>
+            <div class="timeline-content">
+              <h4>August 2020 - Amrit's Call</h4>
+              <p>During the COVID pandemic, Amrit reached out to old friends who hadn't played golf in years. Despite busy lives with family and work, a few answered the call to dust off their clubs.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-icon">⛳</span>
+            <div class="timeline-content">
+              <h4>The First Round Back</h4>
+              <p>Rusty swings, forgotten rules, and plenty of laughs marked our return to the course. What started as a simple reunion became the foundation of something special.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-icon">🤝</span>
+            <div class="timeline-content">
+              <h4>Building the Brotherhood</h4>
+              <p>Regular rounds turned into lasting friendships. We discovered that golf was the perfect excuse to reconnect and stay connected as our group grew.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-icon">📱</span>
+            <div class="timeline-content">
+              <h4>Digital Evolution</h4>
+              <p>We embraced technology to track our progress, with custom scorecards, handicap calculators, and photo galleries to capture our memories.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-icon">🌟</span>
+            <div class="timeline-content">
+              <h4>Five Years Strong</h4>
+              <p>From a pandemic phone call to a great bunch of friends - we've proven that it's never too late to get back into golf and rediscover friendship.</p>
+            </div>
+          </div>
+        </div>
+      `;
+      aboutMainDiv.appendChild(timelineSection);
 
-  <script>
-    // Add some interactive animations
-    document.addEventListener('DOMContentLoaded', function() {
-      // Animate stats on scroll
+      // Call to Action Section
+      const ctaSection = document.createElement('section');
+      ctaSection.className = 'cta-section';
+      ctaSection.innerHTML = `
+        <h2>Ready to Join the Adventure?</h2>
+        <p>Whether you're a seasoned pro or just starting out, there's a place for you with the Birdie Bush Bandits.</p>
+        <div class="cta-buttons">
+          <a href="photo-gallery.html" class="cta-btn">View Our Gallery</a>
+          <a href="members.html" class="cta-btn secondary">Meet the Team</a>
+          <a href="index.html" class="cta-btn secondary">Back to Home</a>
+        </div>
+      `;
+      aboutMainDiv.appendChild(ctaSection);
+
+      mainContent.appendChild(aboutMainDiv);
+      
+      // Add content to main wrapper
+      headerElements.mainWrapper.appendChild(mainContent);
+
+      // Add scroll animations
       const observerOptions = {
-        threshold: 0.5,
+        threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
       };
 
       const observer = new IntersectionObserver(function(entries) {
         entries.forEach(entry => {
           if (entry.isIntersecting) {
-            entry.target.style.animation = 'fadeInUp 0.8s ease-out forwards';
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
           }
         });
       }, observerOptions);
 
-      // Observe stat items
-      document.querySelectorAll('.stat-item').forEach(item => {
-        observer.observe(item);
-      });
-
-      // Observe nav cards
-      document.querySelectorAll('.nav-card').forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.1}s`;
-        observer.observe(card);
-      });
-
-      // Add hover effect to golf balls
-      document.querySelectorAll('.golf-ball').forEach(ball => {
-        ball.addEventListener('mouseenter', function() {
-          this.style.transform = 'rotate(360deg)';
-          this.style.transition = 'transform 0.5s ease';
-        });
-        
-        ball.addEventListener('mouseleave', function() {
-          this.style.transform = 'rotate(0deg)';
-        });
+      // Apply animation styles and observe elements
+      const animatedElements = document.querySelectorAll('.value-item, .timeline-item, .about-text, .about-image-container');
+      animatedElements.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(30px)';
+        element.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+        observer.observe(element);
       });
     });
   </script>
