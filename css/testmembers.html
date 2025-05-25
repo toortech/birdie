@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birdie Bush Bandits – Members</title>
+  <meta name="description" content="Meet the members of Birdie Bush Bandits golf group, view their handicaps and latest scores.">
+  <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  <!-- Add Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Core Modules -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+
+  <style>
+    /* REMOVE ALL INLINE STYLES - Use global CSS instead */
+    /* Only add page-specific styles that don't conflict */
+    
+    /* Members page specific styles only */
+    .member-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .member-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .member-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .member-info {
+      flex: 1;
+      margin-left: var(--spacing-md);
+    }
+
+    .member-stats {
+      font-size: var(--font-size-sm);
+      color: var(--bbb-text-muted);
+      margin-top: var(--spacing-xs);
+    }
+
+    .handicap-badge {
+      display: inline-block;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: 12px;
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+      margin-top: var(--spacing-xs);
+    }
+
+    .score-item {
+      padding: var(--spacing-sm);
+      background: var(--bbb-background);
+      border-radius: var(--border-radius-sm);
+      margin-bottom: var(--spacing-xs);
+      font-size: var(--font-size-sm);
+    }
+
+    .score-item:hover {
+      background: var(--bbb-light-green);
+    }
+
+    /* Stats cards using global card styles */
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--spacing-lg);
+      margin: var(--spacing-lg) 0;
+    }
+
+    .stat-card {
+      /* Remove custom styles - use global .card class */
+    }
+  </style>
+</head>
+<body data-requires-auth="true">
+  <!-- Use Standard Header Structure (like index.html) -->
+  <header class="header">
+    <div class="header-content">
+      <div class="header-left">
+        <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="header-logo">
+        <span class="header-title">Birdie Bush Bandits</span>
+      </div>
+      <div class="header-right">
+        <a href="index.html" class="btn btn-sm">🏠 Home</a>
+        <a href="login.html" class="login-btn" id="login-link">Login</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Use Standard Page Hero (like other pages) -->
+  <section class="page-hero">
+    <div class="page-hero-content">
+      <div class="founded-badge">🏌️ Founded August 2020</div>
+      <h1>Members</h1>
+      <p class="subtitle">Meet our dedicated golfers who make up the Birdie Bush Bandits</p>
+    </div>
+  </section>
+
+  <!-- Use Standard Main Content Structure -->
+  <main class="main-content">
+    <!-- Status Message (Standard) -->
+    <div id="status-message"></div>
+    
+    <!-- Intro Section with Stats -->
+    <div class="content-section">
+      <p class="text-center">From beginners to seasoned players, our diverse group enjoys friendly competition and camaraderie on the course.</p>
+      
+      <!-- Stats using global card components -->
+      <div class="stats-row">
+        <div class="card text-center" style="min-width: 150px;">
+          <div class="card-body p-3">
+            <div style="font-size: 1.8rem; font-weight: bold; color: var(--bbb-primary);">👥</div>
+            <div style="font-size: 1.5rem; font-weight: bold;" id="member-count">12</div>
+            <div class="text-muted">Members</div>
+          </div>
+        </div>
+        
+        <div class="card text-center" style="min-width: 150px;">
+          <div class="card-body p-3">
+            <div style="font-size: 1.8rem; font-weight: bold; color: var(--bbb-primary);">🏆</div>
+            <div style="font-size: 1.5rem; font-weight: bold;">4+</div>
+            <div class="text-muted">Years Active</div>
+          </div>
+        </div>
+        
+        <div class="card text-center" style="min-width: 150px;">
+          <div class="card-body p-3">
+            <div style="font-size: 1.8rem; font-weight: bold; color: var(--bbb-primary);">⛳</div>
+            <div style="font-size: 1.5rem; font-weight: bold;" id="courses-count">6</div>
+            <div class="text-muted">Courses Played</div>
+          </div>
+        </div>
+        
+        <div class="card text-center" style="min-width: 150px;" id="avg-handicap-card" style="display: none;">
+          <div class="card-body p-3">
+            <div style="font-size: 1.8rem; font-weight: bold; color: var(--bbb-primary);">📊</div>
+            <div style="font-size: 1.5rem; font-weight: bold;" id="avg-handicap">-</div>
+            <div class="text-muted">Avg Handicap</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls Section -->
+    <div class="content-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md); margin-bottom: var(--spacing-lg);">
+        <h2 class="section-title" style="margin: 0;">Member Directory</h2>
+        
+        <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+          <label for="sort-select" style="font-size: var(--font-size-sm); margin: 0;">Sort by:</label>
+          <select id="sort-select" style="padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--border-radius-sm);">
+            <option value="name-asc">Name A-Z</option>
+            <option value="name-desc">Name Z-A</option>
+            <option value="handicap-asc">Handicap (Low to High)</option>
+            <option value="handicap-desc">Handicap (High to Low)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Members Grid -->
+    <div class="content-section">
+      <div class="row" id="members-grid">
+        <!-- Member cards will be populated by JavaScript -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Standard Footer -->
+  <footer class="page-footer">
+    <p>&copy; 2025 Birdie Bush Bandits - Founded August 2020</p>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Initialize modules (keep existing logic)
+      BBB_AUTH.init({
+        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+      });
+      
+      BBB_DB.init({
+        useCloudflare: BBB_CONFIG.cloudflareEnabled,
+        localStoragePrefix: 'bbb_'
+      });
+
+      // Update member count
+      document.getElementById('member-count').textContent = BBB_CONFIG.members.length;
+      document.getElementById('courses-count').textContent = Object.keys(BBB_CONFIG.courses).length;
+
+      // Load and display members (keep existing logic but use new structure)
+      loadMembers();
+
+      function loadMembers() {
+        const membersGrid = document.getElementById('members-grid');
+        
+        // Load handicap data for all members (keep existing logic)
+        const handicapPromises = BBB_CONFIG.members.map(member => 
+          BBB_DB.getMemberHandicap(member.toLowerCase())
+            .then(data => ({ member, handicap: data }))
+            .catch(() => ({ member, handicap: null }))
+        );
+        
+        // Load scorecards (keep existing logic)
+        BBB_DB.getScorecards()
+          .then(scorecards => {
+            const scorecardsArray = Object.values(scorecards);
+            
+            Promise.all(handicapPromises)
+              .then(memberData => {
+                // Calculate average handicap
+                let totalHandicap = 0;
+                let membersWithHandicap = 0;
+                
+                memberData.forEach(data => {
+                  if (data.handicap && data.handicap.index) {
+                    totalHandicap += parseFloat(data.handicap.index);
+                    membersWithHandicap++;
+                  }
+                });
+                
+                if (membersWithHandicap > 0) {
+                  const avgHandicap = (totalHandicap / membersWithHandicap).toFixed(1);
+                  document.getElementById('avg-handicap').textContent = avgHandicap;
+                  document.getElementById('avg-handicap-card').style.display = 'block';
+                }
+                
+                // Sort handler
+                document.getElementById('sort-select').addEventListener('change', () => {
+                  displayMembers(memberData, scorecardsArray);
+                });
+                
+                // Initial display
+                displayMembers(memberData, scorecardsArray);
+              });
+          });
+      }
+
+      function displayMembers(memberData, scorecardsArray) {
+        const membersGrid = document.getElementById('members-grid');
+        const sortValue = document.getElementById('sort-select').value;
+        
+        // Sort data
+        const sortedData = [...memberData].sort((a, b) => {
+          switch(sortValue) {
+            case 'name-asc':
+              return a.member.localeCompare(b.member);
+            case 'name-desc':
+              return b.member.localeCompare(a.member);
+            case 'handicap-asc':
+              const hcpA = a.handicap ? parseFloat(a.handicap.index) : 999;
+              const hcpB = b.handicap ? parseFloat(b.handicap.index) : 999;
+              return hcpA - hcpB;
+            case 'handicap-desc':
+              const hcpA2 = a.handicap ? parseFloat(a.handicap.index) : -1;
+              const hcpB2 = b.handicap ? parseFloat(b.handicap.index) : -1;
+              return hcpB2 - hcpA2;
+            default:
+              return 0;
+          }
+        });
+        
+        // Clear grid
+        membersGrid.innerHTML = '';
+        
+        // Create member cards using global styles
+        sortedData.forEach(data => {
+          const recentScores = findRecentScores(scorecardsArray, data.member);
+          const memberCard = createMemberCard(data.member, data.handicap, recentScores);
+          membersGrid.appendChild(memberCard);
+        });
+      }
+
+      function createMemberCard(memberName, handicapData, recentScores) {
+        const col = document.createElement('div');
+        col.className = 'col-md-6 col-lg-4 mb-4';
+        
+        // Use global card structure
+        const card = document.createElement('div');
+        card.className = 'card member-card';
+        
+        // Card header with member info
+        const cardHeader = document.createElement('div');
+        cardHeader.className = 'card-header';
+        cardHeader.style.display = 'flex';
+        cardHeader.style.alignItems = 'center';
+        
+        // Avatar
+        const avatar = document.createElement('div');
+        avatar.className = 'member-avatar';
+        avatar.style.backgroundColor = getColorFromName(memberName);
+        avatar.textContent = memberName.charAt(0);
+        
+        // Member info
+        const memberInfo = document.createElement('div');
+        memberInfo.className = 'member-info';
+        
+        const memberTitle = document.createElement('h3');
+        memberTitle.className = 'card-title';
+        memberTitle.textContent = memberName;
+        
+        // Handicap badge using global button styles
+        const handicapBadge = document.createElement('span');
+        handicapBadge.className = 'handicap-badge';
+        
+        if (handicapData) {
+          const handicapValue = parseFloat(handicapData.index);
+          if (handicapValue < 5) {
+            handicapBadge.style.backgroundColor = 'var(--bbb-success)';
+            handicapBadge.style.color = 'white';
+            handicapBadge.textContent = `Elite • HCP ${handicapData.index}`;
+          } else if (handicapValue < 15) {
+            handicapBadge.style.backgroundColor = 'var(--bbb-secondary)';
+            handicapBadge.style.color = 'white';
+            handicapBadge.textContent = `Skilled • HCP ${handicapData.index}`;
+          } else if (handicapValue < 25) {
+            handicapBadge.style.backgroundColor = 'var(--bbb-warning)';
+            handicapBadge.style.color = 'var(--bbb-text)';
+            handicapBadge.textContent = `Improving • HCP ${handicapData.index}`;
+          } else {
+            handicapBadge.style.backgroundColor = 'var(--bbb-text-muted)';
+            handicapBadge.style.color = 'white';
+            handicapBadge.textContent = `Developing • HCP ${handicapData.index}`;
+          }
+        } else {
+          handicapBadge.style.backgroundColor = 'var(--bbb-border)';
+          handicapBadge.style.color = 'var(--bbb-text-muted)';
+          handicapBadge.textContent = 'No Handicap';
+        }
+        
+        memberInfo.appendChild(memberTitle);
+        memberInfo.appendChild(handicapBadge);
+        
+        cardHeader.appendChild(avatar);
+        cardHeader.appendChild(memberInfo);
+        card.appendChild(cardHeader);
+        
+        // Card body with scores
+        const cardBody = document.createElement('div');
+        cardBody.className = 'card-body';
+        
+        if (recentScores && recentScores.length > 0) {
+          const scoresTitle = document.createElement('h4');
+          scoresTitle.textContent = 'Recent Scores';
+          scoresTitle.style.fontSize = 'var(--font-size-md)';
+          scoresTitle.style.marginBottom = 'var(--spacing-sm)';
+          cardBody.appendChild(scoresTitle);
+          
+          recentScores.forEach(score => {
+            const scoreItem = document.createElement('div');
+            scoreItem.className = 'score-item';
+            
+            const scoreDate = BBB_UTILS.formatDate(score.date, 'short');
+            const teeName = BBB_CONFIG.teeColors[score.tee] || score.tee;
+            
+            scoreItem.innerHTML = `
+              <div style="font-weight: 600; margin-bottom: 0.25rem;">${score.course}</div>
+              <div style="display: flex; justify-content: space-between; font-size: var(--font-size-xs);">
+                <span>${teeName} tees • ${scoreDate}</span>
+                <span style="font-weight: 600;">${score.totalShots} strokes / ${score.stablefordPoints} pts</span>
+              </div>
+            `;
+            
+            cardBody.appendChild(scoreItem);
+          });
+        } else {
+          const noScores = document.createElement('p');
+          noScores.className = 'text-muted text-center';
+          noScores.style.fontStyle = 'italic';
+          noScores.textContent = 'No recent scores available';
+          cardBody.appendChild(noScores);
+        }
+        
+        // View profile button using global button styles
+        const viewProfileBtn = document.createElement('a');
+        viewProfileBtn.href = `member-profile.html?id=${encodeURIComponent(memberName.toLowerCase())}`;
+        viewProfileBtn.className = 'btn btn-sm mt-3';
+        viewProfileBtn.style.width = '100%';
+        viewProfileBtn.textContent = 'View Full Profile';
+        
+        cardBody.appendChild(viewProfileBtn);
+        card.appendChild(cardBody);
+        col.appendChild(card);
+        
+        return col;
+      }
+
+      function findRecentScores(scorecards, memberName) {
+        // Keep existing logic
+        const memberScores = [];
+        
+        scorecards.forEach(scorecard => {
+          if (scorecard.players && Array.isArray(scorecard.players)) {
+            const playerData = scorecard.players.find(player => 
+              player.name === memberName
+            );
+            
+            if (playerData) {
+              memberScores.push({
+                date: new Date(scorecard.date || scorecard.createdAt),
+                course: scorecard.course,
+                tee: scorecard.tee,
+                totalShots: playerData.totalShots || 0,
+                stablefordPoints: playerData.totalPoints || 0
+              });
+            }
+          }
+        });
+        
+        memberScores.sort((a, b) => b.date - a.date);
+        return memberScores.slice(0, 3);
+      }
+
+      function getColorFromName(name) {
+        // Keep existing logic
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+          hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const h = hash % 360;
+        return `hsl(${h}, 70%, 40%)`;
+      }
+    });
+  </script>
+</body>
+</html>
