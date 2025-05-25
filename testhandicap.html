@@ -331,10 +331,7 @@
       const exportButton = document.getElementById('export');
       const historySection = document.getElementById('handicap-history');
       
-      // Keep all existing JavaScript logic exactly the same
-      // Just update the DOM elements to use global CSS classes
-      
-      // Populate members dropdown (keep existing logic)
+      // Populate members dropdown
       function populateMembersDropdown() {
         if (typeof BBB_CONFIG !== 'undefined' && BBB_CONFIG.members && BBB_CONFIG.members.length > 0) {
           memberSelect.innerHTML = '<option value="">-- Select Member --</option>';
@@ -359,7 +356,7 @@
         }
       }
       
-      // Check admin status (keep existing logic)
+      // Check admin status
       function checkAdminStatus() {
         if (typeof BBB_AUTH !== 'undefined' && BBB_AUTH.isAuthenticated && BBB_AUTH.hasRole('admin')) {
           adminMessage.style.display = 'block';
@@ -369,7 +366,7 @@
         }
       }
       
-      // Show message function using global styles
+      // Show message function
       function showMessage(message, type) {
         if (typeof BBB_UTILS !== 'undefined' && typeof BBB_UTILS.showMessage === 'function') {
           BBB_UTILS.showMessage(message, type);
@@ -391,7 +388,323 @@
         console.log(`[${type}] ${message}`);
       }
 
-      // Help toggle
+      // Add a new round input row
+      function addRoundInput() {
+        const roundIndex = roundsTbody.children.length;
+        if (roundIndex >= 20) {
+          showMessage('Maximum 20 rounds allowed.', 'warning');
+          return;
+        }
+        
+        const row = document.createElement('tr');
+        row.id = `round-${roundIndex}`;
+        row.className = 'round-row';
+        
+        // Round number
+        const numCell = document.createElement('td');
+        numCell.textContent = roundIndex + 1;
+        
+        // Course selection
+        const courseCell = document.createElement('td');
+        const courseSelect = document.createElement('select');
+        courseSelect.className = 'course-select';
+        courseSelect.id = `course-${roundIndex}`;
+        
+        // Add course options from config
+        if (typeof BBB_CONFIG !== 'undefined' && BBB_CONFIG.courses) {
+          for (const courseName in BBB_CONFIG.courses) {
+            const option = document.createElement('option');
+            option.value = courseName;
+            option.textContent = courseName;
+            courseSelect.appendChild(option);
+          }
+        } else {
+          // Default courses if BBB_CONFIG not available
+          const defaultCourses = ["Richings Park Golf Club", "Thorney Park Golf Club", "London Airlinks Golf Club"];
+          defaultCourses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course;
+            option.textContent = course;
+            courseSelect.appendChild(option);
+          });
+        }
+        
+        courseCell.appendChild(courseSelect);
+        
+        // Tee selection
+        const teeCell = document.createElement('td');
+        const teeSelect = document.createElement('select');
+        teeSelect.className = 'tee-select';
+        teeSelect.id = `tee-${roundIndex}`;
+        
+        // Add tee options
+        const teeColors = typeof BBB_CONFIG !== 'undefined' && BBB_CONFIG.teeColors ? 
+                          BBB_CONFIG.teeColors : 
+                          { white: "White", yellow: "Yellow", red: "Red" };
+        
+        for (const teeValue in teeColors) {
+          const option = document.createElement('option');
+          option.value = teeValue;
+          option.textContent = teeColors[teeValue];
+          teeSelect.appendChild(option);
+        }
+        
+        teeCell.appendChild(teeSelect);
+        
+        // Score input
+        const scoreCell = document.createElement('td');
+        const scoreInput = document.createElement('input');
+        scoreInput.type = 'number';
+        scoreInput.min = '0';
+        scoreInput.className = 'score-input';
+        scoreInput.id = `score-${roundIndex}`;
+        scoreCell.appendChild(scoreInput);
+        
+        // Course Rating display
+        const crCell = document.createElement('td');
+        const crInput = document.createElement('input');
+        crInput.type = 'number';
+        crInput.step = '0.1';
+        crInput.className = 'cr-input';
+        crInput.id = `cr-${roundIndex}`;
+        crCell.appendChild(crInput);
+        
+        // Slope Rating display
+        const srCell = document.createElement('td');
+        const srInput = document.createElement('input');
+        srInput.type = 'number';
+        srInput.min = '55';
+        srInput.max = '155';
+        srInput.className = 'sr-input';
+        srInput.id = `sr-${roundIndex}`;
+        srCell.appendChild(srInput);
+        
+        // Differential display
+        const diffCell = document.createElement('td');
+        const diffSpan = document.createElement('span');
+        diffSpan.className = 'differential';
+        diffSpan.id = `diff-${roundIndex}`;
+        diffCell.appendChild(diffSpan);
+        
+        // Remove button
+        const actionCell = document.createElement('td');
+        const removeButton = document.createElement('button');
+        removeButton.className = 'remove-btn';
+        removeButton.textContent = '✕';
+        removeButton.onclick = function() {
+          if (roundsTbody.children.length > 3) {
+            row.remove();
+            // Renumber rows
+            Array.from(roundsTbody.children).forEach((row, idx) => {
+              row.querySelector('td:first-child').textContent = idx + 1;
+              row.id = `round-${idx}`;
+            });
+          } else {
+            showMessage('Minimum 3 rounds required.', 'warning');
+          }
+        };
+        actionCell.appendChild(removeButton);
+        
+        // Add all cells to row
+        row.appendChild(numCell);
+        row.appendChild(courseCell);
+        row.appendChild(teeCell);
+        row.appendChild(scoreCell);
+        row.appendChild(crCell);
+        row.appendChild(srCell);
+        row.appendChild(diffCell);
+        row.appendChild(actionCell);
+        
+        // Add row to table
+        roundsTbody.appendChild(row);
+        
+        // Set up event handlers to update ratings and differential
+        function updateRatings() {
+          const selectedCourse = courseSelect.value;
+          const selectedTee = teeSelect.value;
+          
+          // Get ratings from config
+          if (typeof BBB_CONFIG !== 'undefined' && 
+              BBB_CONFIG.courses && 
+              BBB_CONFIG.courses[selectedCourse] && 
+              BBB_CONFIG.courses[selectedCourse].tees && 
+              BBB_CONFIG.courses[selectedCourse].tees[selectedTee]) {
+            crInput.value = BBB_CONFIG.courses[selectedCourse].tees[selectedTee].courseRating;
+            srInput.value = BBB_CONFIG.courses[selectedCourse].tees[selectedTee].slopeRating;
+            
+            console.log(`Updated ratings for ${selectedCourse}, ${selectedTee}`);
+          } else {
+            // Default values if not found in config
+            crInput.value = "72.0";
+            srInput.value = "113";
+            
+            console.log("Using default ratings (config not found)");
+          }
+          
+          updateDifferential(roundIndex);
+        }
+        
+        // Add event listeners
+        courseSelect.addEventListener('change', updateRatings);
+        teeSelect.addEventListener('change', updateRatings);
+        scoreInput.addEventListener('input', function() { updateDifferential(roundIndex); });
+        crInput.addEventListener('input', function() { updateDifferential(roundIndex); });
+        srInput.addEventListener('input', function() { updateDifferential(roundIndex); });
+        
+        // Initial update
+        updateRatings();
+        
+        console.log(`Added round ${roundIndex + 1}`);
+      }
+      
+      // Update differential for a specific round
+      function updateDifferential(index) {
+        const scoreInput = document.getElementById(`score-${index}`);
+        const crInput = document.getElementById(`cr-${index}`);
+        const srInput = document.getElementById(`sr-${index}`);
+        const diffSpan = document.getElementById(`diff-${index}`);
+        
+        const score = parseFloat(scoreInput.value);
+        const courseRating = parseFloat(crInput.value);
+        const slopeRating = parseFloat(srInput.value);
+        
+        if (!isNaN(score) && !isNaN(courseRating) && !isNaN(slopeRating)) {
+          // Calculate differential using formula: (Score - CR) * (113 / SR)
+          const differential = ((score - courseRating) * 113 / slopeRating).toFixed(1);
+          diffSpan.textContent = differential;
+          diffSpan.dataset.value = differential; // Store for calculation
+          
+          console.log(`Updated differential for round ${index + 1}: ${differential}`);
+        } else {
+          diffSpan.textContent = '';
+          diffSpan.dataset.value = '';
+        }
+      }
+      
+      // Calculate handicap
+      function calculateHandicap() {
+        const differentials = [];
+        
+        // Collect all differentials
+        Array.from(roundsTbody.children).forEach(row => {
+          const diffSpan = row.querySelector('.differential');
+          const diffValue = parseFloat(diffSpan.dataset.value);
+          
+          if (!isNaN(diffValue)) {
+            differentials.push(diffValue);
+          }
+        });
+        
+        // Check if we have enough differentials
+        if (differentials.length < 3) {
+          showMessage('Please enter at least 3 complete rounds.', 'error');
+          return;
+        }
+        
+        // Get selected member
+        const selectedMember = memberSelect.options[memberSelect.selectedIndex].text;
+        
+        // Calculate handicap using BBB_UTILS if available
+        let handicapIndex;
+        if (typeof BBB_UTILS !== 'undefined' && typeof BBB_UTILS.calculateHandicapIndex === 'function') {
+          handicapIndex = BBB_UTILS.calculateHandicapIndex(differentials);
+          console.log("Used BBB_UTILS to calculate handicap:", handicapIndex);
+        } else {
+          // Directly calculate if not available
+          differentials.sort((a, b) => a - b);
+          
+          // Determine how many scores to use based on the number of differentials
+          let countToUse;
+          if (differentials.length <= 3) countToUse = 1;
+          else if (differentials.length <= 6) countToUse = 2;
+          else if (differentials.length <= 8) countToUse = 3;
+          else if (differentials.length <= 11) countToUse = 4;
+          else if (differentials.length <= 14) countToUse = 5;
+          else if (differentials.length <= 16) countToUse = 6;
+          else if (differentials.length <= 18) countToUse = 7;
+          else if (differentials.length <= 19) countToUse = 8;
+          else countToUse = 10;
+          
+          // Calculate average of best differentials
+          const bestDifferentials = differentials.slice(0, countToUse);
+          const average = bestDifferentials.reduce((sum, diff) => sum + diff, 0) / countToUse;
+          
+          // Apply 0.96 multiplier
+          handicapIndex = (average * 0.96).toFixed(1);
+          
+          console.log("Calculated handicap directly:", handicapIndex);
+        }
+        
+        // Display result
+        resultDisplay.innerHTML = `
+          <div class="handicap-result-inner">
+            <h3>${selectedMember}'s Handicap Index is</h3>
+            <div class="handicap-value">${handicapIndex}</div>
+            <div class="handicap-info">Calculated using ${differentials.length} rounds</div>
+          </div>
+        `;
+        resultDisplay.style.display = 'block';
+        
+        // Enable save button if user is authenticated and member is selected
+        if (typeof BBB_AUTH !== 'undefined' && BBB_AUTH.isAuthenticated && memberSelect.value) {
+          saveButton.disabled = false;
+        }
+        
+        // Store for later saving
+        resultDisplay.dataset.value = handicapIndex;
+        
+        showMessage('Handicap calculated successfully!', 'success');
+      }
+      
+      // Reset calculator
+      function resetCalculator() {
+        if (confirm('Are you sure you want to reset the calculator? This will clear all rounds.')) {
+          // Clear existing rounds
+          roundsTbody.innerHTML = '';
+          
+          // Add 3 initial rounds
+          for (let i = 0; i < 3; i++) {
+            addRoundInput();
+          }
+          
+          // Clear result
+          resultDisplay.innerHTML = '';
+          resultDisplay.style.display = 'none';
+          delete resultDisplay.dataset.value;
+          
+          // Disable save button
+          saveButton.disabled = true;
+          
+          showMessage('Calculator has been reset.', 'success');
+        }
+      }
+      
+      // Save handicap (placeholder - keep your existing implementation)
+      function saveHandicap() {
+        if (typeof BBB_AUTH === 'undefined' || !BBB_AUTH.isAuthenticated) {
+          showMessage('Please log in to save handicap.', 'error');
+          return;
+        }
+        
+        const handicapIndex = resultDisplay.dataset.value;
+        
+        if (!handicapIndex) {
+          showMessage('Please calculate handicap first.', 'error');
+          return;
+        }
+        
+        // Add your existing save logic here
+        showMessage('Save functionality - add your existing code here', 'info');
+      }
+      
+      // Load saved handicap (placeholder - keep your existing implementation)
+      function loadSavedHandicap(memberId) {
+        if (!memberId) return;
+        console.log("Loading saved handicap for member ID:", memberId);
+        // Add your existing load logic here
+      }
+
+      // Event listeners
       helpToggle.addEventListener('click', function() {
         if (helpSection.style.display === 'none') {
           helpSection.style.display = 'block';
@@ -401,7 +714,16 @@
           helpToggle.textContent = 'Show Help';
         }
       });
-
+      
+      memberSelect.addEventListener('change', function() {
+        loadSavedHandicap(this.value);
+      });
+      
+      addButton.addEventListener('click', addRoundInput);
+      calculateButton.addEventListener('click', calculateHandicap);
+      resetButton.addEventListener('click', resetCalculator);
+      saveButton.addEventListener('click', saveHandicap);
+      
       // Initialize
       populateMembersDropdown();
       checkAdminStatus();
@@ -415,44 +737,6 @@
       if (memberSelect.value) {
         loadSavedHandicap(memberSelect.value);
       }
-
-      // Keep all existing functions but make sure they use global CSS classes
-      // (I'm keeping this short since the main change is the HTML structure and CSS)
-      
-      // Add placeholder for all the existing JavaScript functions
-      // addRoundInput(), updateDifferential(), calculateHandicap(), etc.
-      // These should remain exactly the same as your original code
-      
-      console.log("Page initialization complete");
-
-      // Placeholder for existing functions (keep your existing JS code here)
-      function addRoundInput() {
-        // Keep existing addRoundInput logic
-        console.log("Add round input - keep existing logic");
-      }
-
-      function calculateHandicap() {
-        // Keep existing calculateHandicap logic
-        console.log("Calculate handicap - keep existing logic");
-      }
-
-      function resetCalculator() {
-        // Keep existing resetCalculator logic
-        console.log("Reset calculator - keep existing logic");
-      }
-
-      function saveHandicap() {
-        // Keep existing saveHandicap logic
-        console.log("Save handicap - keep existing logic");
-      }
-
-      function loadSavedHandicap(memberId) {
-        // Keep existing loadSavedHandicap logic
-        console.log("Load saved handicap - keep existing logic");
-      }
-
-      // Add all your existing event listeners and functions here
-      // The key is that the HTML structure now matches the theme
     });
   </script>
 </body>
