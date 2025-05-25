@@ -190,16 +190,16 @@
       animation: fadeInUp 1s ease-out 0.3s both;
     }
 
-    .founded-badge {
+    .founded-badge-header {
       display: inline-block;
       background: var(--bbb-gold);
       color: var(--bbb-primary);
-      padding: 0.5rem 1.5rem;
-      border-radius: 25px;
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
       font-weight: 600;
-      margin-bottom: 2rem;
-      animation: fadeInUp 1s ease-out 0.6s both;
-      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+      font-size: 0.8rem;
+      margin-left: 1rem;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
     }
 
     @keyframes fadeInUp {
@@ -218,6 +218,7 @@
       padding: 4rem 2rem;
       max-width: 1200px;
       margin: 0 auto;
+      margin-top: 150px; /* Account for fixed header and construction banner */
     }
 
     .nav-title {
@@ -465,12 +466,15 @@
         margin-top: 0.5rem;
       }
 
-      .hero {
-        padding: 6rem 1rem 3rem 1rem;
+      .founded-badge-header {
+        margin-left: 0.5rem;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
       }
       
       .nav-section, .featured-section {
         padding: 3rem 1rem;
+        margin-top: 120px; /* Adjust for mobile header */
       }
       
       .nav-grid {
@@ -514,6 +518,9 @@
       <div class="header-left">
         <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="header-logo">
         <span class="header-title">Birdie Bush Bandits</span>
+        <div class="founded-badge-header">
+          🏌️ Founded August 2020
+        </div>
       </div>
       <div class="header-right">
         <!-- Auth controls will be added here by JavaScript -->
@@ -526,20 +533,6 @@
   <div class="construction-banner">
     🚧 This site is under construction - New features coming soon! 🚧
   </div>
-
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content">
-      <h1>
-        Birdie Bush Bandits
-        <span class="golf-ball"></span>
-      </h1>
-      <p class="tagline">Where every round is an adventure and every shot tells a story</p>
-      <div class="founded-badge">
-        🏌️ Founded August 2020
-      </div>
-    </div>
-  </section>
 
   <!-- Navigation Section -->
   <section class="nav-section">
