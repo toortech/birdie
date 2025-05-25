@@ -190,16 +190,16 @@
       animation: fadeInUp 1s ease-out 0.3s both;
     }
 
-    .founded-badge {
+    .founded-badge-header {
       display: inline-block;
       background: var(--bbb-gold);
       color: var(--bbb-primary);
-      padding: 0.5rem 1.5rem;
-      border-radius: 25px;
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
       font-weight: 600;
-      margin-bottom: 2rem;
-      animation: fadeInUp 1s ease-out 0.6s both;
-      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+      font-size: 0.8rem;
+      margin-left: 1rem;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
     }
 
     @keyframes fadeInUp {
@@ -213,56 +213,12 @@
       }
     }
 
-    /* Stats Section */
-    .stats-section {
-      padding: 3rem 2rem;
-      background: white;
-      margin: -2rem 1rem 0 1rem;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      position: relative;
-      z-index: 3;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 2rem;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .stat-item {
-      text-align: center;
-      padding: 1.5rem;
-      background: linear-gradient(135deg, var(--bbb-light-green), white);
-      border-radius: 15px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .stat-item:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-
-    .stat-number {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: var(--bbb-primary);
-      font-family: var(--font-family-accent);
-    }
-
-    .stat-label {
-      color: var(--bbb-text-muted);
-      font-weight: 500;
-      margin-top: 0.5rem;
-    }
-
     /* Navigation Section */
     .nav-section {
-      padding: 4rem 2rem;
+      padding: 2rem 2rem;
       max-width: 1200px;
       margin: 0 auto;
+      margin-top: 1rem; /* Much closer to construction banner */
     }
 
     .nav-title {
@@ -456,7 +412,7 @@
       text-align: center;
       font-weight: 600;
       animation: pulse 2s infinite;
-      margin-top: 70px; /* Account for fixed header */
+      margin-top: 90px; /* Account for fixed header */
     }
 
     @keyframes pulse {
@@ -510,16 +466,19 @@
         margin-top: 0.5rem;
       }
 
-      .hero {
-        padding: 6rem 1rem 3rem 1rem;
+      .founded-badge-header {
+        margin-left: 0.5rem;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
       }
-      
-      .stats-section {
-        margin: -1rem 0.5rem 0 0.5rem;
+
+      .construction-banner {
+        margin-top: 120px; /* Extra space for mobile header that may wrap */
       }
       
       .nav-section, .featured-section {
-        padding: 3rem 1rem;
+        padding: 1.5rem 1rem;
+        margin-top: 0.5rem; /* Closer on mobile too */
       }
       
       .nav-grid {
@@ -563,6 +522,9 @@
       <div class="header-left">
         <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="header-logo">
         <span class="header-title">Birdie Bush Bandits</span>
+        <div class="founded-badge-header">
+          🏌️ Founded August 2020
+        </div>
       </div>
       <div class="header-right">
         <!-- Auth controls will be added here by JavaScript -->
@@ -576,41 +538,8 @@
     🚧 This site is under construction - New features coming soon! 🚧
   </div>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content">
-      <h1>
-        Birdie Bush Bandits
-        <span class="golf-ball"></span>
-      </h1>
-      <p class="tagline">Where every round is an adventure and every shot tells a story</p>
-      <div class="founded-badge">
-        🏌️ Founded August 2020
-      </div>
-    </div>
-  </section>
-
-  <!-- Stats Section -->
-  <section class="stats-section">
-    <div class="stats-grid">
-      <div class="stat-item">
-        <div class="stat-number">4+</div>
-        <div class="stat-label">Years Golfing</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number">∞</div>
-        <div class="stat-label">Great Memories</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number">⭐</div>
-        <div class="stat-label">Premium Experience</div>
-      </div>
-    </div>
-  </section>
-
   <!-- Navigation Section -->
   <section class="nav-section">
-    <h2 class="nav-title">Explore Our Features</h2>
     <div class="nav-grid">
       <!-- Gallery Card - Auth Protected -->
       <div class="nav-card">
@@ -1080,7 +1009,7 @@
      * Add page animations
      */
     function addPageAnimations() {
-      // Animate stats on scroll
+      // Animate content on scroll
       const observerOptions = {
         threshold: 0.5,
         rootMargin: '0px 0px -50px 0px'
@@ -1093,11 +1022,6 @@
           }
         });
       }, observerOptions);
-
-      // Observe stat items
-      document.querySelectorAll('.stat-item').forEach(item => {
-        observer.observe(item);
-      });
 
       // Observe nav cards
       document.querySelectorAll('.nav-card').forEach((card, index) => {
