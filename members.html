@@ -17,36 +17,182 @@
   <script src="js/auth.js"></script>
   <script src="js/db.js"></script>
   <script src="js/ui.js"></script>
+
+  <style>
+    /* REMOVE ALL INLINE STYLES - Use global CSS instead */
+    /* Only add page-specific styles that don't conflict */
+    
+    /* Members page specific styles only */
+    .member-card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .member-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .member-avatar {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: bold;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+    }
+
+    .member-info {
+      flex: 1;
+      margin-left: var(--spacing-md);
+    }
+
+    .member-stats {
+      font-size: var(--font-size-sm);
+      color: var(--bbb-text-muted);
+      margin-top: var(--spacing-xs);
+    }
+
+    .handicap-badge {
+      display: inline-block;
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: 12px;
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+      margin-top: var(--spacing-xs);
+    }
+
+    .score-item {
+      padding: var(--spacing-sm);
+      background: var(--bbb-background);
+      border-radius: var(--border-radius-sm);
+      margin-bottom: var(--spacing-xs);
+      font-size: var(--font-size-sm);
+    }
+
+    .score-item:hover {
+      background: var(--bbb-light-green);
+    }
+
+    /* Stats cards using global card styles */
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: var(--spacing-lg);
+      margin: var(--spacing-lg) 0;
+    }
+
+    .stat-card {
+      /* Remove custom styles - use global .card class */
+    }
+  </style>
 </head>
-<body>
-  <!-- Authentication Protection -->
+<body data-requires-auth="true">
+  <!-- Use Standard Header Structure (like index.html) -->
+  <header class="header">
+    <div class="header-content">
+      <div class="header-left">
+        <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="header-logo">
+        <span class="header-title">Birdie Bush Bandits</span>
+      </div>
+      <div class="header-right">
+        <a href="index.html" class="btn btn-sm">🏠 Home</a>
+        <a href="login.html" class="login-btn" id="login-link">Login</a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Use Standard Page Hero (like other pages) -->
+  <section class="page-hero">
+    <div class="page-hero-content">
+      <div class="founded-badge">🏌️ Founded August 2020</div>
+      <h1>Members</h1>
+      <p class="subtitle">Meet our dedicated golfers who make up the Birdie Bush Bandits</p>
+    </div>
+  </section>
+
+  <!-- Use Standard Main Content Structure -->
+  <main class="main-content">
+    <!-- Status Message (Standard) -->
+    <div id="status-message"></div>
+    
+    <!-- Intro Section with Stats -->
+    <div class="content-section">
+      <p class="text-center">From beginners to seasoned players, our diverse group enjoys friendly competition and camaraderie on the course.</p>
+      
+      <!-- Stats using global card components -->
+      <div class="stats-row">
+        <div class="card text-center" style="min-width: 150px;">
+          <div class="card-body p-3">
+            <div style="font-size: 1.8rem; font-weight: bold; color: var(--bbb-primary);">👥</div>
+            <div style="font-size: 1.5rem; font-weight: bold;" id="member-count">12</div>
+            <div class="text-muted">Members</div>
+          </div>
+        </div>
+        
+        <div class="card text-center" style="min-width: 150px;">
+          <div class="card-body p-3">
+            <div style="font-size: 1.8rem; font-weight: bold; color: var(--bbb-primary);">🏆</div>
+            <div style="font-size: 1.5rem; font-weight: bold;">4+</div>
+            <div class="text-muted">Years Active</div>
+          </div>
+        </div>
+        
+        <div class="card text-center" style="min-width: 150px;">
+          <div class="card-body p-3">
+            <div style="font-size: 1.8rem; font-weight: bold; color: var(--bbb-primary);">⛳</div>
+            <div style="font-size: 1.5rem; font-weight: bold;" id="courses-count">6</div>
+            <div class="text-muted">Courses Played</div>
+          </div>
+        </div>
+        
+        <div class="card text-center" style="min-width: 150px;" id="avg-handicap-card" style="display: none;">
+          <div class="card-body p-3">
+            <div style="font-size: 1.8rem; font-weight: bold; color: var(--bbb-primary);">📊</div>
+            <div style="font-size: 1.5rem; font-weight: bold;" id="avg-handicap">-</div>
+            <div class="text-muted">Avg Handicap</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls Section -->
+    <div class="content-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md); margin-bottom: var(--spacing-lg);">
+        <h2 class="section-title" style="margin: 0;">Member Directory</h2>
+        
+        <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
+          <label for="sort-select" style="font-size: var(--font-size-sm); margin: 0;">Sort by:</label>
+          <select id="sort-select" style="padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--border-radius-sm);">
+            <option value="name-asc">Name A-Z</option>
+            <option value="name-desc">Name Z-A</option>
+            <option value="handicap-asc">Handicap (Low to High)</option>
+            <option value="handicap-desc">Handicap (High to Low)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Members Grid -->
+    <div class="content-section">
+      <div class="row" id="members-grid">
+        <!-- Member cards will be populated by JavaScript -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Standard Footer -->
+  <footer class="page-footer">
+    <p>&copy; 2025 Birdie Bush Bandits - Founded August 2020</p>
+  </footer>
+
   <script>
-    // Check if BBB_AUTH is loaded
     document.addEventListener('DOMContentLoaded', function() {
-      // Wait for auth module to initialize
-      setTimeout(function() {
-        if (typeof BBB_AUTH !== 'undefined') {
-          // If not authenticated and not on login page, redirect to login
-          if (!BBB_AUTH.isAuthenticated && window.location.pathname.indexOf('login.html') === -1) {
-            // Save the current URL to redirect back after login
-            sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
-            window.location.href = 'login.html';
-          }
-        } else {
-          console.error('BBB_AUTH module not found! Authentication check failed.');
-        }
-      }, 100); // Small delay to ensure modules are loaded
-    });
-  </script>
-  
-  <!-- Rest of your page content -->
-  <a href="#main" class="skip-link">Skip to main content</a>
-  
-  <main id="main"></main>
-  
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      // Initialize modules
+      // Initialize modules (keep existing logic)
       BBB_AUTH.init({
         cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
       });
@@ -55,277 +201,210 @@
         useCloudflare: BBB_CONFIG.cloudflareEnabled,
         localStoragePrefix: 'bbb_'
       });
-      
-      // Create header
-      const headerElements = BBB_UI.createHeader({
-        fixed: true,
-        showHomeLinkText: true
-      });
-      
-      document.body.insertBefore(headerElements.header, document.body.firstChild);
-      
-      // Get main content element
-      const main = document.getElementById('main');
-      main.appendChild(headerElements.mainWrapper);
-      
-      // Create page content
-      const mainContent = document.createElement('div');
-      
-      // Create page title
-      const titleContainer = BBB_UI.createPageTitle({
-        title: 'Birdie Bush Bandits',
-        showFoundedText: true,
-        showGolfballs: true
-      });
-      mainContent.appendChild(titleContainer);
-      
-      // Add page subtitle
-      const subtitle = document.createElement('h2');
-      subtitle.textContent = 'Members';
-      mainContent.appendChild(subtitle);
-      
-      // Create status message container
-      const statusMessage = BBB_UI.createStatusMessage();
-      mainContent.appendChild(statusMessage);
-      
-      // Enhanced intro section with stats
-      const introSection = document.createElement('div');
-      introSection.className = 'intro-section';
-      introSection.style.marginBottom = '2.5rem';
 
-      const introText = document.createElement('p');
-      introText.className = 'intro-text';
-      introText.textContent = 'Meet our dedicated golfers who make up the Birdie Bush Bandits. From beginners to seasoned players, our diverse group enjoys friendly competition and camaraderie on the course.';
-      introSection.appendChild(introText);
+      // Update member count
+      document.getElementById('member-count').textContent = BBB_CONFIG.members.length;
+      document.getElementById('courses-count').textContent = Object.keys(BBB_CONFIG.courses).length;
 
-      // Add stats row
-      const statsRow = document.createElement('div');
-      statsRow.className = 'stats-row';
-      statsRow.style.display = 'flex';
-      statsRow.style.flexWrap = 'wrap';
-      statsRow.style.justifyContent = 'center';
-      statsRow.style.gap = '1.5rem';
-      statsRow.style.marginTop = '1.5rem';
+      // Load and display members (keep existing logic but use new structure)
+      loadMembers();
 
-      // Create stats cards
-      const createStatCard = (icon, number, label) => {
-        const statCard = document.createElement('div');
-        statCard.className = 'stat-card';
-        statCard.style.backgroundColor = 'white';
-        statCard.style.borderRadius = '8px';
-        statCard.style.padding = '1rem';
-        statCard.style.boxShadow = 'var(--shadow-sm)';
-        statCard.style.minWidth = '150px';
-        statCard.style.textAlign = 'center';
-
-        const statIcon = document.createElement('div');
-        statIcon.innerHTML = icon;
-        statIcon.style.fontSize = '1.5rem';
-        statIcon.style.marginBottom = '0.5rem';
-        statIcon.style.color = 'var(--bbb-primary)';
-
-        const statNumber = document.createElement('div');
-        statNumber.textContent = number;
-        statNumber.style.fontSize = '1.8rem';
-        statNumber.style.fontWeight = 'bold';
-        statNumber.style.marginBottom = '0.25rem';
-
-        const statLabel = document.createElement('div');
-        statLabel.textContent = label;
-        statLabel.style.fontSize = '0.9rem';
-        statLabel.style.color = 'var(--bbb-text-muted)';
-
-        statCard.appendChild(statIcon);
-        statCard.appendChild(statNumber);
-        statCard.appendChild(statLabel);
-
-        return statCard;
-      };
-
-      // Add stats based on data
-      statsRow.appendChild(createStatCard('👥', BBB_CONFIG.members.length, 'Members'));
-      statsRow.appendChild(createStatCard('🏆', '4+', 'Years Active'));
-      statsRow.appendChild(createStatCard('⛳', Object.keys(BBB_CONFIG.courses).length, 'Courses Played'));
-
-      introSection.appendChild(statsRow);
-      mainContent.appendChild(introSection);
-      
-      // Add controls section for sorting
-      const controlsSection = document.createElement('div');
-      controlsSection.className = 'controls-section';
-      controlsSection.style.marginBottom = '1.5rem';
-      controlsSection.style.display = 'flex';
-      controlsSection.style.justifyContent = 'space-between';
-      controlsSection.style.alignItems = 'center';
-      controlsSection.style.flexWrap = 'wrap';
-      controlsSection.style.gap = '1rem';
-      
-      // Add title for the section
-      const membersTitle = document.createElement('h3');
-      membersTitle.textContent = 'Member Directory';
-      membersTitle.style.margin = '0';
-      
-      // Add sorting dropdown
-      const sortContainer = document.createElement('div');
-      sortContainer.style.display = 'flex';
-      sortContainer.style.alignItems = 'center';
-      sortContainer.style.gap = '0.5rem';
-      
-      const sortLabel = document.createElement('label');
-      sortLabel.textContent = 'Sort by:';
-      sortLabel.style.fontSize = '0.9rem';
-      sortLabel.style.marginRight = '0.5rem';
-      
-      const sortSelect = document.createElement('select');
-      sortSelect.style.padding = '0.5rem';
-      sortSelect.style.borderRadius = '4px';
-      sortSelect.style.border = '1px solid var(--bbb-border)';
-      
-      const sortOptions = [
-        { value: 'name-asc', text: 'Name A-Z' },
-        { value: 'name-desc', text: 'Name Z-A' },
-        { value: 'handicap-asc', text: 'Handicap (Low to High)' },
-        { value: 'handicap-desc', text: 'Handicap (High to Low)' }
-      ];
-      
-      sortOptions.forEach(option => {
-        const optionEl = document.createElement('option');
-        optionEl.value = option.value;
-        optionEl.textContent = option.text;
-        sortSelect.appendChild(optionEl);
-      });
-      
-      sortContainer.appendChild(sortLabel);
-      sortContainer.appendChild(sortSelect);
-      
-      controlsSection.appendChild(membersTitle);
-      controlsSection.appendChild(sortContainer);
-      
-      // Add controls to main content
-      mainContent.appendChild(controlsSection);
-      
-      // Create members grid
-      const membersGrid = document.createElement('div');
-      membersGrid.className = 'row';
-      membersGrid.style.marginTop = '1rem';
-      
-      // Helper function to generate a consistent color based on name
-      function getColorFromName(name) {
-        // Simple hash function
-        let hash = 0;
-        for (let i = 0; i < name.length; i++) {
-          hash = name.charCodeAt(i) + ((hash << 5) - hash);
-        }
+      function loadMembers() {
+        const membersGrid = document.getElementById('members-grid');
         
-        // Convert to HSL color with fixed saturation and lightness for good contrast
-        const h = hash % 360;
-        return `hsl(${h}, 70%, 40%)`;
-      }
-      
-      // Load handicap data for all members
-      const handicapPromises = BBB_CONFIG.members.map(member => 
-        BBB_DB.getMemberHandicap(member.toLowerCase())
-          .then(data => ({ member, handicap: data }))
-          .catch(() => ({ member, handicap: null }))
-      );
-      
-      // Load scorecards to calculate recent scores
-      BBB_DB.getScorecards()
-        .then(scorecards => {
-          const scorecardsArray = Object.values(scorecards);
-          
-          // Process all handicap data
-          Promise.all(handicapPromises)
-            .then(memberData => {
-              // Update average handicap stat if available
-              let totalHandicap = 0;
-              let membersWithHandicap = 0;
-              
-              memberData.forEach(data => {
-                if (data.handicap && data.handicap.index) {
-                  totalHandicap += parseFloat(data.handicap.index);
-                  membersWithHandicap++;
-                }
-              });
-              
-              if (membersWithHandicap > 0) {
-                const avgHandicap = (totalHandicap / membersWithHandicap).toFixed(1);
-                statsRow.appendChild(createStatCard('📊', avgHandicap, 'Avg Handicap'));
-              }
-              
-              // Handle sorting when dropdown changes
-              sortSelect.addEventListener('change', () => {
-                // Clear the grid
-                membersGrid.innerHTML = '';
+        // Load handicap data for all members (keep existing logic)
+        const handicapPromises = BBB_CONFIG.members.map(member => 
+          BBB_DB.getMemberHandicap(member.toLowerCase())
+            .then(data => ({ member, handicap: data }))
+            .catch(() => ({ member, handicap: null }))
+        );
+        
+        // Load scorecards (keep existing logic)
+        BBB_DB.getScorecards()
+          .then(scorecards => {
+            const scorecardsArray = Object.values(scorecards);
+            
+            Promise.all(handicapPromises)
+              .then(memberData => {
+                // Calculate average handicap
+                let totalHandicap = 0;
+                let membersWithHandicap = 0;
                 
-                // Sort the member data
-                const sortedData = [...memberData].sort((a, b) => {
-                  switch(sortSelect.value) {
-                    case 'name-asc':
-                      return a.member.localeCompare(b.member);
-                    case 'name-desc':
-                      return b.member.localeCompare(a.member);
-                    case 'handicap-asc':
-                      const hcpA = a.handicap ? parseFloat(a.handicap.index) : 999;
-                      const hcpB = b.handicap ? parseFloat(b.handicap.index) : 999;
-                      return hcpA - hcpB;
-                    case 'handicap-desc':
-                      const hcpA2 = a.handicap ? parseFloat(a.handicap.index) : -1;
-                      const hcpB2 = b.handicap ? parseFloat(b.handicap.index) : -1;
-                      return hcpB2 - hcpA2;
-                    default:
-                      return 0;
+                memberData.forEach(data => {
+                  if (data.handicap && data.handicap.index) {
+                    totalHandicap += parseFloat(data.handicap.index);
+                    membersWithHandicap++;
                   }
                 });
                 
-                // Create member cards with sorted data
-                sortedData.forEach(data => {
-                  // Find recent scores for this member
-                  const recentScores = findRecentScores(scorecardsArray, data.member);
-                  
-                  // Create member card
-                  const memberCard = createMemberCard(data.member, data.handicap, recentScores);
-                  membersGrid.appendChild(memberCard);
-                });
-              });
-              
-              // Default sort by name
-              const sortedData = [...memberData].sort((a, b) => a.member.localeCompare(b.member));
-              
-              // Create member cards
-              sortedData.forEach(data => {
-                // Find recent scores for this member
-                const recentScores = findRecentScores(scorecardsArray, data.member);
+                if (membersWithHandicap > 0) {
+                  const avgHandicap = (totalHandicap / membersWithHandicap).toFixed(1);
+                  document.getElementById('avg-handicap').textContent = avgHandicap;
+                  document.getElementById('avg-handicap-card').style.display = 'block';
+                }
                 
-                // Create member card
-                const memberCard = createMemberCard(data.member, data.handicap, recentScores);
-                membersGrid.appendChild(memberCard);
+                // Sort handler
+                document.getElementById('sort-select').addEventListener('change', () => {
+                  displayMembers(memberData, scorecardsArray);
+                });
+                
+                // Initial display
+                displayMembers(memberData, scorecardsArray);
               });
-              
-              // Add members grid to page
-              mainContent.appendChild(membersGrid);
-              
-              // Add content to main wrapper
-              headerElements.mainWrapper.appendChild(mainContent);
-            })
-            .catch(err => {
-              console.error('Error loading member data:', err);
-              BBB_UTILS.showMessage('Error loading member data', 'error');
-            });
-        })
-        .catch(err => {
-          console.error('Error loading scorecards:', err);
-          BBB_UTILS.showMessage('Error loading scorecards', 'error');
+          });
+      }
+
+      function displayMembers(memberData, scorecardsArray) {
+        const membersGrid = document.getElementById('members-grid');
+        const sortValue = document.getElementById('sort-select').value;
+        
+        // Sort data
+        const sortedData = [...memberData].sort((a, b) => {
+          switch(sortValue) {
+            case 'name-asc':
+              return a.member.localeCompare(b.member);
+            case 'name-desc':
+              return b.member.localeCompare(a.member);
+            case 'handicap-asc':
+              const hcpA = a.handicap ? parseFloat(a.handicap.index) : 999;
+              const hcpB = b.handicap ? parseFloat(b.handicap.index) : 999;
+              return hcpA - hcpB;
+            case 'handicap-desc':
+              const hcpA2 = a.handicap ? parseFloat(a.handicap.index) : -1;
+              const hcpB2 = b.handicap ? parseFloat(b.handicap.index) : -1;
+              return hcpB2 - hcpA2;
+            default:
+              return 0;
+          }
         });
-      
-      /**
-       * Find recent scores for a member
-       * @param {Array} scorecards - Array of scorecards
-       * @param {string} memberName - Member name to find scores for
-       * @returns {Array} - Array of recent scores
-       */
+        
+        // Clear grid
+        membersGrid.innerHTML = '';
+        
+        // Create member cards using global styles
+        sortedData.forEach(data => {
+          const recentScores = findRecentScores(scorecardsArray, data.member);
+          const memberCard = createMemberCard(data.member, data.handicap, recentScores);
+          membersGrid.appendChild(memberCard);
+        });
+      }
+
+      function createMemberCard(memberName, handicapData, recentScores) {
+        const col = document.createElement('div');
+        col.className = 'col-md-6 col-lg-4 mb-4';
+        
+        // Use global card structure
+        const card = document.createElement('div');
+        card.className = 'card member-card';
+        
+        // Card header with member info
+        const cardHeader = document.createElement('div');
+        cardHeader.className = 'card-header';
+        cardHeader.style.display = 'flex';
+        cardHeader.style.alignItems = 'center';
+        
+        // Avatar
+        const avatar = document.createElement('div');
+        avatar.className = 'member-avatar';
+        avatar.style.backgroundColor = getColorFromName(memberName);
+        avatar.textContent = memberName.charAt(0);
+        
+        // Member info
+        const memberInfo = document.createElement('div');
+        memberInfo.className = 'member-info';
+        
+        const memberTitle = document.createElement('h3');
+        memberTitle.className = 'card-title';
+        memberTitle.textContent = memberName;
+        
+        // Handicap badge using global button styles
+        const handicapBadge = document.createElement('span');
+        handicapBadge.className = 'handicap-badge';
+        
+        if (handicapData) {
+          const handicapValue = parseFloat(handicapData.index);
+          if (handicapValue < 5) {
+            handicapBadge.style.backgroundColor = 'var(--bbb-success)';
+            handicapBadge.style.color = 'white';
+            handicapBadge.textContent = `Elite • HCP ${handicapData.index}`;
+          } else if (handicapValue < 15) {
+            handicapBadge.style.backgroundColor = 'var(--bbb-secondary)';
+            handicapBadge.style.color = 'white';
+            handicapBadge.textContent = `Skilled • HCP ${handicapData.index}`;
+          } else if (handicapValue < 25) {
+            handicapBadge.style.backgroundColor = 'var(--bbb-warning)';
+            handicapBadge.style.color = 'var(--bbb-text)';
+            handicapBadge.textContent = `Improving • HCP ${handicapData.index}`;
+          } else {
+            handicapBadge.style.backgroundColor = 'var(--bbb-text-muted)';
+            handicapBadge.style.color = 'white';
+            handicapBadge.textContent = `Developing • HCP ${handicapData.index}`;
+          }
+        } else {
+          handicapBadge.style.backgroundColor = 'var(--bbb-border)';
+          handicapBadge.style.color = 'var(--bbb-text-muted)';
+          handicapBadge.textContent = 'No Handicap';
+        }
+        
+        memberInfo.appendChild(memberTitle);
+        memberInfo.appendChild(handicapBadge);
+        
+        cardHeader.appendChild(avatar);
+        cardHeader.appendChild(memberInfo);
+        card.appendChild(cardHeader);
+        
+        // Card body with scores
+        const cardBody = document.createElement('div');
+        cardBody.className = 'card-body';
+        
+        if (recentScores && recentScores.length > 0) {
+          const scoresTitle = document.createElement('h4');
+          scoresTitle.textContent = 'Recent Scores';
+          scoresTitle.style.fontSize = 'var(--font-size-md)';
+          scoresTitle.style.marginBottom = 'var(--spacing-sm)';
+          cardBody.appendChild(scoresTitle);
+          
+          recentScores.forEach(score => {
+            const scoreItem = document.createElement('div');
+            scoreItem.className = 'score-item';
+            
+            const scoreDate = BBB_UTILS.formatDate(score.date, 'short');
+            const teeName = BBB_CONFIG.teeColors[score.tee] || score.tee;
+            
+            scoreItem.innerHTML = `
+              <div style="font-weight: 600; margin-bottom: 0.25rem;">${score.course}</div>
+              <div style="display: flex; justify-content: space-between; font-size: var(--font-size-xs);">
+                <span>${teeName} tees • ${scoreDate}</span>
+                <span style="font-weight: 600;">${score.totalShots} strokes / ${score.stablefordPoints} pts</span>
+              </div>
+            `;
+            
+            cardBody.appendChild(scoreItem);
+          });
+        } else {
+          const noScores = document.createElement('p');
+          noScores.className = 'text-muted text-center';
+          noScores.style.fontStyle = 'italic';
+          noScores.textContent = 'No recent scores available';
+          cardBody.appendChild(noScores);
+        }
+        
+        // View profile button using global button styles
+        const viewProfileBtn = document.createElement('a');
+        viewProfileBtn.href = `member-profile.html?id=${encodeURIComponent(memberName.toLowerCase())}`;
+        viewProfileBtn.className = 'btn btn-sm mt-3';
+        viewProfileBtn.style.width = '100%';
+        viewProfileBtn.textContent = 'View Full Profile';
+        
+        cardBody.appendChild(viewProfileBtn);
+        card.appendChild(cardBody);
+        col.appendChild(card);
+        
+        return col;
+      }
+
       function findRecentScores(scorecards, memberName) {
-        // Filter scorecards that include this member
+        // Keep existing logic
         const memberScores = [];
         
         scorecards.forEach(scorecard => {
@@ -346,218 +425,18 @@
           }
         });
         
-        // Sort by date descending
         memberScores.sort((a, b) => b.date - a.date);
-        
-        // Return 3 most recent
         return memberScores.slice(0, 3);
       }
-      
-      /**
-       * Create a member card
-       * @param {string} memberName - Member name
-       * @param {Object} handicapData - Handicap data
-       * @param {Array} recentScores - Recent scores
-       * @returns {HTMLElement} - Member card element
-       */
-      function createMemberCard(memberName, handicapData, recentScores) {
-        const col = document.createElement('div');
-        col.className = 'col-md-6 col-lg-4';
-        col.style.marginBottom = '2rem';
-        
-        const card = document.createElement('div');
-        card.className = 'card member-card';
-        // Add hover effect and enhanced shadow
-        card.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
-        card.style.boxShadow = 'var(--shadow-md)';
-        card.style.cursor = 'pointer';
-        
-        // Add hover event listeners
-        card.addEventListener('mouseenter', () => {
-          card.style.transform = 'translateY(-5px)';
-          card.style.boxShadow = 'var(--shadow-lg)';
-        });
-        
-        card.addEventListener('mouseleave', () => {
-          card.style.transform = 'translateY(0)';
-          card.style.boxShadow = 'var(--shadow-md)';
-        });
-      
-        // Card header with profile image
-        const cardHeader = document.createElement('div');
-        cardHeader.className = 'card-header';
-        cardHeader.style.display = 'flex';
-        cardHeader.style.alignItems = 'center';
-        cardHeader.style.padding = '1.25rem 1.25rem 0.75rem';
-        
-        // Profile image container
-        const profileContainer = document.createElement('div');
-        profileContainer.style.width = '60px';
-        profileContainer.style.height = '60px';
-        profileContainer.style.borderRadius = '50%';
-        profileContainer.style.overflow = 'hidden';
-        profileContainer.style.marginRight = '1rem';
-        profileContainer.style.backgroundColor = '#e9ecef';
-        profileContainer.style.display = 'flex';
-        profileContainer.style.alignItems = 'center';
-        profileContainer.style.justifyContent = 'center';
-        
-        // Profile image
-        const profileImg = document.createElement('div');
-        profileImg.style.width = '100%';
-        profileImg.style.height = '100%';
-        profileImg.style.backgroundColor = getColorFromName(memberName);
-        profileImg.style.display = 'flex';
-        profileImg.style.alignItems = 'center';
-        profileImg.style.justifyContent = 'center';
-        profileImg.style.color = 'white';
-        profileImg.style.fontWeight = 'bold';
-        profileImg.style.fontSize = '1.5rem';
-        profileImg.textContent = memberName.charAt(0);
-        
-        profileContainer.appendChild(profileImg);
-        
-        const memberInfo = document.createElement('div');
-        
-        const memberTitle = document.createElement('h3');
-        memberTitle.className = 'card-title';
-        memberTitle.textContent = memberName;
-        memberTitle.style.margin = '0';
-        memberTitle.style.lineHeight = '1.2';
-        
-        // Handicap badge
-        const handicapBadge = document.createElement('div');
-        handicapBadge.style.display = 'inline-block';
-        handicapBadge.style.padding = '0.25rem 0.5rem';
-        handicapBadge.style.borderRadius = '12px';
-        handicapBadge.style.fontSize = '0.85rem';
-        handicapBadge.style.fontWeight = 'bold';
-        handicapBadge.style.marginTop = '0.5rem';
-        
-        // Set badge color based on handicap
-        if (handicapData) {
-          const handicapValue = parseFloat(handicapData.index);
-          let badgeColor, textColor, label;
-          
-          if (handicapValue < 5) {
-            badgeColor = '#28a745'; // Green for low handicap (better players)
-            textColor = 'white';
-            label = 'Cunt';
-          } else if (handicapValue < 15) {
-            badgeColor = '#17a2b8'; // Blue for mid handicap
-            textColor = 'white';
-            label = 'Skilled';
-          } else if (handicapValue < 25) {
-            badgeColor = '#fd7e14'; // Orange for higher handicap
-            textColor = 'white';
-            label = 'Improving';
-          } else {
-            badgeColor = '#6c757d'; // Gray for highest handicap
-            textColor = 'white';
-            label = 'Developing';
-          }
-          
-          handicapBadge.style.backgroundColor = badgeColor;
-          handicapBadge.style.color = textColor;
-          handicapBadge.textContent = `${label} • HCP ${handicapData.index}`;
-        } else {
-          handicapBadge.style.backgroundColor = '#e9ecef';
-          handicapBadge.style.color = '#495057';
-          handicapBadge.textContent = 'No Handicap';
+
+      function getColorFromName(name) {
+        // Keep existing logic
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+          hash = name.charCodeAt(i) + ((hash << 5) - hash);
         }
-        
-        memberInfo.appendChild(memberTitle);
-        memberInfo.appendChild(handicapBadge);
-        
-        cardHeader.appendChild(profileContainer);
-        cardHeader.appendChild(memberInfo);
-        card.appendChild(cardHeader);
-        
-        // Card content
-        const cardContent = document.createElement('div');
-        cardContent.className = 'card-content';
-        cardContent.style.padding = '0.75rem 1.25rem 1.25rem';
-        
-        // Recent scores
-        if (recentScores && recentScores.length > 0) {
-          const scoresSection = document.createElement('div');
-          scoresSection.className = 'member-scores';
-          scoresSection.style.marginTop = '1rem';
-          
-          const scoresTitle = document.createElement('h4');
-          scoresTitle.style.fontSize = '1rem';
-          scoresTitle.style.marginBottom = '0.75rem';
-          scoresTitle.style.color = 'var(--bbb-text-light)';
-          scoresTitle.textContent = 'Recent Scores';
-          
-          scoresSection.appendChild(scoresTitle);
-          
-          const scoresList = document.createElement('ul');
-          scoresList.style.listStyle = 'none';
-          scoresList.style.padding = '0';
-          scoresList.style.margin = '0';
-          
-          recentScores.forEach(score => {
-            const scoreItem = document.createElement('li');
-            scoreItem.style.marginBottom = '0.5rem';
-            scoreItem.style.padding = '0.75rem';
-            scoreItem.style.backgroundColor = 'rgba(0,0,0,0.03)';
-            scoreItem.style.borderRadius = '6px';
-            scoreItem.style.fontSize = '0.9rem';
-            scoreItem.style.transition = 'background-color 0.2s ease';
-            
-            // Add subtle hover effect to score items
-            scoreItem.addEventListener('mouseenter', () => {
-              scoreItem.style.backgroundColor = 'rgba(0,0,0,0.06)';
-            });
-            
-            scoreItem.addEventListener('mouseleave', () => {
-              scoreItem.style.backgroundColor = 'rgba(0,0,0,0.03)';
-            });
-            
-            const scoreDate = BBB_UTILS.formatDate(score.date, 'short');
-            const teeName = BBB_CONFIG.teeColors[score.tee] || score.tee;
-            
-            scoreItem.innerHTML = `
-              <div style="font-weight: 600; margin-bottom: 0.25rem;">${score.course}</div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
-                <span>${teeName} tees • ${scoreDate}</span>
-                <span style="font-weight: 600;">${score.totalShots} strokes / ${score.stablefordPoints} pts</span>
-              </div>
-            `;
-            
-            scoresList.appendChild(scoreItem);
-          });
-          
-          scoresSection.appendChild(scoresList);
-          cardContent.appendChild(scoresSection);
-        } else {
-          // No scores message
-          const noScores = document.createElement('p');
-          noScores.style.color = 'var(--bbb-text-muted)';
-          noScores.style.fontStyle = 'italic';
-          noScores.style.textAlign = 'center';
-          noScores.style.marginTop = '1rem';
-          noScores.textContent = 'No recent scores available';
-          cardContent.appendChild(noScores);
-        }
-        
-        // Add "View Profile" button
-        const viewProfileBtn = document.createElement('button');
-        viewProfileBtn.className = 'btn btn-sm';
-        viewProfileBtn.style.width = '100%';
-        viewProfileBtn.style.marginTop = '1rem';
-        viewProfileBtn.textContent = 'View Full Profile';
-        viewProfileBtn.addEventListener('click', (e) => {
-          e.stopPropagation(); // Prevent card click event
-          window.location.href = `member-profile.html?id=${encodeURIComponent(memberName.toLowerCase())}`;
-        });
-        
-        cardContent.appendChild(viewProfileBtn);
-        card.appendChild(cardContent);
-        col.appendChild(card);
-        
-        return col;
+        const h = hash % 360;
+        return `hsl(${h}, 70%, 40%)`;
       }
     });
   </script>
