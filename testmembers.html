@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Birdie Bush Bandits – Members</title>
-  <meta name="description" content="Meet the members of Birdie Bush Bandits golf group, view their handicaps and latest scores.">
+  <title>Birdie Bush Bandits – Member Profile</title>
+  <meta name="description" content="Detailed profile and statistics for a Birdie Bush Bandits golf group member.">
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
   <!-- Add Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
@@ -17,82 +17,329 @@
   <script src="js/auth.js"></script>
   <script src="js/db.js"></script>
   <script src="js/ui.js"></script>
-
+  
   <style>
-    /* REMOVE ALL INLINE STYLES - Use global CSS instead */
-    /* Only add page-specific styles that don't conflict */
-    
-    /* Members page specific styles only */
-    .member-card {
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    /* Member Profile specific styles only - using global theme */
+    .profile-hero {
+      background: linear-gradient(135deg, var(--bbb-light-green), white);
+      padding: var(--spacing-xl) var(--spacing-lg);
+      border-radius: var(--border-radius-lg);
+      margin-bottom: var(--spacing-xl);
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xl);
+      box-shadow: var(--shadow-md);
     }
 
-    .member-card:hover {
-      transform: translateY(-5px);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .member-avatar {
-      width: 60px;
-      height: 60px;
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      font-size: 3rem;
       font-weight: bold;
-      font-size: 1.5rem;
+      color: white;
       flex-shrink: 0;
+      border: 4px solid white;
+      box-shadow: var(--shadow-sm);
     }
 
-    .member-info {
+    .profile-info {
       flex: 1;
-      margin-left: var(--spacing-md);
     }
 
-    .member-stats {
-      font-size: var(--font-size-sm);
-      color: var(--bbb-text-muted);
-      margin-top: var(--spacing-xs);
+    .profile-name {
+      margin: 0 0 var(--spacing-sm) 0;
+      font-size: 2.5rem;
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
     }
 
-    .handicap-badge {
+    .profile-handicap {
       display: inline-block;
-      padding: var(--spacing-xs) var(--spacing-sm);
-      border-radius: 12px;
-      font-size: var(--font-size-xs);
+      padding: var(--spacing-sm) var(--spacing-lg);
+      border-radius: 25px;
+      font-size: var(--font-size-lg);
       font-weight: 600;
-      margin-top: var(--spacing-xs);
+      margin-bottom: var(--spacing-sm);
+      font-family: var(--font-family-accent);
     }
 
-    .score-item {
-      padding: var(--spacing-sm);
-      background: var(--bbb-background);
-      border-radius: var(--border-radius-sm);
-      margin-bottom: var(--spacing-xs);
-      font-size: var(--font-size-sm);
+    .profile-meta {
+      color: var(--bbb-text-muted);
+      font-size: var(--font-size-md);
     }
 
-    .score-item:hover {
-      background: var(--bbb-light-green);
-    }
-
-    /* Stats cards using global card styles */
-    .stats-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+    /* Stats grid using card structure */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: var(--spacing-lg);
-      margin: var(--spacing-lg) 0;
+      margin-bottom: var(--spacing-xl);
     }
 
     .stat-card {
-      /* Remove custom styles - use global .card class */
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
+      margin-bottom: var(--spacing-xs);
+    }
+
+    .stat-label {
+      font-size: var(--font-size-sm);
+      color: var(--bbb-text-muted);
+      font-weight: 500;
+    }
+
+    /* Tab system using global styles */
+    .tab-container {
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .tab-buttons {
+      display: flex;
+      gap: var(--spacing-sm);
+      margin-bottom: var(--spacing-lg);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .tab-button {
+      padding: var(--spacing-sm) var(--spacing-lg);
+      background-color: var(--bbb-background);
+      border: 1px solid var(--bbb-border);
+      border-radius: var(--border-radius-sm);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      font-family: var(--font-family-accent);
+    }
+
+    .tab-button:hover {
+      background-color: var(--bbb-light-green);
+    }
+
+    .tab-button.active {
+      background-color: var(--bbb-secondary);
+      color: white;
+      border-color: var(--bbb-secondary);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    /* Performance table using global table styles */
+    .performance-table {
+      width: 100%;
+      margin-top: var(--spacing-md);
+    }
+
+    /* Score cards using global card styles */
+    .score-card {
+      margin-bottom: var(--spacing-md);
+      border-left: 4px solid var(--bbb-secondary);
+    }
+
+    .score-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .score-card-course {
+      font-weight: 600;
+      font-size: var(--font-size-lg);
+      color: var(--bbb-primary);
+    }
+
+    .score-card-date {
+      color: var(--bbb-text-muted);
+      font-size: var(--font-size-sm);
+    }
+
+    .score-card-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: var(--spacing-md);
+    }
+
+    .score-detail {
+      text-align: center;
+    }
+
+    .score-detail-label {
+      font-size: var(--font-size-xs);
+      color: var(--bbb-text-muted);
+      margin-bottom: var(--spacing-xs);
+      font-weight: 500;
+    }
+
+    .score-detail-value {
+      font-weight: 600;
+      font-size: var(--font-size-lg);
+      color: var(--bbb-text);
+    }
+
+    /* Achievements using global card grid */
+    .achievements-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: var(--spacing-lg);
+      margin-top: var(--spacing-md);
+    }
+
+    .achievement-card {
+      text-align: center;
+      position: relative;
+      transition: transform 0.3s ease;
+    }
+
+    .achievement-card:hover {
+      transform: translateY(-2px);
+    }
+
+    .achievement-icon {
+      font-size: 2.5rem;
+      margin-bottom: var(--spacing-sm);
+      display: block;
+    }
+
+    .achievement-title {
+      font-weight: 600;
+      font-size: var(--font-size-lg);
+      margin-bottom: var(--spacing-xs);
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
+    }
+
+    .achievement-desc {
+      font-size: var(--font-size-sm);
+      color: var(--bbb-text-muted);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    .achievement-date {
+      font-size: var(--font-size-xs);
+      color: var(--bbb-text-muted);
+      font-style: italic;
+    }
+
+    /* Handicap progress display */
+    .current-handicap {
+      text-align: center;
+      margin-bottom: var(--spacing-xl);
+    }
+
+    .handicap-display {
+      font-size: 4rem;
+      font-weight: bold;
+      font-family: var(--font-family-accent);
+      margin: var(--spacing-sm) 0;
+    }
+
+    .handicap-category {
+      font-size: var(--font-size-lg);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    /* Chart placeholder */
+    .chart-container {
+      height: 300px;
+      background: var(--bbb-background);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-lg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: var(--spacing-lg) 0;
+      border: 1px solid var(--bbb-border);
+    }
+
+    .chart-placeholder {
+      color: var(--bbb-text-muted);
+      font-style: italic;
+      text-align: center;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+      .profile-hero {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .profile-avatar {
+        width: 100px;
+        height: 100px;
+        font-size: 2.5rem;
+      }
+
+      .profile-name {
+        font-size: 2rem;
+      }
+
+      .tab-buttons {
+        justify-content: center;
+      }
+
+      .score-card-details {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .achievements-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .profile-hero {
+        padding: var(--spacing-lg);
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .score-card-details {
+        grid-template-columns: 1fr;
+      }
+
+      .tab-buttons {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .tab-button {
+        width: 100%;
+        max-width: 250px;
+      }
     }
   </style>
 </head>
 <body data-requires-auth="true">
-  <!-- Use Standard Header Structure (like index.html) -->
+  <!-- Standard Header -->
   <header class="header">
     <div class="header-content">
       <div class="header-left">
@@ -100,88 +347,138 @@
         <span class="header-title">Birdie Bush Bandits</span>
       </div>
       <div class="header-right">
+        <a href="members.html" class="btn btn-sm">← Back to Members</a>
         <a href="index.html" class="btn btn-sm">🏠 Home</a>
         <a href="login.html" class="login-btn" id="login-link">Login</a>
       </div>
     </div>
   </header>
 
-  <!-- Use Standard Page Hero (like other pages) -->
+  <!-- Standard Page Hero -->
   <section class="page-hero">
     <div class="page-hero-content">
       <div class="founded-badge">🏌️ Founded August 2020</div>
-      <h1>Members</h1>
-      <p class="subtitle">Meet our dedicated golfers who make up the Birdie Bush Bandits</p>
+      <h1 id="page-title">Member Profile</h1>
+      <p class="subtitle">Detailed statistics and performance analysis</p>
     </div>
   </section>
 
-  <!-- Use Standard Main Content Structure -->
+  <!-- Standard Main Content -->
   <main class="main-content">
-    <!-- Status Message (Standard) -->
+    <!-- Status Message -->
     <div id="status-message"></div>
-    
-    <!-- Intro Section with Stats -->
-    <div class="content-section">
-      <p class="text-center">From beginners to seasoned players, our diverse group enjoys friendly competition and camaraderie on the course.</p>
-      
-      <!-- Stats using global card components -->
-      <div class="stats-row">
-        <div class="card text-center" style="min-width: 150px;">
-          <div class="card-body p-3">
-            <div style="font-size: 1.8rem; font-weight: bold; color: var(--bbb-primary);">👥</div>
-            <div style="font-size: 1.5rem; font-weight: bold;" id="member-count">12</div>
-            <div class="text-muted">Members</div>
+
+    <!-- Profile Hero Section -->
+    <div class="profile-hero" id="profile-hero" style="display: none;">
+      <div class="profile-avatar" id="profile-avatar"></div>
+      <div class="profile-info">
+        <h2 class="profile-name" id="profile-name"></h2>
+        <div class="profile-handicap" id="profile-handicap"></div>
+        <div class="profile-meta" id="profile-meta"></div>
+      </div>
+    </div>
+
+    <!-- Statistics Grid -->
+    <div class="stats-grid" id="stats-grid" style="display: none;">
+      <!-- Stats will be populated by JavaScript -->
+    </div>
+
+    <!-- Tab Container -->
+    <div class="tab-container" id="tab-container" style="display: none;">
+      <div class="tab-buttons">
+        <button class="tab-button active" data-tab="handicap">Handicap Progress</button>
+        <button class="tab-button" data-tab="scores">Recent Scores</button>
+        <button class="tab-button" data-tab="performance">Course Performance</button>
+        <button class="tab-button" data-tab="achievements">Achievements</button>
+      </div>
+
+      <!-- Handicap Tab -->
+      <div class="tab-content active" id="tab-handicap">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Handicap Progress</h3>
+          </div>
+          <div class="card-body">
+            <div class="current-handicap" id="current-handicap">
+              <!-- Current handicap display -->
+            </div>
+            <div class="chart-container">
+              <div class="chart-placeholder">
+                📊 Handicap history chart will be displayed here
+              </div>
+            </div>
+            <div class="alert alert-info">
+              <p><strong>About Handicap Index:</strong> The handicap index is calculated based on the World Handicap System (WHS). It represents your playing ability on a standard course using the 8 best differentials from your 20 most recent rounds.</p>
+              <p>Your actual Course Handicap will vary depending on the course and tees played.</p>
+            </div>
           </div>
         </div>
-        
-        <div class="card text-center" style="min-width: 150px;">
-          <div class="card-body p-3">
-            <div style="font-size: 1.8rem; font-weight: bold; color: var(--bbb-primary);">🏆</div>
-            <div style="font-size: 1.5rem; font-weight: bold;">4+</div>
-            <div class="text-muted">Years Active</div>
+      </div>
+
+      <!-- Scores Tab -->
+      <div class="tab-content" id="tab-scores">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Recent Scores</h3>
+          </div>
+          <div class="card-body">
+            <div id="recent-scores">
+              <!-- Recent scores will be populated here -->
+            </div>
           </div>
         </div>
-        
-        <div class="card text-center" style="min-width: 150px;">
-          <div class="card-body p-3">
-            <div style="font-size: 1.8rem; font-weight: bold; color: var(--bbb-primary);">⛳</div>
-            <div style="font-size: 1.5rem; font-weight: bold;" id="courses-count">6</div>
-            <div class="text-muted">Courses Played</div>
+      </div>
+
+      <!-- Performance Tab -->
+      <div class="tab-content" id="tab-performance">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Course Performance</h3>
+          </div>
+          <div class="card-body">
+            <table class="performance-table" id="performance-table">
+              <thead>
+                <tr>
+                  <th>Course</th>
+                  <th>Rounds</th>
+                  <th>Avg Score</th>
+                  <th>Best Score</th>
+                  <th>Avg Points</th>
+                  <th>Best Points</th>
+                </tr>
+              </thead>
+              <tbody id="performance-tbody">
+                <!-- Performance data will be populated here -->
+              </tbody>
+            </table>
+            <div class="alert alert-info mt-3">
+              <p><strong>Note:</strong> Course performance is calculated based on all recorded rounds. Scores are gross scores without handicap adjustments.</p>
+            </div>
           </div>
         </div>
-        
-        <div class="card text-center" style="min-width: 150px;" id="avg-handicap-card" style="display: none;">
-          <div class="card-body p-3">
-            <div style="font-size: 1.8rem; font-weight: bold; color: var(--bbb-primary);">📊</div>
-            <div style="font-size: 1.5rem; font-weight: bold;" id="avg-handicap">-</div>
-            <div class="text-muted">Avg Handicap</div>
+      </div>
+
+      <!-- Achievements Tab -->
+      <div class="tab-content" id="tab-achievements">
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Achievements</h3>
+          </div>
+          <div class="card-body">
+            <div class="achievements-grid" id="achievements-grid">
+              <!-- Achievements will be populated here -->
+            </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Controls Section -->
-    <div class="content-section">
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--spacing-md); margin-bottom: var(--spacing-lg);">
-        <h2 class="section-title" style="margin: 0;">Member Directory</h2>
-        
-        <div style="display: flex; align-items: center; gap: var(--spacing-sm);">
-          <label for="sort-select" style="font-size: var(--font-size-sm); margin: 0;">Sort by:</label>
-          <select id="sort-select" style="padding: var(--spacing-xs) var(--spacing-sm); border-radius: var(--border-radius-sm);">
-            <option value="name-asc">Name A-Z</option>
-            <option value="name-desc">Name Z-A</option>
-            <option value="handicap-asc">Handicap (Low to High)</option>
-            <option value="handicap-desc">Handicap (High to Low)</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- Members Grid -->
-    <div class="content-section">
-      <div class="row" id="members-grid">
-        <!-- Member cards will be populated by JavaScript -->
-      </div>
+    <!-- Error Container -->
+    <div id="error-container" class="text-center" style="display: none; margin: var(--spacing-xl) 0;">
+      <div style="font-size: 3rem; margin-bottom: var(--spacing-lg);">⚠️</div>
+      <h2>Error Loading Profile</h2>
+      <div id="error-message" style="margin: var(--spacing-lg) 0;"></div>
+      <a href="members.html" class="btn">Return to Members</a>
     </div>
   </main>
 
@@ -190,9 +487,29 @@
     <p>&copy; 2025 Birdie Bush Bandits - Founded August 2020</p>
   </footer>
 
+  <!-- Authentication Protection -->
+  <script>
+    // Check if BBB_AUTH is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Wait for auth module to initialize
+      setTimeout(function() {
+        if (typeof BBB_AUTH !== 'undefined') {
+          // If not authenticated and not on login page, redirect to login
+          if (!BBB_AUTH.isAuthenticated && window.location.pathname.indexOf('login.html') === -1) {
+            // Save the current URL to redirect back after login
+            sessionStorage.setItem('redirectAfterLogin', window.location.pathname);
+            window.location.href = 'login.html';
+          }
+        } else {
+          console.error('BBB_AUTH module not found! Authentication check failed.');
+        }
+      }, 100); // Small delay to ensure modules are loaded
+    });
+  </script>
+  
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Initialize modules (keep existing logic)
+      // Initialize modules
       BBB_AUTH.init({
         cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
       });
@@ -202,216 +519,109 @@
         localStoragePrefix: 'bbb_'
       });
 
-      // Update member count
-      document.getElementById('member-count').textContent = BBB_CONFIG.members.length;
-      document.getElementById('courses-count').textContent = Object.keys(BBB_CONFIG.courses).length;
-
-      // Load and display members (keep existing logic but use new structure)
-      loadMembers();
-
-      function loadMembers() {
-        const membersGrid = document.getElementById('members-grid');
-        
-        // Load handicap data for all members (keep existing logic)
-        const handicapPromises = BBB_CONFIG.members.map(member => 
-          BBB_DB.getMemberHandicap(member.toLowerCase())
-            .then(data => ({ member, handicap: data }))
-            .catch(() => ({ member, handicap: null }))
-        );
-        
-        // Load scorecards (keep existing logic)
-        BBB_DB.getScorecards()
-          .then(scorecards => {
-            const scorecardsArray = Object.values(scorecards);
-            
-            Promise.all(handicapPromises)
-              .then(memberData => {
-                // Calculate average handicap
-                let totalHandicap = 0;
-                let membersWithHandicap = 0;
-                
-                memberData.forEach(data => {
-                  if (data.handicap && data.handicap.index) {
-                    totalHandicap += parseFloat(data.handicap.index);
-                    membersWithHandicap++;
-                  }
-                });
-                
-                if (membersWithHandicap > 0) {
-                  const avgHandicap = (totalHandicap / membersWithHandicap).toFixed(1);
-                  document.getElementById('avg-handicap').textContent = avgHandicap;
-                  document.getElementById('avg-handicap-card').style.display = 'block';
-                }
-                
-                // Sort handler
-                document.getElementById('sort-select').addEventListener('change', () => {
-                  displayMembers(memberData, scorecardsArray);
-                });
-                
-                // Initial display
-                displayMembers(memberData, scorecardsArray);
-              });
-          });
+      // Get member ID from URL
+      const urlParams = new URLSearchParams(window.location.search);
+      const memberId = urlParams.get('id');
+      
+      if (!memberId) {
+        showError('No member specified. Please select a member from the <a href="members.html">members page</a>.');
+        return;
       }
+      
+      // Load member profile
+      loadMemberProfile(memberId);
 
-      function displayMembers(memberData, scorecardsArray) {
-        const membersGrid = document.getElementById('members-grid');
-        const sortValue = document.getElementById('sort-select').value;
-        
-        // Sort data
-        const sortedData = [...memberData].sort((a, b) => {
-          switch(sortValue) {
-            case 'name-asc':
-              return a.member.localeCompare(b.member);
-            case 'name-desc':
-              return b.member.localeCompare(a.member);
-            case 'handicap-asc':
-              const hcpA = a.handicap ? parseFloat(a.handicap.index) : 999;
-              const hcpB = b.handicap ? parseFloat(b.handicap.index) : 999;
-              return hcpA - hcpB;
-            case 'handicap-desc':
-              const hcpA2 = a.handicap ? parseFloat(a.handicap.index) : -1;
-              const hcpB2 = b.handicap ? parseFloat(b.handicap.index) : -1;
-              return hcpB2 - hcpA2;
-            default:
-              return 0;
-          }
-        });
-        
-        // Clear grid
-        membersGrid.innerHTML = '';
-        
-        // Create member cards using global styles
-        sortedData.forEach(data => {
-          const recentScores = findRecentScores(scorecardsArray, data.member);
-          const memberCard = createMemberCard(data.member, data.handicap, recentScores);
-          membersGrid.appendChild(memberCard);
-        });
-      }
-
-      function createMemberCard(memberName, handicapData, recentScores) {
-        const col = document.createElement('div');
-        col.className = 'col-md-6 col-lg-4 mb-4';
-        
-        // Use global card structure
-        const card = document.createElement('div');
-        card.className = 'card member-card';
-        
-        // Card header with member info
-        const cardHeader = document.createElement('div');
-        cardHeader.className = 'card-header';
-        cardHeader.style.display = 'flex';
-        cardHeader.style.alignItems = 'center';
-        
-        // Avatar
-        const avatar = document.createElement('div');
-        avatar.className = 'member-avatar';
-        avatar.style.backgroundColor = getColorFromName(memberName);
-        avatar.textContent = memberName.charAt(0);
-        
-        // Member info
-        const memberInfo = document.createElement('div');
-        memberInfo.className = 'member-info';
-        
-        const memberTitle = document.createElement('h3');
-        memberTitle.className = 'card-title';
-        memberTitle.textContent = memberName;
-        
-        // Handicap badge using global button styles
-        const handicapBadge = document.createElement('span');
-        handicapBadge.className = 'handicap-badge';
-        
-        if (handicapData) {
-          const handicapValue = parseFloat(handicapData.index);
-          if (handicapValue < 5) {
-            handicapBadge.style.backgroundColor = 'var(--bbb-success)';
-            handicapBadge.style.color = 'white';
-            handicapBadge.textContent = `Elite • HCP ${handicapData.index}`;
-          } else if (handicapValue < 15) {
-            handicapBadge.style.backgroundColor = 'var(--bbb-secondary)';
-            handicapBadge.style.color = 'white';
-            handicapBadge.textContent = `Skilled • HCP ${handicapData.index}`;
-          } else if (handicapValue < 25) {
-            handicapBadge.style.backgroundColor = 'var(--bbb-warning)';
-            handicapBadge.style.color = 'var(--bbb-text)';
-            handicapBadge.textContent = `Improving • HCP ${handicapData.index}`;
-          } else {
-            handicapBadge.style.backgroundColor = 'var(--bbb-text-muted)';
-            handicapBadge.style.color = 'white';
-            handicapBadge.textContent = `Developing • HCP ${handicapData.index}`;
-          }
-        } else {
-          handicapBadge.style.backgroundColor = 'var(--bbb-border)';
-          handicapBadge.style.color = 'var(--bbb-text-muted)';
-          handicapBadge.textContent = 'No Handicap';
-        }
-        
-        memberInfo.appendChild(memberTitle);
-        memberInfo.appendChild(handicapBadge);
-        
-        cardHeader.appendChild(avatar);
-        cardHeader.appendChild(memberInfo);
-        card.appendChild(cardHeader);
-        
-        // Card body with scores
-        const cardBody = document.createElement('div');
-        cardBody.className = 'card-body';
-        
-        if (recentScores && recentScores.length > 0) {
-          const scoresTitle = document.createElement('h4');
-          scoresTitle.textContent = 'Recent Scores';
-          scoresTitle.style.fontSize = 'var(--font-size-md)';
-          scoresTitle.style.marginBottom = 'var(--spacing-sm)';
-          cardBody.appendChild(scoresTitle);
+      // Tab switching
+      document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', () => {
+          const tabId = button.dataset.tab;
           
-          recentScores.forEach(score => {
-            const scoreItem = document.createElement('div');
-            scoreItem.className = 'score-item';
-            
-            const scoreDate = BBB_UTILS.formatDate(score.date, 'short');
-            const teeName = BBB_CONFIG.teeColors[score.tee] || score.tee;
-            
-            scoreItem.innerHTML = `
-              <div style="font-weight: 600; margin-bottom: 0.25rem;">${score.course}</div>
-              <div style="display: flex; justify-content: space-between; font-size: var(--font-size-xs);">
-                <span>${teeName} tees • ${scoreDate}</span>
-                <span style="font-weight: 600;">${score.totalShots} strokes / ${score.stablefordPoints} pts</span>
-              </div>
-            `;
-            
-            cardBody.appendChild(scoreItem);
-          });
-        } else {
-          const noScores = document.createElement('p');
-          noScores.className = 'text-muted text-center';
-          noScores.style.fontStyle = 'italic';
-          noScores.textContent = 'No recent scores available';
-          cardBody.appendChild(noScores);
-        }
+          // Update active button
+          document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+          button.classList.add('active');
+          
+          // Show corresponding content
+          document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+          document.getElementById(`tab-${tabId}`).classList.add('active');
+        });
+      });
+
+      function showError(message) {
+        const errorContainer = document.createElement('div');
+        errorContainer.className = 'error-container';
+        errorContainer.style.textAlign = 'center';
+        errorContainer.style.margin = '3rem auto';
+        errorContainer.style.maxWidth = '600px';
         
-        // View profile button using global button styles
-        const viewProfileBtn = document.createElement('a');
-        viewProfileBtn.href = `member-profile.html?id=${encodeURIComponent(memberName.toLowerCase())}`;
-        viewProfileBtn.className = 'btn btn-sm mt-3';
-        viewProfileBtn.style.width = '100%';
-        viewProfileBtn.textContent = 'View Full Profile';
+        const errorIcon = document.createElement('div');
+        errorIcon.textContent = '⚠️';
+        errorIcon.style.fontSize = '3rem';
+        errorIcon.style.marginBottom = '1rem';
         
-        cardBody.appendChild(viewProfileBtn);
-        card.appendChild(cardBody);
-        col.appendChild(card);
+        const errorTitle = document.createElement('h2');
+        errorTitle.textContent = 'Error Loading Profile';
+        errorTitle.style.marginBottom = '1rem';
         
-        return col;
+        const errorMessage = document.createElement('div');
+        errorMessage.innerHTML = message;
+        
+        const backButton = document.createElement('a');
+        backButton.href = 'members.html';
+        backButton.className = 'btn';
+        backButton.textContent = 'Return to Members';
+        backButton.style.marginTop = '1.5rem';
+        backButton.style.display = 'inline-block';
+        
+        errorContainer.appendChild(errorIcon);
+        errorContainer.appendChild(errorTitle);
+        errorContainer.appendChild(errorMessage);
+        errorContainer.appendChild(backButton);
+        
+        const mainContent = document.querySelector('.main-content');
+        mainContent.innerHTML = '';
+        mainContent.appendChild(errorContainer);
       }
 
-      function findRecentScores(scorecards, memberName) {
-        // Keep existing logic
+      function loadMemberProfile(memberId) {
+        BBB_UTILS.showMessage('Loading member profile...', 'info');
+        
+        const memberName = memberId.charAt(0).toUpperCase() + memberId.slice(1);
+        
+        if (!BBB_CONFIG.members.includes(memberName)) {
+          showError(`Member "${memberName}" not found.`);
+          return;
+        }
+        
+        // Load handicap and scorecard data
+        Promise.all([
+          BBB_DB.getMemberHandicap(memberId),
+          BBB_DB.getScorecards()
+        ]).then(([handicapData, scorecards]) => {
+          const scorecardsArray = Object.values(scorecards);
+          const profileData = buildProfileData(memberName, handicapData, scorecardsArray);
+          renderProfile(profileData);
+        }).catch(err => {
+          console.error('Error loading profile data:', err);
+          const profileData = buildProfileData(memberName, null, []);
+          renderProfile(profileData);
+        });
+      }
+
+      /**
+       * Build comprehensive profile data from all sources
+       * @param {string} memberName - Member name
+       * @param {Object} handicapData - Handicap data
+       * @param {Array} scorecards - Array of scorecards
+       * @returns {Object} - Profile data
+       */
+
+      function buildProfileData(memberName, handicapData, scorecards) {
+        // Filter scorecards for this member
         const memberScores = [];
         
         scorecards.forEach(scorecard => {
           if (scorecard.players && Array.isArray(scorecard.players)) {
-            const playerData = scorecard.players.find(player => 
-              player.name === memberName
-            );
+            const playerData = scorecard.players.find(player => player.name === memberName);
             
             if (playerData) {
               memberScores.push({
@@ -419,24 +629,469 @@
                 course: scorecard.course,
                 tee: scorecard.tee,
                 totalShots: playerData.totalShots || 0,
-                stablefordPoints: playerData.totalPoints || 0
+                stablefordPoints: playerData.totalPoints || 0,
+                handicap: playerData.handicap || 0,
+                courseHandicap: playerData.courseHandicap || 0,
+                holes: scorecard.holes || '18'
               });
             }
           }
         });
         
         memberScores.sort((a, b) => b.date - a.date);
-        return memberScores.slice(0, 3);
+        
+        const stats = calculateStatistics(memberScores);
+        const coursePerformance = generateCoursePerformance(memberScores);
+        const achievements = generateAchievements(memberName, memberScores, handicapData);
+        
+        return {
+          id: memberName.toLowerCase(),
+          name: memberName,
+          joinDate: "2020-08-01",
+          handicap: handicapData ? handicapData.index : null,
+          handicapCategory: getHandicapCategory(handicapData ? parseFloat(handicapData.index) : null),
+          handicapLastUpdated: handicapData ? new Date(handicapData.calculatedAt) : null,
+          scores: memberScores,
+          stats: stats,
+          coursePerformance: coursePerformance,
+          achievements: achievements
+        };
+      }
+
+      function calculateStatistics(scores) {
+        if (!scores || scores.length === 0) {
+          return {
+            roundsPlayed: 0,
+            averageScore: 0,
+            bestScore: 0,
+            averagePoints: 0,
+            bestPoints: 0,
+            latestScore: null
+          };
+        }
+        
+        let totalShots = 0;
+        let totalPoints = 0;
+        let bestScore = Infinity;
+        let bestPoints = 0;
+        
+        const fullRounds = scores.filter(s => s.holes === '18');
+        
+        fullRounds.forEach(score => {
+          totalShots += score.totalShots;
+          totalPoints += score.stablefordPoints;
+          
+          if (score.totalShots < bestScore) {
+            bestScore = score.totalShots;
+          }
+          
+          if (score.stablefordPoints > bestPoints) {
+            bestPoints = score.stablefordPoints;
+          }
+        });
+        
+        const averageScore = fullRounds.length > 0 ? Math.round((totalShots / fullRounds.length) * 10) / 10 : 0;
+        const averagePoints = fullRounds.length > 0 ? Math.round((totalPoints / fullRounds.length) * 10) / 10 : 0;
+        
+        return {
+          roundsPlayed: scores.length,
+          averageScore: averageScore,
+          bestScore: bestScore === Infinity ? 0 : bestScore,
+          averagePoints: averagePoints,
+          bestPoints: bestPoints,
+          latestScore: scores.length > 0 ? scores[0] : null
+        };
+      }
+
+      function generateCoursePerformance(scores) {
+        if (!scores || scores.length === 0) return [];
+        
+        const courseMap = {};
+        
+        scores.forEach(score => {
+          if (!courseMap[score.course]) {
+            courseMap[score.course] = {
+              course: score.course,
+              rounds: 0,
+              totalShots: 0,
+              totalPoints: 0,
+              bestScore: Infinity,
+              bestPoints: 0
+            };
+          }
+          
+          const courseData = courseMap[score.course];
+          courseData.rounds++;
+          courseData.totalShots += score.totalShots;
+          courseData.totalPoints += score.stablefordPoints;
+          
+          if (score.totalShots < courseData.bestScore) {
+            courseData.bestScore = score.totalShots;
+          }
+          
+          if (score.stablefordPoints > courseData.bestPoints) {
+            courseData.bestPoints = score.stablefordPoints;
+          }
+        });
+        
+        return Object.values(courseMap).map(course => ({
+          course: course.course,
+          rounds: course.rounds,
+          averageScore: Math.round((course.totalShots / course.rounds) * 10) / 10,
+          averagePoints: Math.round((course.totalPoints / course.rounds) * 10) / 10,
+          bestScore: course.bestScore === Infinity ? 0 : course.bestScore,
+          bestPoints: course.bestPoints
+        })).sort((a, b) => b.rounds - a.rounds);
+      }
+
+      function generateAchievements(memberName, scores, handicapData) {
+        const achievements = [];
+        
+        achievements.push({
+          icon: '🏆',
+          title: 'Founding Member',
+          description: 'One of the original Birdie Bush Bandits',
+          date: new Date('2020-08-01')
+        });
+        
+        if (scores && scores.length > 0) {
+          if (scores.length >= 10) {
+            achievements.push({
+              icon: '🏌️',
+              title: 'Committed Golfer',
+              description: `Played ${scores.length} rounds with the Bandits`,
+              date: scores[0].date
+            });
+          }
+          
+          const bestRound = [...scores].sort((a, b) => a.totalShots - b.totalShots)[0];
+          if (bestRound) {
+            achievements.push({
+              icon: '🥇',
+              title: 'Personal Best',
+              description: `Shot ${bestRound.totalShots} at ${bestRound.course}`,
+              date: bestRound.date
+            });
+          }
+          
+          const bestPoints = [...scores].sort((a, b) => b.stablefordPoints - a.stablefordPoints)[0];
+          if (bestPoints) {
+            achievements.push({
+              icon: '📊',
+              title: 'Points Master',
+              description: `Scored ${bestPoints.stablefordPoints} points at ${bestPoints.course}`,
+              date: bestPoints.date
+            });
+          }
+        }
+        
+        if (handicapData && handicapData.index) {
+          const handicapValue = parseFloat(handicapData.index);
+          
+          if (handicapValue < 10) {
+            achievements.push({
+              icon: '⭐',
+              title: 'Single Digit Handicap',
+              description: `Achieved a handicap of ${handicapData.index}`,
+              date: new Date(handicapData.calculatedAt)
+            });
+          } else if (handicapValue < 18) {
+            achievements.push({
+              icon: '🏄',
+              title: 'Mid Handicapper',
+              description: `Achieved a handicap of ${handicapData.index}`,
+              date: new Date(handicapData.calculatedAt)
+            });
+          }
+        }
+        
+        return achievements;
+      }
+
+      /**
+       * Get handicap category text and color
+       * @param {number} handicap - Handicap value
+       * @returns {Object} - Category data
+       */
+
+      function getHandicapCategory(handicap) {
+        if (handicap === null) {
+          return {
+            label: 'No Handicap',
+            color: 'var(--bbb-text-muted)',
+            textColor: 'white'
+          };
+        }
+        
+        if (handicap < 5) {
+          return {
+            label: 'Elite',
+            color: 'var(--bbb-success)',
+            textColor: 'white'
+          };
+        } else if (handicap < 15) {
+          return {
+            label: 'Skilled',
+            color: 'var(--bbb-secondary)',
+            textColor: 'white'
+          };
+        } else if (handicap < 25) {
+          return {
+            label: 'Improving',
+            color: 'var(--bbb-warning)',
+            textColor: 'var(--bbb-text)'
+          };
+        } else {
+          return {
+            label: 'Developing',
+            color: 'var(--bbb-text-muted)',
+            textColor: 'white'
+          };
+        }
       }
 
       function getColorFromName(name) {
-        // Keep existing logic
         let hash = 0;
         for (let i = 0; i < name.length; i++) {
           hash = name.charCodeAt(i) + ((hash << 5) - hash);
         }
         const h = hash % 360;
         return `hsl(${h}, 70%, 40%)`;
+      }
+
+      /**
+       * Render the profile page with data
+       * @param {Object} profileData - Profile data
+       */
+
+      function renderProfile(profileData) {
+        BBB_UTILS.showMessage('', 'info');
+        
+        // Update page title
+        document.getElementById('page-title').textContent = `${profileData.name}'s Profile`;
+        
+        // Profile hero
+        const profileAvatar = document.getElementById('profile-avatar');
+        profileAvatar.style.backgroundColor = getColorFromName(profileData.name);
+        profileAvatar.textContent = profileData.name.charAt(0);
+        
+        document.getElementById('profile-name').textContent = profileData.name;
+        
+        const handicapBadge = document.getElementById('profile-handicap');
+        if (profileData.handicap) {
+          handicapBadge.textContent = `Handicap: ${profileData.handicap} (${profileData.handicapCategory.label})`;
+          handicapBadge.style.backgroundColor = profileData.handicapCategory.color;
+          handicapBadge.style.color = profileData.handicapCategory.textColor;
+        } else {
+          handicapBadge.textContent = 'No Handicap';
+          handicapBadge.style.backgroundColor = 'var(--bbb-background)';
+          handicapBadge.style.color = 'var(--bbb-text-muted)';
+        }
+        
+        const metaInfo = document.getElementById('profile-meta');
+        let metaText = `Member since ${new Date(profileData.joinDate).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}`;
+        if (profileData.handicapLastUpdated) {
+          metaText += ` • Handicap last updated: ${new Date(profileData.handicapLastUpdated).toLocaleDateString()}`;
+        }
+        metaInfo.textContent = metaText;
+        
+        document.getElementById('profile-hero').style.display = 'flex';
+        
+        // Statistics
+        const statsGrid = document.getElementById('stats-grid');
+        const statBoxes = [
+          { label: 'Rounds Played', value: profileData.stats.roundsPlayed },
+          { label: 'Average Score', value: profileData.stats.averageScore || '-' },
+          { label: 'Best Score', value: profileData.stats.bestScore || '-' },
+          { label: 'Average Points', value: profileData.stats.averagePoints || '-' },
+          { label: 'Best Points', value: profileData.stats.bestPoints || '-' }
+        ];
+        
+        statsGrid.innerHTML = '';
+        statBoxes.forEach(stat => {
+          const statCard = document.createElement('div');
+          statCard.className = 'card stat-card';
+          statCard.innerHTML = `
+            <div class="card-body text-center">
+              <div class="stat-value">${stat.value}</div>
+              <div class="stat-label">${stat.label}</div>
+            </div>
+          `;
+          statsGrid.appendChild(statCard);
+        });
+        
+        statsGrid.style.display = 'grid';
+        
+        // Render tab content
+        renderHandicapTab(profileData);
+        renderScoresTab(profileData);
+        renderPerformanceTab(profileData);
+        renderAchievementsTab(profileData);
+        
+        document.getElementById('tab-container').style.display = 'block';
+      }
+
+      /**
+       * Render handicap progress tab
+       * @param {Object} profileData - Profile data
+       */
+
+      function renderHandicapTab(profileData) {
+        const currentHandicap = document.getElementById('current-handicap');
+        
+        if (!profileData.handicap) {
+          currentHandicap.innerHTML = `
+            <div class="alert alert-warning text-center">
+              <p><strong>No handicap data available yet.</strong></p>
+              <p>Use the Handicap Calculator to record your scores.</p>
+              <a href="handicap-calculator.html" class="btn btn-success mt-2">Go to Handicap Calculator</a>
+            </div>
+          `;
+          return;
+        }
+        
+        currentHandicap.innerHTML = `
+          <div class="handicap-display" style="color: ${profileData.handicapCategory.color};">${profileData.handicap}</div>
+          <div class="handicap-category">Current Handicap Index (${profileData.handicapCategory.label})</div>
+        `;
+      }
+
+      /**
+       * Render recent scores tab
+       * @param {Object} profileData - Profile data
+       */
+
+      function renderScoresTab(profileData) {
+        const recentScores = document.getElementById('recent-scores');
+        
+        if (!profileData.scores || profileData.scores.length === 0) {
+          recentScores.innerHTML = `
+            <div class="alert alert-info text-center">
+              <p>No scores recorded yet.</p>
+            </div>
+          `;
+          return;
+        }
+        
+        const scoresToShow = profileData.scores.slice(0, 10);
+        
+        recentScores.innerHTML = '';
+        scoresToShow.forEach(score => {
+          const scoreCard = document.createElement('div');
+          scoreCard.className = 'card score-card';
+          
+          const holesText = score.holes === '9f' ? 'Front 9' : score.holes === '9b' ? 'Back 9' : 'Full 18';
+          const teeText = BBB_CONFIG.teeColors[score.tee] || score.tee;
+          
+          scoreCard.innerHTML = `
+            <div class="card-body">
+              <div class="score-card-header">
+                <div class="score-card-course">${score.course}</div>
+                <div class="score-card-date">${BBB_UTILS.formatDate(score.date, 'short')}</div>
+              </div>
+              <div class="score-card-details">
+                <div class="score-detail">
+                  <div class="score-detail-label">Gross Score</div>
+                  <div class="score-detail-value">${score.totalShots}</div>
+                </div>
+                <div class="score-detail">
+                  <div class="score-detail-label">Stableford Points</div>
+                  <div class="score-detail-value">${score.stablefordPoints}</div>
+                </div>
+                <div class="score-detail">
+                  <div class="score-detail-label">Tee</div>
+                  <div class="score-detail-value">${teeText}</div>
+                </div>
+                <div class="score-detail">
+                  <div class="score-detail-label">Holes</div>
+                  <div class="score-detail-value">${holesText}</div>
+                </div>
+              </div>
+            </div>
+          `;
+          
+          recentScores.appendChild(scoreCard);
+        });
+        
+        if (profileData.scores.length > 10) {
+          const viewMoreDiv = document.createElement('div');
+          viewMoreDiv.className = 'text-center mt-3';
+          viewMoreDiv.innerHTML = `
+            <button class="btn" onclick="alert('Full score history would be shown here (${profileData.scores.length} scores).')">
+              View All ${profileData.scores.length} Scores
+            </button>
+          `;
+          recentScores.appendChild(viewMoreDiv);
+        }
+      }
+
+      /**
+       * Render course performance tab
+       * @param {Object} profileData - Profile data
+       */
+
+      function renderPerformanceTab(profileData) {
+        const tbody = document.getElementById('performance-tbody');
+        
+        if (!profileData.coursePerformance || profileData.coursePerformance.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" class="text-center text-muted" style="font-style: italic;">
+                No course data available yet.
+              </td>
+            </tr>
+          `;
+          return;
+        }
+        
+        tbody.innerHTML = '';
+        profileData.coursePerformance.forEach(course => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td style="font-weight: 600;">${course.course}</td>
+            <td>${course.rounds}</td>
+            <td>${course.averageScore}</td>
+            <td>${course.bestScore}</td>
+            <td>${course.averagePoints}</td>
+            <td>${course.bestPoints}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      }
+
+      /**
+       * Render achievements tab
+       * @param {Object} profileData - Profile data
+       */
+
+      function renderAchievementsTab(profileData) {
+        const achievementsGrid = document.getElementById('achievements-grid');
+        
+        if (!profileData.achievements || profileData.achievements.length === 0) {
+          achievementsGrid.innerHTML = `
+            <div class="card text-center">
+              <div class="card-body">
+                <p class="text-muted" style="font-style: italic;">No achievements recorded yet.</p>
+              </div>
+            </div>
+          `;
+          return;
+        }
+        
+        achievementsGrid.innerHTML = '';
+        profileData.achievements.forEach(achievement => {
+          const achievementCard = document.createElement('div');
+          achievementCard.className = 'card achievement-card';
+          achievementCard.innerHTML = `
+            <div class="card-body">
+              <div class="achievement-icon">${achievement.icon}</div>
+              <div class="achievement-title">${achievement.title}</div>
+              <div class="achievement-desc">${achievement.description}</div>
+              <div class="achievement-date">${BBB_UTILS.formatDate(achievement.date, 'short')}</div>
+            </div>
+          `;
+          achievementsGrid.appendChild(achievementCard);
+        });
       }
     });
   </script>
