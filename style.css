@@ -1,0 +1,871 @@
+/**
+ * Birdie Bush Bandits - Main Stylesheet
+ * Global styles used across the site
+ */
+
+/* ----------- Variables ----------- */
+:root {
+  /* Color palette - updated for better contrast */
+  --bbb-primary: #004d00; /* Darkened slightly for better contrast */
+  --bbb-secondary: #0046ad; /* Darker blue for better contrast with white text */
+  --bbb-secondary-dark: #003a8c; /* Adjusted accordingly */
+  --bbb-background: #f5f5f5;
+  --bbb-text: #212529; /* Slightly softer than pure black */
+  --bbb-text-muted: #6c757d; /* Better contrast gray */
+  --bbb-text-light: #495057; /* Improved midtone */
+  --bbb-border: #dee2e6; /* Softened border color */
+  --bbb-error: #dc3545;
+  --bbb-success: #28a745;
+  --bbb-warning: #ffc107;
+  --bbb-info: #17a2b8;
+  
+  /* Spacing */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  
+  /* Typography - updated with modern fonts */
+  --font-family-base: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font-family-accent: 'Montserrat', Georgia, serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-xxl: 2rem;
+  --font-size-xxxl: 3rem;
+  
+  /* Border radius */
+  --border-radius-sm: 4px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 8px;
+  
+  /* Box shadows */
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+  --shadow-md: 0 2px 4px rgba(0,0,0,0.1);
+  --shadow-lg: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Font utility classes */
+.font-inter {
+  font-family: var(--font-family-base);
+}
+
+.font-montserrat {
+  font-family: var(--font-family-accent);
+}
+
+/* ----------- Base Styles ----------- */
+html, body {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+body {
+  background-color: var(--bbb-background);
+  font-family: var(--font-family-base);
+  text-align: center;
+  padding: var(--spacing-xl);
+  margin: 0 auto;
+  color: var(--bbb-text);
+  max-width: 1200px;
+  line-height: 1.6;
+  position: relative;
+}
+
+/* ----------- Accessibility ----------- */
+.skip-link {
+  display: none !important;
+}
+
+/* ----------- Header & Logo ----------- */
+header {
+  margin-bottom: var(--spacing-xl);
+  position: relative;
+  border: none !important;
+}
+
+/* Remove the green line */
+header::before,
+header::after,
+body::before,
+body::after,
+.fixed-header::before,
+.fixed-header::after,
+.main-wrapper::before,
+.main-wrapper::after {
+  display: none !important;
+  border: none !important;
+  height: 0 !important;
+  background: transparent !important;
+  content: none !important;
+}
+
+.top-bar {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.corner-logo {
+  width: 80px;
+  height: 80px;
+  display: block;
+}
+
+.home-link { 
+  color: var(--bbb-primary); /* Updated to use variable */
+  font-weight: bold; 
+  text-decoration: none;
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--bbb-background); /* Updated to use variable */
+  border-radius: 4px;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-family: var(--font-family-accent); /* Added Montserrat font */
+}
+
+.home-link:hover {
+  background-color: #ffffff; /* Lighter on hover */
+  transform: translateY(-2px);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+/* For fixed header layout */
+.fixed-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: var(--spacing-md);
+  z-index: 5;
+  background-color: transparent;
+  border: none !important;
+}
+
+.main-content {
+  padding-top: 80px; /* Space for fixed header */
+}
+
+/* ----------- Typography ----------- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family-accent); /* Apply Montserrat to all headings */
+  color: var(--bbb-primary);
+  font-weight: bold;
+}
+
+h1 {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xxxl);
+  margin: 0;
+  margin-bottom: var(--spacing-sm);
+  flex-wrap: wrap;
+}
+
+/* Hide golf ball images in headings */
+h1 img {
+  display: none !important;
+}
+
+h2 {
+  margin: var(--spacing-md) 0;
+}
+
+.founded {
+  font-size: var(--font-size-lg);
+  margin-top: var(--spacing-sm);
+  margin-bottom: var(--spacing-lg);
+  font-style: italic;
+  color: var(--bbb-text-muted);
+  font-family: var(--font-family-accent);
+}
+
+/* ----------- Buttons ----------- */
+.btn, button.btn, .nav-boxes a {
+  display: inline-block;
+  padding: var(--spacing-md) var(--spacing-lg);
+  border: none;
+  border-radius: var(--border-radius-sm);
+  text-decoration: none;
+  color: #ffffff;
+  font-weight: bold;
+  background-color: var(--bbb-secondary);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  text-align: center;
+  font-family: var(--font-family-accent); /* Added Montserrat font */
+}
+
+.btn:hover, button.btn:hover, .nav-boxes a:hover {
+  background-color: var(--bbb-secondary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btn:active, button.btn:active {
+  transform: translateY(0);
+}
+
+.btn:focus, button.btn:focus {
+  outline: 3px solid var(--bbb-primary);
+  outline-offset: 2px;
+}
+
+.btn-sm, button.btn-sm {
+  padding: var(--spacing-sm) var(--spacing-md);
+  font-size: var(--font-size-sm);
+}
+
+.btn-lg, button.btn-lg {
+  padding: var(--spacing-lg) var(--spacing-xl);
+  font-size: var(--font-size-lg);
+}
+
+.btn-danger, button.btn-danger {
+  background-color: var(--bbb-error);
+}
+
+.btn-danger:hover, button.btn-danger:hover {
+  background-color: #c82333;
+}
+
+.btn-success, button.btn-success {
+  background-color: var(--bbb-success);
+}
+
+.btn-success:hover, button.btn-success:hover {
+  background-color: #218838;
+}
+
+/* ----------- Forms ----------- */
+input, select, textarea {
+  width: 100%;
+  padding: var(--spacing-sm);
+  border: 1px solid var(--bbb-border);
+  border-radius: var(--border-radius-sm);
+  box-sizing: border-box;
+  font-size: var(--font-size-md);
+  background: #fff;
+  color: var(--bbb-text);
+  font-family: var(--font-family-base); /* Add Inter font */
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid var(--bbb-secondary);
+  outline-offset: -1px;
+}
+
+label {
+  display: block;
+  margin-bottom: var(--spacing-xs);
+  font-weight: bold;
+  color: var(--bbb-text-light);
+  font-family: var(--font-family-accent); /* Add Montserrat for labels */
+}
+
+.form-group {
+  margin-bottom: var(--spacing-md);
+}
+
+/* Form validation styles */
+.invalid, .missing {
+  border: 2px solid var(--bbb-error);
+  background-color: #ffcccc;
+}
+
+/* ----------- Utility Classes ----------- */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+
+.mt-1 { margin-top: var(--spacing-sm); }
+.mt-2 { margin-top: var(--spacing-md); }
+.mt-3 { margin-top: var(--spacing-lg); }
+.mt-4 { margin-top: var(--spacing-xl); }
+
+.mb-1 { margin-bottom: var(--spacing-sm); }
+.mb-2 { margin-bottom: var(--spacing-md); }
+.mb-3 { margin-bottom: var(--spacing-lg); }
+.mb-4 { margin-bottom: var(--spacing-xl); }
+
+.mx-auto { margin-left: auto; margin-right: auto; }
+
+.p-1 { padding: var(--spacing-sm); }
+.p-2 { padding: var(--spacing-md); }
+.p-3 { padding: var(--spacing-lg); }
+.p-4 { padding: var(--spacing-xl); }
+
+.bg-white { background-color: white; }
+.rounded { border-radius: var(--border-radius-sm); }
+.shadow { box-shadow: var(--shadow-md); }
+
+/* ----------- Card Styles ----------- */
+.card {
+  background: white;
+  border: 1px solid var(--bbb-border);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-md);
+}
+
+.card-header {
+  border-bottom: 1px solid var(--bbb-border);
+  padding-bottom: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.card-title {
+  font-weight: bold;
+  font-size: var(--font-size-lg);
+  margin: 0;
+  font-family: var(--font-family-accent); /* Add Montserrat */
+}
+
+.card-footer {
+  border-top: 1px solid var(--bbb-border);
+  padding-top: var(--spacing-sm);
+  margin-top: var(--spacing-md);
+}
+
+/* ----------- Grid System ----------- */
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -10px;
+}
+
+.col {
+  flex: 1 1 0;
+  padding: 0 10px;
+}
+
+.col-2 { flex-basis: 16.67%; }
+.col-3 { flex-basis: 25%; }
+.col-4 { flex-basis: 33.33%; }
+.col-6 { flex-basis: 50%; }
+.col-8 { flex-basis: 66.67%; }
+.col-12 { flex-basis: 100%; }
+
+/* ----------- Tables ----------- */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--spacing-lg);
+}
+
+th, td {
+  border: 1px solid var(--bbb-border);
+  padding: var(--spacing-sm);
+  text-align: center;
+}
+
+th {
+  background-color: #eee;
+  font-weight: bold;
+  font-family: var(--font-family-accent); /* Add Montserrat */
+}
+
+caption {
+  caption-side: top;
+  text-align: left;
+  padding: var(--spacing-sm);
+  font-weight: bold;
+  background-color: #f8f9fa;
+  font-family: var(--font-family-accent); /* Add Montserrat */
+}
+
+/* ----------- Status Messages ----------- */
+#status-message {
+  padding: var(--spacing-lg);
+  margin: var(--spacing-md) 0;
+  border-radius: var(--border-radius-sm);
+  text-align: center;
+  display: none;
+  font-family: var(--font-family-base); /* Add Inter */
+}
+
+.success {
+  background-color: #e8f5e9;
+  color: #1b5e20;
+  border: 1px solid #c8e6c9;
+}
+
+.error {
+  background-color: #ffcdd2;
+  color: #b71c1c;
+  border: 1px solid #ef9a9a;
+}
+
+.warning {
+  background-color: #fff8e1;
+  color: #f57f17;
+  border: 1px solid #ffe082;
+}
+
+.info {
+  background-color: #e3f2fd;
+  color: #0d47a1;
+  border: 1px solid #bbdefb;
+}
+
+/* ----------- Navigation ----------- */
+.nav-boxes {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-md);
+  margin: var(--spacing-xl) 0;
+}
+
+.nav-boxes a {
+  display: inline-block;
+  padding: var(--spacing-md) var(--spacing-xl);
+  border: none;
+  border-radius: var(--border-radius-lg);
+  text-decoration: none;
+  color: #ffffff;
+  font-weight: bold;
+  background-color: var(--bbb-secondary);
+  transition: all 0.3s ease;
+  flex: 1 1 150px;
+  max-width: 200px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  font-family: var(--font-family-accent); /* Add Montserrat */
+}
+
+.nav-boxes a:hover {
+  background-color: var(--bbb-secondary-dark);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* ----------- Scorecard Specific ----------- */
+.calculator {
+  background: rgba(0,0,0,0.05);
+  padding: var(--spacing-lg);
+  border-radius: var(--border-radius-lg);
+  margin-top: var(--spacing-md);
+  text-align: left;
+  border: 1px solid var(--bbb-border);
+}
+
+.round {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: #fff;
+  border-radius: var(--border-radius-md);
+  border: 1px solid var(--bbb-border);
+}
+
+/* ----------- Gallery Specific ----------- */
+.gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-md);
+}
+
+.gallery-img {
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--bbb-border);
+  border-radius: var(--border-radius-md);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.gallery-img:hover {
+  transform: scale(1.05);
+}
+
+/* Lightbox */
+.lightbox {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.8);
+  align-items: center;
+  justify-content: center;
+}
+
+.lightbox-img {
+  max-width: 90%;
+  max-height: 80%;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+}
+
+.lightbox-close {
+  position: absolute;
+  top: 1rem; right: 1.5rem;
+  font-size: 2rem;
+  color: white;
+  cursor: pointer;
+}
+
+/* ----------- Auth/Login Specific ----------- */
+#login-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+#login-box {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  text-align: center;
+  max-width: 90%;
+  width: 300px;
+}
+
+/* ----------- Responsive Breakpoints ----------- */
+/* Tablet */
+@media (max-width: 768px) {
+  body {
+    padding: var(--spacing-md);
+  }
+  
+  h1 {
+    font-size: var(--font-size-xxl);
+  }
+  
+  h1 img {
+    display: none !important;
+  }
+  
+  .corner-logo {
+    width: 70px;
+    height: 70px;
+  }
+  
+  .nav-boxes a {
+    padding: var(--spacing-sm) var(--spacing-lg);
+    max-width: 150px;
+  }
+  
+  .main-content {
+    padding-top: 70px; /* Adjusted space for fixed header */
+  }
+  
+  .fixed-header {
+    padding: var(--spacing-sm);
+    border: none !important;
+  }
+  
+  /* Responsive grid adjustments */
+  .col-md-6 { flex-basis: 50%; }
+  .col-md-12 { flex-basis: 100%; }
+  
+  .round {
+    grid-template-columns: 1fr 1fr;
+  }
+  
+  .gallery {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  body {
+    padding: var(--spacing-sm);
+  }
+  
+  h1 {
+    font-size: var(--font-size-xl);
+    line-height: 1.2;
+  }
+  
+  h1 img {
+    display: none !important;
+  }
+  
+  .corner-logo {
+    width: 65px;
+    height: 65px;
+  }
+  
+  .main-content {
+    padding-top: 65px; /* Adjusted space for fixed header */
+  }
+  
+  .fixed-header {
+    padding: var(--spacing-xs);
+    border: none !important;
+  }
+  
+  .home-link {
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-size: var(--font-size-sm);
+  }
+  
+  .nav-boxes {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .nav-boxes a {
+    flex: 1 1 auto;
+    max-width: 100%;
+    padding: var(--spacing-sm) var(--spacing-md);
+  }
+  
+  /* Mobile grid */
+  .col-sm-12 { flex-basis: 100%; }
+  
+  .round {
+    grid-template-columns: 1fr;
+  }
+  
+  .gallery {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  }
+  
+  /* Mobile table adjustments */
+  table { font-size: var(--font-size-xs); }
+  th, td { padding: var(--spacing-xs); white-space: normal; }
+  
+  /* Mobile buttons */
+  .btn-group { 
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+  }
+  
+  .btn-group .btn {
+    width: 100%;
+  }
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background-color: white;
+    padding: 0;
+  }
+  
+  .no-print, .nav-boxes, .btn, header, .home-link, .top-bar {
+    display: none !important;
+  }
+  
+  .main-content {
+    padding-top: 0;
+  }
+  
+  table {
+    page-break-inside: avoid;
+  }
+  
+  h1, h2 {
+    page-break-after: avoid;
+  }
+}
+
+/* Button styles with centering - updated with improved contrast */
+.btn, button.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 4px;
+  background-color: var(--bbb-secondary); /* Updated to use variable */
+  color: white;
+  font-weight: bold;
+  text-decoration: none;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  min-width: 160px;
+  font-family: var(--font-family-accent); /* Added Montserrat font */
+}
+
+.btn:hover, button.btn:hover {
+  background-color: var(--bbb-secondary-dark); /* Updated to use variable */
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.btn:active, button.btn:active {
+  transform: translateY(0);
+}
+
+.btn-sm, button.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  min-width: 120px;
+}
+
+.btn-lg, button.btn-lg {
+  padding: 1rem 2rem;
+  font-size: 1.25rem;
+  min-width: 200px;
+}
+
+.btn-danger, button.btn-danger {
+  background-color: #dc3545;
+}
+
+.btn-danger:hover, button.btn-danger:hover {
+  background-color: #c82333;
+}
+
+.btn-success, button.btn-success {
+  background-color: #28a745;
+}
+
+.btn-success:hover, button.btn-success:hover {
+  background-color: #218838;
+}
+
+/* Centered button groups */
+.btn-group, 
+#button-group, 
+.button-group, 
+.action-buttons,
+.card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center; /* Center horizontally */
+  margin: 1.5rem auto;
+  width: 100%;
+  text-align: center;
+}
+
+/* Individual buttons in groups */
+.btn-group .btn, 
+.btn-group button, 
+#button-group .btn, 
+#button-group button,
+.button-group .btn,
+.button-group button,
+.action-buttons .btn,
+.action-buttons button,
+.card-actions .btn,
+.card-actions button {
+  flex: 0 0 auto;
+}
+
+/* For card actions which often have left and right buttons */
+.card-actions {
+  justify-content: space-around; /* Evenly spaced in the container */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .btn-group, 
+  #button-group, 
+  .button-group, 
+  .action-buttons,
+  .card-actions {
+    flex-direction: column;
+    align-items: center; /* Center items in column layout */
+  }
+  
+  .btn, button.btn, 
+  .btn-sm, button.btn-sm, 
+  .btn-lg, button.btn-lg {
+    width: 100%;
+    max-width: 300px; /* Limit width on mobile */
+  }
+}
+
+/* Main image centering styles */
+.main-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 2rem auto;
+  width: 100%;
+  max-width: 800px; /* Adjust this value based on your preference */
+}
+
+.main-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+
+.main-image:hover {
+  transform: scale(1.02);
+}
+
+/* Return text styling */
+.return-text {
+  text-align: center;
+  font-style: italic;
+  color: var(--bbb-text-muted); /* Updated to use variable */
+  margin-bottom: 1.5rem;
+}
+
+/* Centered logo styling */
+.logo-centered {
+  display: flex;
+  justify-content: center;
+  margin: 1rem auto 2rem auto;
+  text-align: center;
+}
+
+.logo-centered img {
+  width: 120px;
+  height: auto;
+  margin: 0 auto;
+}
+
+/* Fix for green header line */
+body:before, 
+header:before, 
+.fixed-header:before,
+.main-wrapper:before,
+body:after, 
+header:after, 
+.fixed-header:after,
+.main-wrapper:after,
+#main:before,
+#main:after {
+  display: none !important;
+  content: none !important;
+  border: none !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  height: 0 !important;
+  background-color: transparent !important;
+}
+
+/* Override any borders on header and navigation */
+body > *:first-child,
+#main > *:first-child,
+header > *:first-child {
+  border-top: none !important;
+  border: none !important;
+}
+
+/* Target any potential headers created by the JavaScript UI system */
+[class*="header"],
+[id*="header"],
+[class*="nav"],
+[class*="banner"],
+[class*="top"] {
+  border: none !important;
+  border-top: none !important;
+}
