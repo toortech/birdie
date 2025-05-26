@@ -537,6 +537,15 @@
     function checkExistingAuth() {
       console.log('Checking existing authentication...');
       
+      // Check if user just logged out - if so, don't auto-login
+      const justLoggedOut = sessionStorage.getItem('justLoggedOut') === 'true';
+      if (justLoggedOut) {
+        console.log('User just logged out, clearing flag and showing login form');
+        sessionStorage.removeItem('justLoggedOut');
+        clearStoredAuth(); // Clear any stored auth data
+        return; // Don't auto-login, show the login form
+      }
+      
       try {
         // Check localStorage for existing session
         const storedAuth = localStorage.getItem('bbb_auth_session');
@@ -569,7 +578,7 @@
           }
         }
         
-        // Check BBB_AUTH state
+        // Check BBB_AUTH state (only if user didn't just log out)
         if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
           console.log('User already authenticated in current session');
           showSuccess('Already logged in! Redirecting...');
