@@ -749,10 +749,25 @@
      * Clear authentication session
      */
     function clearAuthSession() {
-      localStorage.removeItem('bbb_auth_session');
-      localStorage.removeItem('bbb_current_user');
-      BBB_AUTH.currentUser = null;
-      BBB_AUTH.isAuthenticated = false;
+      try {
+        // Clear localStorage
+        localStorage.removeItem('bbb_auth_session');
+        localStorage.removeItem('bbb_current_user');
+        
+        // Clear sessionStorage
+        sessionStorage.removeItem('justLoggedIn');
+        sessionStorage.removeItem('redirectAfterLogin');
+        
+        // Reset BBB_AUTH module state
+        if (typeof BBB_AUTH !== 'undefined') {
+          BBB_AUTH.currentUser = null;
+          BBB_AUTH.isAuthenticated = false;
+        }
+        
+        console.log('All authentication data cleared');
+      } catch (error) {
+        console.error('Error clearing auth session:', error);
+      }
     }
 
     /**
@@ -857,13 +872,20 @@
         if (link) {
           const originalHref = link.getAttribute('href');
           
+          // Remove any existing click handlers and re-add auth prompt
           link.onclick = function(e) {
             e.preventDefault();
             const featureName = card.querySelector('h3').textContent.toLowerCase();
             showAuthPrompt(featureName, originalHref);
           };
           
-          // Add login required badge
+          // Remove authenticated badge if it exists
+          const authBadge = card.querySelector('.auth-badge');
+          if (authBadge) {
+            authBadge.remove();
+          }
+          
+          // Add login required badge if it doesn't exist
           if (!card.querySelector('.login-required-badge')) {
             const badge = document.createElement('span');
             badge.className = 'login-required-badge';
@@ -953,6 +975,10 @@
         
         logoutBtn.onclick = function() {
           if (confirm('Are you sure you want to logout?')) {
+            // Immediate state change to prevent any auth checks
+            BBB_AUTH.isAuthenticated = false;
+            BBB_AUTH.currentUser = null;
+            
             performLogout();
           }
         };
@@ -992,12 +1018,14 @@
     function performLogout() {
       console.log('Logging out user...');
       
-      // Clear authentication state
+      // Clear all authentication data immediately
       clearAuthSession();
       
-      // Reset BBB_AUTH state
-      BBB_AUTH.currentUser = null;
-      BBB_AUTH.isAuthenticated = false;
+      // Reset BBB_AUTH state completely
+      if (typeof BBB_AUTH !== 'undefined') {
+        BBB_AUTH.currentUser = null;
+        BBB_AUTH.isAuthenticated = false;
+      }
       
       // Stop session monitoring
       if (window.bbbSessionMonitor) {
@@ -1005,18 +1033,77 @@
         window.bbbSessionMonitor = null;
       }
       
-      // Show logout success message briefly
+      // Clear any other session data
+      sessionStorage.removeItem('justLoggedIn');
+      sessionStorage.removeItem('redirectAfterLogin');
+      
+      // Immediately update the page state to public mode
+      hideAllAuthenticatedContent();
+      showAllPublicContent();
+      updateHeaderForLogout();
+      
+      // Show logout success message briefly, then reload
       const headerRight = document.querySelector('.header-right');
       if (headerRight) {
-        headerRight.innerHTML = '<span style="color: #28a745; font-weight: bold;">Logged out successfully!</span>';
+        headerRight.innerHTML = '<span style="color: #28a745; font-weight: bold; animation: fadeInUp 0.5s ease-out;">✓ Logged out successfully!</span>';
         
-        // Revert to login button after 2 seconds and refresh page
+        // Force reload after short delay to ensure clean state
         setTimeout(() => {
           window.location.reload();
-        }, 2000);
+        }, 1500);
       } else {
-        // Fallback: just refresh the page
+        // Fallback: immediate reload
         window.location.reload();
+      }
+    }
+
+    /**
+     * Hide all authenticated content immediately
+     */
+    function hideAllAuthenticatedContent() {
+      // Hide member-only content
+      const memberContent = document.querySelectorAll('.member-only');
+      memberContent.forEach(element => {
+        element.style.display = 'none';
+      });
+      
+      // Remove all auth badges
+      const authBadges = document.querySelectorAll('.auth-badge');
+      authBadges.forEach(badge => badge.remove());
+    }
+
+    /**
+     * Show all public content immediately
+     */
+    function showAllPublicContent() {
+      // Re-apply auth requirements to protected links
+      updateNavigationForPublic();
+    }
+
+    /**
+     * Update header for logout state
+     */
+    function updateHeaderForLogout() {
+      const headerRight = document.querySelector('.header-right');
+      if (headerRight) {
+        // Remove user info and logout button
+        const userInfo = headerRight.querySelector('.user-info');
+        const logoutBtn = headerRight.querySelector('.logout-btn');
+        
+        if (userInfo) userInfo.remove();
+        if (logoutBtn) logoutBtn.remove();
+        
+        // Show login button if it doesn't exist
+        let loginLink = headerRight.querySelector('#login-link');
+        if (!loginLink) {
+          loginLink = document.createElement('a');
+          loginLink.href = 'login.html';
+          loginLink.className = 'login-btn';
+          loginLink.id = 'login-link';
+          loginLink.textContent = 'Login';
+          headerRight.appendChild(loginLink);
+        }
+        loginLink.style.display = 'inline-block';
       }
     }
 
