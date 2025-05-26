@@ -754,9 +754,15 @@
         localStorage.removeItem('bbb_auth_session');
         localStorage.removeItem('bbb_current_user');
         
-        // Clear sessionStorage
+        // Clear sessionStorage (but preserve justLoggedOut flag)
+        const justLoggedOut = sessionStorage.getItem('justLoggedOut');
         sessionStorage.removeItem('justLoggedIn');
         sessionStorage.removeItem('redirectAfterLogin');
+        
+        // Restore the logout flag if it existed
+        if (justLoggedOut) {
+          sessionStorage.setItem('justLoggedOut', justLoggedOut);
+        }
         
         // Reset BBB_AUTH module state
         if (typeof BBB_AUTH !== 'undefined') {
@@ -1018,6 +1024,9 @@
     function performLogout() {
       console.log('Logging out user...');
       
+      // Set flag to indicate user intentionally logged out
+      sessionStorage.setItem('justLoggedOut', 'true');
+      
       // Clear all authentication data immediately
       clearAuthSession();
       
@@ -1033,7 +1042,7 @@
         window.bbbSessionMonitor = null;
       }
       
-      // Clear any other session data
+      // Clear any other session data except the logout flag
       sessionStorage.removeItem('justLoggedIn');
       sessionStorage.removeItem('redirectAfterLogin');
       
