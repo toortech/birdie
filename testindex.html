@@ -190,16 +190,16 @@
       animation: fadeInUp 1s ease-out 0.3s both;
     }
 
-    .founded-badge {
+    .founded-badge-header {
       display: inline-block;
       background: var(--bbb-gold);
       color: var(--bbb-primary);
-      padding: 0.5rem 1.5rem;
-      border-radius: 25px;
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
       font-weight: 600;
-      margin-bottom: 2rem;
-      animation: fadeInUp 1s ease-out 0.6s both;
-      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+      font-size: 0.8rem;
+      margin-left: 1rem;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
     }
 
     @keyframes fadeInUp {
@@ -213,56 +213,12 @@
       }
     }
 
-    /* Stats Section */
-    .stats-section {
-      padding: 3rem 2rem;
-      background: white;
-      margin: -2rem 1rem 0 1rem;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      position: relative;
-      z-index: 3;
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 2rem;
-      max-width: 800px;
-      margin: 0 auto;
-    }
-
-    .stat-item {
-      text-align: center;
-      padding: 1.5rem;
-      background: linear-gradient(135deg, var(--bbb-light-green), white);
-      border-radius: 15px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    .stat-item:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-    }
-
-    .stat-number {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: var(--bbb-primary);
-      font-family: var(--font-family-accent);
-    }
-
-    .stat-label {
-      color: var(--bbb-text-muted);
-      font-weight: 500;
-      margin-top: 0.5rem;
-    }
-
     /* Navigation Section */
     .nav-section {
-      padding: 4rem 2rem;
+      padding: 2rem 2rem;
       max-width: 1200px;
       margin: 0 auto;
+      margin-top: 1rem; /* Much closer to construction banner */
     }
 
     .nav-title {
@@ -456,7 +412,7 @@
       text-align: center;
       font-weight: 600;
       animation: pulse 2s infinite;
-      margin-top: 70px; /* Account for fixed header */
+      margin-top: 90px; /* Account for fixed header */
     }
 
     @keyframes pulse {
@@ -510,16 +466,19 @@
         margin-top: 0.5rem;
       }
 
-      .hero {
-        padding: 6rem 1rem 3rem 1rem;
+      .founded-badge-header {
+        margin-left: 0.5rem;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
       }
-      
-      .stats-section {
-        margin: -1rem 0.5rem 0 0.5rem;
+
+      .construction-banner {
+        margin-top: 120px; /* Extra space for mobile header that may wrap */
       }
       
       .nav-section, .featured-section {
-        padding: 3rem 1rem;
+        padding: 1.5rem 1rem;
+        margin-top: 0.5rem; /* Closer on mobile too */
       }
       
       .nav-grid {
@@ -563,6 +522,9 @@
       <div class="header-left">
         <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="header-logo">
         <span class="header-title">Birdie Bush Bandits</span>
+        <div class="founded-badge-header">
+          🏌️ Founded August 2020
+        </div>
       </div>
       <div class="header-right">
         <!-- Auth controls will be added here by JavaScript -->
@@ -576,71 +538,42 @@
     🚧 This site is under construction - New features coming soon! 🚧
   </div>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <div class="hero-content">
-      <h1>
-        Birdie Bush Bandits
-        <span class="golf-ball"></span>
-      </h1>
-      <p class="tagline">Where every round is an adventure and every shot tells a story</p>
-      <div class="founded-badge">
-        🏌️ Founded August 2020
-      </div>
-    </div>
-  </section>
-
-  <!-- Stats Section -->
-  <section class="stats-section">
-    <div class="stats-grid">
-      <div class="stat-item">
-        <div class="stat-number">4+</div>
-        <div class="stat-label">Years Golfing</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number">∞</div>
-        <div class="stat-label">Great Memories</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number">⭐</div>
-        <div class="stat-label">Premium Experience</div>
-      </div>
-    </div>
-  </section>
-
   <!-- Navigation Section -->
   <section class="nav-section">
-    <h2 class="nav-title">Explore Our Features</h2>
     <div class="nav-grid">
       <!-- Gallery Card - Auth Protected -->
-      <div class="nav-card">
+      <div class="nav-card" data-auth-required="true">
         <span class="nav-icon">📸</span>
         <h3>Photo Gallery</h3>
         <p>Browse through our collection of memorable moments on the course. Every swing captured!</p>
-        <a href="photo-gallery.html" class="btn">View Gallery</a>
+        <a href="photo-gallery.html" class="btn auth-required-link">View Gallery</a>
       </div>
       
-      <div class="nav-card">
+      <!-- Scorecards Card - Auth Protected -->
+      <div class="nav-card" data-auth-required="true">
         <span class="nav-icon">📊</span>
         <h3>Scorecards</h3>
         <p>Track your progress and view historical scorecards. See how your game improves over time.</p>
-        <a href="view-saved-scores.html" class="btn">View Scores</a>
+        <a href="view-saved-scores.html" class="btn auth-required-link">View Scores</a>
       </div>
       
-      <div class="nav-card">
+      <!-- Handicap Calculator Card - Auth Protected -->
+      <div class="nav-card" data-auth-required="true">
         <span class="nav-icon">🏆</span>
         <h3>Handicap Calculator</h3>
         <p>Calculate and track your handicap with our advanced calculator. Know your true skill level.</p>
-        <a href="handicap-calculator.html" class="btn">Calculate</a>
+        <a href="handicap-calculator.html" class="btn auth-required-link">Calculate</a>
       </div>
       
-      <div class="nav-card">
+      <!-- Members Card - Auth Protected -->
+      <div class="nav-card" data-auth-required="true">
         <span class="nav-icon">👥</span>
         <h3>Members</h3>
         <p>Meet the Birdie Bush Bandits! Get to know your fellow golfers and their achievements.</p>
-        <a href="members.html" class="btn">Meet Us</a>
+        <a href="members.html" class="btn auth-required-link">Meet Us</a>
       </div>
       
+      <!-- Public Cards -->
       <div class="nav-card">
         <span class="nav-icon">ℹ️</span>
         <h3>About BBB</h3>
@@ -888,19 +821,20 @@
      * Update navigation for authenticated users
      */
     function updateNavigationForAuth() {
-      // Find gallery links and make them direct links
-      const galleryCards = document.querySelectorAll('.nav-card');
-      galleryCards.forEach(card => {
-        const link = card.querySelector('a[href*="gallery"]');
+      // Find auth-required cards and make links functional
+      const authCards = document.querySelectorAll('.nav-card[data-auth-required="true"]');
+      authCards.forEach(card => {
+        const link = card.querySelector('.auth-required-link');
         if (link) {
-          link.href = 'photo-gallery.html';
           link.onclick = null; // Remove any click handlers
           
           // Add authenticated badge
-          const badge = document.createElement('span');
-          badge.className = 'auth-badge';
-          badge.textContent = '✓ Authenticated';
-          card.appendChild(badge);
+          if (!card.querySelector('.auth-badge')) {
+            const badge = document.createElement('span');
+            badge.className = 'auth-badge';
+            badge.textContent = '✓ Authenticated';
+            card.appendChild(badge);
+          }
         }
       });
     }
@@ -909,21 +843,26 @@
      * Update navigation for public users
      */
     function updateNavigationForPublic() {
-      // Find gallery links and add auth prompts
-      const galleryCards = document.querySelectorAll('.nav-card');
-      galleryCards.forEach(card => {
-        const link = card.querySelector('a[href*="gallery"]');
+      // Find auth-required cards and add auth prompts
+      const authCards = document.querySelectorAll('.nav-card[data-auth-required="true"]');
+      authCards.forEach(card => {
+        const link = card.querySelector('.auth-required-link');
         if (link) {
+          const originalHref = link.getAttribute('href');
+          
           link.onclick = function(e) {
             e.preventDefault();
-            showAuthPrompt('photo gallery');
+            const featureName = card.querySelector('h3').textContent.toLowerCase();
+            showAuthPrompt(featureName, originalHref);
           };
           
           // Add login required badge
-          const badge = document.createElement('span');
-          badge.className = 'login-required-badge';
-          badge.textContent = '🔒 Login Required';
-          card.appendChild(badge);
+          if (!card.querySelector('.login-required-badge')) {
+            const badge = document.createElement('span');
+            badge.className = 'login-required-badge';
+            badge.textContent = '🔒 Login Required';
+            card.appendChild(badge);
+          }
         }
       });
     }
@@ -931,7 +870,7 @@
     /**
      * Show authentication prompt
      */
-    function showAuthPrompt(feature) {
+    function showAuthPrompt(feature, targetUrl = null) {
       const modal = document.createElement('div');
       modal.className = 'auth-prompt-modal';
       
@@ -950,7 +889,7 @@
         <h3 style="color: #004d00; margin-bottom: 1rem;">Authentication Required</h3>
         <p style="margin-bottom: 1.5rem;">You need to log in to access the ${feature}.</p>
         <div style="display: flex; gap: 1rem; justify-content: center;">
-          <button onclick="window.location.href='login.html'" style="
+          <button id="login-prompt-btn" style="
             background: #004c99;
             color: white;
             border: none;
@@ -972,6 +911,15 @@
       
       modal.appendChild(content);
       document.body.appendChild(modal);
+      
+      // Handle login button click
+      content.querySelector('#login-prompt-btn').onclick = function() {
+        // Save the target URL for post-login redirect
+        if (targetUrl) {
+          sessionStorage.setItem('redirectAfterLogin', targetUrl);
+        }
+        window.location.href = 'login.html';
+      };
       
       // Close on outside click
       modal.addEventListener('click', (e) => {
@@ -1038,8 +986,29 @@
       // Clear authentication state
       clearAuthSession();
       
-      // Refresh page to show public content
-      window.location.reload();
+      // Reset BBB_AUTH state
+      BBB_AUTH.currentUser = null;
+      BBB_AUTH.isAuthenticated = false;
+      
+      // Stop session monitoring
+      if (window.bbbSessionMonitor) {
+        clearInterval(window.bbbSessionMonitor);
+        window.bbbSessionMonitor = null;
+      }
+      
+      // Show logout success message briefly
+      const headerRight = document.querySelector('.header-right');
+      if (headerRight) {
+        headerRight.innerHTML = '<span style="color: #28a745; font-weight: bold;">Logged out successfully!</span>';
+        
+        // Revert to login button after 2 seconds and refresh page
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        // Fallback: just refresh the page
+        window.location.reload();
+      }
     }
 
     /**
@@ -1080,7 +1049,7 @@
      * Add page animations
      */
     function addPageAnimations() {
-      // Animate stats on scroll
+      // Animate content on scroll
       const observerOptions = {
         threshold: 0.5,
         rootMargin: '0px 0px -50px 0px'
@@ -1093,11 +1062,6 @@
           }
         });
       }, observerOptions);
-
-      // Observe stat items
-      document.querySelectorAll('.stat-item').forEach(item => {
-        observer.observe(item);
-      });
 
       // Observe nav cards
       document.querySelectorAll('.nav-card').forEach((card, index) => {
