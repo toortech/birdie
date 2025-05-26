@@ -6,97 +6,426 @@
   <title>Login - Birdie Bush Bandits</title>
   <meta name="description" content="Login to access the Birdie Bush Bandits golf group website.">
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  
   <!-- Add Google Fonts -->
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  
   <!-- Global CSS -->
   <link rel="stylesheet" href="css/style.css">
   
   <style>
-    /* Login page specific styles */
+    /* BBB Theme Variables */
+    :root {
+      --bbb-primary: #004d00;
+      --bbb-secondary: #0046ad;
+      --bbb-gold: #ffd700;
+      --bbb-light-green: #e8f5e8;
+      --bbb-background: #f5f5f5;
+      --bbb-text: #212529;
+      --bbb-text-muted: #6c757d;
+      --bbb-border: #dee2e6;
+      --font-family-base: 'Inter', sans-serif;
+      --font-family-accent: 'Montserrat', serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
     body {
-      background: #f5f5f5;
-      font-family: Arial, sans-serif;
+      font-family: var(--font-family-base);
+      line-height: 1.6;
+      color: var(--bbb-text);
+      background: linear-gradient(135deg, var(--bbb-light-green) 0%, var(--bbb-background) 100%);
+      min-height: 100vh;
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      margin: 0;
       padding: 1rem;
+      position: relative;
+      overflow-x: hidden;
     }
-    
+
+    /* Background Animation */
+    body::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 77, 0, 0.03) 0%, transparent 70%);
+      animation: rotate 30s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Login Container */
     .login-container {
-      max-width: 400px;
+      max-width: 450px;
       width: 100%;
       background: white;
-      padding: 2rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 3rem 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+      animation: slideInUp 0.8s ease-out;
     }
-    
+
+    .login-container:hover {
+      border-color: var(--bbb-gold);
+      transform: translateY(-5px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Logo Section */
     .logo-container {
       text-align: center;
-      margin-bottom: 1.5rem;
+      margin-bottom: 2rem;
+      position: relative;
     }
-    
+
     .logo {
-      max-width: 100px;
+      max-width: 120px;
       height: auto;
+      filter: drop-shadow(2px 2px 8px rgba(0,0,0,0.1));
+      transition: transform 0.3s ease;
+      animation: logoFloat 3s ease-in-out infinite;
     }
-    
+
+    .logo:hover {
+      transform: scale(1.05) rotate(3deg);
+    }
+
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .logo-title {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-top: 0.5rem;
+    }
+
+    .founded-badge {
+      display: inline-block;
+      background: var(--bbb-gold);
+      color: var(--bbb-primary);
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    }
+
+    /* Main Title */
     h1 {
-      color: #003300;
+      color: var(--bbb-primary);
       text-align: center;
-      margin-bottom: 1.5rem;
-      font-size: 1.8rem;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+      font-family: var(--font-family-accent);
+      font-weight: 700;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
     }
-    
+
+    /* Form Styling */
     .form-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.8rem;
+      position: relative;
     }
-    
+
     label {
       display: block;
-      margin-bottom: 0.5rem;
-      font-weight: bold;
+      margin-bottom: 0.7rem;
+      font-weight: 600;
+      color: var(--bbb-primary);
+      font-size: 0.95rem;
     }
-    
+
     input {
       width: 100%;
-      padding: 0.75rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+      padding: 1rem 1.2rem;
+      border: 2px solid var(--bbb-border);
+      border-radius: 10px;
       font-size: 1rem;
+      font-family: var(--font-family-base);
+      transition: all 0.3s ease;
+      background: #fafafa;
     }
-    
+
+    input:focus {
+      outline: none;
+      border-color: var(--bbb-secondary);
+      background: white;
+      box-shadow: 0 4px 15px rgba(0, 70, 173, 0.15);
+      transform: translateY(-2px);
+    }
+
+    input:hover {
+      border-color: var(--bbb-primary);
+      background: white;
+    }
+
+    /* Login Button */
     button {
       width: 100%;
-      padding: 0.75rem;
-      background: #004c99;
+      padding: 1rem 1.5rem;
+      background: linear-gradient(135deg, var(--bbb-secondary), var(--bbb-primary));
       color: white;
       border: none;
-      border-radius: 4px;
-      font-size: 1rem;
-      font-weight: bold;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: var(--font-family-base);
       cursor: pointer;
-      transition: background 0.3s;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 70, 173, 0.3);
     }
-    
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
     button:hover {
-      background: #003d7a;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 70, 173, 0.4);
     }
-    
+
+    button:active {
+      transform: translateY(-1px);
+    }
+
+    /* Success and Error Messages */
     .error-message {
       color: #dc3545;
-      margin-top: 1rem;
+      margin-top: 1.5rem;
       text-align: center;
       display: none;
+      background: #f8d7da;
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: 1px solid #f5c6cb;
+      font-weight: 500;
+      animation: shake 0.5s ease-in-out;
     }
-    
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .success-message {
+      color: #155724;
+      background: #d4edda;
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: 1px solid #c3e6cb;
+      text-align: center;
+      font-weight: 500;
+      margin-top: 1.5rem;
+      display: none;
+      animation: slideInUp 0.5s ease-out;
+    }
+
+    /* Help Text */
     .help-text {
       text-align: center;
+      margin-top: 2rem;
+      color: var(--bbb-text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    .help-text .credentials {
+      background: var(--bbb-light-green);
+      padding: 1rem;
+      border-radius: 8px;
+      margin-top: 1rem;
+      border-left: 4px solid var(--bbb-gold);
+      font-family: 'Courier New', monospace;
+      font-size: 0.85rem;
+      text-align: left;
+    }
+
+    .credentials-title {
+      font-weight: 600;
+      color: var(--bbb-primary);
+      margin-bottom: 0.5rem;
+      font-family: var(--font-family-base);
+    }
+
+    /* Back to Home Link */
+    .back-home {
+      text-align: center;
       margin-top: 1.5rem;
-      color: #666;
-      font-size: 0.9rem;
+    }
+
+    .back-home a {
+      color: var(--bbb-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .back-home a:hover {
+      color: var(--bbb-primary);
+      transform: translateX(-3px);
+    }
+
+    /* Loading State */
+    .loading {
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .loading button {
+      background: #6c757d;
+      cursor: not-allowed;
+    }
+
+    .loading button::after {
+      content: '';
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ffffff;
+      border-radius: 50%;
+      border-top-color: transparent;
+      animation: spin 1s ease-in-out infinite;
+      margin-left: 10px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Golf Ball Decoration */
+    .golf-ball {
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      position: relative;
+      display: inline-block;
+      margin: 0 8px;
+      box-shadow: inset -2px -2px 4px rgba(0,0,0,0.2);
+    }
+
+    .golf-ball::before {
+      content: '';
+      position: absolute;
+      width: 1.5px;
+      height: 1.5px;
+      background: #ccc;
+      border-radius: 50%;
+      top: 3px;
+      left: 5px;
+      box-shadow: 3px 0 #ccc, 6px 0 #ccc, 1.5px 3px #ccc, 4.5px 3px #ccc, 7.5px 3px #ccc, 3px 6px #ccc, 6px 6px #ccc;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .login-container {
+        margin: 1rem;
+        padding: 2rem 1.5rem;
+        max-width: 400px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .logo {
+        max-width: 100px;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      input, button {
+        padding: 0.9rem 1rem;
+        font-size: 0.95rem;
+      }
+
+      .help-text {
+        font-size: 0.9rem;
+      }
+
+      .credentials {
+        font-size: 0.8rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 0.5rem;
+      }
+
+      .login-container {
+        padding: 1.5rem 1rem;
+        margin: 0.5rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .logo {
+        max-width: 90px;
+      }
+
+      .logo-title {
+        font-size: 1.1rem;
+      }
+
+      .founded-badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.6rem;
+      }
     }
   </style>
   
@@ -110,44 +439,56 @@
 <body>
   <div class="login-container">
     <div class="logo-container">
-      <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="logo">
+      <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="logo">
+      <div class="logo-title">Birdie Bush Bandits</div>
+      <div class="founded-badge">
+        🏌️ Founded August 2020
+      </div>
     </div>
     
-    <h1>BBB Member Login</h1>
+    <h1>Member Login <span class="golf-ball"></span></h1>
     
     <form id="login-form">
       <div class="form-group">
         <label for="username">Username</label>
-        <input type="text" id="username" name="username" placeholder="Enter your username" required>
+        <input type="text" id="username" name="username" placeholder="Enter your username" required autocomplete="username">
       </div>
       
       <div class="form-group">
         <label for="password">Password</label>
-        <input type="password" id="password" name="password" placeholder="Enter your password" required>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
       </div>
       
-      <button type="submit">Login</button>
+      <button type="submit" id="login-btn">Login to BBB</button>
       
       <div id="error-message" class="error-message">
-        Invalid username or password. Please try again.
+        <strong>Login Failed:</strong> Invalid username or password. Please try again.
+      </div>
+
+      <div id="success-message" class="success-message">
+        <strong>Success!</strong> Welcome back to BBB! Redirecting you now...
       </div>
     </form>
     
     <div class="help-text">
-      <!-- Add this comment with credentials for site owner -->
-      <!-- 
-      DEVELOPER NOTE:
-      Temporary admin credentials:
-      Username: admin
-      Password: bbb123
-      -->
-      Need help? Contact your club administrator.
+      <div class="credentials-title">🔐 Demo Credentials for Testing:</div>
+      <div class="credentials">
+        <strong>Username:</strong> admin<br>
+        <strong>Password:</strong> bbb123
+      </div>
+      <p style="margin-top: 1rem;">Need help? Contact your club administrator.</p>
+    </div>
+
+    <div class="back-home">
+      <a href="index.html">← Back to Home</a>
     </div>
   </div>
   
   <script>
     // Initialize modules
     document.addEventListener('DOMContentLoaded', function() {
+      console.log('Initializing login page...');
+      
       // Initialize auth system
       BBB_AUTH.init({
         cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
@@ -161,41 +502,185 @@
       
       // Check if already logged in
       if (BBB_AUTH.isAuthenticated) {
-        // Redirect to index or saved page
-        redirectAfterLogin();
+        console.log('User already authenticated, redirecting...');
+        showSuccessMessage();
+        setTimeout(() => {
+          redirectAfterLogin();
+        }, 1500);
+        return;
       }
       
       // Set up login form
       const loginForm = document.getElementById('login-form');
+      const loginBtn = document.getElementById('login-btn');
+      const errorMessage = document.getElementById('error-message');
+      const successMessage = document.getElementById('success-message');
+      
       loginForm.addEventListener('submit', function(event) {
         event.preventDefault();
         
-        const username = document.getElementById('username').value;
+        const username = document.getElementById('username').value.trim();
         const password = document.getElementById('password').value;
+        
+        // Validate inputs
+        if (!username || !password) {
+          showErrorMessage('Please enter both username and password.');
+          return;
+        }
+        
+        // Show loading state
+        setLoadingState(true);
+        hideMessages();
         
         // Try to login
         BBB_AUTH.login(username, password)
           .then(user => {
             console.log('Login successful:', user);
-            // Redirect after login
-            redirectAfterLogin();
+            setLoadingState(false);
+            
+            // Set authentication session with 24-hour expiration
+            setAuthSession(user);
+            
+            // Show success message
+            showSuccessMessage();
+            
+            // Redirect after brief delay
+            setTimeout(() => {
+              redirectAfterLogin();
+            }, 1500);
           })
           .catch(err => {
             console.error('Login error:', err);
-            // Show error message
-            document.getElementById('error-message').style.display = 'block';
+            setLoadingState(false);
+            showErrorMessage('Invalid username or password. Please check your credentials and try again.');
           });
       });
       
-      // Function to redirect after login
-      function redirectAfterLogin() {
-        // Get saved redirect URL or default to index
-        const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || 'index.html';
-        // Clear saved URL
-        sessionStorage.removeItem('redirectAfterLogin');
-        // Redirect
-        window.location.href = redirectUrl;
+      // Auto-focus username field
+      document.getElementById('username').focus();
+      
+      // Enter key handling
+      document.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter' && !loginForm.querySelector('.loading')) {
+          loginForm.dispatchEvent(new Event('submit'));
+        }
+      });
+    });
+
+    /**
+     * Set authentication session with expiration
+     */
+    function setAuthSession(user) {
+      const expirationTime = new Date();
+      expirationTime.setHours(expirationTime.getHours() + 24); // 24 hour expiration
+      
+      const authData = {
+        expiresAt: expirationTime.toISOString(),
+        loginTime: new Date().toISOString()
+      };
+      
+      localStorage.setItem('bbb_auth_session', JSON.stringify(authData));
+      localStorage.setItem('bbb_current_user', JSON.stringify(user));
+      
+      console.log('Session set to expire at:', expirationTime);
+    }
+
+    /**
+     * Function to redirect after login
+     */
+    function redirectAfterLogin() {
+      // Get saved redirect URL or default to index
+      const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || 'index.html';
+      // Clear saved URL
+      sessionStorage.removeItem('redirectAfterLogin');
+      
+      console.log('Redirecting to:', redirectUrl);
+      
+      // Redirect
+      window.location.href = redirectUrl;
+    }
+
+    /**
+     * Show loading state
+     */
+    function setLoadingState(loading) {
+      const form = document.getElementById('login-form');
+      const button = document.getElementById('login-btn');
+      
+      if (loading) {
+        form.classList.add('loading');
+        button.textContent = 'Logging in...';
+        button.disabled = true;
+      } else {
+        form.classList.remove('loading');
+        button.textContent = 'Login to BBB';
+        button.disabled = false;
       }
+    }
+
+    /**
+     * Show error message
+     */
+    function showErrorMessage(message) {
+      const errorDiv = document.getElementById('error-message');
+      const successDiv = document.getElementById('success-message');
+      
+      if (message) {
+        errorDiv.innerHTML = `<strong>Login Failed:</strong> ${message}`;
+      }
+      
+      successDiv.style.display = 'none';
+      errorDiv.style.display = 'block';
+      
+      // Auto-hide after 5 seconds
+      setTimeout(() => {
+        errorDiv.style.display = 'none';
+      }, 5000);
+    }
+
+    /**
+     * Show success message
+     */
+    function showSuccessMessage() {
+      const errorDiv = document.getElementById('error-message');
+      const successDiv = document.getElementById('success-message');
+      
+      errorDiv.style.display = 'none';
+      successDiv.style.display = 'block';
+    }
+
+    /**
+     * Hide all messages
+     */
+    function hideMessages() {
+      document.getElementById('error-message').style.display = 'none';
+      document.getElementById('success-message').style.display = 'none';
+    }
+
+    // Add some interactive effects
+    document.addEventListener('DOMContentLoaded', function() {
+      // Add golf ball hover effect
+      const golfBalls = document.querySelectorAll('.golf-ball');
+      golfBalls.forEach(ball => {
+        ball.addEventListener('mouseenter', function() {
+          this.style.transform = 'rotate(360deg)';
+          this.style.transition = 'transform 0.5s ease';
+        });
+        
+        ball.addEventListener('mouseleave', function() {
+          this.style.transform = 'rotate(0deg)';
+        });
+      });
+
+      // Add floating animation to container on hover
+      const container = document.querySelector('.login-container');
+      container.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-8px)';
+      });
+      
+      container.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(-5px)';
+      });
     });
   </script>
 </body>
