@@ -6,10 +6,8 @@
   <title>Login - Birdie Bush Bandits</title>
   <meta name="description" content="Login to access the Birdie Bush Bandits golf group website.">
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
-  
   <!-- Add Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
-  
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
   <!-- Global CSS -->
   <link rel="stylesheet" href="css/style.css">
   
@@ -233,6 +231,17 @@
       transform: translateY(-1px);
     }
 
+    button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 2px 5px rgba(108, 117, 125, 0.2);
+    }
+
+    button:disabled::before {
+      display: none;
+    }
+
     /* Success and Error Messages */
     .error-message {
       color: #dc3545;
@@ -264,6 +273,21 @@
       margin-top: 1.5rem;
       display: none;
       animation: slideInUp 0.5s ease-out;
+    }
+
+    /* Loading State */
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--bbb-secondary);
+      font-weight: 500;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
     }
 
     /* Help Text */
@@ -312,33 +336,6 @@
     .back-home a:hover {
       color: var(--bbb-primary);
       transform: translateX(-3px);
-    }
-
-    /* Loading State */
-    .loading {
-      pointer-events: none;
-      opacity: 0.7;
-    }
-
-    .loading button {
-      background: #6c757d;
-      cursor: not-allowed;
-    }
-
-    .loading button::after {
-      content: '';
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 2px solid #ffffff;
-      border-radius: 50%;
-      border-top-color: transparent;
-      animation: spin 1s ease-in-out infinite;
-      margin-left: 10px;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
     }
 
     /* Golf Ball Decoration */
@@ -461,6 +458,10 @@
       
       <button type="submit" id="login-btn">Login to BBB</button>
       
+      <div id="loading" class="loading">
+        <strong>🏌️ Logging you in...</strong> Please wait while we authenticate your credentials.
+      </div>
+      
       <div id="error-message" class="error-message">
         <strong>Login Failed:</strong> Invalid username or password. Please try again.
       </div>
@@ -485,168 +486,222 @@
   </div>
   
   <script>
+    // Prevent login loop by tracking login state
+    let isLoggingIn = false;
+    let loginProcessed = false;
+
     // Initialize modules
     document.addEventListener('DOMContentLoaded', function() {
       console.log('Initializing login page...');
       
+      // Check if BBB modules are loaded
+      if (typeof BBB_CONFIG === 'undefined' || 
+          typeof BBB_AUTH === 'undefined' || 
+          typeof BBB_DB === 'undefined') {
+        console.error('Required BBB modules not found!');
+        showError('System error: Authentication modules not loaded.');
+        return;
+      }
+
       // Initialize auth system
-      BBB_AUTH.init({
-        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
-      });
-      
-      // Initialize database
-      BBB_DB.init({
-        useCloudflare: BBB_CONFIG.cloudflareEnabled,
-        localStoragePrefix: 'bbb_'
-      });
-      
-      // Check if already logged in
-      if (BBB_AUTH.isAuthenticated) {
-        console.log('User already authenticated, redirecting...');
-        showSuccessMessage();
-        setTimeout(() => {
-          redirectAfterLogin();
-        }, 1500);
+      try {
+        BBB_AUTH.init({
+          cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+        });
+        
+        // Initialize database
+        BBB_DB.init({
+          useCloudflare: BBB_CONFIG.cloudflareEnabled,
+          localStoragePrefix: 'bbb_'
+        });
+
+        console.log('BBB modules initialized successfully');
+      } catch (error) {
+        console.error('Error initializing BBB modules:', error);
+        showError('System error: Failed to initialize authentication.');
         return;
       }
       
+      // Check if already logged in (but only if we haven't processed login yet)
+      if (!loginProcessed && !isLoggingIn) {
+        checkExistingAuth();
+      }
+      
       // Set up login form
+      setupLoginForm();
+    });
+
+    /**
+     * Check if user is already authenticated
+     */
+    function checkExistingAuth() {
+      console.log('Checking existing authentication...');
+      
+      try {
+        // Check localStorage for existing session
+        const storedAuth = localStorage.getItem('bbb_auth_session');
+        const storedUser = localStorage.getItem('bbb_current_user');
+        
+        if (storedAuth && storedUser) {
+          console.log('Found stored authentication data');
+          
+          const authData = JSON.parse(storedAuth);
+          const userData = JSON.parse(storedUser);
+          
+          // Check if session is still valid
+          if (authData.expiresAt && new Date(authData.expiresAt) > new Date()) {
+            console.log('Valid session found for user:', userData.id);
+            
+            // Restore authentication state
+            BBB_AUTH.currentUser = userData;
+            BBB_AUTH.isAuthenticated = true;
+            
+            // Show success and redirect
+            showSuccess('Already logged in! Redirecting...');
+            setTimeout(() => {
+              redirectAfterLogin();
+            }, 1000);
+            
+            return;
+          } else {
+            console.log('Session expired, clearing stored data');
+            clearStoredAuth();
+          }
+        }
+        
+        // Check BBB_AUTH state
+        if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+          console.log('User already authenticated in current session');
+          showSuccess('Already logged in! Redirecting...');
+          setTimeout(() => {
+            redirectAfterLogin();
+          }, 1000);
+        } else {
+          console.log('No existing authentication found');
+        }
+      } catch (error) {
+        console.error('Error checking existing auth:', error);
+        clearStoredAuth();
+      }
+    }
+
+    /**
+     * Clear stored authentication data
+     */
+    function clearStoredAuth() {
+      localStorage.removeItem('bbb_auth_session');
+      localStorage.removeItem('bbb_current_user');
+      BBB_AUTH.currentUser = null;
+      BBB_AUTH.isAuthenticated = false;
+    }
+
+    /**
+     * Set up the login form handlers
+     */
+    function setupLoginForm() {
       const loginForm = document.getElementById('login-form');
       const loginBtn = document.getElementById('login-btn');
-      const errorMessage = document.getElementById('error-message');
-      const successMessage = document.getElementById('success-message');
       
       loginForm.addEventListener('submit', function(event) {
         event.preventDefault();
         
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
-        
-        // Validate inputs
-        if (!username || !password) {
-          showErrorMessage('Please enter both username and password.');
+        // Prevent multiple login attempts
+        if (isLoggingIn || loginProcessed) {
+          console.log('Login already in progress or completed');
           return;
         }
         
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        
+        if (!username || !password) {
+          showError('Please enter both username and password.');
+          return;
+        }
+        
+        // Set login state
+        isLoggingIn = true;
+        
         // Show loading state
-        setLoadingState(true);
+        showLoading();
+        loginBtn.disabled = true;
+        
+        // Clear any previous messages
         hideMessages();
+        
+        console.log('Attempting login for user:', username);
         
         // Try to login
         BBB_AUTH.login(username, password)
           .then(user => {
             console.log('Login successful:', user);
-            setLoadingState(false);
+            loginProcessed = true;
             
-            // Set authentication session with 24-hour expiration
-            setAuthSession(user);
+            // Store session with expiration (24 hours)
+            const expiresAt = new Date();
+            expiresAt.setHours(expiresAt.getHours() + 24);
+            
+            const authSession = {
+              timestamp: new Date().toISOString(),
+              expiresAt: expiresAt.toISOString(),
+              userId: user.id
+            };
+            
+            localStorage.setItem('bbb_auth_session', JSON.stringify(authSession));
+            localStorage.setItem('bbb_current_user', JSON.stringify(user));
             
             // Show success message
-            showSuccessMessage();
+            showSuccess('Login successful! Redirecting...');
             
-            // Redirect after brief delay
+            // Wait a moment then redirect
             setTimeout(() => {
               redirectAfterLogin();
             }, 1500);
           })
           .catch(err => {
             console.error('Login error:', err);
-            setLoadingState(false);
-            showErrorMessage('Invalid username or password. Please check your credentials and try again.');
+            isLoggingIn = false;
+            loginBtn.disabled = false;
+            hideLoading();
+            
+            // Show error message
+            showError('Invalid username or password. Please try again.');
           });
       });
-      
-      // Auto-focus username field
-      document.getElementById('username').focus();
-      
-      // Enter key handling
-      document.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter' && !loginForm.querySelector('.loading')) {
-          loginForm.dispatchEvent(new Event('submit'));
-        }
-      });
-    });
-
-    /**
-     * Set authentication session with expiration
-     */
-    function setAuthSession(user) {
-      const expirationTime = new Date();
-      expirationTime.setHours(expirationTime.getHours() + 24); // 24 hour expiration
-      
-      const authData = {
-        expiresAt: expirationTime.toISOString(),
-        loginTime: new Date().toISOString()
-      };
-      
-      localStorage.setItem('bbb_auth_session', JSON.stringify(authData));
-      localStorage.setItem('bbb_current_user', JSON.stringify(user));
-      
-      console.log('Session set to expire at:', expirationTime);
-    }
-
-    /**
-     * Function to redirect after login
-     */
-    function redirectAfterLogin() {
-      // Get saved redirect URL or default to index
-      const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || 'index.html';
-      // Clear saved URL
-      sessionStorage.removeItem('redirectAfterLogin');
-      
-      console.log('Redirecting to:', redirectUrl);
-      
-      // Redirect
-      window.location.href = redirectUrl;
     }
 
     /**
      * Show loading state
      */
-    function setLoadingState(loading) {
-      const form = document.getElementById('login-form');
-      const button = document.getElementById('login-btn');
-      
-      if (loading) {
-        form.classList.add('loading');
-        button.textContent = 'Logging in...';
-        button.disabled = true;
-      } else {
-        form.classList.remove('loading');
-        button.textContent = 'Login to BBB';
-        button.disabled = false;
-      }
+    function showLoading() {
+      document.getElementById('loading').style.display = 'block';
+    }
+
+    /**
+     * Hide loading state
+     */
+    function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
     }
 
     /**
      * Show error message
      */
-    function showErrorMessage(message) {
-      const errorDiv = document.getElementById('error-message');
-      const successDiv = document.getElementById('success-message');
-      
-      if (message) {
-        errorDiv.innerHTML = `<strong>Login Failed:</strong> ${message}`;
-      }
-      
-      successDiv.style.display = 'none';
-      errorDiv.style.display = 'block';
-      
-      // Auto-hide after 5 seconds
-      setTimeout(() => {
-        errorDiv.style.display = 'none';
-      }, 5000);
+    function showError(message) {
+      hideMessages();
+      const errorElement = document.getElementById('error-message');
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
     }
 
     /**
      * Show success message
      */
-    function showSuccessMessage() {
-      const errorDiv = document.getElementById('error-message');
-      const successDiv = document.getElementById('success-message');
-      
-      errorDiv.style.display = 'none';
-      successDiv.style.display = 'block';
+    function showSuccess(message) {
+      hideMessages();
+      const successElement = document.getElementById('success-message');
+      successElement.textContent = message;
+      successElement.style.display = 'block';
     }
 
     /**
@@ -655,32 +710,54 @@
     function hideMessages() {
       document.getElementById('error-message').style.display = 'none';
       document.getElementById('success-message').style.display = 'none';
+      document.getElementById('loading').style.display = 'none';
     }
 
-    // Add some interactive effects
-    document.addEventListener('DOMContentLoaded', function() {
-      // Add golf ball hover effect
-      const golfBalls = document.querySelectorAll('.golf-ball');
-      golfBalls.forEach(ball => {
-        ball.addEventListener('mouseenter', function() {
-          this.style.transform = 'rotate(360deg)';
-          this.style.transition = 'transform 0.5s ease';
-        });
+    /**
+     * Redirect after successful login
+     */
+    function redirectAfterLogin() {
+      try {
+        // Set flag to indicate successful login
+        sessionStorage.setItem('justLoggedIn', 'true');
         
-        ball.addEventListener('mouseleave', function() {
-          this.style.transform = 'rotate(0deg)';
-        });
-      });
+        // Get saved redirect URL or default to index
+        const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || 'index.html';
+        
+        console.log('Redirecting to:', redirectUrl);
+        
+        // Clear saved URL
+        sessionStorage.removeItem('redirectAfterLogin');
+        
+        // Add a small delay to ensure state is properly saved
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 100);
+        
+      } catch (error) {
+        console.error('Error during redirect:', error);
+        // Fallback to index.html
+        sessionStorage.setItem('justLoggedIn', 'true');
+        window.location.href = 'index.html';
+      }
+    }
 
-      // Add floating animation to container on hover
-      const container = document.querySelector('.login-container');
-      container.addEventListener('mouseenter', function() {
-        this.style.transform = 'translateY(-8px)';
-      });
-      
-      container.addEventListener('mouseleave', function() {
-        this.style.transform = 'translateY(-5px)';
-      });
+    // Prevent back button from causing issues
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted) {
+        // Page was loaded from cache, reset login state
+        console.log('Page loaded from cache, resetting login state');
+        isLoggingIn = false;
+        loginProcessed = false;
+        hideMessages();
+        document.getElementById('login-btn').disabled = false;
+      }
+    });
+
+    // Handle browser navigation
+    window.addEventListener('beforeunload', function() {
+      // Reset state when leaving page
+      isLoggingIn = false;
     });
   </script>
 </body>
