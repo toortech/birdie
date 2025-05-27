@@ -6,8 +6,10 @@
   <title>Birdie Bush Bandits – Members</title>
   <meta name="description" content="Meet the members of Birdie Bush Bandits golf group, view their handicaps and latest scores.">
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  
   <!-- Add Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  
   <!-- Global CSS -->
   <link rel="stylesheet" href="css/style.css">
   
@@ -17,6 +19,551 @@
   <script src="js/auth.js"></script>
   <script src="js/db.js"></script>
   <script src="js/ui.js"></script>
+
+  <style>
+    /* Enhanced CSS Variables - Same as about.html */
+    :root {
+      --bbb-primary: #004d00;
+      --bbb-secondary: #0046ad;
+      --bbb-gold: #ffd700;
+      --bbb-light-green: #e8f5e8;
+      --bbb-background: #f5f5f5;
+      --bbb-text: #212529;
+      --bbb-text-muted: #6c757d;
+      --bbb-border: #dee2e6;
+      --font-family-base: 'Inter', sans-serif;
+      --font-family-accent: 'Montserrat', serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family-base);
+      line-height: 1.6;
+      color: var(--bbb-text);
+      background: linear-gradient(135deg, var(--bbb-light-green) 0%, var(--bbb-background) 100%);
+      min-height: 100vh;
+    }
+
+    /* Header with Logo - Same as about.html */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header-logo {
+      height: 50px;
+      width: auto;
+      transition: transform 0.3s ease;
+    }
+
+    .header-logo:hover {
+      transform: scale(1.05);
+    }
+
+    .header-title {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-left: 1rem;
+      text-decoration: none;
+    }
+
+    .header-title:hover {
+      color: var(--bbb-secondary);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .founded-badge-header {
+      display: inline-block;
+      background: var(--bbb-gold);
+      color: var(--bbb-primary);
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-left: 1rem;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    }
+
+    /* User info and auth controls */
+    .user-info {
+      color: var(--bbb-primary);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .logout-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+
+    .logout-btn:hover {
+      background: #c82333;
+    }
+
+    .home-btn {
+      background: var(--bbb-secondary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.3s;
+    }
+
+    .home-btn:hover {
+      background: var(--bbb-primary);
+    }
+
+    /* Members Page Specific Styles - Updated to match about.html pattern */
+    .members-hero {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+      color: var(--bbb-text);
+      text-align: center;
+      padding: 4rem 2rem 3rem 2rem;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 3px solid #dee2e6;
+      margin-top: 90px; /* Account for fixed header */
+    }
+
+    .members-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 77, 0, 0.03) 0%, transparent 70%);
+      animation: rotate 30s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .members-hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .members-hero h1 {
+      font-family: var(--font-family-accent);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      color: var(--bbb-primary);
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+      animation: fadeInUp 1s ease-out;
+      margin: 0 0 1rem 0;
+    }
+
+    .members-hero .tagline {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--bbb-text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+      animation: fadeInUp 1s ease-out 0.3s both;
+      font-weight: 500;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .members-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* Enhanced intro section */
+    .intro-section {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      margin: 4rem 0;
+      text-align: center;
+    }
+
+    .intro-section:hover {
+      border-color: var(--bbb-gold);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    .intro-text {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: var(--bbb-secondary);
+      margin-bottom: 2rem;
+      line-height: 1.7;
+    }
+
+    .stats-row {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, var(--bbb-light-green), rgba(255, 215, 0, 0.1));
+      border-radius: 15px;
+      padding: 1.5rem;
+      min-width: 150px;
+      text-align: center;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      border-left: 4px solid var(--bbb-gold);
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .stat-card .stat-icon {
+      font-size: 1.5rem;
+      margin-bottom: 0.5rem;
+      color: var(--bbb-primary);
+    }
+
+    .stat-card .stat-number {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 0.25rem;
+      color: var(--bbb-primary);
+    }
+
+    .stat-card .stat-label {
+      font-size: 0.9rem;
+      color: var(--bbb-text-muted);
+    }
+
+    /* Controls section */
+    .controls-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      margin: 2rem 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .controls-section h3 {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      margin: 0;
+      font-size: 1.5rem;
+    }
+
+    .sort-container {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .sort-container label {
+      font-family: var(--font-family-accent);
+      font-weight: 600;
+      color: var(--bbb-text-muted);
+      margin-right: 0.5rem;
+    }
+
+    .sort-container select {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      border: 2px solid var(--bbb-border);
+      background: white;
+      font-family: var(--font-family-base);
+      transition: border-color 0.3s ease;
+    }
+
+    .sort-container select:focus {
+      border-color: var(--bbb-secondary);
+    }
+
+    /* Enhanced member cards */
+    .members-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 2rem;
+      margin: 2rem 0;
+    }
+
+    .member-card {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .member-card:hover {
+      border-color: var(--bbb-gold);
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .member-card .card-header {
+      background: linear-gradient(135deg, var(--bbb-light-green), white);
+      padding: 1.5rem;
+      border-bottom: 2px solid #f0f0f0;
+    }
+
+    .member-card .card-content {
+      padding: 1.5rem;
+    }
+
+    .member-card h3 {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      font-size: 1.3rem;
+      margin-bottom: 0.5rem;
+    }
+
+    /* Enhanced buttons to match about.html style */
+    .btn, button.btn {
+      background: #6c757d;
+      color: white;
+      padding: 0.75rem 1.5rem;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      display: inline-block;
+      box-shadow: 0 4px 15px rgba(108, 117, 125, 0.2);
+      text-align: center;
+      border: 2px solid transparent;
+      font-family: var(--font-family-accent);
+      cursor: pointer;
+    }
+
+    .btn:hover, button.btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
+      background: #5a6268;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    /* Member-only content styling */
+    .member-only {
+      display: none; /* Hidden by default, shown for authenticated users */
+    }
+
+    .auth-required {
+      /* Will be hidden for non-authenticated users */
+    }
+
+    /* Golf-specific decorative elements */
+    .golf-ball {
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      position: relative;
+      display: inline-block;
+      margin: 0 10px;
+      box-shadow: inset -3px -3px 5px rgba(0,0,0,0.2);
+    }
+
+    .golf-ball::before {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #ccc;
+      border-radius: 50%;
+      top: 4px;
+      left: 6px;
+      box-shadow: 4px 0 #ccc, 8px 0 #ccc, 2px 4px #ccc, 6px 4px #ccc, 10px 4px #ccc, 4px 8px #ccc, 8px 8px #ccc;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .header {
+        padding: 0.75rem 1rem;
+      }
+
+      .header-logo {
+        height: 40px;
+      }
+
+      .header-title {
+        font-size: 1.2rem;
+        margin-left: 0.5rem;
+      }
+
+      .header-content {
+        flex-wrap: wrap;
+      }
+
+      .header-right {
+        margin-top: 0.5rem;
+      }
+
+      .founded-badge-header {
+        margin-left: 0.5rem;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+      }
+
+      .members-hero {
+        padding: 2rem 1rem 1.5rem 1rem;
+        margin-top: 120px; /* Extra space for mobile header that may wrap */
+      }
+
+      .members-hero h1 {
+        font-size: 2rem;
+        line-height: 1.2;
+      }
+
+      .members-hero .tagline {
+        font-size: 1rem;
+        padding: 0 1rem;
+      }
+
+      .members-main {
+        padding: 0 1rem;
+      }
+
+      .intro-section {
+        padding: 2rem;
+        margin: 2rem 0;
+      }
+
+      .intro-text {
+        font-size: 1.1rem;
+      }
+
+      .stats-row {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .stat-card {
+        min-width: 200px;
+      }
+
+      .controls-section {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding: 1.5rem;
+      }
+
+      .members-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .member-card .card-header,
+      .member-card .card-content {
+        padding: 1.25rem;
+      }
+    }
+
+    /* Extra small mobile devices */
+    @media (max-width: 480px) {
+      .members-hero {
+        padding: 1.5rem 0.75rem 1rem 0.75rem;
+      }
+
+      .members-hero h1 {
+        font-size: 1.75rem;
+      }
+
+      .members-hero .tagline {
+        font-size: 0.95rem;
+      }
+
+      .members-main {
+        padding: 0 0.75rem;
+      }
+
+      .intro-section {
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+      }
+
+      .stat-card {
+        min-width: 180px;
+        padding: 1.25rem;
+      }
+
+      .controls-section {
+        padding: 1.25rem;
+      }
+
+      .member-card .card-header,
+      .member-card .card-content {
+        padding: 1rem;
+      }
+    }
+  </style>
 </head>
 <body>
   <!-- Authentication Protection -->
@@ -39,175 +586,354 @@
     });
   </script>
   
-  <!-- Rest of your page content -->
   <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- Fixed Header with Logo - Same as about.html -->
+  <header class="header">
+    <div class="header-content">
+      <div class="header-left">
+        <a href="index.html">
+          <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="header-logo">
+        </a>
+        <a href="index.html" class="header-title">Birdie Bush Bandits</a>
+        <div class="founded-badge-header">
+          🏌️ Founded August 2020
+        </div>
+      </div>
+      <div class="header-right">
+        <!-- Auth controls will be added here by JavaScript -->
+        <a href="index.html" class="home-btn" id="home-link">Home</a>
+      </div>
+    </div>
+  </header>
   
-  <main id="main"></main>
-  
+  <main id="main">
+    <!-- Hero Section - Same style as about.html -->
+    <section class="members-hero">
+      <div class="members-hero-content">
+        <h1>Meet the Bandits <span class="golf-ball"></span></h1>
+        <p class="tagline">Our dedicated golfers who make the BBB community special</p>
+      </div>
+    </section>
+
+    <!-- Main Members Content -->
+    <div class="members-main">
+      <!-- Enhanced intro section -->
+      <section class="intro-section">
+        <p class="intro-text">Meet our dedicated golfers who make up the Birdie Bush Bandits. From beginners to seasoned players, our diverse group enjoys friendly competition and camaraderie on the course.</p>
+        
+        <!-- Stats row will be populated by JavaScript -->
+        <div class="stats-row" id="stats-row">
+          <!-- Stats will be added here -->
+        </div>
+      </section>
+
+      <!-- Member Only Section -->
+      <section class="member-only">
+        <div style="background: #e8f5e8; padding: 2rem; margin: 2rem 0; border-radius: 10px; text-align: center;">
+          <h3 style="color: #004d00; margin-bottom: 1rem;">🏌️ Welcome Back, Member!</h3>
+          <p>View detailed member profiles, handicaps, and recent performance statistics.</p>
+        </div>
+      </section>
+
+      <!-- Controls section -->
+      <section class="controls-section">
+        <h3>Member Directory</h3>
+        <div class="sort-container">
+          <label for="sort-select">Sort by:</label>
+          <select id="sort-select">
+            <option value="name-asc">Name A-Z</option>
+            <option value="name-desc">Name Z-A</option>
+            <option value="handicap-asc">Handicap (Low to High)</option>
+            <option value="handicap-desc">Handicap (High to Low)</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Members grid -->
+      <div class="members-grid" id="members-grid">
+        <!-- Member cards will be populated by JavaScript -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Enhanced Authentication Integration Script -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      console.log('Initializing members page with authentication...');
+      
+      // Check if BBB modules are loaded
+      if (typeof BBB_CONFIG === 'undefined' || 
+          typeof BBB_AUTH === 'undefined' || 
+          typeof BBB_DB === 'undefined' || 
+          typeof BBB_UI === 'undefined' || 
+          typeof BBB_UTILS === 'undefined') {
+        console.error('Required BBB modules not found!');
+        initializePublicPage();
+        return;
+      }
+      
       // Initialize modules
-      BBB_AUTH.init({
-        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+      try {
+        BBB_AUTH.init({
+          cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+        });
+        
+        BBB_DB.init({
+          useCloudflare: BBB_CONFIG.cloudflareEnabled,
+          localStoragePrefix: 'bbb_'
+        });
+        
+        console.log('Modules initialized successfully');
+      } catch (error) {
+        console.error('Error initializing modules:', error);
+        initializePublicPage();
+        return;
+      }
+      
+      // Check authentication and render page accordingly
+      checkPageAuthentication();
+      
+      // Add scroll animations
+      addScrollAnimations();
+    });
+
+    /**
+     * Main authentication check for members page
+     */
+    function checkPageAuthentication() {
+      console.log('Checking page authentication...');
+      
+      // Try to restore session from localStorage
+      const hasStoredAuth = restoreAuthSession();
+      
+      if (hasStoredAuth) {
+        console.log('Restored authentication from storage');
+        initializeAuthenticatedPage();
+      } else {
+        console.log('No stored authentication, checking current auth state...');
+        
+        // Check if already authenticated in current session
+        if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+          console.log('User already authenticated in current session');
+          initializeAuthenticatedPage();
+        } else {
+          console.log('User not authenticated, showing public page');
+          initializePublicPage();
+        }
+      }
+    }
+
+    /**
+     * Restore authentication session from localStorage
+     */
+    function restoreAuthSession() {
+      try {
+        const storedAuth = localStorage.getItem('bbb_auth_session');
+        const storedUser = localStorage.getItem('bbb_current_user');
+        
+        if (storedAuth && storedUser) {
+          console.log('Found stored authentication data');
+          
+          const authData = JSON.parse(storedAuth);
+          const userData = JSON.parse(storedUser);
+          
+          // Check if session is still valid
+          if (authData.expiresAt && new Date(authData.expiresAt) > new Date()) {
+            console.log('Restoring valid session for user:', userData.id);
+            
+            // Restore authentication state
+            BBB_AUTH.currentUser = userData;
+            BBB_AUTH.isAuthenticated = true;
+            
+            return true;
+          } else {
+            console.log('Session expired, clearing stored data');
+            clearAuthSession();
+          }
+        }
+        
+        return false;
+      } catch (error) {
+        console.error('Error restoring auth session:', error);
+        clearAuthSession();
+        return false;
+      }
+    }
+
+    /**
+     * Clear authentication session
+     */
+    function clearAuthSession() {
+      localStorage.removeItem('bbb_auth_session');
+      localStorage.removeItem('bbb_current_user');
+      BBB_AUTH.currentUser = null;
+      BBB_AUTH.isAuthenticated = false;
+    }
+
+    /**
+     * Initialize page for authenticated users
+     */
+    function initializeAuthenticatedPage() {
+      console.log('Initializing authenticated page for user:', BBB_AUTH.currentUser?.id);
+      
+      // Start session monitoring
+      startSessionMonitoring();
+      
+      // Show authenticated content
+      showAuthenticatedContent();
+      
+      // Add logout functionality to header
+      addLogoutFunctionality();
+      
+      // Show user info
+      showUserInfo();
+      
+      // Load member data
+      loadMemberData();
+    }
+
+    /**
+     * Initialize page for public (non-authenticated) users
+     */
+    function initializePublicPage() {
+      console.log('Initializing public page');
+      
+      // Show public content
+      showPublicContent();
+      
+      // Keep home button visible
+      const homeLink = document.getElementById('home-link');
+      if (homeLink) {
+        homeLink.style.display = 'inline-block';
+      }
+      
+      // Load limited member data for public view
+      loadMemberData();
+    }
+
+    /**
+     * Show content for authenticated users
+     */
+    function showAuthenticatedContent() {
+      // Show member-specific content
+      const memberContent = document.querySelectorAll('.member-only');
+      memberContent.forEach(element => {
+        element.style.display = 'block';
       });
-      
-      BBB_DB.init({
-        useCloudflare: BBB_CONFIG.cloudflareEnabled,
-        localStoragePrefix: 'bbb_'
+    }
+
+    /**
+     * Show content for public users
+     */
+    function showPublicContent() {
+      // Hide member-only content
+      const memberContent = document.querySelectorAll('.member-only');
+      memberContent.forEach(element => {
+        element.style.display = 'none';
       });
-      
-      // Create header
-      const headerElements = BBB_UI.createHeader({
-        fixed: true,
-        showHomeLinkText: true
-      });
-      
-      document.body.insertBefore(headerElements.header, document.body.firstChild);
-      
-      // Get main content element
-      const main = document.getElementById('main');
-      main.appendChild(headerElements.mainWrapper);
-      
-      // Create page content
-      const mainContent = document.createElement('div');
-      
-      // Create page title
-      const titleContainer = BBB_UI.createPageTitle({
-        title: 'Birdie Bush Bandits',
-        showFoundedText: true,
-        showGolfballs: true
-      });
-      mainContent.appendChild(titleContainer);
-      
-      // Add page subtitle
-      const subtitle = document.createElement('h2');
-      subtitle.textContent = 'Members';
-      mainContent.appendChild(subtitle);
-      
-      // Create status message container
-      const statusMessage = BBB_UI.createStatusMessage();
-      mainContent.appendChild(statusMessage);
-      
-      // Enhanced intro section with stats
-      const introSection = document.createElement('div');
-      introSection.className = 'intro-section';
-      introSection.style.marginBottom = '2.5rem';
+    }
 
-      const introText = document.createElement('p');
-      introText.className = 'intro-text';
-      introText.textContent = 'Meet our dedicated golfers who make up the Birdie Bush Bandits. From beginners to seasoned players, our diverse group enjoys friendly competition and camaraderie on the course.';
-      introSection.appendChild(introText);
+    /**
+     * Add logout functionality to header
+     */
+    function addLogoutFunctionality() {
+      const headerRight = document.querySelector('.header-right');
+      if (headerRight && BBB_AUTH.isAuthenticated) {
+        // Check if logout button already exists
+        if (headerRight.querySelector('.logout-btn')) return;
+        
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'logout-btn';
+        logoutBtn.textContent = 'Logout';
+        
+        logoutBtn.onclick = function() {
+          if (confirm('Are you sure you want to logout?')) {
+            performLogout();
+          }
+        };
+        
+        headerRight.appendChild(logoutBtn);
+      }
+    }
 
-      // Add stats row
-      const statsRow = document.createElement('div');
-      statsRow.className = 'stats-row';
-      statsRow.style.display = 'flex';
-      statsRow.style.flexWrap = 'wrap';
-      statsRow.style.justifyContent = 'center';
-      statsRow.style.gap = '1.5rem';
-      statsRow.style.marginTop = '1.5rem';
+    /**
+     * Show user info
+     */
+    function showUserInfo() {
+      if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+        const headerRight = document.querySelector('.header-right');
+        if (headerRight) {
+          // Check if user info already exists
+          if (headerRight.querySelector('.user-info')) return;
+          
+          const userInfo = document.createElement('span');
+          userInfo.className = 'user-info';
+          userInfo.textContent = `Welcome, ${BBB_AUTH.currentUser.id}`;
+          
+          // Insert before logout button
+          const logoutBtn = headerRight.querySelector('.logout-btn');
+          if (logoutBtn) {
+            headerRight.insertBefore(userInfo, logoutBtn);
+          } else {
+            headerRight.appendChild(userInfo);
+          }
+        }
+      }
+    }
 
-      // Create stats cards
-      const createStatCard = (icon, number, label) => {
-        const statCard = document.createElement('div');
-        statCard.className = 'stat-card';
-        statCard.style.backgroundColor = 'white';
-        statCard.style.borderRadius = '8px';
-        statCard.style.padding = '1rem';
-        statCard.style.boxShadow = 'var(--shadow-sm)';
-        statCard.style.minWidth = '150px';
-        statCard.style.textAlign = 'center';
+    /**
+     * Perform logout
+     */
+    function performLogout() {
+      console.log('Logging out user...');
+      
+      // Clear authentication state
+      clearAuthSession();
+      
+      // Refresh page to show public content
+      window.location.reload();
+    }
 
-        const statIcon = document.createElement('div');
-        statIcon.innerHTML = icon;
-        statIcon.style.fontSize = '1.5rem';
-        statIcon.style.marginBottom = '0.5rem';
-        statIcon.style.color = 'var(--bbb-primary)';
+    /**
+     * Start session monitoring
+     */
+    function startSessionMonitoring() {
+      // Check session every 5 minutes
+      const sessionCheck = setInterval(() => {
+        const storedAuth = localStorage.getItem('bbb_auth_session');
+        
+        if (storedAuth) {
+          try {
+            const authData = JSON.parse(storedAuth);
+            
+            if (authData.expiresAt && new Date(authData.expiresAt) <= new Date()) {
+              console.log('Session expired, logging out...');
+              clearInterval(sessionCheck);
+              performLogout();
+            }
+          } catch (error) {
+            console.error('Error checking session:', error);
+            clearInterval(sessionCheck);
+            performLogout();
+          }
+        } else if (BBB_AUTH.isAuthenticated) {
+          // Session was cleared externally
+          console.log('Session cleared externally, logging out...');
+          clearInterval(sessionCheck);
+          performLogout();
+        }
+      }, 5 * 60 * 1000); // 5 minutes
+      
+      // Store interval ID for cleanup if needed
+      window.bbbSessionMonitor = sessionCheck;
+    }
 
-        const statNumber = document.createElement('div');
-        statNumber.textContent = number;
-        statNumber.style.fontSize = '1.8rem';
-        statNumber.style.fontWeight = 'bold';
-        statNumber.style.marginBottom = '0.25rem';
-
-        const statLabel = document.createElement('div');
-        statLabel.textContent = label;
-        statLabel.style.fontSize = '0.9rem';
-        statLabel.style.color = 'var(--bbb-text-muted)';
-
-        statCard.appendChild(statIcon);
-        statCard.appendChild(statNumber);
-        statCard.appendChild(statLabel);
-
-        return statCard;
-      };
-
-      // Add stats based on data
-      statsRow.appendChild(createStatCard('👥', BBB_CONFIG.members.length, 'Members'));
-      statsRow.appendChild(createStatCard('🏆', '4+', 'Years Active'));
-      statsRow.appendChild(createStatCard('⛳', Object.keys(BBB_CONFIG.courses).length, 'Courses Played'));
-
-      introSection.appendChild(statsRow);
-      mainContent.appendChild(introSection);
-      
-      // Add controls section for sorting
-      const controlsSection = document.createElement('div');
-      controlsSection.className = 'controls-section';
-      controlsSection.style.marginBottom = '1.5rem';
-      controlsSection.style.display = 'flex';
-      controlsSection.style.justifyContent = 'space-between';
-      controlsSection.style.alignItems = 'center';
-      controlsSection.style.flexWrap = 'wrap';
-      controlsSection.style.gap = '1rem';
-      
-      // Add title for the section
-      const membersTitle = document.createElement('h3');
-      membersTitle.textContent = 'Member Directory';
-      membersTitle.style.margin = '0';
-      
-      // Add sorting dropdown
-      const sortContainer = document.createElement('div');
-      sortContainer.style.display = 'flex';
-      sortContainer.style.alignItems = 'center';
-      sortContainer.style.gap = '0.5rem';
-      
-      const sortLabel = document.createElement('label');
-      sortLabel.textContent = 'Sort by:';
-      sortLabel.style.fontSize = '0.9rem';
-      sortLabel.style.marginRight = '0.5rem';
-      
-      const sortSelect = document.createElement('select');
-      sortSelect.style.padding = '0.5rem';
-      sortSelect.style.borderRadius = '4px';
-      sortSelect.style.border = '1px solid var(--bbb-border)';
-      
-      const sortOptions = [
-        { value: 'name-asc', text: 'Name A-Z' },
-        { value: 'name-desc', text: 'Name Z-A' },
-        { value: 'handicap-asc', text: 'Handicap (Low to High)' },
-        { value: 'handicap-desc', text: 'Handicap (High to Low)' }
-      ];
-      
-      sortOptions.forEach(option => {
-        const optionEl = document.createElement('option');
-        optionEl.value = option.value;
-        optionEl.textContent = option.text;
-        sortSelect.appendChild(optionEl);
-      });
-      
-      sortContainer.appendChild(sortLabel);
-      sortContainer.appendChild(sortSelect);
-      
-      controlsSection.appendChild(membersTitle);
-      controlsSection.appendChild(sortContainer);
-      
-      // Add controls to main content
-      mainContent.appendChild(controlsSection);
-      
-      // Create members grid
-      const membersGrid = document.createElement('div');
-      membersGrid.className = 'row';
-      membersGrid.style.marginTop = '1rem';
+    /**
+     * Load member data
+     */
+    function loadMemberData() {
+      console.log('Loading member data...');
       
       // Helper function to generate a consistent color based on name
       function getColorFromName(name) {
@@ -237,76 +963,14 @@
           // Process all handicap data
           Promise.all(handicapPromises)
             .then(memberData => {
-              // Update average handicap stat if available
-              let totalHandicap = 0;
-              let membersWithHandicap = 0;
+              // Update stats
+              updateStats(memberData, scorecardsArray);
               
-              memberData.forEach(data => {
-                if (data.handicap && data.handicap.index) {
-                  totalHandicap += parseFloat(data.handicap.index);
-                  membersWithHandicap++;
-                }
-              });
+              // Setup sorting
+              setupSorting(memberData, scorecardsArray);
               
-              if (membersWithHandicap > 0) {
-                const avgHandicap = (totalHandicap / membersWithHandicap).toFixed(1);
-                statsRow.appendChild(createStatCard('📊', avgHandicap, 'Avg Handicap'));
-              }
-              
-              // Handle sorting when dropdown changes
-              sortSelect.addEventListener('change', () => {
-                // Clear the grid
-                membersGrid.innerHTML = '';
-                
-                // Sort the member data
-                const sortedData = [...memberData].sort((a, b) => {
-                  switch(sortSelect.value) {
-                    case 'name-asc':
-                      return a.member.localeCompare(b.member);
-                    case 'name-desc':
-                      return b.member.localeCompare(a.member);
-                    case 'handicap-asc':
-                      const hcpA = a.handicap ? parseFloat(a.handicap.index) : 999;
-                      const hcpB = b.handicap ? parseFloat(b.handicap.index) : 999;
-                      return hcpA - hcpB;
-                    case 'handicap-desc':
-                      const hcpA2 = a.handicap ? parseFloat(a.handicap.index) : -1;
-                      const hcpB2 = b.handicap ? parseFloat(b.handicap.index) : -1;
-                      return hcpB2 - hcpA2;
-                    default:
-                      return 0;
-                  }
-                });
-                
-                // Create member cards with sorted data
-                sortedData.forEach(data => {
-                  // Find recent scores for this member
-                  const recentScores = findRecentScores(scorecardsArray, data.member);
-                  
-                  // Create member card
-                  const memberCard = createMemberCard(data.member, data.handicap, recentScores);
-                  membersGrid.appendChild(memberCard);
-                });
-              });
-              
-              // Default sort by name
-              const sortedData = [...memberData].sort((a, b) => a.member.localeCompare(b.member));
-              
-              // Create member cards
-              sortedData.forEach(data => {
-                // Find recent scores for this member
-                const recentScores = findRecentScores(scorecardsArray, data.member);
-                
-                // Create member card
-                const memberCard = createMemberCard(data.member, data.handicap, recentScores);
-                membersGrid.appendChild(memberCard);
-              });
-              
-              // Add members grid to page
-              mainContent.appendChild(membersGrid);
-              
-              // Add content to main wrapper
-              headerElements.mainWrapper.appendChild(mainContent);
+              // Initial render with default sort
+              renderMembers(memberData, scorecardsArray, 'name-asc');
             })
             .catch(err => {
               console.error('Error loading member data:', err);
@@ -317,247 +981,357 @@
           console.error('Error loading scorecards:', err);
           BBB_UTILS.showMessage('Error loading scorecards', 'error');
         });
+    }
+
+    /**
+     * Update stats section
+     */
+    function updateStats(memberData, scorecards) {
+      const statsRow = document.getElementById('stats-row');
       
-      /**
-       * Find recent scores for a member
-       * @param {Array} scorecards - Array of scorecards
-       * @param {string} memberName - Member name to find scores for
-       * @returns {Array} - Array of recent scores
-       */
-      function findRecentScores(scorecards, memberName) {
-        // Filter scorecards that include this member
-        const memberScores = [];
+      // Clear existing stats
+      statsRow.innerHTML = '';
+      
+      // Calculate stats
+      let totalHandicap = 0;
+      let membersWithHandicap = 0;
+      
+      memberData.forEach(data => {
+        if (data.handicap && data.handicap.index) {
+          totalHandicap += parseFloat(data.handicap.index);
+          membersWithHandicap++;
+        }
+      });
+      
+      // Create stat cards
+      const createStatCard = (icon, number, label) => {
+        const statCard = document.createElement('div');
+        statCard.className = 'stat-card';
         
-        scorecards.forEach(scorecard => {
-          if (scorecard.players && Array.isArray(scorecard.players)) {
-            const playerData = scorecard.players.find(player => 
-              player.name === memberName
-            );
-            
-            if (playerData) {
-              memberScores.push({
-                date: new Date(scorecard.date || scorecard.createdAt),
-                course: scorecard.course,
-                tee: scorecard.tee,
-                totalShots: playerData.totalShots || 0,
-                stablefordPoints: playerData.totalPoints || 0
-              });
-            }
+        const statIcon = document.createElement('div');
+        statIcon.className = 'stat-icon';
+        statIcon.innerHTML = icon;
+        
+        const statNumber = document.createElement('div');
+        statNumber.className = 'stat-number';
+        statNumber.textContent = number;
+        
+        const statLabel = document.createElement('div');
+        statLabel.className = 'stat-label';
+        statLabel.textContent = label;
+        
+        statCard.appendChild(statIcon);
+        statCard.appendChild(statNumber);
+        statCard.appendChild(statLabel);
+        
+        return statCard;
+      };
+      
+      // Add stats
+      statsRow.appendChild(createStatCard('👥', BBB_CONFIG.members.length, 'Members'));
+      statsRow.appendChild(createStatCard('🏆', '4+', 'Years Active'));
+      statsRow.appendChild(createStatCard('⛳', Object.keys(BBB_CONFIG.courses).length, 'Courses Played'));
+      
+      if (membersWithHandicap > 0) {
+        const avgHandicap = (totalHandicap / membersWithHandicap).toFixed(1);
+        statsRow.appendChild(createStatCard('📊', avgHandicap, 'Avg Handicap'));
+      }
+    }
+
+    /**
+     * Setup sorting functionality
+     */
+    function setupSorting(memberData, scorecards) {
+      const sortSelect = document.getElementById('sort-select');
+      
+      sortSelect.addEventListener('change', () => {
+        renderMembers(memberData, scorecards, sortSelect.value);
+      });
+    }
+
+    /**
+     * Render members based on sort criteria
+     */
+    function renderMembers(memberData, scorecards, sortCriteria) {
+      const membersGrid = document.getElementById('members-grid');
+      
+      // Clear existing members
+      membersGrid.innerHTML = '';
+      
+      // Sort the member data
+      const sortedData = [...memberData].sort((a, b) => {
+        switch(sortCriteria) {
+          case 'name-asc':
+            return a.member.localeCompare(b.member);
+          case 'name-desc':
+            return b.member.localeCompare(a.member);
+          case 'handicap-asc':
+            const hcpA = a.handicap ? parseFloat(a.handicap.index) : 999;
+            const hcpB = b.handicap ? parseFloat(b.handicap.index) : 999;
+            return hcpA - hcpB;
+          case 'handicap-desc':
+            const hcpA2 = a.handicap ? parseFloat(a.handicap.index) : -1;
+            const hcpB2 = b.handicap ? parseFloat(b.handicap.index) : -1;
+            return hcpB2 - hcpA2;
+          default:
+            return 0;
+        }
+      });
+      
+      // Create member cards
+      sortedData.forEach(data => {
+        // Find recent scores for this member
+        const recentScores = findRecentScores(scorecards, data.member);
+        
+        // Create member card
+        const memberCard = createMemberCard(data.member, data.handicap, recentScores);
+        membersGrid.appendChild(memberCard);
+      });
+    }
+
+    /**
+     * Find recent scores for a member
+     */
+    function findRecentScores(scorecards, memberName) {
+      const memberScores = [];
+      
+      scorecards.forEach(scorecard => {
+        if (scorecard.players && Array.isArray(scorecard.players)) {
+          const playerData = scorecard.players.find(player => 
+            player.name === memberName
+          );
+          
+          if (playerData) {
+            memberScores.push({
+              date: new Date(scorecard.date || scorecard.createdAt),
+              course: scorecard.course,
+              tee: scorecard.tee,
+              totalShots: playerData.totalShots || 0,
+              stablefordPoints: playerData.totalPoints || 0
+            });
           }
-        });
-        
-        // Sort by date descending
-        memberScores.sort((a, b) => b.date - a.date);
-        
-        // Return 3 most recent
-        return memberScores.slice(0, 3);
+        }
+      });
+      
+      // Sort by date descending and return 3 most recent
+      memberScores.sort((a, b) => b.date - a.date);
+      return memberScores.slice(0, 3);
+    }
+
+    /**
+     * Create a member card
+     */
+    function createMemberCard(memberName, handicapData, recentScores) {
+      // Helper function to generate a consistent color based on name
+      function getColorFromName(name) {
+        let hash = 0;
+        for (let i = 0; i < name.length; i++) {
+          hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const h = hash % 360;
+        return `hsl(${h}, 70%, 40%)`;
       }
       
-      /**
-       * Create a member card
-       * @param {string} memberName - Member name
-       * @param {Object} handicapData - Handicap data
-       * @param {Array} recentScores - Recent scores
-       * @returns {HTMLElement} - Member card element
-       */
-      function createMemberCard(memberName, handicapData, recentScores) {
-        const col = document.createElement('div');
-        col.className = 'col-md-6 col-lg-4';
-        col.style.marginBottom = '2rem';
-        
-        const card = document.createElement('div');
-        card.className = 'card member-card';
-        // Add hover effect and enhanced shadow
-        card.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
-        card.style.boxShadow = 'var(--shadow-md)';
-        card.style.cursor = 'pointer';
-        
-        // Add hover event listeners
-        card.addEventListener('mouseenter', () => {
-          card.style.transform = 'translateY(-5px)';
-          card.style.boxShadow = 'var(--shadow-lg)';
-        });
-        
-        card.addEventListener('mouseleave', () => {
-          card.style.transform = 'translateY(0)';
-          card.style.boxShadow = 'var(--shadow-md)';
-        });
+      const memberCard = document.createElement('div');
+      memberCard.className = 'member-card';
       
-        // Card header with profile image
-        const cardHeader = document.createElement('div');
-        cardHeader.className = 'card-header';
-        cardHeader.style.display = 'flex';
-        cardHeader.style.alignItems = 'center';
-        cardHeader.style.padding = '1.25rem 1.25rem 0.75rem';
+      // Card header with profile image
+      const cardHeader = document.createElement('div');
+      cardHeader.className = 'card-header';
+      cardHeader.style.display = 'flex';
+      cardHeader.style.alignItems = 'center';
+      
+      // Profile image container
+      const profileContainer = document.createElement('div');
+      profileContainer.style.width = '60px';
+      profileContainer.style.height = '60px';
+      profileContainer.style.borderRadius = '50%';
+      profileContainer.style.overflow = 'hidden';
+      profileContainer.style.marginRight = '1rem';
+      profileContainer.style.backgroundColor = '#e9ecef';
+      profileContainer.style.display = 'flex';
+      profileContainer.style.alignItems = 'center';
+      profileContainer.style.justifyContent = 'center';
+      
+      // Profile image
+      const profileImg = document.createElement('div');
+      profileImg.style.width = '100%';
+      profileImg.style.height = '100%';
+      profileImg.style.backgroundColor = getColorFromName(memberName);
+      profileImg.style.display = 'flex';
+      profileImg.style.alignItems = 'center';
+      profileImg.style.justifyContent = 'center';
+      profileImg.style.color = 'white';
+      profileImg.style.fontWeight = 'bold';
+      profileImg.style.fontSize = '1.5rem';
+      profileImg.textContent = memberName.charAt(0);
+      
+      profileContainer.appendChild(profileImg);
+      
+      const memberInfo = document.createElement('div');
+      
+      const memberTitle = document.createElement('h3');
+      memberTitle.textContent = memberName;
+      memberTitle.style.margin = '0';
+      memberTitle.style.lineHeight = '1.2';
+      
+      // Handicap badge
+      const handicapBadge = document.createElement('div');
+      handicapBadge.style.display = 'inline-block';
+      handicapBadge.style.padding = '0.25rem 0.5rem';
+      handicapBadge.style.borderRadius = '12px';
+      handicapBadge.style.fontSize = '0.85rem';
+      handicapBadge.style.fontWeight = 'bold';
+      handicapBadge.style.marginTop = '0.5rem';
+      
+      // Set badge color based on handicap
+      if (handicapData) {
+        const handicapValue = parseFloat(handicapData.index);
+        let badgeColor, textColor, label;
         
-        // Profile image container
-        const profileContainer = document.createElement('div');
-        profileContainer.style.width = '60px';
-        profileContainer.style.height = '60px';
-        profileContainer.style.borderRadius = '50%';
-        profileContainer.style.overflow = 'hidden';
-        profileContainer.style.marginRight = '1rem';
-        profileContainer.style.backgroundColor = '#e9ecef';
-        profileContainer.style.display = 'flex';
-        profileContainer.style.alignItems = 'center';
-        profileContainer.style.justifyContent = 'center';
-        
-        // Profile image
-        const profileImg = document.createElement('div');
-        profileImg.style.width = '100%';
-        profileImg.style.height = '100%';
-        profileImg.style.backgroundColor = getColorFromName(memberName);
-        profileImg.style.display = 'flex';
-        profileImg.style.alignItems = 'center';
-        profileImg.style.justifyContent = 'center';
-        profileImg.style.color = 'white';
-        profileImg.style.fontWeight = 'bold';
-        profileImg.style.fontSize = '1.5rem';
-        profileImg.textContent = memberName.charAt(0);
-        
-        profileContainer.appendChild(profileImg);
-        
-        const memberInfo = document.createElement('div');
-        
-        const memberTitle = document.createElement('h3');
-        memberTitle.className = 'card-title';
-        memberTitle.textContent = memberName;
-        memberTitle.style.margin = '0';
-        memberTitle.style.lineHeight = '1.2';
-        
-        // Handicap badge
-        const handicapBadge = document.createElement('div');
-        handicapBadge.style.display = 'inline-block';
-        handicapBadge.style.padding = '0.25rem 0.5rem';
-        handicapBadge.style.borderRadius = '12px';
-        handicapBadge.style.fontSize = '0.85rem';
-        handicapBadge.style.fontWeight = 'bold';
-        handicapBadge.style.marginTop = '0.5rem';
-        
-        // Set badge color based on handicap
-        if (handicapData) {
-          const handicapValue = parseFloat(handicapData.index);
-          let badgeColor, textColor, label;
-          
-          if (handicapValue < 5) {
-            badgeColor = '#28a745'; // Green for low handicap (better players)
-            textColor = 'white';
-            label = 'Cunt';
-          } else if (handicapValue < 15) {
-            badgeColor = '#17a2b8'; // Blue for mid handicap
-            textColor = 'white';
-            label = 'Skilled';
-          } else if (handicapValue < 25) {
-            badgeColor = '#fd7e14'; // Orange for higher handicap
-            textColor = 'white';
-            label = 'Improving';
-          } else {
-            badgeColor = '#6c757d'; // Gray for highest handicap
-            textColor = 'white';
-            label = 'Developing';
-          }
-          
-          handicapBadge.style.backgroundColor = badgeColor;
-          handicapBadge.style.color = textColor;
-          handicapBadge.textContent = `${label} • HCP ${handicapData.index}`;
+        if (handicapValue < 5) {
+          badgeColor = '#28a745';
+          textColor = 'white';
+          label = 'Elite';
+        } else if (handicapValue < 15) {
+          badgeColor = '#17a2b8';
+          textColor = 'white';
+          label = 'Skilled';
+        } else if (handicapValue < 25) {
+          badgeColor = '#fd7e14';
+          textColor = 'white';
+          label = 'Improving';
         } else {
-          handicapBadge.style.backgroundColor = '#e9ecef';
-          handicapBadge.style.color = '#495057';
-          handicapBadge.textContent = 'No Handicap';
+          badgeColor = '#6c757d';
+          textColor = 'white';
+          label = 'Developing';
         }
         
-        memberInfo.appendChild(memberTitle);
-        memberInfo.appendChild(handicapBadge);
+        handicapBadge.style.backgroundColor = badgeColor;
+        handicapBadge.style.color = textColor;
+        handicapBadge.textContent = `${label} • HCP ${handicapData.index}`;
+      } else {
+        handicapBadge.style.backgroundColor = '#e9ecef';
+        handicapBadge.style.color = '#495057';
+        handicapBadge.textContent = 'No Handicap';
+      }
+      
+      memberInfo.appendChild(memberTitle);
+      memberInfo.appendChild(handicapBadge);
+      
+      cardHeader.appendChild(profileContainer);
+      cardHeader.appendChild(memberInfo);
+      memberCard.appendChild(cardHeader);
+      
+      // Card content
+      const cardContent = document.createElement('div');
+      cardContent.className = 'card-content';
+      
+      // Recent scores
+      if (recentScores && recentScores.length > 0) {
+        const scoresSection = document.createElement('div');
+        scoresSection.className = 'member-scores';
+        scoresSection.style.marginTop = '1rem';
         
-        cardHeader.appendChild(profileContainer);
-        cardHeader.appendChild(memberInfo);
-        card.appendChild(cardHeader);
+        const scoresTitle = document.createElement('h4');
+        scoresTitle.style.fontSize = '1rem';
+        scoresTitle.style.marginBottom = '0.75rem';
+        scoresTitle.style.color = 'var(--bbb-text-light)';
+        scoresTitle.textContent = 'Recent Scores';
         
-        // Card content
-        const cardContent = document.createElement('div');
-        cardContent.className = 'card-content';
-        cardContent.style.padding = '0.75rem 1.25rem 1.25rem';
+        scoresSection.appendChild(scoresTitle);
         
-        // Recent scores
-        if (recentScores && recentScores.length > 0) {
-          const scoresSection = document.createElement('div');
-          scoresSection.className = 'member-scores';
-          scoresSection.style.marginTop = '1rem';
-          
-          const scoresTitle = document.createElement('h4');
-          scoresTitle.style.fontSize = '1rem';
-          scoresTitle.style.marginBottom = '0.75rem';
-          scoresTitle.style.color = 'var(--bbb-text-light)';
-          scoresTitle.textContent = 'Recent Scores';
-          
-          scoresSection.appendChild(scoresTitle);
-          
-          const scoresList = document.createElement('ul');
-          scoresList.style.listStyle = 'none';
-          scoresList.style.padding = '0';
-          scoresList.style.margin = '0';
-          
-          recentScores.forEach(score => {
-            const scoreItem = document.createElement('li');
-            scoreItem.style.marginBottom = '0.5rem';
-            scoreItem.style.padding = '0.75rem';
-            scoreItem.style.backgroundColor = 'rgba(0,0,0,0.03)';
-            scoreItem.style.borderRadius = '6px';
-            scoreItem.style.fontSize = '0.9rem';
-            scoreItem.style.transition = 'background-color 0.2s ease';
-            
-            // Add subtle hover effect to score items
-            scoreItem.addEventListener('mouseenter', () => {
-              scoreItem.style.backgroundColor = 'rgba(0,0,0,0.06)';
-            });
-            
-            scoreItem.addEventListener('mouseleave', () => {
-              scoreItem.style.backgroundColor = 'rgba(0,0,0,0.03)';
-            });
-            
-            const scoreDate = BBB_UTILS.formatDate(score.date, 'short');
-            const teeName = BBB_CONFIG.teeColors[score.tee] || score.tee;
-            
-            scoreItem.innerHTML = `
-              <div style="font-weight: 600; margin-bottom: 0.25rem;">${score.course}</div>
-              <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
-                <span>${teeName} tees • ${scoreDate}</span>
-                <span style="font-weight: 600;">${score.totalShots} strokes / ${score.stablefordPoints} pts</span>
-              </div>
-            `;
-            
-            scoresList.appendChild(scoreItem);
-          });
-          
-          scoresSection.appendChild(scoresList);
-          cardContent.appendChild(scoresSection);
-        } else {
-          // No scores message
-          const noScores = document.createElement('p');
-          noScores.style.color = 'var(--bbb-text-muted)';
-          noScores.style.fontStyle = 'italic';
-          noScores.style.textAlign = 'center';
-          noScores.style.marginTop = '1rem';
-          noScores.textContent = 'No recent scores available';
-          cardContent.appendChild(noScores);
-        }
+        const scoresList = document.createElement('ul');
+        scoresList.style.listStyle = 'none';
+        scoresList.style.padding = '0';
+        scoresList.style.margin = '0';
         
-        // Add "View Profile" button
-        const viewProfileBtn = document.createElement('button');
-        viewProfileBtn.className = 'btn btn-sm';
-        viewProfileBtn.style.width = '100%';
-        viewProfileBtn.style.marginTop = '1rem';
-        viewProfileBtn.textContent = 'View Full Profile';
-        viewProfileBtn.addEventListener('click', (e) => {
-          e.stopPropagation(); // Prevent card click event
-          window.location.href = `member-profile.html?id=${encodeURIComponent(memberName.toLowerCase())}`;
+        recentScores.forEach(score => {
+          const scoreItem = document.createElement('li');
+          scoreItem.style.marginBottom = '0.5rem';
+          scoreItem.style.padding = '0.75rem';
+          scoreItem.style.backgroundColor = 'rgba(0,0,0,0.03)';
+          scoreItem.style.borderRadius = '6px';
+          scoreItem.style.fontSize = '0.9rem';
+          scoreItem.style.transition = 'background-color 0.2s ease';
+          
+          const scoreDate = BBB_UTILS.formatDate(score.date, 'short');
+          const teeName = BBB_CONFIG.teeColors[score.tee] || score.tee;
+          
+          scoreItem.innerHTML = `
+            <div style="font-weight: 600; margin-bottom: 0.25rem;">${score.course}</div>
+            <div style="display: flex; justify-content: space-between; font-size: 0.85rem;">
+              <span>${teeName} tees • ${scoreDate}</span>
+              <span style="font-weight: 600;">${score.totalShots} strokes / ${score.stablefordPoints} pts</span>
+            </div>
+          `;
+          
+          scoresList.appendChild(scoreItem);
         });
         
-        cardContent.appendChild(viewProfileBtn);
-        card.appendChild(cardContent);
-        col.appendChild(card);
-        
-        return col;
+        scoresSection.appendChild(scoresList);
+        cardContent.appendChild(scoresSection);
+      } else {
+        // No scores message
+        const noScores = document.createElement('p');
+        noScores.style.color = 'var(--bbb-text-muted)';
+        noScores.style.fontStyle = 'italic';
+        noScores.style.textAlign = 'center';
+        noScores.style.marginTop = '1rem';
+        noScores.textContent = 'No recent scores available';
+        cardContent.appendChild(noScores);
+      }
+      
+      // Add "View Profile" button
+      const viewProfileBtn = document.createElement('button');
+      viewProfileBtn.className = 'btn btn-sm';
+      viewProfileBtn.style.width = '100%';
+      viewProfileBtn.style.marginTop = '1rem';
+      viewProfileBtn.textContent = 'View Full Profile';
+      viewProfileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.location.href = `member-profile.html?id=${encodeURIComponent(memberName.toLowerCase())}`;
+      });
+      
+      cardContent.appendChild(viewProfileBtn);
+      memberCard.appendChild(cardContent);
+      
+      return memberCard;
+    }
+
+    /**
+     * Add scroll animations
+     */
+    function addScrollAnimations() {
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, observerOptions);
+
+      // Apply animation styles and observe elements
+      const animatedElements = document.querySelectorAll('.intro-section, .controls-section, .member-card');
+      animatedElements.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(30px)';
+        element.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+        observer.observe(element);
+      });
+    }
+
+    // Handle browser back/forward with session check
+    window.addEventListener('pageshow', function(e) {
+      if (e.persisted) {
+        // Page was loaded from cache, recheck auth
+        checkPageAuthentication();
       }
     });
   </script>
