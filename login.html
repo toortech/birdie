@@ -332,6 +332,19 @@
       box-shadow: 3px 0 #ccc, 6px 0 #ccc, 1.5px 3px #ccc, 4.5px 3px #ccc, 7.5px 3px #ccc, 3px 6px #ccc, 6px 6px #ccc;
     }
 
+    /* Logout notice styling */
+    .logout-notice {
+      background: #d4edda;
+      color: #155724;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      border: 1px solid #c3e6cb;
+      font-weight: 500;
+      animation: slideInUp 0.5s ease-out;
+    }
+
     /* Responsive Design */
     @media (max-width: 768px) {
       .login-container {
@@ -409,6 +422,12 @@
       </div>
     </div>
     
+    <!-- Logout notice (shown when user just logged out) -->
+    <div id="logout-notice" class="logout-notice" style="display: none;">
+      <strong>✓ You have been logged out successfully.</strong><br>
+      Please enter your credentials to log in again.
+    </div>
+    
     <h1>Member Login <span class="golf-ball"></span></h1>
     
     <form id="login-form">
@@ -447,9 +466,10 @@
   </div>
   
   <script>
-    // Prevent login loop by tracking login state
+    // IMPROVED: Prevent login loop by tracking login state with better race condition prevention
     let isLoggingIn = false;
     let loginProcessed = false;
+    let authCheckCompleted = false;
 
     // Initialize modules
     document.addEventListener('DOMContentLoaded', function() {
@@ -483,9 +503,17 @@
         return;
       }
       
-      // Check if already logged in (but only if we haven't processed login yet)
-      if (!loginProcessed && !isLoggingIn) {
-        checkExistingAuth();
+      // PRIORITY CHECK: Handle logout flags first (highest priority)
+      if (checkLogoutFlags()) {
+        console.log('Logout flag detected, showing logout notice and clearing auth data');
+        showLogoutNotice();
+        clearStoredAuth();
+        authCheckCompleted = true;
+      } else {
+        // Check if already logged in (but only if we haven't processed login yet and no logout flags)
+        if (!loginProcessed && !isLoggingIn && !authCheckCompleted) {
+          checkExistingAuth();
+        }
       }
       
       // Set up login form
@@ -493,18 +521,74 @@
     });
 
     /**
-     * Check if user is already authenticated
+     * NEW: Check logout flags with multiple methods
+     */
+    function checkLogoutFlags() {
+      // Check sessionStorage logout flag
+      const justLoggedOut = sessionStorage.getItem('justLoggedOut') === 'true';
+      
+      // Check logout timestamp (protection for 10 seconds after logout)
+      const logoutTimestamp = sessionStorage.getItem('bbb_logout_timestamp');
+      const recentLogout = logoutTimestamp && 
+        (Date.now() - parseInt(logoutTimestamp)) < 10000; // 10 seconds protection
+      
+      // Check if currently in logout process
+      const currentlyLoggingOut = sessionStorage.getItem('bbb_logging_out') === 'true';
+      
+      if (justLoggedOut || recentLogout || currentlyLoggingOut) {
+        console.log('Logout flag detected:', {
+          justLoggedOut,
+          recentLogout,
+          currentlyLoggingOut
+        });
+        return true;
+      }
+      
+      return false;
+    }
+
+    /**
+     * NEW: Show logout notice when user was logged out
+     */
+    function showLogoutNotice() {
+      const logoutNotice = document.getElementById('logout-notice');
+      if (logoutNotice) {
+        logoutNotice.style.display = 'block';
+        
+        // Clear the logout flags after showing notice (with delay)
+        setTimeout(() => {
+          cleanupLogoutFlags();
+        }, 3000); // 3 seconds delay
+      }
+    }
+
+    /**
+     * NEW: Clean up logout flags
+     */
+    function cleanupLogoutFlags() {
+      try {
+        sessionStorage.removeItem('justLoggedOut');
+        sessionStorage.removeItem('bbb_logout_timestamp');
+        sessionStorage.removeItem('bbb_logging_out');
+        console.log('Logout flags cleaned up');
+      } catch (error) {
+        console.error('Error cleaning up logout flags:', error);
+      }
+    }
+
+    /**
+     * IMPROVED: Check if user is already authenticated (with logout flag respect)
      */
     function checkExistingAuth() {
       console.log('Checking existing authentication...');
       
-      // Check if user just logged out - if so, don't auto-login
-      const justLoggedOut = sessionStorage.getItem('justLoggedOut') === 'true';
-      if (justLoggedOut) {
-        console.log('User just logged out, clearing flag and showing login form');
-        sessionStorage.removeItem('justLoggedOut');
-        clearStoredAuth(); // Clear any stored auth data
-        return; // Don't auto-login, show the login form
+      // Double-check logout flags before any auth restoration
+      if (checkLogoutFlags()) {
+        console.log('Logout flags present, clearing auth data and showing logout notice');
+        showLogoutNotice();
+        clearStoredAuth();
+        authCheckCompleted = true;
+        return;
       }
       
       try {
@@ -522,6 +606,15 @@
           if (authData.expiresAt && new Date(authData.expiresAt) > new Date()) {
             console.log('Valid session found for user:', userData.id);
             
+            // Final check for logout flags before restoring session
+            if (checkLogoutFlags()) {
+              console.log('Logout flags detected during session restore, aborting auto-login');
+              showLogoutNotice();
+              clearStoredAuth();
+              authCheckCompleted = true;
+              return;
+            }
+            
             // Restore authentication state
             BBB_AUTH.currentUser = userData;
             BBB_AUTH.isAuthenticated = true;
@@ -532,6 +625,7 @@
               redirectAfterLogin();
             }, 1000);
             
+            authCheckCompleted = true;
             return;
           } else {
             console.log('Session expired, clearing stored data');
@@ -539,8 +633,8 @@
           }
         }
         
-        // Check BBB_AUTH state (only if user didn't just log out)
-        if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+        // Check BBB_AUTH state (only if no logout flags)
+        if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser && !checkLogoutFlags()) {
           console.log('User already authenticated in current session');
           showSuccess('Already logged in! Redirecting...');
           setTimeout(() => {
@@ -549,24 +643,45 @@
         } else {
           console.log('No existing authentication found');
         }
+        
+        authCheckCompleted = true;
       } catch (error) {
         console.error('Error checking existing auth:', error);
         clearStoredAuth();
+        authCheckCompleted = true;
       }
     }
 
     /**
-     * Clear stored authentication data
+     * IMPROVED: Clear stored authentication data with verification
      */
     function clearStoredAuth() {
-      localStorage.removeItem('bbb_auth_session');
-      localStorage.removeItem('bbb_current_user');
-      BBB_AUTH.currentUser = null;
-      BBB_AUTH.isAuthenticated = false;
+      try {
+        // Clear localStorage with verification
+        const authKeys = ['bbb_auth_session', 'bbb_current_user'];
+        authKeys.forEach(key => {
+          localStorage.removeItem(key);
+          // Verify removal
+          if (localStorage.getItem(key) !== null) {
+            console.warn(`Failed to clear ${key}, trying again...`);
+            localStorage.removeItem(key);
+          }
+        });
+        
+        // Reset BBB_AUTH state
+        if (typeof BBB_AUTH !== 'undefined') {
+          BBB_AUTH.currentUser = null;
+          BBB_AUTH.isAuthenticated = false;
+        }
+        
+        console.log('Stored authentication data cleared');
+      } catch (error) {
+        console.error('Error clearing stored auth:', error);
+      }
     }
 
     /**
-     * Set up the login form handlers
+     * IMPROVED: Set up the login form handlers with better state management
      */
     function setupLoginForm() {
       const loginForm = document.getElementById('login-form');
@@ -578,6 +693,13 @@
         // Prevent multiple login attempts
         if (isLoggingIn || loginProcessed) {
           console.log('Login already in progress or completed');
+          return;
+        }
+        
+        // Check for logout flags - don't allow login if logout just happened
+        if (checkLogoutFlags()) {
+          console.log('Recent logout detected, please wait before logging in again');
+          showError('Please wait a few seconds after logout before logging in again.');
           return;
         }
         
@@ -684,12 +806,15 @@
     }
 
     /**
-     * Redirect after successful login
+     * IMPROVED: Redirect after successful login with better state management
      */
     function redirectAfterLogin() {
       try {
         // Set flag to indicate successful login
         sessionStorage.setItem('justLoggedIn', 'true');
+        
+        // Clear any logout flags that might interfere
+        cleanupLogoutFlags();
         
         // Get saved redirect URL or default to index
         const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || 'index.html';
@@ -708,27 +833,96 @@
         console.error('Error during redirect:', error);
         // Fallback to index.html
         sessionStorage.setItem('justLoggedIn', 'true');
+        cleanupLogoutFlags();
         window.location.href = 'index.html';
       }
     }
 
-    // Prevent back button from causing issues
+    // IMPROVED: Prevent back button from causing issues
     window.addEventListener('pageshow', function(event) {
       if (event.persisted) {
         // Page was loaded from cache, reset login state
-        console.log('Page loaded from cache, resetting login state');
+        console.log('Page loaded from cache, resetting login state and rechecking auth');
         isLoggingIn = false;
         loginProcessed = false;
+        authCheckCompleted = false;
         hideMessages();
         document.getElementById('login-btn').disabled = false;
+        
+        // Recheck authentication status
+        if (checkLogoutFlags()) {
+          showLogoutNotice();
+          clearStoredAuth();
+        } else if (!authCheckCompleted) {
+          checkExistingAuth();
+        }
       }
     });
 
     // Handle browser navigation
     window.addEventListener('beforeunload', function() {
-      // Reset state when leaving page
+      // Reset state when leaving page (but preserve logout flags)
       isLoggingIn = false;
+      if (!checkLogoutFlags()) {
+        cleanupLogoutFlags();
+      }
     });
+
+    // NEW: Handle storage events (for cross-tab logout)
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'bbb_auth_session' && e.newValue === null) {
+        console.log('Auth session cleared in another tab');
+        clearStoredAuth();
+        if (!checkLogoutFlags()) {
+          showError('Your session was ended in another tab. Please log in again.');
+        }
+      }
+    });
+
+    // NEW: Handle focus events to recheck auth state
+    window.addEventListener('focus', function() {
+      // When page regains focus, recheck for logout flags
+      if (checkLogoutFlags() && document.getElementById('logout-notice').style.display !== 'block') {
+        showLogoutNotice();
+        clearStoredAuth();
+      }
+    });
+
+    // NEW: Periodic check for logout flags (in case they're set by other tabs)
+    setInterval(function() {
+      if (checkLogoutFlags() && document.getElementById('logout-notice').style.display !== 'block') {
+        console.log('Periodic check detected logout flags');
+        showLogoutNotice();
+        clearStoredAuth();
+      }
+    }, 1000); // Check every second
+
+    // Prevent form submission on Enter if logout flags are present
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && checkLogoutFlags()) {
+        e.preventDefault();
+        showError('Please wait a few seconds after logout before logging in again.');
+      }
+    });
+
+    // Clear logout notice when user starts typing (after delay)
+    document.getElementById('username').addEventListener('input', function() {
+      setTimeout(() => {
+        const logoutNotice = document.getElementById('logout-notice');
+        if (logoutNotice && logoutNotice.style.display === 'block') {
+          logoutNotice.style.display = 'none';
+        }
+      }, 5000); // 5 second delay
+    });
+
+    // Handle visibility change (tab switching)
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden && checkLogoutFlags()) {
+        showLogoutNotice();
+        clearStoredAuth();
+      }
+    });
+
   </script>
 </body>
 </html>
