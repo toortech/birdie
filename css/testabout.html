@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About BBB - Birdie Bush Bandits</title>
+  <meta name="description" content="Learn about the Birdie Bush Bandits golf group - our story, mission, and what makes us special since August 2020.">
+  <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  
+  <!-- Add Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Core Modules - MUST be loaded before authentication script -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+
+  <style>
+    /* STEP 1: REMOVED CSS VARIABLES - Now using global style.css variables */
+    
+    /* Universal reset - KEEPING for now (will move in next step) */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family-base);
+      line-height: 1.6;
+      color: var(--bbb-text);
+      background: linear-gradient(135deg, var(--bbb-light-green) 0%, var(--bbb-background) 100%);
+      min-height: 100vh;
+    }
+
+    /* About Page Specific Styles - Softer Hero Section */
+    .about-hero {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+      color: var(--bbb-text);
+      text-align: center;
+      padding: 4rem 2rem 3rem 2rem;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 3px solid #dee2e6;
+      margin-top: 90px; /* Account for fixed header */
+    }
+
+    .about-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 77, 0, 0.03) 0%, transparent 70%);
+      animation: rotate 30s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .about-hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .about-hero h1 {
+      font-family: var(--font-family-accent);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      color: var(--bbb-primary);
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+      animation: fadeInUp 1s ease-out;
+      margin: 0 0 1rem 0;
+    }
+
+    .about-hero .tagline {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--bbb-text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+      animation: fadeInUp 1s ease-out 0.3s both;
+      font-weight: 500;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .about-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* Modified: Full width story section without image */
+    .about-story-section {
+      margin: 4rem 0;
+    }
+
+    .about-text {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      max-width: 900px;
+      margin: 0 auto;
+      text-align: left;
+    }
+
+    .about-text:hover {
+      border-color: var(--bbb-gold);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    .about-story .lead {
+      font-size: 1.2rem;
+      font-weight: 500;
+      color: var(--bbb-secondary);
+      margin-bottom: 1.5rem;
+      line-height: 1.7;
+      text-align: left;
+    }
+
+    .about-story p {
+      margin-bottom: 1.5rem;
+      line-height: 1.7;
+      color: var(--bbb-text);
+      text-align: left;
+    }
+
+    .mission-box {
+      background: linear-gradient(135deg, var(--bbb-light-green), rgba(255, 215, 0, 0.1));
+      padding: 2rem;
+      border-radius: 15px;
+      margin: 2rem 0;
+      border-left: 4px solid var(--bbb-gold);
+      transition: transform 0.3s ease;
+      text-align: left;
+    }
+
+    .mission-box:hover {
+      transform: translateX(10px);
+    }
+
+    .mission-box h3 {
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+      text-align: left;
+    }
+
+    .mission-box p {
+      text-align: left;
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .values-section {
+      background: white;
+      padding: 4rem 0;
+      margin: 4rem 0;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .values-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .values-header h2 {
+      font-family: var(--font-family-accent);
+      font-size: 2.5rem;
+      color: var(--bbb-primary);
+      margin-bottom: 1rem;
+    }
+
+    .values-header p {
+      font-size: 1.1rem;
+      color: var(--bbb-text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .values-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2rem;
+      padding: 0 3rem;
+    }
+
+    .value-item {
+      text-align: center;
+      padding: 2rem;
+      background: linear-gradient(135deg, var(--bbb-light-green), white);
+      border-radius: 15px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border: 3px solid transparent;
+    }
+
+    .value-item:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+      border-color: var(--bbb-gold);
+    }
+
+    .value-icon {
+      font-size: 3rem;
+      display: block;
+      margin-bottom: 1rem;
+    }
+
+    .value-item h4 {
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+
+    .value-item p {
+      color: var(--bbb-text-muted);
+      margin: 0;
+      line-height: 1.6;
+      text-align: left;
+    }
+
+    .timeline-section {
+      background: linear-gradient(135deg, var(--bbb-light-green), white);
+      padding: 4rem 0;
+      margin: 4rem 0;
+      border-radius: 20px;
+    }
+
+    .timeline-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .timeline-header h2 {
+      font-family: var(--font-family-accent);
+      font-size: 2.5rem;
+      color: var(--bbb-primary);
+      margin-bottom: 1rem;
+    }
+
+    .timeline {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 3rem;
+    }
+
+    .timeline-item {
+      display: flex;
+      align-items: center;
+      margin-bottom: 3rem;
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+      border: 3px solid transparent;
+    }
+
+    .timeline-item:hover {
+      transform: translateX(10px);
+      border-color: var(--bbb-gold);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    .timeline-icon {
+      font-size: 2.5rem;
+      margin-right: 2rem;
+      flex-shrink: 0;
+    }
+
+    .timeline-content h4 {
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
+      margin-bottom: 0.5rem;
+      font-size: 1.2rem;
+    }
+
+    .timeline-content p {
+      color: var(--bbb-text);
+      margin: 0;
+      line-height: 1.6;
+      text-align: left;
+    }
+
+    /* Modified: Softer CTA section colors */
+    .cta-section {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      color: var(--bbb-text);
+      text-align: center;
+      padding: 4rem 2rem;
+      border-radius: 20px;
+      margin: 4rem 0;
+      position: relative;
+      overflow: hidden;
+      border: 2px solid #dee2e6;
+    }
+
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 77, 0, 0.05) 0%, transparent 70%);
+      animation: rotate 20s linear infinite;
+    }
+
+    .cta-section h2 {
+      font-family: var(--font-family-accent);
+      font-size: clamp(2rem, 4vw, 2.5rem);
+      margin-bottom: 1.5rem;
+      position: relative;
+      z-index: 2;
+      color: var(--bbb-primary);
+    }
+
+    .cta-section p {
+      font-size: clamp(1.1rem, 3vw, 1.3rem);
+      margin-bottom: 2.5rem;
+      line-height: 1.5;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      position: relative;
+      z-index: 2;
+      color: var(--bbb-text-muted);
+    }
+
+    .cta-buttons {
+      display: flex;
+      gap: 1.5rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* Modified: Much softer button colors */
+    .cta-btn {
+      background: #6c757d;
+      color: white;
+      padding: 1rem 2.5rem;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: clamp(1rem, 2.5vw, 1.1rem);
+      transition: all 0.3s ease;
+      display: inline-block;
+      box-shadow: 0 4px 15px rgba(108, 117, 125, 0.2);
+      min-width: 180px;
+      text-align: center;
+      border: 2px solid transparent;
+    }
+
+    .cta-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
+      background: #5a6268;
+    }
+
+    .cta-btn.secondary {
+      background: transparent;
+      color: var(--bbb-secondary);
+      border: 2px solid var(--bbb-secondary);
+      box-shadow: 0 4px 15px rgba(0, 70, 173, 0.15);
+    }
+
+    .cta-btn.secondary:hover {
+      background: var(--bbb-secondary);
+      color: white;
+      box-shadow: 0 6px 20px rgba(0, 70, 173, 0.25);
+    }
+
+    /* Golf-specific decorative elements */
+    .golf-ball {
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      position: relative;
+      display: inline-block;
+      margin: 0 10px;
+      box-shadow: inset -3px -3px 5px rgba(0,0,0,0.2);
+    }
+
+    .golf-ball::before {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #ccc;
+      border-radius: 50%;
+      top: 4px;
+      left: 6px;
+      box-shadow: 4px 0 #ccc, 8px 0 #ccc, 2px 4px #ccc, 6px 4px #ccc, 10px 4px #ccc, 4px 8px #ccc, 8px 8px #ccc;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .about-hero {
+        padding: 2rem 1rem 1.5rem 1rem;
+        margin-top: 120px; /* Extra space for mobile header that may wrap */
+      }
+
+      .about-hero h1 {
+        font-size: 2rem;
+        line-height: 1.2;
+      }
+
+      .about-hero .tagline {
+        font-size: 1rem;
+        padding: 0 1rem;
+      }
+
+      .about-main {
+        padding: 0 1rem;
+      }
+
+      .about-story-section {
+        margin: 2rem 0;
+      }
+
+      .about-text {
+        padding: 1.5rem;
+        border-radius: 15px;
+      }
+
+      .about-story .lead {
+        font-size: 1.1rem;
+        margin-bottom: 1rem;
+      }
+
+      .about-story p {
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        line-height: 1.6;
+      }
+
+      .mission-box {
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+      }
+
+      .mission-box h3 {
+        font-size: 1.1rem;
+      }
+
+      .values-section {
+        padding: 3rem 0;
+        margin: 3rem 0;
+      }
+
+      .values-header h2 {
+        font-size: 2rem;
+      }
+
+      .values-header p {
+        font-size: 1rem;
+        padding: 0 1rem;
+      }
+
+      .values-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 0 1rem;
+      }
+
+      .value-item {
+        padding: 1.5rem;
+      }
+
+      .value-icon {
+        font-size: 2.5rem;
+      }
+
+      .value-item h4 {
+        font-size: 1.2rem;
+      }
+
+      .value-item p {
+        font-size: 0.95rem;
+      }
+
+      .timeline-section {
+        padding: 3rem 0;
+        margin: 3rem 0;
+      }
+
+      .timeline-header h2 {
+        font-size: 2rem;
+      }
+
+      .timeline {
+        padding: 0 1rem;
+      }
+
+      .timeline-item {
+        flex-direction: column;
+        text-align: center;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .timeline-icon {
+        margin-right: 0;
+        margin-bottom: 1rem;
+        font-size: 2rem;
+      }
+
+      .timeline-content h4 {
+        font-size: 1.1rem;
+        margin-bottom: 0.75rem;
+      }
+
+      .timeline-content p {
+        font-size: 0.95rem;
+        line-height: 1.5;
+      }
+
+      .cta-section {
+        padding: 3rem 1rem;
+        margin: 3rem 0;
+      }
+
+      .cta-section h2 {
+        font-size: 1.8rem;
+      }
+
+      .cta-section p {
+        font-size: 1rem;
+        padding: 0 1rem;
+      }
+
+      .cta-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .cta-btn {
+        width: 100%;
+        max-width: 280px;
+        padding: 1rem;
+        font-size: 1rem;
+      }
+    }
+
+    /* Extra small mobile devices */
+    @media (max-width: 480px) {
+      .about-hero {
+        padding: 1.5rem 0.75rem 1rem 0.75rem;
+      }
+
+      .about-hero h1 {
+        font-size: 1.75rem;
+      }
+
+      .about-hero .tagline {
+        font-size: 0.95rem;
+      }
+
+      .about-main {
+        padding: 0 0.75rem;
+      }
+
+      .about-text {
+        padding: 1.25rem;
+      }
+
+      .about-story .lead {
+        font-size: 1rem;
+      }
+
+      .about-story p {
+        font-size: 0.9rem;
+      }
+
+      .mission-box {
+        padding: 1.25rem;
+      }
+
+      .values-section,
+      .timeline-section,
+      .cta-section {
+        margin: 2rem 0;
+      }
+
+      .values-header h2,
+      .timeline-header h2 {
+        font-size: 1.75rem;
+      }
+
+      .values-grid,
+      .timeline {
+        padding: 0 0.75rem;
+      }
+
+      .value-item,
+      .timeline-item {
+        padding: 1.25rem;
+      }
+
+      .value-icon {
+        font-size: 2.25rem;
+      }
+
+      .timeline-icon {
+        font-size: 1.75rem;
+      }
+
+      .cta-section {
+        padding: 2.5rem 0.75rem;
+      }
+
+      .cta-section h2 {
+        font-size: 1.6rem;
+      }
+
+      .cta-btn {
+        max-width: 260px;
+        padding: 0.9rem;
+        font-size: 0.95rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- Fixed Header with Logo - Using global styles now -->
+  <header class="header">
+    <div class="header-content">
+      <div class="header-left">
+        <a href="index.html">
+          <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="header-logo">
+        </a>
+        <a href="index.html" class="header-title">Birdie Bush Bandits</a>
+        <div class="founded-badge-header">
+          🏌️ Founded August 2020
+        </div>
+      </div>
+      <div class="header-right">
+        <!-- Auth controls will be added here by JavaScript -->
+        <a href="index.html" class="home-btn" id="home-link">Home</a>
+      </div>
+    </div>
+  </header>
+  
+  <main id="main">
+    <!-- Hero Section - Removed logo, kept simple -->
+    <section class="about-hero">
+      <div class="about-hero-content">
+        <h1>About the Birdie Bush Bandits <span class="golf-ball"></span></h1>
+        <p class="tagline">Discover our story, our mission, and what makes our golf group special</p>
+      </div>
+    </section>
+
+    <!-- Main About Content -->
+    <div class="about-main">
+      <!-- Story Section -->
+      <section class="about-story-section">
+        <div class="about-text">
+          <div class="about-story">
+            <p class="lead">It all started when the world slowed down during the COVID pandemic. Amrit, missing the game he loved and wanting to reconnect with friends, made a few phone calls that would change everything. Despite not having played for years - life, family, and work had gotten in the way - a small group decided to dust off their clubs and head back to the course.</p>
+            
+            <p>What began as a simple reunion round in August 2020 quickly became something much more meaningful. The Birdie Bush Bandits weren't just rediscovering golf; we were rediscovering friendship. Fast forward five years to 2025, and we've grown into a great bunch of friends who've turned our shared love of the game into lasting bonds that extend far beyond the 18th hole.</p>
+
+            <p>We're living proof that it's never too late to get back into golf, and that sometimes the best things come from the simplest ideas. What started as "let's play a round" has become a brotherhood that celebrates every birdie, laughs at every shank, and supports each other through all of life's ups and downs.</p>
+            
+            <div class="mission-box">
+              <h3>🎯 Our Mission</h3>
+              <p>To create lasting friendships through our shared passion for golf, while continuously improving our games and having an absolute blast doing it.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Member Only Section -->
+      <section class="member-only">
+        <div style="background: #e8f5e8; padding: 2rem; margin: 2rem 0; border-radius: 10px; text-align: center;">
+          <h3 style="color: #004d00; margin-bottom: 1rem;">🏌️ Welcome Back, Member!</h3>
+          <p>As a BBB member, you have access to exclusive content including detailed founding stories, member insights, and behind-the-scenes moments that shaped our group.</p>
+        </div>
+      </section>
+
+      <!-- Values Section -->
+      <section class="values-section">
+        <div class="values-header">
+          <h2>Our Core Values</h2>
+          <p>These principles guide everything we do, from how we play to how we treat each other</p>
+        </div>
+        <div class="values-grid">
+          <div class="value-item">
+            <span class="value-icon">🤝</span>
+            <h4>Fellowship</h4>
+            <p>Building lasting friendships on and off the course. Golf brings us together, but friendship keeps us coming back.</p>
+          </div>
+          <div class="value-item">
+            <span class="value-icon">📈</span>
+            <h4>Improvement</h4>
+            <p>Supporting each other's journey to better golf. We celebrate progress, no matter how small, and learn from every round.</p>
+          </div>
+          <div class="value-item">
+            <span class="value-icon">🎉</span>
+            <h4>Fun</h4>
+            <p>Making every round memorable and enjoyable. Win or lose, we always find something to laugh about and enjoy together.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Timeline Section -->
+      <section class="timeline-section">
+        <div class="timeline-header">
+          <h2>Our Journey</h2>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <span class="timeline-icon">🚀</span>
+            <div class="timeline-content">
+              <h4>August 2020 - Amrit's Call</h4>
+              <p>During the COVID pandemic, Amrit reached out to old friends who hadn't played golf in years. Despite busy lives with family and work, a few answered the call to dust off their clubs.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-icon">⛳</span>
+            <div class="timeline-content">
+              <h4>The First Round Back</h4>
+              <p>Rusty swings, forgotten rules, and plenty of laughs marked our return to the course. What started as a simple reunion became the foundation of something special.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-icon">🤝</span>
+            <div class="timeline-content">
+              <h4>Building the Brotherhood</h4>
+              <p>Regular rounds turned into lasting friendships. We discovered that golf was the perfect excuse to reconnect and stay connected as our group grew.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-icon">📱</span>
+            <div class="timeline-content">
+              <h4>Digital Evolution</h4>
+              <p>We embraced technology to track our progress, with custom scorecards, handicap calculators, and photo galleries to capture our memories.</p>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-icon">🌟</span>
+            <div class="timeline-content">
+              <h4>Five Years Strong</h4>
+              <p>From a pandemic phone call to a great bunch of friends - we've proven that it's never too late to get back into golf and rediscover friendship.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Call to Action Section -->
+      <section class="cta-section">
+        <h2>Ready to Join the Adventure?</h2>
+        <p>Whether you're a seasoned pro or just starting out, there's a place for you with the Birdie Bush Bandits.</p>
+        <div class="cta-buttons">
+          <a href="photo-gallery.html" class="cta-btn auth-required">View Our Gallery</a>
+          <a href="members.html" class="cta-btn secondary">Meet the Team</a>
+          <a href="index.html" class="cta-btn secondary">Back to Home</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Authentication Integration Script -->
+  <script>
+    // Enhanced Authentication Integration for About Page
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Initializing about page with authentication...');
+      
+      // Check if BBB modules are loaded
+      if (typeof BBB_CONFIG === 'undefined' || 
+          typeof BBB_AUTH === 'undefined' || 
+          typeof BBB_DB === 'undefined' || 
+          typeof BBB_UI === 'undefined' || 
+          typeof BBB_UTILS === 'undefined') {
+        console.error('Required BBB modules not found!');
+        // Continue without auth features
+        initializePublicPage();
+        return;
+      }
+      
+      // Initialize modules
+      try {
+        BBB_AUTH.init({
+          cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+        });
+        
+        BBB_DB.init({
+          useCloudflare: BBB_CONFIG.cloudflareEnabled,
+          localStoragePrefix: 'bbb_'
+        });
+        
+        console.log('Modules initialized successfully');
+      } catch (error) {
+        console.error('Error initializing modules:', error);
+        initializePublicPage();
+        return;
+      }
+      
+      // Check authentication and render page accordingly
+      checkPageAuthentication();
+      
+      // Add scroll animations
+      addScrollAnimations();
+    });
+
+    /**
+     * Main authentication check for about page
+     */
+    function checkPageAuthentication() {
+      console.log('Checking page authentication...');
+      
+      // Try to restore session from localStorage
+      const hasStoredAuth = restoreAuthSession();
+      
+      if (hasStoredAuth) {
+        console.log('Restored authentication from storage');
+        initializeAuthenticatedPage();
+      } else {
+        console.log('No stored authentication, checking current auth state...');
+        
+        // Check if already authenticated in current session
+        if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+          console.log('User already authenticated in current session');
+          initializeAuthenticatedPage();
+        } else {
+          console.log('User not authenticated, showing public page');
+          initializePublicPage();
+        }
+      }
+    }
+
+    /**
+     * Restore authentication session from localStorage
+     */
+    function restoreAuthSession() {
+      try {
+        const storedAuth = localStorage.getItem('bbb_auth_session');
+        const storedUser = localStorage.getItem('bbb_current_user');
+        
+        if (storedAuth && storedUser) {
+          console.log('Found stored authentication data');
+          
+          const authData = JSON.parse(storedAuth);
+          const userData = JSON.parse(storedUser);
+          
+          // Check if session is still valid
+          if (authData.expiresAt && new Date(authData.expiresAt) > new Date()) {
+            console.log('Restoring valid session for user:', userData.id);
+            
+            // Restore authentication state
+            BBB_AUTH.currentUser = userData;
+            BBB_AUTH.isAuthenticated = true;
+            
+            return true;
+          } else {
+            console.log('Session expired, clearing stored data');
+            clearAuthSession();
+          }
+        }
+        
+        return false;
+      } catch (error) {
+        console.error('Error restoring auth session:', error);
+        clearAuthSession();
+        return false;
+      }
+    }
+
+    /**
+     * Clear authentication session
+     */
+    function clearAuthSession() {
+      localStorage.removeItem('bbb_auth_session');
+      localStorage.removeItem('bbb_current_user');
+      BBB_AUTH.currentUser = null;
+      BBB_AUTH.isAuthenticated = false;
+    }
+
+    /**
+     * Initialize page for authenticated users
+     */
+    function initializeAuthenticatedPage() {
+      console.log('Initializing authenticated page for user:', BBB_AUTH.currentUser?.id);
+      
+      // Start session monitoring
+      startSessionMonitoring();
+      
+      // Show authenticated content
+      showAuthenticatedContent();
+      
+      // Add logout functionality to header
+      addLogoutFunctionality();
+      
+      // Show user info
+      showUserInfo();
+    }
+
+    /**
+     * Initialize page for public (non-authenticated) users
+     */
+    function initializePublicPage() {
+      console.log('Initializing public page');
+      
+      // Show public content
+      showPublicContent();
+      
+      // Keep home button visible
+      const homeLink = document.getElementById('home-link');
+      if (homeLink) {
+        homeLink.style.display = 'inline-block';
+      }
+    }
+
+    /**
+     * Show content for authenticated users
+     */
+    function showAuthenticatedContent() {
+      // Show member-specific content
+      const memberContent = document.querySelectorAll('.member-only');
+      memberContent.forEach(element => {
+        element.style.display = 'block';
+      });
+      
+      // Remove auth restrictions from gallery links
+      const authRequiredLinks = document.querySelectorAll('.auth-required');
+      authRequiredLinks.forEach(link => {
+        link.onclick = null; // Remove click handler
+        // Make gallery link direct
+        if (link.href.includes('gallery')) {
+          link.href = 'photo-gallery.html';
+        }
+      });
+    }
+
+    /**
+     * Show content for public users
+     */
+    function showPublicContent() {
+      // Hide member-only content
+      const memberContent = document.querySelectorAll('.member-only');
+      memberContent.forEach(element => {
+        element.style.display = 'none';
+      });
+      
+      // Add auth prompts to protected links
+      const authRequiredLinks = document.querySelectorAll('.auth-required');
+      authRequiredLinks.forEach(link => {
+        link.onclick = function(e) {
+          e.preventDefault();
+          showAuthPrompt('photo gallery');
+        };
+      });
+    }
+
+    /**
+     * Show authentication prompt
+     */
+    function showAuthPrompt(feature) {
+      const modal = document.createElement('div');
+      modal.className = 'auth-prompt-modal';
+      
+      const content = document.createElement('div');
+      content.style.cssText = `
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      `;
+      
+      content.innerHTML = `
+        <h3 style="color: #004d00; margin-bottom: 1rem;">Authentication Required</h3>
+        <p style="margin-bottom: 1.5rem;">You need to log in to access the ${feature}.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+          <button onclick="window.location.href='login.html'" style="
+            background: #004c99;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+          ">Login</button>
+          <button onclick="this.closest('.auth-prompt-modal').remove()" style="
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+          ">Cancel</button>
+        </div>
+      `;
+      
+      modal.appendChild(content);
+      document.body.appendChild(modal);
+      
+      // Close on outside click
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      });
+    }
+
+    /**
+     * Add logout functionality to header
+     */
+    function addLogoutFunctionality() {
+      const headerRight = document.querySelector('.header-right');
+      if (headerRight && BBB_AUTH.isAuthenticated) {
+        // Check if logout button already exists
+        if (headerRight.querySelector('.logout-btn')) return;
+        
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'logout-btn';
+        logoutBtn.textContent = 'Logout';
+        
+        logoutBtn.onclick = function() {
+          if (confirm('Are you sure you want to logout?')) {
+            performLogout();
+          }
+        };
+        
+        headerRight.appendChild(logoutBtn);
+      }
+    }
+
+    /**
+     * Show user info
+     */
+    function showUserInfo() {
+      if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+        const headerRight = document.querySelector('.header-right');
+        if (headerRight) {
+          // Check if user info already exists
+          if (headerRight.querySelector('.user-info')) return;
+          
+          const userInfo = document.createElement('span');
+          userInfo.className = 'user-info';
+          userInfo.textContent = `Welcome, ${BBB_AUTH.currentUser.id}`;
+          
+          // Insert before logout button
+          const logoutBtn = headerRight.querySelector('.logout-btn');
+          if (logoutBtn) {
+            headerRight.insertBefore(userInfo, logoutBtn);
+          } else {
+            headerRight.appendChild(userInfo);
+          }
+        }
+      }
+    }
+
+    /**
+     * Perform logout
+     */
+    function performLogout() {
+      console.log('Logging out user...');
+      
+      // Clear authentication state
+      clearAuthSession();
+      
+      // Refresh page to show public content
+      window.location.reload();
+    }
+
+    /**
+     * Start session monitoring
+     */
+    function startSessionMonitoring() {
+      // Check session every 5 minutes
+      const sessionCheck = setInterval(() => {
+        const storedAuth = localStorage.getItem('bbb_auth_session');
+        
+        if (storedAuth) {
+          try {
+            const authData = JSON.parse(storedAuth);
+            
+            if (authData.expiresAt && new Date(authData.expiresAt) <= new Date()) {
+              console.log('Session expired, logging out...');
+              clearInterval(sessionCheck);
+              performLogout();
+            }
+          } catch (error) {
+            console.error('Error checking session:', error);
+            clearInterval(sessionCheck);
+            performLogout();
+          }
+        } else if (BBB_AUTH.isAuthenticated) {
+          // Session was cleared externally
+          console.log('Session cleared externally, logging out...');
+          clearInterval(sessionCheck);
+          performLogout();
+        }
+      }, 5 * 60 * 1000); // 5 minutes
+      
+      // Store interval ID for cleanup if needed
+      window.bbbSessionMonitor = sessionCheck;
+    }
+
+    /**
+     * Add scroll animations
+     */
+    function addScrollAnimations() {
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
+        });
+      }, observerOptions);
+
+      // Apply animation styles and observe elements
+      const animatedElements = document.querySelectorAll('.value-item, .timeline-item, .about-text');
+      animatedElements.forEach((element, index) => {
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(30px)';
+        element.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+        observer.observe(element);
+      });
+    }
+
+    // Save page for post-login redirect when clicking login links
+    document.addEventListener('click', function(e) {
+      if (e.target.matches('a[href*="login"]') || 
+          e.target.matches('button[onclick*="login"]')) {
+        sessionStorage.setItem('redirectAfterLogin', window.location.href);
+      }
+    });
+
+    // Handle browser back/forward with session check
+    window.addEventListener('pageshow', function(e) {
+      if (e.persisted) {
+        // Page was loaded from cache, recheck auth
+        checkPageAuthentication();
+      }
+    });
+  </script>
+</body>
+</html>
