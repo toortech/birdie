@@ -1,0 +1,1226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stableford Scorecard</title>
+  <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  <!-- Add scripts to support BBB framework -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+  <!-- Add html2canvas library for image download functionality -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    /* Base styles */
+    body { 
+      background: #f5f5f5; 
+      color: #000; 
+      font-family: Arial, sans-serif; 
+      padding: 1rem; 
+      margin: 0 auto; 
+      max-width: 1200px;
+      position: relative;
+    }
+    
+    /* Validation & utility */
+    .invalid-hcp, .missing { border: 2px solid red; background-color: #ffcccc; }
+    .invalid-score { border: 2px solid orange; background-color: #ffeecc; }
+    
+    /* Logo in top-right corner */
+    .top-bar {
+      position: absolute;
+      top: 0;
+      right: 0;
+      z-index: 10;
+    }
+    
+    .corner-logo {
+      width: 80px;
+      height: 80px;
+      display: block;
+    }
+    
+    h1 { 
+      color: #003300; 
+      font-size: 2rem; 
+      text-align: center; 
+      margin-bottom: 1rem; 
+    }
+    
+    header { 
+      position: fixed;
+      top: 0;
+      left: 0;
+      padding: 1rem;
+      z-index: 5;
+    }
+    
+    .home-link { 
+      color: #000; 
+      font-weight: bold; 
+      text-decoration: none;
+      display: inline-block;
+      padding: 0.5rem 0.75rem;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 4px;
+      transition: background-color 0.3s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .home-link:hover {
+      background-color: rgba(255, 255, 255, 1);
+    }
+    
+    /* Main content wrapper */
+    main {
+      padding-top: 80px;
+    }
+    
+    /* Controls */
+    details#setup-controls { margin-bottom: 1rem; }
+    .controls { display: flex; flex-wrap: wrap; gap: 1rem; }
+    .controls > div { background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 6px; flex: 1 1 200px; }
+    .controls label { display: block; margin-bottom: 0.25rem; font-weight: bold; }
+    .controls label.checkbox { display: inline-block; margin-right: 0.5rem; }
+    
+    /* Player selects styling */
+    .player-select {
+      width: 100%;
+      padding: 0.5rem;
+      margin-top: 0.25rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      background-color: white;
+      cursor: pointer;
+    }
+    
+    #player-selects label {
+      font-size: 0.9rem;
+      color: #666;
+    }
+    
+    #player-selects > div > div {
+      margin-bottom: 0.5rem;
+    }
+    
+    /* Buttons */
+    #button-group { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem; }
+    select, button { padding: 0.5rem 1rem; cursor: pointer; }
+    button { background: #004c99; color: white; border: none; border-radius: 4px; }
+    button:hover { background: #003d7a; }
+    button:active { opacity: 0.8; transform: scale(0.98); }
+    button:disabled { background: #cccccc; cursor: not-allowed; }
+    
+    /* Table */
+    #table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 1rem; }
+    table { width: 100%; border-collapse: collapse; min-width: 600px; }
+    caption { caption-side: top; text-align: left; padding: 0.5rem; font-weight: bold; background: #eef; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: center; white-space: nowrap; }
+    th { background: #ddd; }
+    
+    /* Status messages */
+    #status-message { 
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 4px;
+      text-align: center;
+      display: none;
+    }
+    .success { background-color: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
+    .error { background-color: #ffcdd2; color: #b71c1c; border: 1px solid #ef9a9a; }
+    .warning { background-color: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
+    .info { background-color: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; }
+    
+    /* Saved scorecards section */
+    #saved-scorecards {
+      margin-top: 2rem;
+      padding: 1rem;
+      background-color: #f0f8ff;
+      border-radius: 4px;
+      border: 1px solid #bbdefb;
+    }
+    
+    #saved-scorecards h2 {
+      margin-top: 0;
+      color: #0d47a1;
+    }
+    
+    #scorecard-list {
+      list-style: none;
+      padding: 0;
+    }
+    
+    #scorecard-list li {
+      padding: 0.5rem;
+      margin-bottom: 0.5rem;
+      background-color: white;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    #scorecard-list button {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.8rem;
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      header {
+        padding: 0.75rem;
+      }
+      
+      main {
+        padding-top: 70px;
+      }
+      
+      .corner-logo {
+        width: 70px;
+        height: 70px;
+      }
+      
+      .controls { flex-direction: column; }
+      #button-group { flex-direction: column; }
+      table { font-size: 0.8rem; }
+    }
+    
+    @media (max-width: 480px) {
+      body { padding: 0.5rem; }
+      
+      header {
+        padding: 0.5rem;
+      }
+      
+      main {
+        padding-top: 65px;
+      }
+      
+      .corner-logo {
+        width: 65px;
+        height: 65px;
+      }
+      
+      .home-link {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.9rem;
+      }
+      
+      h1 { font-size: 1.5rem; }
+      .controls { flex-direction: column; gap: 0.5rem; }
+      .controls > div { flex: 1 1 100%; }
+      #button-group { flex-direction: column; }
+      select, button { width: 100%; }
+      /* Mobile table adjustments */
+      table { min-width: auto; table-layout: auto; font-size: 0.65rem; width: 100%; }
+      th, td { white-space: normal; word-wrap: break-word; padding: 0.2rem; }
+      input[type="number"] { width: 1.2rem; font-size: 0.7rem; }
+      .stroke-info, .points { font-size: 0.6em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="corner-logo">
+  </div>
+  
+  <header>
+    <nav><a href="index.html" class="home-link">🏠 Home</a></nav>
+  </header>
+  
+  <main>
+    <h1>Stableford Scorecard</h1>
+    <div id="status-message"></div>
+    <details id="setup-controls" open>
+      <summary>⚙️ Setup Options</summary>
+      <div class="controls">
+        <div>
+          <label for="course-select">Course:</label>
+          <select id="course-select">
+            <option value="Richings">Richings Park Golf Club</option>
+            <option value="Thorney">Thorney Park Golf Club</option>
+            <option value="Airlinks">London Airlinks Golf Club</option>
+            <option value="Ascot">Royal Ascot Golf Club</option>
+            <option value="Stoke">Stoke Park Golf Club</option>
+            <option value="Inspirations">Inspirations Golf Club</option>
+          </select>
+        </div>
+        <div>
+          <label for="tee-select">Tee Colour:</label>
+          <select id="tee-select">
+            <option value="white">White</option>
+            <option value="yellow">Yellow</option>
+            <option value="red">Red</option>
+          </select>
+        </div>
+        <div id="player-selects">
+          <label>Players:</label>
+          <div style="display: grid; gap: 0.5rem;">
+            <div>
+              <label for="player-1">Player 1:</label>
+              <select id="player-1" class="player-select">
+                <option value="">-- Select Player --</option>
+                <option value="Amrit">Amrit</option>
+                <option value="Kam">Kam</option>
+                <option value="Vish">Vish</option>
+                <option value="Ravi">Ravi</option>
+                <option value="Bal">Bal</option>
+                <option value="Vick">Vick</option>
+                <option value="Michael">Michael</option>
+                <option value="Justy">Justy</option>
+                <option value="Phuperjee">Phuperjee</option>
+                <option value="Indy">Indy</option>
+                <option value="Maj">Maj</option>
+                <option value="Sama">Sama</option>
+              </select>
+            </div>
+            <div>
+              <label for="player-2">Player 2:</label>
+              <select id="player-2" class="player-select">
+                <option value="">-- Select Player --</option>
+                <option value="Amrit">Amrit</option>
+                <option value="Kam">Kam</option>
+                <option value="Vish">Vish</option>
+                <option value="Ravi">Ravi</option>
+                <option value="Bal">Bal</option>
+                <option value="Vick">Vick</option>
+                <option value="Michael">Michael</option>
+                <option value="Justy">Justy</option>
+                <option value="Phuperjee">Phuperjee</option>
+                <option value="Indy">Indy</option>
+                <option value="Maj">Maj</option>
+                <option value="Sama">Sama</option>
+              </select>
+            </div>
+            <div>
+              <label for="player-3">Player 3:</label>
+              <select id="player-3" class="player-select">
+                <option value="">-- Select Player --</option>
+                <option value="Amrit">Amrit</option>
+                <option value="Kam">Kam</option>
+                <option value="Vish">Vish</option>
+                <option value="Ravi">Ravi</option>
+                <option value="Bal">Bal</option>
+                <option value="Vick">Vick</option>
+                <option value="Michael">Michael</option>
+                <option value="Justy">Justy</option>
+                <option value="Phuperjee">Phuperjee</option>
+                <option value="Indy">Indy</option>
+                <option value="Maj">Maj</option>
+                <option value="Sama">Sama</option>
+              </select>
+            </div>
+            <div>
+              <label for="player-4">Player 4:</label>
+              <select id="player-4" class="player-select">
+                <option value="">-- Select Player --</option>
+                <option value="Amrit">Amrit</option>
+                <option value="Kam">Kam</option>
+                <option value="Vish">Vish</option>
+                <option value="Ravi">Ravi</option>
+                <option value="Bal">Bal</option>
+                <option value="Vick">Vick</option>
+                <option value="Michael">Michael</option>
+                <option value="Justy">Justy</option>
+                <option value="Phuperjee">Phuperjee</option>
+                <option value="Indy">Indy</option>
+                <option value="Maj">Maj</option>
+                <option value="Sama">Sama</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div>
+          <label>Holes:</label>
+          <label class="checkbox"><input type="radio" name="holes" value="18" checked> Full 18</label>
+          <label class="checkbox"><input type="radio" name="holes" value="9f"> Front 9</label>
+          <label class="checkbox"><input type="radio" name="holes" value="9b"> Back 9</label>
+        </div>
+      </div>
+    </details>
+    <div id="button-group">
+      <button id="build">Build Scorecard</button>
+      <button id="reset">Reset</button>
+      <button id="save" disabled>Save Scorecard</button>
+      <button id="download-image">📸 Save Scorecard as Image</button>
+    </div>
+    
+    <!-- Table container for the scorecard -->
+    <div id="table-container"></div>
+  </main>
+  <script>
+    (function() {
+      'use strict';
+      const buildBtn = document.getElementById('build');
+      const saveBtn = document.getElementById('save');
+      const resetBtn = document.getElementById('reset');
+      const downloadBtn = document.getElementById('download-image');
+      const tableContainer = document.getElementById('table-container');
+      const courseSelect = document.getElementById('course-select');
+      const teeSelect = document.getElementById('tee-select');
+      const holeRadios = document.querySelectorAll('input[name="holes"]');
+      const playerSelects = document.querySelectorAll('.player-select');
+      const statusMessage = document.getElementById('status-message');
+      let scorecardBuilt = false;
+      let savedSuccessfully = false;
+
+      // Course data - directly in this file instead of using external config
+      const courses = {
+        Richings: {
+          par: [4,3,5,4,4,3,4,4,4,3,4,4,4,3,4,4,5,4],
+          si:  [15,4,12,18,16,14,2,6,8,11,3,17,10,7,5,1,13,9],
+          yards: {
+            white: [287,199,545,345,335,165,397,299,388,172,417,328,356,201,420,431,423,402],
+            yellow:[265,188,534,335,322,149,383,284,364,162,373,318,344,188,391,392,513,380],
+            red:   [237,158,490,300,289,130,353,257,344,132,351,294,323,177,391,337,479,360]
+          },
+          tees: {
+            white: {courseRating: 70.7, slopeRating: 128},
+            yellow: {courseRating: 68.3, slopeRating: 121},
+            red: {courseRating: 65.9, slopeRating: 115}
+          }
+        },
+        Thorney: {
+          par: [5,4,4,3,5,4,4,3,5,4,4,3,5,4,4,3,5,4],
+          si:  [9,15,1,17,5,13,3,11,7,16,2,14,6,18,4,12,8,10],
+          yards: {
+            white: [475,360,410,155,495,345,375,160,500,350,370,150,480,355,385,145,505,365],
+            yellow:[460,345,395,145,480,330,360,150,485,335,355,140,465,340,370,135,490,350],
+            red:   [440,320,370,130,450,305,335,135,455,310,330,125,435,315,345,120,460,325]
+          },
+          tees: {
+            white: {courseRating: 68.7, slopeRating: 120},
+            yellow: {courseRating: 67.0, slopeRating: 117},
+            red: {courseRating: 69.3, slopeRating: 119}
+          }
+        },
+        Airlinks: {
+          par: [4,3,4,5,3,4,4,5,4,3,4,4,5,3,4,4,3,5],
+          si:  [6,14,4,10,16,2,8,12,1,18,7,5,11,17,3,9,15,13],
+          yards: {
+            white: [375,185,420,510,175,450,380,520,430,165,410,365,525,170,445,375,180,540],
+            yellow: [360,175,405,495,165,435,365,510,415,155,395,355,515,160,430,365,170,525],
+            red: [345,165,385,470,150,410,345,480,395,145,375,335,485,145,405,345,155,495]
+          },
+          tees: {
+            white: {courseRating: 63.4, slopeRating: 102},
+            yellow: {courseRating: 62.0, slopeRating: 98},
+            red: {courseRating: 61.1, slopeRating: 92}
+          }
+        },
+        Ascot: {
+          par: [4,4,3,4,5,4,3,4,5,4,3,4,5,3,4,4,3,5],
+          si:  [5,11,15,1,9,3,17,7,13,4,18,6,10,16,2,8,14,12],
+          yards: {
+            white: [410,385,175,440,525,430,180,415,545,425,170,435,530,185,445,405,175,540],
+            yellow: [395,370,165,425,510,415,170,400,530,410,160,420,515,175,430,390,165,525],
+            red: [365,340,145,395,480,385,150,370,500,380,140,390,485,155,400,360,145,495]
+          },
+          tees: {
+            white: {courseRating: 70.3, slopeRating: 123},
+            yellow: {courseRating: 68.5, slopeRating: 118},
+            red: {courseRating: 70.0, slopeRating: 113}
+          }
+        },
+        Stoke: {
+          par: [4,5,3,4,4,3,4,4,5,4,3,4,5,4,3,4,5,4],
+          si:  [7,15,11,1,9,17,5,3,13,8,18,4,10,2,16,6,12,14],
+          yards: {
+            white: [405,510,190,450,430,175,415,425,535,420,165,440,520,430,180,425,545,410],
+            yellow: [390,495,180,435,415,165,400,410,520,405,155,425,505,415,170,410,530,395],
+            red: [360,465,160,405,385,145,370,380,490,375,135,395,475,385,150,380,500,365]
+          },
+          tees: {
+            white: {courseRating: 70.9, slopeRating: 126},
+            yellow: {courseRating: 69.1, slopeRating: 122},
+            red: {courseRating: 68.5, slopeRating: 118}
+          }
+        },
+        Inspirations: {
+          par: [5,4,3,4,5,3,4,4,5,4,3,4,5,4,3,4,4,5],
+          si:  [11,5,17,1,9,15,3,7,13,4,18,6,10,2,16,8,14,12],
+          yards: {
+            white: [530,440,185,460,540,175,445,430,555,435,180,450,535,465,170,425,410,540],
+            yellow: [515,425,175,445,525,165,430,415,540,420,170,435,520,450,160,410,395,525],
+            red: [485,395,155,415,495,145,400,385,510,390,150,405,490,420,140,380,365,495]
+          },
+          tees: {
+            white: {courseRating: 74.3, slopeRating: 128},
+            yellow: {courseRating: 72.1, slopeRating: 124},
+            red: {courseRating: 70.5, slopeRating: 120}
+          }
+        }
+      };
+      
+      // Show message function
+      function showMessage(message, type) {
+        statusMessage.textContent = message;
+        statusMessage.className = type;
+        statusMessage.style.display = 'block';
+        setTimeout(() => {
+          statusMessage.style.display = 'none';
+        }, 3000);
+      }
+      
+      // Prevent duplicate player selection
+      function updatePlayerOptions() {
+        const selectedPlayers = [];
+        playerSelects.forEach(select => {
+          if (select.value) selectedPlayers.push(select.value);
+        });
+        
+        playerSelects.forEach(select => {
+          const currentValue = select.value;
+          const options = select.querySelectorAll('option');
+          
+          options.forEach(option => {
+            if (option.value && option.value !== currentValue && selectedPlayers.includes(option.value)) {
+              option.disabled = true;
+              option.style.color = '#999';
+            } else {
+              option.disabled = false;
+              option.style.color = '#000';
+            }
+          });
+        });
+      }
+
+      // Add event listeners to player selects
+      playerSelects.forEach(select => {
+        select.addEventListener('change', updatePlayerOptions);
+      });
+
+      // Debounce function to limit execution frequency
+      function debounce(fn, delay = 200) {
+        let timer;
+        return function(...args) {
+          clearTimeout(timer);
+          timer = setTimeout(() => fn.apply(this, args), delay);
+        };
+      }
+
+      // Save to database and link to view page
+      function saveToLocalStorage() {
+        if (!scorecardBuilt) return;
+        
+        try {
+          // Check if any scores are missing
+          const inputs = tableContainer.querySelectorAll('tbody input[type="number"]');
+          let missingScores = false;
+          let invalidScores = false;
+          
+          inputs.forEach(inp => {
+            if (inp.value === '' || inp.value === null) {
+              inp.classList.add('missing');
+              missingScores = true;
+            } else if (isNaN(parseInt(inp.value, 10)) || parseInt(inp.value, 10) < 0) {
+              inp.classList.add('invalid-score');
+              invalidScores = true;
+            } else {
+              inp.classList.remove('missing');
+              inp.classList.remove('invalid-score');
+            }
+          });
+          
+          if (missingScores) {
+            showMessage('Please enter all scores before saving.', 'error');
+            return false;
+          }
+          
+          if (invalidScores) {
+            showMessage('Some scores are invalid. Please enter positive numbers only.', 'error');
+            return false;
+          }
+          
+          // Check if any players have invalid handicaps
+          const handicapInputs = document.querySelectorAll('[id^="hcp-"]');
+          let invalidHandicaps = false;
+          
+          handicapInputs.forEach(input => {
+            if (input.value !== '' && (isNaN(parseInt(input.value, 10)) || parseInt(input.value, 10) < 0)) {
+              input.classList.add('invalid-hcp');
+              invalidHandicaps = true;
+            } else {
+              input.classList.remove('invalid-hcp');
+            }
+          });
+          
+          if (invalidHandicaps) {
+            showMessage('Some handicaps are invalid. Please enter positive numbers only.', 'error');
+            return false;
+          }
+          
+          const scorecard = {
+            id: 'scorecard_' + Date.now(), // Add a unique ID for each scorecard
+            date: new Date().toISOString(),
+            course: courseSelect.value,
+            tee: teeSelect.value,
+            holes: [...holeRadios].find(r => r.checked).value,
+            players: [],
+            createdAt: new Date().toISOString(),
+            savedAt: new Date().toLocaleString('en-GB')
+          };
+          
+          // Get players and their data
+          const selectedPlayers = [];
+          playerSelects.forEach(select => {
+            if (select.value) selectedPlayers.push(select.value);
+          });
+          
+          selectedPlayers.forEach((player, index) => {
+            const handicapInput = document.getElementById(`hcp-${index}`);
+            if (!handicapInput) return; // Safety check
+            
+            const handicap = parseInt(handicapInput.value, 10) || 0;
+            const scores = [];
+            const points = [];
+            
+            const holeVal = scorecard.holes;
+            let holeIndices = [...Array(18).keys()];
+            if (holeVal === '9f') holeIndices = holeIndices.slice(0, 9);
+            if (holeVal === '9b') holeIndices = holeIndices.slice(9);
+            
+            holeIndices.forEach(hole => {
+              const input = document.querySelector(`input[data-player="${index}"][data-hole="${hole}"]`);
+              if (!input) return; // Safety check
+              
+              const score = parseInt(input.value, 10) || 0;
+              scores.push(score);
+              
+              // Get points from the display
+              const pointsEl = document.querySelector(`.pts-${index} .points[data-hole="${hole}"]`);
+              if (pointsEl && pointsEl.textContent) {
+                points.push(parseInt(pointsEl.textContent, 10) || 0);
+              } else {
+                const pointsDiv = document.querySelector(`.pts-${index} .points`);
+                if (pointsDiv && pointsDiv.textContent) {
+                  points.push(parseInt(pointsDiv.textContent, 10) || 0);
+                } else {
+                  points.push(0);
+                }
+              }
+            });
+            
+            // Calculate totals from actual values
+            const totalShots = scores.reduce((sum, val) => sum + val, 0);
+            const totalPoints = points.reduce((sum, val) => sum + val, 0);
+            
+            // Get adjusted handicap
+            const slopeRating = courses[scorecard.course].tees[scorecard.tee].slopeRating;
+            const courseHandicap = Math.round(handicap * slopeRating / 113);
+            
+            scorecard.players.push({
+              name: player,
+              handicap,
+              courseHandicap: courseHandicap,
+              scores,
+              points,
+              totalShots,
+              totalPoints
+            });
+          });
+          
+          // Try to save using BBB_DB if available, otherwise fallback to localStorage
+          if (typeof BBB_DB !== 'undefined' && typeof BBB_DB.saveScorecard === 'function') {
+            // Using BBB_DB module
+            BBB_DB.saveScorecard(scorecard)
+              .then(() => {
+                showMessage('Scorecard saved successfully!', 'success');
+                savedSuccessfully = true;
+                
+                // Add redirect to view page after short delay
+                setTimeout(() => {
+                  showMessage('Redirecting to saved scorecards...', 'info');
+                  setTimeout(() => {
+                    window.location.href = 'view-saved-scores.html';
+                  }, 1500);
+                }, 1000);
+              })
+              .catch(error => {
+                console.error("Error saving to BBB_DB:", error);
+                // Fallback to localStorage if BBB_DB fails
+                saveToLocalStorageFallback(scorecard);
+              });
+          } else {
+            // Fallback to localStorage if BBB_DB not available
+            saveToLocalStorageFallback(scorecard);
+          }
+          
+          return true;
+        } catch (error) {
+          console.error("Error saving scorecard:", error);
+          showMessage('Error saving scorecard: ' + error.message, 'error');
+          return false;
+        }
+      }
+      
+      // Fallback to original localStorage method
+      function saveToLocalStorageFallback(scorecard) {
+        try {
+          // Get existing scorecards or initialize empty array
+          let savedScorecards;
+          try {
+            savedScorecards = JSON.parse(localStorage.getItem('golfScorecards') || '[]');
+            if (!Array.isArray(savedScorecards)) savedScorecards = [];
+          } catch (e) {
+            console.error("Error parsing saved scorecards:", e);
+            savedScorecards = [];
+          }
+          
+          // Add new scorecard and save
+          savedScorecards.push(scorecard);
+          localStorage.setItem('golfScorecards', JSON.stringify(savedScorecards));
+          
+          showMessage('Scorecard saved to local storage!', 'success');
+          savedSuccessfully = true;
+          
+          // Add button to redirect to view-saved-scores.html
+          setTimeout(() => {
+            showMessage('Redirecting to saved scorecards...', 'info');
+            setTimeout(() => {
+              window.location.href = 'view-saved-scores.html';
+            }, 1500);
+          }, 1000);
+          
+          return true;
+        } catch (error) {
+          console.error("Error in localStorage fallback:", error);
+          showMessage('Error saving to localStorage: ' + error.message, 'error');
+          return false;
+        }
+      }
+      
+      // Load any saved scorecards
+      function loadSavedScorecards() {
+        if (typeof BBB_DB !== 'undefined' && typeof BBB_DB.getScorecards === 'function') {
+          BBB_DB.getScorecards()
+            .then(scorecards => {
+              // Iterate over scorecards, they might be an object
+              const scorecardItems = Object.values(scorecards);
+              if (scorecardItems.length > 0) {
+                // Show a button to view all scorecards at the bottom
+                const viewButton = document.createElement('button');
+                viewButton.id = 'view-all-saved';
+                viewButton.className = 'btn';
+                viewButton.textContent = 'View All Saved Scorecards';
+                viewButton.style.display = 'block';
+                viewButton.style.margin = '1rem auto';
+                viewButton.style.marginTop = '2rem';
+                viewButton.addEventListener('click', () => {
+                  window.location.href = 'view-saved-scores.html';
+                });
+                
+                if (!document.getElementById('view-all-saved')) {
+                  // Add at the bottom of main
+                  const main = document.querySelector('main');
+                  if (main) {
+                    main.appendChild(viewButton);
+                  } else {
+                    document.body.appendChild(viewButton);
+                  }
+                }
+              }
+            })
+            .catch(err => {
+              console.error("Error loading scorecards:", err);
+            });
+        } else {
+          // Fallback to localStorage if BBB_DB not available
+          try {
+            const savedScorecards = JSON.parse(localStorage.getItem('golfScorecards') || '[]');
+            if (savedScorecards.length > 0) {
+              // Show a button to view all scorecards at the bottom
+              const viewButton = document.createElement('button');
+              viewButton.id = 'view-all-saved';
+              viewButton.className = 'btn';
+              viewButton.textContent = 'View All Saved Scorecards';
+              viewButton.style.display = 'block';
+              viewButton.style.margin = '1rem auto';
+              viewButton.style.marginTop = '2rem';
+              viewButton.addEventListener('click', () => {
+                window.location.href = 'view-saved-scores.html';
+              });
+              
+              if (!document.getElementById('view-all-saved')) {
+                // Add at the bottom of main
+                const main = document.querySelector('main');
+                if (main) {
+                  main.appendChild(viewButton);
+                } else {
+                  document.body.appendChild(viewButton);
+                }
+              }
+            }
+          } catch (e) {
+            console.error("Error parsing saved scorecards:", e);
+          }
+        }
+      }
+      
+      // Check for BBB modules and initialize if available
+      function initBBBModules() {
+        // Check if BBB modules are loaded
+        if (typeof BBB_AUTH !== 'undefined' && typeof BBB_DB !== 'undefined') {
+          try {
+            // Initialize BBB modules
+            if (typeof BBB_CONFIG !== 'undefined') {
+              BBB_AUTH.init({
+                cloudflareEnabled: BBB_CONFIG.cloudflareEnabled || false
+              });
+              
+              BBB_DB.init({
+                useCloudflare: BBB_CONFIG.cloudflareEnabled || false,
+                localStoragePrefix: 'bbb_'
+              });
+            } else {
+              // Fallback initialization
+              BBB_AUTH.init({
+                cloudflareEnabled: false
+              });
+              
+              BBB_DB.init({
+                useCloudflare: false,
+                localStoragePrefix: 'bbb_'
+              });
+            }
+            
+            // Load saved scorecards
+            loadSavedScorecards();
+            
+            console.log("BBB modules initialized successfully");
+          } catch (err) {
+            console.error("Error initializing BBB modules:", err);
+          }
+        } else {
+          console.log("BBB modules not available");
+        }
+      }
+      
+      // Initialize BBB modules after DOM content loaded
+      document.addEventListener('DOMContentLoaded', function() {
+        // Small delay to ensure all scripts are loaded
+        setTimeout(initBBBModules, 100);
+      });
+      
+      // Download scorecard as image
+      function downloadScorecardAsImage() {
+        try {
+          const table = tableContainer.querySelector('table');
+          if (!table) {
+            showMessage('No scorecard to capture.', 'error');
+            return;
+          }
+          
+          // Create a container for the table with some extra styling for nice image
+          const container = document.createElement('div');
+          container.style.backgroundColor = 'white';
+          container.style.padding = '20px';
+          container.style.borderRadius = '8px';
+          container.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+          container.style.position = 'fixed';
+          container.style.left = '-9999px';
+          container.style.top = '-9999px';
+          
+          // Clone the table so we don't modify the original
+          const tableClone = table.cloneNode(true);
+          
+          // Fix input values in the clone - convert inputs to text elements
+          // This is the critical part that fixes the numbers not showing in boxes
+          const inputs = tableClone.querySelectorAll('input');
+          inputs.forEach(input => {
+            const span = document.createElement('span');
+            // Copy the value from the original input
+            const originalInput = table.querySelector(`input[id="${input.id}"], input[data-player="${input.dataset.player}"][data-hole="${input.dataset.hole}"]`);
+            
+            if (originalInput && originalInput.value) {
+              span.textContent = originalInput.value;
+            } else if (input.value) {
+              span.textContent = input.value;
+            } else {
+              span.textContent = '';
+            }
+            
+            // Style the span to look like an input
+            span.style.display = 'inline-block';
+            span.style.width = input.type === 'number' ? '20px' : '30px';
+            span.style.height = '20px';
+            span.style.border = '1px solid #ccc';
+            span.style.borderRadius = '3px';
+            span.style.backgroundColor = '#fff';
+            span.style.padding = '2px';
+            span.style.textAlign = 'center';
+            
+            // Replace the input with the span
+            input.parentNode.replaceChild(span, input);
+          });
+          
+          // Add a proper title to the image
+          const title = document.createElement('h2');
+          title.textContent = `Stableford Scorecard - ${courseSelect.value} (${teeSelect.value} tees)`;
+          title.style.textAlign = 'center';
+          title.style.marginBottom = '15px';
+          title.style.color = '#003300';
+          
+          container.appendChild(title);
+          container.appendChild(tableClone);
+          document.body.appendChild(container);
+          
+          // Use html2canvas to create an image
+          html2canvas(container, { 
+            backgroundColor: '#ffffff',
+            scale: 2, // Increase quality
+            logging: false,
+            useCORS: true
+          }).then(canvas => {
+            // Remove the temporary container
+            document.body.removeChild(container);
+            
+            // Convert to image
+            const image = canvas.toDataURL('image/png');
+            
+            // Create a download link
+            const link = document.createElement('a');
+            link.download = `scorecard-${courseSelect.value}-${new Date().toISOString().slice(0,10)}.png`;
+            link.href = image;
+            link.click();
+            
+            showMessage('Scorecard image downloaded successfully!', 'success');
+          }).catch(error => {
+            console.error("Error generating image:", error);
+            document.body.removeChild(container);
+            showMessage('Error generating image: ' + error.message, 'error');
+          });
+        } catch (error) {
+          console.error("Error in download image function:", error);
+          showMessage('Error generating image: ' + error.message, 'error');
+        }
+      }
+
+      // Build scorecard button click handler
+      buildBtn.addEventListener('click', function() {
+        try {
+          const players = [];
+          playerSelects.forEach(select => {
+            if (select.value) players.push(select.value);
+          });
+          
+          if (!players.length) {
+            showMessage('Please select at least one player.', 'error');
+            return;
+          }
+          
+          build(players);
+          scorecardBuilt = true;
+          document.getElementById('setup-controls').open = false;
+          saveBtn.disabled = false;
+          showMessage('Scorecard built successfully!', 'success');
+          
+          // Remove any existing View Saved Cards button
+          const existingViewBtn = document.getElementById('view-scorecards-btn');
+          if (existingViewBtn) {
+            existingViewBtn.remove();
+          }
+        } catch (error) {
+          console.error("Error building scorecard:", error);
+          showMessage('Error building scorecard: ' + error.message, 'error');
+        }
+      });
+
+      // Reset button click handler
+      resetBtn.addEventListener('click', function() {
+        try {
+          // Only confirm if there's data to lose
+          if (scorecardBuilt) {
+            // Check if any scores have been entered
+            const inputs = tableContainer.querySelectorAll('tbody input[type="number"]');
+            let hasEnteredScores = false;
+            
+            inputs.forEach(input => {
+              if (input.value && input.value !== '' && !isNaN(parseInt(input.value, 10))) {
+                hasEnteredScores = true;
+              }
+            });
+            
+            if (hasEnteredScores) {
+              // Show a more detailed confirmation for scores
+              if (!confirm('WARNING: You have entered scores that will be permanently lost if you reset.\n\nAre you sure you want to reset the scorecard?')) {
+                return;
+              }
+            } else {
+              // Basic confirmation for built scorecard with no scores
+              if (!confirm('Reset scorecard? The current layout will be cleared.')) {
+                return;
+              }
+            }
+          }
+          
+          // Reset everything
+          scorecardBuilt = false;
+          savedSuccessfully = false;
+          tableContainer.innerHTML = '';
+          document.getElementById('setup-controls').open = true;
+          saveBtn.disabled = true;
+          
+          // Also reset player handicaps to make starting fresh easier
+          const handicapInputs = document.querySelectorAll('input[id^="hcp-"]');
+          handicapInputs.forEach(input => {
+            input.value = 0;
+          });
+          
+          showMessage('Scorecard has been reset.', 'success');
+        } catch (error) {
+          console.error("Error resetting scorecard:", error);
+          showMessage('Error resetting scorecard: ' + error.message, 'error');
+        }
+      });
+
+      // Save button click handler
+      saveBtn.addEventListener('click', function() {
+        try {
+          // This is now handled within the saveToLocalStorage function
+          const success = saveToLocalStorage();
+          if (success) {
+            saveBtn.disabled = true;
+            setTimeout(() => {
+              saveBtn.disabled = false;
+            }, 2000);
+          }
+        } catch (error) {
+          console.error("Error in save button handler:", error);
+          showMessage('Error saving: ' + error.message, 'error');
+        }
+      });
+
+      // Download image button click handler
+      downloadBtn.addEventListener('click', function() {
+        try {
+          if (!tableContainer.firstElementChild) {
+            showMessage('No scorecard to capture.', 'error');
+            return;
+          }
+          
+          // Check if any scores are missing before generating image
+          const inputs = tableContainer.querySelectorAll('tbody input[type="number"]');
+          let missingScores = false;
+          let invalidScores = false;
+          
+          inputs.forEach(inp => {
+            if (inp.value === '' || inp.value === null) {
+              inp.classList.add('missing');
+              missingScores = true;
+            } else if (isNaN(parseInt(inp.value, 10)) || parseInt(inp.value, 10) < 0) {
+              inp.classList.add('invalid-score');
+              invalidScores = true;
+            } else {
+              inp.classList.remove('missing');
+              inp.classList.remove('invalid-score');
+            }
+          });
+          
+          if (missingScores) {
+            showMessage('Please enter all scores before saving as image.', 'error');
+            return;
+          }
+          
+          if (invalidScores) {
+            showMessage('Please fix invalid scores before saving as image.', 'error');
+            return;
+          }
+          
+          downloadScorecardAsImage();
+        } catch (error) {
+          console.error("Error in download button handler:", error);
+          showMessage('Error downloading image: ' + error.message, 'error');
+        }
+      });
+      
+      // View saved scorecards button
+      viewSavedBtn.addEventListener('click', function() {
+        try {
+          updateSavedScorecardsList();
+          savedScorecardsDiv.style.display = 'block';
+          tableContainer.style.display = 'none';
+        } catch (error) {
+          console.error("Error viewing saved scorecards:", error);
+          showMessage('Error viewing saved scorecards: ' + error.message, 'error');
+        }
+      });
+      
+      // Close saved scorecards button
+      closeSavedBtn.addEventListener('click', function() {
+        savedScorecardsDiv.style.display = 'none';
+        tableContainer.style.display = 'block';
+      });
+      
+      // Build the scorecard
+      function build(players) {
+        tableContainer.innerHTML = '';
+        const table = document.createElement('table');
+        const caption = document.createElement('caption');
+        caption.textContent = 'Scorecard created: ' + new Date().toLocaleString('en-GB', { dateStyle: 'short', timeStyle: 'short' }) + 
+                              ' | Course: ' + courseSelect.value + ' | Tees: ' + teeSelect.value;
+        table.appendChild(caption);
+
+        const thead = document.createElement('thead');
+        let hdr1 = '<tr><th>Hole</th><th>Par</th><th style="color:red;">SI</th><th>Yards</th>';
+        players.forEach((p,i) => hdr1 += `<th colspan="2">${p}<br>H:<input id="hcp-${i}" type="number" min="0" max="99" value="0" oninput="if(this.value.length>2) this.value=this.value.slice(0,2)"></th>`);
+        hdr1 += '</tr>';
+        let hdr2 = '<tr><th></th><th></th><th></th><th></th>';
+        players.forEach(() => hdr2 += '<th>Shots</th><th>Pts</th>');
+        hdr2 += '</tr>';
+        thead.innerHTML = hdr1 + hdr2;
+        table.appendChild(thead);
+
+        const tbody = document.createElement('tbody');
+        const holeVal = [...holeRadios].find(r => r.checked).value;
+        let idx = [...Array(18).keys()];
+        if (holeVal === '9f') idx = idx.slice(0,9);
+        if (holeVal === '9b') idx = idx.slice(9);
+        idx.forEach(h => {
+          const tr = document.createElement('tr');
+          const c = courses[courseSelect.value];
+          tr.innerHTML = `<td>${h+1}</td><td>${c.par[h]}</td><td style="color:red;">${c.si[h]}</td><td>${c.yards[teeSelect.value][h]}</td>`;
+          players.forEach((_,pi) => {
+            tr.innerHTML += `<td><input data-player="${pi}" data-hole="${h}" type="number" min="0" max="999" oninput="if(this.value.length>3) this.value=this.value.slice(0,3)"></td><td class="pts-${pi}"><div class="stroke-info" data-player="${pi}" data-hole="${h}"></div><div class="points" data-hole="${h}"></div></td>`;
+          });
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+
+        const tfoot = document.createElement('tfoot');
+        ['Front 9','Back 9','Total'].forEach((lbl,i) => {
+          let row = `<tr><td colspan="4">${lbl}</td>`;
+          players.forEach((_,pi) => row += `<td id="shots-${i}-${pi}"></td><td id="pts-${i}-${pi}"></td>`);
+          row += '</tr>';
+          tfoot.innerHTML += row;
+        });
+        table.appendChild(tfoot);
+        tableContainer.appendChild(table);
+
+        // Setup handlers
+        players.forEach((_,i) => {
+          const hIn = document.getElementById(`hcp-${i}`);
+          if (!hIn) return; // Safety check
+          
+          const adj = document.createElement('span'); 
+          adj.id = `adjhcp-${i}`; 
+          adj.style.marginLeft = '0.5rem';
+          hIn.insertAdjacentElement('afterend', adj);
+          
+          const updateAdj = () => {
+            const raw = parseInt(hIn.value, 10) || 0;
+            const a = Math.round(raw * courses[courseSelect.value].tees[teeSelect.value].slopeRating / 113);
+            adj.textContent = 'CH: ' + a;
+            
+            idx.forEach(h => {
+              const siVal = courses[courseSelect.value].si[h];
+              const strokes = a >= siVal + 18 ? 2 : a >= siVal ? 1 : 0;
+              const info = document.querySelector(`.stroke-info[data-player="${i}"][data-hole="${h}"]`);
+              if (info) info.textContent = `(${strokes} stroke${strokes!==1?'s':''})`;
+            });
+          };
+          
+          hIn.addEventListener('input', () => { 
+            if (hIn.value === '' || isNaN(parseInt(hIn.value, 10)) || parseInt(hIn.value, 10) < 0) {
+              hIn.classList.add('invalid-hcp');
+            } else {
+              hIn.classList.remove('invalid-hcp');
+              updateAdj(); 
+              debounce(updateScores)();
+            }
+          });
+          
+          updateAdj();
+        });
+
+        // Add input handlers to all score inputs
+        const scoreInputs = table.querySelectorAll('tbody input[type="number"]');
+        scoreInputs.forEach(inp => {
+          inp.addEventListener('input', () => { 
+            inp.classList.remove('missing'); 
+            debounce(updateScores)(); 
+          });
+        });
+
+        function updateScores() {
+          try {
+            const tots = players.map(() => ({fS:0, fP:0, bS:0, bP:0, oS:0, oP:0}));
+            
+            table.querySelectorAll('tbody tr').forEach((tr, rIdx) => {
+              if (rIdx >= idx.length) return; // Safety check
+              
+              const h = idx[rIdx]; 
+              const c = courses[courseSelect.value]; 
+              const parVal = c.par[h];
+              const siVal = c.si[h]; 
+              const front = h < 9;
+              
+              players.forEach((_, pi) => {
+                const inp = tr.querySelector(`input[data-player="${pi}"][data-hole="${h}"]`);
+                if (!inp) return; // Safety check
+                
+                const sc = parseInt(inp.value, 10); 
+                if (isNaN(sc)) return;
+                
+                const hcpInput = document.getElementById(`hcp-${pi}`);
+                if (!hcpInput) return; // Safety check
+                
+                const raw = parseInt(hcpInput.value, 10) || 0;
+                const a = Math.round(raw * courses[courseSelect.value].tees[teeSelect.value].slopeRating / 113);
+                const strokes = a >= siVal + 18 ? 2 : a >= siVal ? 1 : 0;
+                const net = sc - strokes;
+                let pts = 0;
+                
+                if (net <= parVal - 3)       pts = 5;
+                else if (net === parVal - 2)  pts = 4;
+                else if (net === parVal - 1)  pts = 3;
+                else if (net === parVal)      pts = 2;
+                else if (net === parVal + 1)  pts = 1;
+                
+                const pointsDiv = tr.querySelector(`.pts-${pi} .points[data-hole="${h}"]`);
+                if (pointsDiv) {
+                  pointsDiv.textContent = pts;
+                } else {
+                  const pointsEl = tr.querySelector(`.pts-${pi} .points`);
+                  if (pointsEl) pointsEl.textContent = pts;
+                }
+                
+                tots[pi].oS += sc; 
+                tots[pi].oP += pts;
+                
+                if (front) { 
+                  tots[pi].fS += sc; 
+                  tots[pi].fP += pts; 
+                } else { 
+                  tots[pi].bS += sc; 
+                  tots[pi].bP += pts; 
+                }
+              });
+            });
+            
+            // Update totals in footer
+            tots.forEach((t, pi) => {
+              [['shots', 'fS', 'fP'], ['shots', 'bS', 'bP'], ['shots', 'oS', 'oP']].forEach((cols, i) => {
+                const shotsEl = document.getElementById(`${cols[0]}-${i}-${pi}`);
+                const ptsEl = document.getElementById(`pts-${i}-${pi}`);
+                
+                if (shotsEl) shotsEl.textContent = t[cols[1]];
+                if (ptsEl) ptsEl.textContent = t[cols[2]];
+              });
+            });
+          } catch (error) {
+            console.error("Error updating scores:", error);
+          }
+        }
+      }
+      
+      // Initialize the saved scorecards list
+      updateSavedScorecardsList();
+    })();
+  </script>
+</body>
+</html>
