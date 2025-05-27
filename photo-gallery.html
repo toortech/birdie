@@ -3,11 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Birdie Bush Bandits – Photo Gallery</title>
+  <title>Photo Gallery - Birdie Bush Bandits</title>
   <meta name="description" content="View photos from Birdie Bush Bandits golf outings and events.">
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  
   <!-- Add Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  
   <!-- Global CSS -->
   <link rel="stylesheet" href="css/style.css">
   
@@ -18,345 +20,735 @@
   <script src="js/db.js"></script>
   <script src="js/ui.js"></script>
   
-  <!-- Gallery specific styles -->
   <style>
-    .gallery {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      gap: 16px;
-      margin-top: 2rem;
+    /* Enhanced CSS Variables - Same as about.html */
+    :root {
+      --bbb-primary: #004d00;
+      --bbb-secondary: #0046ad;
+      --bbb-gold: #ffd700;
+      --bbb-light-green: #e8f5e8;
+      --bbb-background: #f5f5f5;
+      --bbb-text: #212529;
+      --bbb-text-muted: #6c757d;
+      --bbb-border: #dee2e6;
+      --font-family-base: 'Inter', sans-serif;
+      --font-family-accent: 'Montserrat', serif;
     }
-    
-    @media (max-width: 768px) {
-      .gallery {
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-        gap: 12px;
-      }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    
-    @media (max-width: 480px) {
-      .gallery {
-        grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-        gap: 8px;
-      }
+
+    body {
+      font-family: var(--font-family-base);
+      line-height: 1.6;
+      color: var(--bbb-text);
+      background: linear-gradient(135deg, var(--bbb-light-green) 0%, var(--bbb-background) 100%);
+      min-height: 100vh;
     }
-    
-    .gallery-img {
-      width: 100%;
-      height: 200px;
-      object-fit: cover;
-      border-radius: 8px;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    
-    .gallery-img:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 5px 15px rgba(0,0,0,0.15);
-    }
-    
-    .upload-section {
-      display: flex;
-      justify-content: center;
-      margin: 1.5rem 0;
-    }
-    
-    .upload-label {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 20px;
-    }
-    
-    .upload-label::before {
-      content: '📸';
-      font-size: 1.25rem;
-    }
-    
-    .empty-gallery {
-      text-align: center;
-      padding: 3rem;
-      background-color: #f8f9fa;
-      border-radius: 8px;
-      margin-top: 2rem;
-    }
-    
-    /* Improved lightbox styles */
-    .lightbox {
-      display: none;
+
+    /* Header with Logo - Same as about.html */
+    .header {
       position: fixed;
-      z-index: 1000;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.9);
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-    }
-    
-    .lightbox-img {
-      max-width: 90%;
-      max-height: 80%;
-      border-radius: 4px;
-      box-shadow: 0 5px 25px rgba(0,0,0,0.5);
-    }
-    
-    .lightbox-close {
-      position: absolute;
-      top: 20px; right: 25px;
-      font-size: 2.5rem;
-      color: white;
-      cursor: pointer;
-      opacity: 0.8;
-      transition: opacity 0.3s;
-    }
-    
-    .lightbox-close:hover {
-      opacity: 1;
-    }
-    
-    .lightbox-caption {
-      color: white;
-      margin-top: 1rem;
-      font-size: 1.1rem;
-      max-width: 80%;
-      text-align: center;
-    }
-    
-    .upload-progress {
-      margin-top: 1rem;
-      width: 100%;
-      max-width: 500px;
-      background-color: #f8f9fa;
-      border-radius: 8px;
-      padding: 1rem;
-      text-align: center;
-      display: none;
-      margin: 0 auto;
-    }
-    
-    .progress-bar {
-      width: 100%;
-      height: 10px;
-      background-color: #e9ecef;
-      border-radius: 5px;
-      margin-top: 0.5rem;
-      overflow: hidden;
-    }
-    
-    .progress-bar-inner {
-      height: 100%;
-      background-color: var(--bbb-secondary);
-      width: 0%;
-      transition: width 0.3s ease;
-    }
-    
-    /* Image container and actions styles */
-    .gallery-img-container {
-      position: relative;
-      overflow: hidden;
-      border-radius: 8px;
-    }
-    
-    .image-actions {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(0,0,0,0.7);
-      padding: 8px;
-      display: flex;
-      justify-content: space-between;
-      opacity: 0;
-      transition: opacity 0.3s;
-      border-bottom-left-radius: 8px;
-      border-bottom-right-radius: 8px;
-    }
-    
-    .gallery-img-container:hover .image-actions {
-      opacity: 1;
-    }
-    
-    .image-action-btn {
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-      font-size: 1rem;
-      padding: 4px 8px;
-      border-radius: 4px;
-      transition: background-color 0.2s;
-    }
-    
-    .image-action-btn:hover {
-      background-color: rgba(255,255,255,0.2);
-    }
-    
-    .delete-btn {
-      color: #ff6b6b;
-    }
-    
-    .image-info {
-      position: absolute;
       top: 0;
       left: 0;
-      background-color: rgba(0,0,0,0.6);
-      color: white;
-      padding: 4px 8px;
-      font-size: 0.8rem;
-      border-top-left-radius: 8px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 100;
     }
-    
-    .filter-bar {
+
+    .header-content {
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      margin-bottom: 1.5rem;
-      flex-wrap: wrap;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header-logo {
+      height: 50px;
+      width: auto;
+      transition: transform 0.3s ease;
+    }
+
+    .header-logo:hover {
+      transform: scale(1.05);
+    }
+
+    .header-title {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-left: 1rem;
+      text-decoration: none;
+    }
+
+    .header-title:hover {
+      color: var(--bbb-secondary);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
       gap: 1rem;
     }
-    
-    .search-container {
+
+    .founded-badge-header {
+      display: inline-block;
+      background: var(--bbb-gold);
+      color: var(--bbb-primary);
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-left: 1rem;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    }
+
+    /* User info and auth controls */
+    .user-info {
+      color: var(--bbb-primary);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .logout-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+
+    .logout-btn:hover {
+      background: #c82333;
+    }
+
+    .home-btn {
+      background: var(--bbb-secondary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.3s;
+    }
+
+    .home-btn:hover {
+      background: var(--bbb-primary);
+    }
+
+    /* Gallery Page Hero Section */
+    .gallery-hero {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+      color: var(--bbb-text);
+      text-align: center;
+      padding: 4rem 2rem 3rem 2rem;
       position: relative;
-      flex-grow: 1;
-      max-width: 300px;
+      overflow: hidden;
+      border-bottom: 3px solid #dee2e6;
+      margin-top: 90px; /* Account for fixed header */
     }
-    
-    .search-input {
-      width: 100%;
-      padding: 8px 12px 8px 36px;
-      border-radius: 20px;
-      border: 1px solid #ddd;
-      font-size: 0.9rem;
-    }
-    
-    .search-icon {
+
+    .gallery-hero::before {
+      content: '';
       position: absolute;
-      left: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #666;
-    }
-    
-    .sort-container {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .sort-label {
-      font-size: 0.9rem;
-      color: #666;
-    }
-    
-    .sort-select {
-      padding: 6px 12px;
-      border-radius: 4px;
-      border: 1px solid #ddd;
-      font-size: 0.9rem;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 77, 0, 0.03) 0%, transparent 70%);
+      animation: rotate 30s linear infinite;
     }
 
-    /* Migration button */
-    .migration-button {
-      display: block;
-      margin: 1rem auto;
-      animation: pulse 2s infinite;
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
 
-    @keyframes pulse {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
+    .gallery-hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      margin: 0 auto;
     }
 
-    /* Message styles */
-    .info-message {
-      background-color: #e3f2fd;
-      border: 1px solid #bbdefb;
-      color: #0d47a1;
-      padding: 0.75rem;
-      border-radius: 4px;
-      margin: 1rem auto;
+    .gallery-hero h1 {
+      font-family: var(--font-family-accent);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      color: var(--bbb-primary);
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+      animation: fadeInUp 1s ease-out;
+      margin: 0 0 1rem 0;
+    }
+
+    .gallery-hero .tagline {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--bbb-text-muted);
       max-width: 600px;
+      margin: 0 auto;
+      animation: fadeInUp 1s ease-out 0.3s both;
+      font-weight: 500;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Main content container */
+    .gallery-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* Page title styling */
+    #page-title {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      font-size: 2.5rem;
+      text-align: center;
+      margin: 2rem 0 1rem 0;
+      font-weight: 700;
+    }
+
+    /* Gallery description */
+    .gallery-description {
+      text-align: center;
+      color: var(--bbb-text-muted);
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Status message styling */
+    #status-message {
+      margin: 1rem auto 2rem auto;
+      max-width: 600px;
+      border-radius: 8px;
+      font-weight: 500;
+      padding: 1rem;
       text-align: center;
     }
-    
-    /* =============================================================================
-       ALBUM MANAGEMENT STYLES
-       ============================================================================= */
 
-    /* Albums container */
-    #albums-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: var(--spacing-lg);
-      margin-top: var(--spacing-lg);
+    #status-message.success {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      color: #155724;
     }
 
-    /* Album cards */
+    #status-message.error {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      color: #721c24;
+    }
+
+    #status-message.warning {
+      background-color: #fff3cd;
+      border: 1px solid #ffeaa7;
+      color: #856404;
+    }
+
+    #status-message.info {
+      background-color: #d1ecf1;
+      border: 1px solid #bee5eb;
+      color: #0c5460;
+    }
+
+    /* Albums Section */
+    #albums-section {
+      margin: 2rem 0;
+    }
+
+    #albums-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      margin-top: 2rem;
+    }
+
     .album-card {
       background: white;
       border: 1px solid var(--bbb-border);
-      border-radius: var(--border-radius-lg);
+      border-radius: 15px;
       overflow: hidden;
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
     }
 
     .album-card:hover {
-      transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      border-color: var(--bbb-gold);
     }
 
     .album-card .card-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      padding: var(--spacing-lg);
+      padding: 1.5rem;
       border-bottom: 1px solid var(--bbb-border);
-      background-color: #f8f9fa;
+      background: linear-gradient(135deg, var(--bbb-light-green), white);
     }
 
     .album-card .card-title {
       margin: 0;
       color: var(--bbb-primary);
-      font-size: var(--font-size-lg);
+      font-size: 1.3rem;
       font-family: var(--font-family-accent);
       flex: 1;
-      margin-right: var(--spacing-md);
+      margin-right: 1rem;
+      font-weight: 600;
     }
 
     .album-actions {
       display: flex;
-      gap: var(--spacing-sm);
+      gap: 0.5rem;
       flex-shrink: 0;
     }
 
     .album-card .card-body {
-      padding: var(--spacing-lg);
+      padding: 1.5rem;
     }
 
     .album-card .card-body p {
-      margin: 0 0 var(--spacing-sm) 0;
+      margin: 0 0 1rem 0;
       color: var(--bbb-text-muted);
       line-height: 1.5;
     }
 
     .album-buttons {
       display: flex;
-      gap: var(--spacing-sm);
-      margin-top: var(--spacing-md);
+      gap: 0.75rem;
+      margin-top: 1rem;
       flex-wrap: wrap;
     }
 
     .album-buttons .btn {
       flex: 1;
-      min-width: 120px;
+      min-width: 130px;
+      font-size: 0.9rem;
+      padding: 0.75rem 1rem;
     }
 
-    /* Back button */
+    /* Back button styling */
     #back-to-albums {
-      margin-bottom: var(--spacing-lg);
+      background: var(--bbb-secondary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 25px;
+      font-weight: 600;
+      font-family: var(--font-family-accent);
+      box-shadow: 0 4px 15px rgba(0, 70, 173, 0.2);
+      transition: all 0.3s ease;
+      margin-bottom: 2rem;
+      display: none;
+      cursor: pointer;
+    }
+
+    #back-to-albums:hover {
+      background: var(--bbb-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 70, 173, 0.3);
+    }
+
+    /* Gallery section */
+    #gallery-container {
+      display: none;
+      margin: 2rem 0;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 2rem;
+    }
+
+    .gallery-img-container {
+      position: relative;
+      overflow: hidden;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .gallery-img-container:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    .gallery-img {
+      width: 100%;
+      height: 220px;
+      object-fit: cover;
+      transition: transform 0.3s ease;
+      cursor: pointer;
+    }
+
+    .gallery-img:hover {
+      transform: scale(1.05);
+    }
+
+    /* Filter bar */
+    .filter-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+      background: white;
+      padding: 1.5rem;
+      border-radius: 15px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .search-container {
+      position: relative;
+      flex-grow: 1;
+      max-width: 350px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 0.75rem 1rem 0.75rem 3rem;
+      border-radius: 25px;
+      border: 2px solid var(--bbb-border);
+      font-size: 1rem;
+      font-family: var(--font-family-base);
+      transition: border-color 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--bbb-secondary);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--bbb-text-muted);
+      font-size: 1.1rem;
+    }
+
+    .sort-container {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sort-label {
+      font-size: 1rem;
+      color: var(--bbb-text);
+      font-weight: 500;
+      font-family: var(--font-family-accent);
+    }
+
+    .sort-select {
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      border: 2px solid var(--bbb-border);
+      font-size: 1rem;
+      font-family: var(--font-family-base);
+      background: white;
+      transition: border-color 0.3s ease;
+    }
+
+    .sort-select:focus {
+      outline: none;
+      border-color: var(--bbb-secondary);
+    }
+
+    /* Upload section */
+    #upload-section {
+      display: none;
+      text-align: center;
+      margin: 2rem 0;
+    }
+
+    .upload-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 1rem 2rem;
+      background: var(--bbb-gold);
+      color: var(--bbb-primary);
+      border-radius: 25px;
+      font-weight: 600;
+      font-family: var(--font-family-accent);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+      border: none;
+      font-size: 1rem;
+    }
+
+    .upload-label:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+      background: #ffed4a;
+    }
+
+    .upload-label::before {
+      content: '📸';
+      font-size: 1.2rem;
+    }
+
+    /* Info message */
+    .info-message {
+      background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+      border: 2px solid #90caf9;
+      color: #0d47a1;
+      padding: 1rem;
+      border-radius: 12px;
+      margin: 1.5rem auto;
+      max-width: 700px;
+      text-align: center;
+      font-weight: 500;
+      box-shadow: 0 4px 15px rgba(33, 150, 243, 0.2);
+    }
+
+    /* Upload progress */
+    .upload-progress {
+      margin: 2rem auto;
+      width: 100%;
+      max-width: 600px;
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      display: none;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background-color: #e9ecef;
+      border-radius: 6px;
+      margin-top: 1rem;
+      overflow: hidden;
+    }
+
+    .progress-bar-inner {
+      height: 100%;
+      background: linear-gradient(90deg, var(--bbb-secondary), var(--bbb-primary));
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 6px;
+    }
+
+    /* Image overlays */
+    .image-info {
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      background: rgba(0,0,0,0.7);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .image-filename {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      padding: 0.5rem;
+      font-size: 0.8rem;
+      word-break: break-word;
+      line-height: 1.3;
+    }
+
+    .image-actions {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      display: flex;
+      gap: 0.25rem;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .gallery-img-container:hover .image-actions {
+      opacity: 1;
+    }
+
+    .image-action-btn {
+      background: rgba(0,0,0,0.7);
+      border: none;
+      color: white;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0.5rem;
+      border-radius: 6px;
+      transition: background-color 0.2s ease;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-action-btn:hover {
+      background: rgba(0,0,0,0.9);
+    }
+
+    .delete-btn:hover {
+      background: #dc3545 !important;
+    }
+
+    /* Empty gallery */
+    .empty-gallery {
+      text-align: center;
+      padding: 4rem 2rem;
+      background: white;
+      border-radius: 15px;
+      margin: 2rem 0;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .empty-gallery div:first-child {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      opacity: 0.7;
+    }
+
+    /* Button groups */
+    .text-center {
+      text-align: center;
+    }
+
+    .mb-3 {
+      margin-bottom: 2rem;
+    }
+
+    /* Button styling */
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      background: var(--bbb-secondary);
+      color: white;
+      font-weight: 600;
+      text-decoration: none;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      font-family: var(--font-family-accent);
+      font-size: 0.95rem;
+      border: 2px solid transparent;
+    }
+
+    .btn:hover {
+      background: var(--bbb-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .btn-success {
+      background: #28a745;
+    }
+
+    .btn-success:hover {
+      background: #218838;
+    }
+
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+    }
+
+    /* Lightbox */
+    .lightbox {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .lightbox-img {
+      max-width: 90%;
+      max-height: 80%;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 30px;
+      right: 40px;
+      font-size: 3rem;
+      color: white;
+      cursor: pointer;
+      opacity: 0.8;
+      transition: opacity 0.3s ease;
+      z-index: 1001;
+    }
+
+    .lightbox-close:hover {
+      opacity: 1;
+    }
+
+    .lightbox-caption {
+      color: white;
+      margin-top: 1.5rem;
+      font-size: 1.2rem;
+      max-width: 80%;
+      text-align: center;
+      font-weight: 500;
     }
 
     /* Modal styles */
@@ -376,28 +768,30 @@
 
     .modal-content {
       background: white;
-      border-radius: var(--border-radius-lg);
+      border-radius: 15px;
       max-width: 500px;
       width: 90%;
       max-height: 90%;
       overflow-y: auto;
       animation: slideIn 0.3s ease;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
     }
 
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: var(--spacing-lg);
+      padding: 1.5rem;
       border-bottom: 1px solid var(--bbb-border);
-      background-color: #f8f9fa;
-      border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+      background: linear-gradient(135deg, var(--bbb-light-green), white);
+      border-radius: 15px 15px 0 0;
     }
 
     .modal-header h3 {
       margin: 0;
       color: var(--bbb-primary);
       font-family: var(--font-family-accent);
+      font-weight: 600;
     }
 
     .btn-close {
@@ -421,102 +815,123 @@
     }
 
     .modal-body {
-      padding: var(--spacing-lg);
+      padding: 1.5rem;
     }
 
     .modal-footer {
       display: flex;
       justify-content: flex-end;
-      gap: var(--spacing-sm);
-      padding: var(--spacing-lg);
+      gap: 0.75rem;
+      padding: 1.5rem;
       border-top: 1px solid var(--bbb-border);
-      background-color: #f8f9fa;
-      border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+      background: linear-gradient(135deg, white, var(--bbb-light-green));
+      border-radius: 0 0 15px 15px;
     }
 
-    /* Form styles in modals */
-    .modal-body .form-group {
-      margin-bottom: var(--spacing-md);
+    /* Form styles */
+    .form-group {
+      margin-bottom: 1.5rem;
     }
 
     .modal-body label {
       display: block;
-      margin-bottom: var(--spacing-xs);
-      font-weight: bold;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
       color: var(--bbb-text);
       font-family: var(--font-family-accent);
     }
 
     .modal-body input,
-    .modal-body textarea {
+    .modal-body textarea,
+    .modal-body select {
       width: 100%;
-      padding: var(--spacing-sm);
-      border: 1px solid var(--bbb-border);
-      border-radius: var(--border-radius-sm);
-      font-size: var(--font-size-md);
+      padding: 0.75rem;
+      border: 2px solid var(--bbb-border);
+      border-radius: 8px;
+      font-size: 1rem;
       font-family: var(--font-family-base);
       box-sizing: border-box;
+      transition: border-color 0.3s ease;
     }
 
     .modal-body input:focus,
-    .modal-body textarea:focus {
-      outline: 2px solid var(--bbb-secondary);
-      outline-offset: -1px;
+    .modal-body textarea:focus,
+    .modal-body select:focus {
+      outline: none;
       border-color: var(--bbb-secondary);
     }
 
     .modal-body textarea {
       resize: vertical;
-      min-height: 80px;
+      min-height: 100px;
     }
 
-    .gallery-img-container {
-      position: relative;
-      display: inline-block;
-      margin: var(--spacing-sm);
+    /* Migration button */
+    .migration-button {
+      display: block;
+      margin: 2rem auto;
+      animation: pulse 2s infinite;
+      background: var(--bbb-gold);
+      color: var(--bbb-primary);
     }
 
-    .gallery-img-container:hover .image-actions {
-      opacity: 1;
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
     }
 
-    .image-actions {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      display: flex;
-      gap: 2px;
-      opacity: 0;
-      transition: opacity 0.2s ease;
-    }
-
-    .image-actions .btn {
-      padding: 4px 8px;
-      font-size: 12px;
-      min-width: auto;
-      line-height: 1;
-    }
-
-    .image-filename {
-      position: absolute;
-      bottom: 0;
+    /* Auth/Login overlay styling */
+    #login-overlay {
+      position: fixed;
+      top: 0;
       left: 0;
-      right: 0;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      padding: 4px 8px;
-      font-size: 12px;
-      border-radius: 0 0 var(--border-radius-sm) var(--border-radius-sm);
-      word-break: break-word;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
     }
 
-    /* Hide gallery initially when in albums mode */
-    #gallery-container {
-      display: none;
+    #login-box {
+      background: white;
+      padding: 2.5rem;
+      border-radius: 15px;
+      text-align: center;
+      max-width: 90%;
+      width: 400px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
     }
 
-    #upload-section {
-      display: none;
+    #login-box h2 {
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
+      margin-bottom: 1rem;
+    }
+
+    #pw-input {
+      width: 100%;
+      padding: 1rem;
+      margin: 1rem 0;
+      border: 2px solid var(--bbb-border);
+      border-radius: 8px;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    #pw-input:focus {
+      outline: none;
+      border-color: var(--bbb-secondary);
+    }
+
+    #error-msg {
+      margin-top: 1rem;
+      padding: 0.75rem;
+      background: #ffebee;
+      border: 1px solid #ffcdd2;
+      border-radius: 8px;
     }
 
     /* Animation keyframes */
@@ -536,63 +951,297 @@
       }
     }
 
-    /* Responsive adjustments */
+    /* Golf-specific decorative elements */
+    .golf-ball {
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      position: relative;
+      display: inline-block;
+      margin: 0 10px;
+      box-shadow: inset -3px -3px 5px rgba(0,0,0,0.2);
+    }
+
+    .golf-ball::before {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #ccc;
+      border-radius: 50%;
+      top: 4px;
+      left: 6px;
+      box-shadow: 4px 0 #ccc, 8px 0 #ccc, 2px 4px #ccc, 6px 4px #ccc, 10px 4px #ccc, 4px 8px #ccc, 8px 8px #ccc;
+    }
+
+    /* Responsive Design */
     @media (max-width: 768px) {
+      .header {
+        padding: 0.75rem 1rem;
+      }
+
+      .header-logo {
+        height: 40px;
+      }
+
+      .header-title {
+        font-size: 1.2rem;
+        margin-left: 0.5rem;
+      }
+
+      .header-content {
+        flex-wrap: wrap;
+      }
+
+      .header-right {
+        margin-top: 0.5rem;
+      }
+
+      .founded-badge-header {
+        margin-left: 0.5rem;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+      }
+
+      .gallery-hero {
+        padding: 2rem 1rem 1.5rem 1rem;
+        margin-top: 120px;
+      }
+
+      .gallery-main {
+        padding: 0 1rem;
+      }
+
+      #page-title {
+        font-size: 2rem;
+      }
+
       #albums-container {
         grid-template-columns: 1fr;
-        gap: var(--spacing-md);
+        gap: 1.5rem;
       }
-      
+
       .album-card .card-header {
         flex-direction: column;
         align-items: stretch;
       }
-      
+
       .album-card .card-title {
         margin-right: 0;
-        margin-bottom: var(--spacing-sm);
+        margin-bottom: 1rem;
       }
-      
+
       .album-actions {
         justify-content: flex-end;
       }
-      
+
       .album-buttons {
         flex-direction: column;
       }
-      
+
       .album-buttons .btn {
         flex: none;
         width: 100%;
       }
-      
+
+      .gallery {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 1rem;
+      }
+
+      .filter-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-container {
+        max-width: none;
+      }
+
+      .sort-container {
+        justify-content: space-between;
+      }
+
       .modal-content {
         width: 95%;
-        margin: var(--spacing-md);
+        margin: 1rem;
       }
-      
+
       .modal-footer {
         flex-direction: column-reverse;
       }
-      
+
       .modal-footer .btn {
         width: 100%;
         margin: 0;
       }
+
+      .image-actions {
+        opacity: 1; /* Always show on mobile */
+      }
     }
 
     @media (max-width: 480px) {
-      .image-actions {
-        opacity: 1; /* Always show on mobile */
+      .gallery-hero {
+        padding: 1.5rem 0.75rem 1rem 0.75rem;
+      }
+
+      .gallery-hero h1 {
+        font-size: 1.75rem;
+      }
+
+      .gallery-main {
+        padding: 0 0.75rem;
+      }
+
+      #page-title {
+        font-size: 1.75rem;
+      }
+
+      .gallery {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 0.75rem;
+      }
+
+      .gallery-img {
+        height: 180px;
+      }
+
+      .album-card .card-header,
+      .album-card .card-body {
+        padding: 1rem;
+      }
+
+      .filter-bar {
+        padding: 1rem;
+      }
+
+      .search-input,
+      .sort-select {
+        padding: 0.6rem;
+        font-size: 0.9rem;
+      }
+
+      .upload-label {
+        padding: 0.8rem 1.5rem;
+        font-size: 0.9rem;
+      }
+
+      #login-box {
+        padding: 2rem;
+        width: 320px;
+      }
+
+      .btn {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
       }
     }
   </style>
 </head>
 <body>
-  <!-- Skip main auth check for gallery pages - Handle auth differently -->
   <a href="#main" class="skip-link">Skip to main content</a>
   
-  <main id="main"></main>
+  <!-- Fixed Header with Logo - Same as about.html -->
+  <header class="header">
+    <div class="header-content">
+      <div class="header-left">
+        <a href="index.html">
+          <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="header-logo">
+        </a>
+        <a href="index.html" class="header-title">Birdie Bush Bandits</a>
+        <div class="founded-badge-header">
+          🏌️ Founded August 2020
+        </div>
+      </div>
+      <div class="header-right">
+        <!-- Auth controls will be added here by JavaScript -->
+        <a href="index.html" class="home-btn" id="home-link">Home</a>
+      </div>
+    </div>
+  </header>
+  
+  <main id="main">
+    <!-- Hero Section -->
+    <section class="gallery-hero">
+      <div class="gallery-hero-content">
+        <h1>Photo Gallery <span class="golf-ball"></span></h1>
+        <p class="tagline">Capturing memories from our golf adventures and friendships</p>
+      </div>
+    </section>
+
+    <!-- Main Gallery Content -->
+    <div class="gallery-main">
+      <!-- Page Title (Dynamic) -->
+      <h2 id="page-title">Photo Albums</h2>
+      
+      <!-- Status Message Container -->
+      <div id="status-message" style="display: none;"></div>
+      
+      <!-- Gallery Description -->
+      <p class="gallery-description">Browse photos from our golf outings and events. Click on any image to view it in full size.</p>
+
+      <!-- Back to Albums Button -->
+      <button id="back-to-albums" onclick="goBackToAlbums()">← Back to Albums</button>
+
+      <!-- Albums Section -->
+      <div id="albums-section">
+        <div class="text-center mb-3">
+          <button class="btn btn-success" onclick="showCreateAlbumModal()">Create New Album</button>
+          <button class="btn" onclick="viewAllImages()" style="margin-left: 0.75rem;">View All Images</button>
+        </div>
+        <div id="albums-container"></div>
+      </div>
+      
+      <!-- Filter/Search Bar -->
+      <div class="filter-bar">
+        <div class="search-container">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" placeholder="Search gallery..." id="gallery-search">
+        </div>
+        <div class="sort-container">
+          <span class="sort-label">Sort by:</span>
+          <select class="sort-select" id="gallery-sort">
+            <option value="newest">Newest first</option>
+            <option value="oldest">Oldest first</option>
+            <option value="name">Name (A-Z)</option>
+          </select>
+        </div>
+      </div>
+      
+      <!-- Image Upload Section -->
+      <div id="upload-section">
+        <label for="image-upload" class="upload-label">Upload Photos</label>
+        <input type="file" id="image-upload" accept="image/*" multiple style="display: none;">
+      </div>
+      
+      <!-- Info Message -->
+      <div class="info-message">
+        Gallery images are now stored in the cloud for better performance and reliability.
+      </div>
+      
+      <!-- Upload Progress -->
+      <div class="upload-progress" id="upload-progress">
+        <div id="progress-text">Uploading photos...</div>
+        <div class="progress-bar">
+          <div class="progress-bar-inner" id="progress-bar-inner"></div>
+        </div>
+      </div>
+      
+      <!-- Gallery Container -->
+      <div id="gallery-container">
+        <div id="gallery" class="gallery"></div>
+      </div>
+      
+      <!-- Lightbox -->
+      <div id="lightbox" class="lightbox">
+        <span class="lightbox-close">&times;</span>
+        <img class="lightbox-img" id="lightbox-img" src="" alt="">
+        <div id="lightbox-caption" class="lightbox-caption"></div>
+      </div>
+    </div>
+  </main>
   
   <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -762,171 +1411,57 @@
       function initializeGallery() {
         console.log('Initializing gallery...');
         
-        // Create header
-        const headerElements = BBB_UI.createHeader({
-          fixed: true,
-          showHomeLinkText: true
-        });
+        // Add logout functionality and user info to header
+        addHeaderAuthentication();
         
-        document.body.insertBefore(headerElements.header, document.body.firstChild);
-        
-        // Get main content element
-        const main = document.getElementById('main');
-        main.appendChild(headerElements.mainWrapper);
-        
-        // Create page content
-        const mainContent = document.createElement('div');
-        
-        // Create page title
-        const titleContainer = BBB_UI.createPageTitle({
-          title: 'Birdie Bush Bandits',
-          showFoundedText: true,
-          showGolfballs: true
-        });
-        mainContent.appendChild(titleContainer);
-        
-        // Add page subtitle
-        const subtitle = document.createElement('h2');
-        subtitle.id = 'page-title';
-        subtitle.textContent = 'Photo Albums';
-        mainContent.appendChild(subtitle);
-        
-        // Create status message container
-        const statusMessage = BBB_UI.createStatusMessage();
-        mainContent.appendChild(statusMessage);
-        
-        // Add description text
-        const description = document.createElement('p');
-        description.className = 'gallery-description';
-        description.textContent = 'Browse photos from our golf outings and events. Click on any image to view it in full size.';
-        mainContent.appendChild(description);
-
-        // Albums Section
-        const albumsSection = document.createElement('div');
-        albumsSection.id = 'albums-section';
-
-        const albumsButtonsContainer = document.createElement('div');
-        albumsButtonsContainer.className = 'text-center mb-3';
-
-        const createAlbumBtn = document.createElement('button');
-        createAlbumBtn.className = 'btn btn-success';
-        createAlbumBtn.textContent = 'Create New Album';
-        createAlbumBtn.onclick = showCreateAlbumModal;
-
-        const viewAllBtn = document.createElement('button');
-        viewAllBtn.className = 'btn';
-        viewAllBtn.textContent = 'View All Images';
-        viewAllBtn.onclick = viewAllImages;
-        viewAllBtn.style.marginLeft = '0.5rem';
-        
-        albumsButtonsContainer.appendChild(createAlbumBtn);
-        albumsButtonsContainer.appendChild(viewAllBtn);
-
-        const albumsContainer = document.createElement('div');
-        albumsContainer.id = 'albums-container';
-        albumsSection.appendChild(albumsButtonsContainer);
-        albumsSection.appendChild(albumsContainer);
-        mainContent.appendChild(albumsSection);
-        
-        // Create filter/search bar
-        const filterBar = createFilterBar();
-        mainContent.appendChild(filterBar);
-        
-        // Image upload section
-        const uploadSection = document.createElement('div');
-        uploadSection.id = 'upload-section';
-        uploadSection.className = 'upload-section';
-        
-        const uploadLabel = document.createElement('label');
-        uploadLabel.htmlFor = 'image-upload';
-        uploadLabel.className = 'upload-label btn';
-        uploadLabel.textContent = 'Upload Photos';
-        
-        const uploadInput = document.createElement('input');
-        uploadInput.type = 'file';
-        uploadInput.id = 'image-upload';
-        uploadInput.className = 'upload-input';
-        uploadInput.setAttribute('accept', 'image/*');
-        uploadInput.setAttribute('multiple', 'true');
-        uploadInput.style.display = 'none';
-        
-        uploadSection.appendChild(uploadLabel);
-        uploadSection.appendChild(uploadInput);
-        mainContent.appendChild(uploadSection);
-        
-        // Info message about cloudflare
-        const infoMessage = document.createElement('div');
-        infoMessage.className = 'info-message';
-        infoMessage.textContent = 'Gallery images are now stored in the cloud for better performance and reliability.';
-        mainContent.appendChild(infoMessage);
-        
-        // Upload progress indicator
-        const progressContainer = document.createElement('div');
-        progressContainer.className = 'upload-progress';
-        progressContainer.id = 'upload-progress';
-        
-        const progressText = document.createElement('div');
-        progressText.id = 'progress-text';
-        progressText.textContent = 'Uploading photos...';
-        
-        const progressBar = document.createElement('div');
-        progressBar.className = 'progress-bar';
-        
-        const progressBarInner = document.createElement('div');
-        progressBarInner.className = 'progress-bar-inner';
-        progressBarInner.id = 'progress-bar-inner';
-        
-        progressBar.appendChild(progressBarInner);
-        progressContainer.appendChild(progressText);
-        progressContainer.appendChild(progressBar);
-        mainContent.appendChild(progressContainer);
-        
-        // Gallery container wrapper
-        const galleryContainerWrapper = document.createElement('div');
-        galleryContainerWrapper.id = 'gallery-container';
-
-        // Gallery container
-        const galleryContainer = document.createElement('div');
-        galleryContainer.id = 'gallery';
-        galleryContainer.className = 'gallery';
-
-        galleryContainerWrapper.appendChild(galleryContainer);
-        mainContent.appendChild(galleryContainerWrapper);
-        
-        // Lightbox for image viewing
-        const lightbox = document.createElement('div');
-        lightbox.id = 'lightbox';
-        lightbox.className = 'lightbox';
-        
-        const lightboxClose = document.createElement('span');
-        lightboxClose.className = 'lightbox-close';
-        lightboxClose.innerHTML = '&times;';
-        
-        const lightboxImg = document.createElement('img');
-        lightboxImg.className = 'lightbox-img';
-        lightboxImg.id = 'lightbox-img';
-        lightboxImg.setAttribute('src', '');
-        lightboxImg.setAttribute('alt', '');
-        
-        const lightboxCaption = document.createElement('div');
-        lightboxCaption.id = 'lightbox-caption';
-        lightboxCaption.className = 'lightbox-caption';
-        
-        lightbox.appendChild(lightboxClose);
-        lightbox.appendChild(lightboxImg);
-        lightbox.appendChild(lightboxCaption);
-        mainContent.appendChild(lightbox);
-        
-        // Add content to main wrapper
-        headerElements.mainWrapper.appendChild(mainContent);
-        
-        // Load albums instead of gallery (since we start in albums mode)
+        // Load albums (default view)
         loadAlbums();
         
         // Setup event handlers
         setupEventHandlers();
         
         console.log('Gallery initialization complete!');
+      }
+
+      /**
+       * Add authentication controls to header
+       */
+      function addHeaderAuthentication() {
+        const headerRight = document.querySelector('.header-right');
+        if (headerRight && BBB_AUTH.isAuthenticated) {
+          // Show user info
+          const userInfo = document.createElement('span');
+          userInfo.className = 'user-info';
+          userInfo.textContent = `Welcome, ${BBB_AUTH.currentUser.id}`;
+          headerRight.insertBefore(userInfo, document.getElementById('home-link'));
+          
+          // Add logout button
+          const logoutBtn = document.createElement('button');
+          logoutBtn.className = 'logout-btn';
+          logoutBtn.textContent = 'Logout';
+          logoutBtn.onclick = function() {
+            if (confirm('Are you sure you want to logout?')) {
+              performLogout();
+            }
+          };
+          headerRight.appendChild(logoutBtn);
+        }
+      }
+
+      /**
+       * Perform logout
+       */
+      function performLogout() {
+        console.log('Logging out user...');
+        
+        // Clear authentication state
+        localStorage.removeItem('bbb_auth_session');
+        localStorage.removeItem('bbb_current_user');
+        BBB_AUTH.currentUser = null;
+        BBB_AUTH.isAuthenticated = false;
+        
+        // Refresh page to show login
+        window.location.reload();
       }
   
       // =============================================================================
@@ -941,7 +1476,7 @@
        */
       function loadAlbums() {
         console.log("Loading albums...");
-        BBB_UTILS.showMessage('Loading albums...', 'info');
+        showMessage('Loading albums...', 'info');
         
         fetch(`${CLOUDFLARE_API}/albums`)
           .then(response => {
@@ -953,11 +1488,11 @@
           .then(albums => {
             console.log("Albums loaded:", albums);
             displayAlbums(albums);
-            BBB_UTILS.showMessage('', 'info'); // Clear loading message
+            showMessage('', 'info'); // Clear loading message
           })
           .catch(err => {
             console.error('Error loading albums:', err);
-            BBB_UTILS.showMessage(`Error loading albums: ${err.message}`, 'error');
+            showMessage(`Error loading albums: ${err.message}`, 'error');
           });
       }
 
@@ -973,8 +1508,8 @@
         
         if (albums.length === 0) {
           albumsContainer.innerHTML = `
-            <div class="text-center p-4">
-              <div style="font-size: 3rem; margin-bottom: 1rem;">📁</div>
+            <div class="empty-gallery">
+              <div>📁</div>
               <p>No albums found. Create your first album!</p>
               <button onclick="showCreateAlbumModal()" class="btn btn-success">Create Album</button>
             </div>
@@ -983,7 +1518,7 @@
         }
         
         albumsContainer.innerHTML = albums.map(album => `
-          <div class="album-card card" data-album-id="${album.id}">
+          <div class="album-card" data-album-id="${album.id}">
             <div class="card-header">
               <h3 class="card-title">${escapeHtml(album.name)}</h3>
               <div class="album-actions">
@@ -992,7 +1527,7 @@
               </div>
             </div>
             <div class="card-body">
-              ${album.description ? `<p>${escapeHtml(album.description)}</p>` : '<p class="text-muted">No description</p>'}
+              ${album.description ? `<p>${escapeHtml(album.description)}</p>` : '<p style="color: #999;">No description</p>'}
               <p><strong>${album.image_count || 0}</strong> image${album.image_count === 1 ? '' : 's'}</p>
               <div class="album-buttons">
                 <button onclick="viewAlbum('${album.id}', '${escapeHtml(album.name)}')" class="btn">📂 View Album</button>
@@ -1059,7 +1594,7 @@
         const descInput = document.getElementById('album-description');
         
         if (!nameInput) {
-          BBB_UTILS.showMessage('Form elements not found', 'error');
+          showMessage('Form elements not found', 'error');
           return;
         }
         
@@ -1067,7 +1602,7 @@
         const description = descInput ? descInput.value.trim() : '';
         
         if (!name) {
-          BBB_UTILS.showMessage('Album name is required', 'error');
+          showMessage('Album name is required', 'error');
           nameInput.focus();
           return;
         }
@@ -1082,7 +1617,7 @@
           createBtn.textContent = 'Creating...';
         }
         
-        BBB_UTILS.showMessage('Creating album...', 'info');
+        showMessage('Creating album...', 'info');
         
         fetch(`${CLOUDFLARE_API}/albums`, {
           method: 'POST',
@@ -1094,11 +1629,11 @@
           .then(response => response.json())
           .then(result => {
             if (result.success) {
-              BBB_UTILS.showMessage('Album created successfully!', 'success');
+              showMessage('Album created successfully!', 'success');
               closeModal();
               loadAlbums(); // Refresh the albums list
             } else {
-              BBB_UTILS.showMessage(`Error creating album: ${result.error}`, 'error');
+              showMessage(`Error creating album: ${result.error}`, 'error');
               // Re-enable form
               nameInput.disabled = false;
               if (descInput) descInput.disabled = false;
@@ -1110,7 +1645,7 @@
           })
           .catch(err => {
             console.error('Error creating album:', err);
-            BBB_UTILS.showMessage(`Error creating album: ${err.message}`, 'error');
+            showMessage(`Error creating album: ${err.message}`, 'error');
             // Re-enable form
             nameInput.disabled = false;
             if (descInput) descInput.disabled = false;
@@ -1126,7 +1661,7 @@
        */
       function viewAlbum(albumId, albumName) {
         if (!albumId) {
-          BBB_UTILS.showMessage('Invalid album ID', 'error');
+          showMessage('Invalid album ID', 'error');
           return;
         }
         
@@ -1137,8 +1672,10 @@
         document.getElementById('page-title').textContent = `Album: ${albumName}`;
         
         // Show back button
-        const backButton = document.getElementById('back-to-albums') || createBackButton();
-        backButton.style.display = 'block';
+        const backButton = document.getElementById('back-to-albums');
+        if (backButton) {
+          backButton.style.display = 'block';
+        }
         
         // Hide albums section, show gallery
         document.getElementById('albums-section').style.display = 'none';
@@ -1156,17 +1693,14 @@
       }
 
       /**
-       * 6. Rename album (ENHANCED DEBUG VERSION)
+       * 6. Rename album
        */
       function renameAlbum(albumId, currentName) {
-        console.log('=== RENAME ALBUM DEBUG START ===');
-        console.log('albumId:', albumId);
-        console.log('currentName:', currentName);
-        console.log('CLOUDFLARE_API:', CLOUDFLARE_API);
+        console.log('Renaming album:', albumId, currentName);
         
         if (!albumId) {
           console.error('Invalid album ID provided');
-          BBB_UTILS.showMessage('Invalid album ID', 'error');
+          showMessage('Invalid album ID', 'error');
           return;
         }
         
@@ -1176,17 +1710,12 @@
         
         fetch(fetchUrl)
           .then(response => {
-            console.log('Fetch response status:', response.status);
-            console.log('Fetch response ok:', response.ok);
-            
             if (!response.ok) {
               throw new Error(`Failed to fetch album: ${response.status}`);
             }
             return response.json();
           })
           .then(album => {
-            console.log('Album data received:', album);
-            
             const modal = document.createElement('div');
             modal.className = 'modal-overlay';
             modal.innerHTML = `
@@ -1213,18 +1742,13 @@
             `;
             
             document.body.appendChild(modal);
-            console.log('Modal created and added to DOM');
             
             // Add click event listener to save button
             const saveBtn = document.getElementById('save-album-btn');
             if (saveBtn) {
               saveBtn.addEventListener('click', function() {
-                console.log('Save button clicked!');
                 updateAlbum(albumId);
               });
-              console.log('Save button event listener added');
-            } else {
-              console.error('Save button not found after modal creation');
             }
             
             // Focus and select the name input
@@ -1233,9 +1757,6 @@
               if (nameInput) {
                 nameInput.focus();
                 nameInput.select();
-                console.log('Name input focused and selected');
-              } else {
-                console.error('Name input not found after modal creation');
               }
             }, 100);
 
@@ -1244,52 +1765,34 @@
             if (nameInput) {
               nameInput.addEventListener('keypress', e => {
                 if (e.key === 'Enter') {
-                  console.log('Enter key pressed, calling updateAlbum');
                   updateAlbum(albumId);
                 }
               });
-              console.log('Enter key listener added');
-            } else {
-              console.error('Could not add enter key listener - input not found');
             }
           })
           .catch(err => {
             console.error('Error loading album details:', err);
-            console.error('Error details:', err.message);
-            BBB_UTILS.showMessage('Error loading album details', 'error');
+            showMessage('Error loading album details', 'error');
           });
-          
-        console.log('=== RENAME ALBUM DEBUG END ===');
       }
 
       /**
-       * 7. Update album (helper for rename) - ENHANCED DEBUG VERSION
+       * 7. Update album (helper for rename)
        */
       function updateAlbum(albumId) {
-        console.log('=== UPDATE ALBUM DEBUG START ===');
-        console.log('albumId:', albumId);
-        
         const nameInput = document.getElementById('rename-album-name');
         const descInput = document.getElementById('rename-album-description');
         
-        console.log('nameInput found:', !!nameInput);
-        console.log('descInput found:', !!descInput);
-        
         if (!nameInput) {
-          console.error('Form elements not found');
-          BBB_UTILS.showMessage('Form elements not found', 'error');
+          showMessage('Form elements not found', 'error');
           return;
         }
         
         const name = nameInput.value.trim();
         const description = descInput ? descInput.value.trim() : '';
         
-        console.log('name:', name);
-        console.log('description:', description);
-        
         if (!name) {
-          console.error('Album name is required');
-          BBB_UTILS.showMessage('Album name is required', 'error');
+          showMessage('Album name is required', 'error');
           nameInput.focus();
           return;
         }
@@ -1302,18 +1805,12 @@
         if (saveBtn) {
           saveBtn.disabled = true;
           saveBtn.textContent = 'Saving...';
-          console.log('Save button disabled and text updated');
-        } else {
-          console.error('Save button not found');
         }
         
-        BBB_UTILS.showMessage('Updating album...', 'info');
+        showMessage('Updating album...', 'info');
         
         const updateUrl = `${CLOUDFLARE_API}/albums/${albumId}`;
         const updateData = { name, description };
-        
-        console.log('Update URL:', updateUrl);
-        console.log('Update data:', updateData);
         
         fetch(updateUrl, {
           method: 'PUT',
@@ -1324,54 +1821,36 @@
           body: JSON.stringify(updateData)
         })
           .then(response => {
-            console.log('Update response status:', response.status);
-            console.log('Update response ok:', response.ok);
-            console.log('Update response headers:', [...response.headers.entries()]);
-            
-            // Check if response is JSON
             const contentType = response.headers.get('content-type');
-            console.log('Content-Type:', contentType);
             
             if (contentType && contentType.includes('application/json')) {
-              return response.json().then(data => {
-                console.log('Parsed JSON response:', data);
-                return {
-                  ok: response.ok,
-                  status: response.status,
-                  data: data
-                };
-              });
+              return response.json().then(data => ({
+                ok: response.ok,
+                status: response.status,
+                data: data
+              }));
             } else {
-              return response.text().then(text => {
-                console.log('Non-JSON response:', text);
-                return {
-                  ok: response.ok,
-                  status: response.status,
-                  data: { success: false, error: `Non-JSON response: ${text}` }
-                };
-              });
+              return response.text().then(text => ({
+                ok: response.ok,
+                status: response.status,
+                data: { success: false, error: `Non-JSON response: ${text}` }
+              }));
             }
           })
           .then(result => {
-            console.log('Final update result:', result);
-            
             if (result.ok && result.data.success) {
-              console.log('Update successful!');
-              BBB_UTILS.showMessage('Album updated successfully!', 'success');
+              showMessage('Album updated successfully!', 'success');
               closeModal();
               
               // If we're currently viewing this album, update the title
               if (window.currentAlbumId === albumId) {
-                console.log('Updating current album title');
                 document.getElementById('page-title').textContent = `Album: ${name}`;
               }
               
-              console.log('Refreshing albums list');
               loadAlbums(); // Refresh the albums list
             } else {
-              console.error('Update failed:', result.data);
               const errorMessage = result.data.error || `Update failed with status ${result.status}`;
-              BBB_UTILS.showMessage(`Error updating album: ${errorMessage}`, 'error');
+              showMessage(`Error updating album: ${errorMessage}`, 'error');
               
               // Re-enable form
               nameInput.disabled = false;
@@ -1383,10 +1862,8 @@
             }
           })
           .catch(err => {
-            console.error('Network or parsing error during album update:', err);
-            console.error('Error details:', err.message);
-            console.error('Error stack:', err.stack);
-            BBB_UTILS.showMessage(`Error updating album: ${err.message}`, 'error');
+            console.error('Error updating album:', err);
+            showMessage(`Error updating album: ${err.message}`, 'error');
             
             // Re-enable form
             nameInput.disabled = false;
@@ -1396,22 +1873,14 @@
               saveBtn.textContent = 'Save Changes';
             }
           });
-          
-        console.log('=== UPDATE ALBUM DEBUG END ===');
       }
 
       /**
-       * 8. Delete album with confirmation (ENHANCED DEBUG VERSION)
+       * 8. Delete album with confirmation
        */
       function deleteAlbum(albumId, albumName) {
-        console.log('=== DELETE ALBUM DEBUG START ===');
-        console.log('albumId:', albumId);
-        console.log('albumName:', albumName);
-        console.log('CLOUDFLARE_API:', CLOUDFLARE_API);
-        
         if (!albumId) {
-          console.error('Invalid album ID provided');
-          BBB_UTILS.showMessage('Invalid album ID', 'error');
+          showMessage('Invalid album ID', 'error');
           return;
         }
         
@@ -1423,15 +1892,12 @@
         );
         
         if (!confirmed) {
-          console.log('User cancelled album deletion');
           return;
         }
         
-        console.log('User confirmed deletion, proceeding...');
-        BBB_UTILS.showMessage('Deleting album and all images...', 'info');
+        showMessage('Deleting album and all images...', 'info');
         
         const deleteUrl = `${CLOUDFLARE_API}/albums/${albumId}`;
-        console.log('DELETE URL:', deleteUrl);
         
         fetch(deleteUrl, {
           method: 'DELETE',
@@ -1441,64 +1907,41 @@
           }
         })
           .then(response => {
-            console.log('Delete response received');
-            console.log('Response status:', response.status);
-            console.log('Response ok:', response.ok);
-            console.log('Response headers:', [...response.headers.entries()]);
-            
-            // Check if response is JSON
             const contentType = response.headers.get('content-type');
-            console.log('Content-Type:', contentType);
             
             if (contentType && contentType.includes('application/json')) {
-              return response.json().then(data => {
-                console.log('Parsed JSON response:', data);
-                return {
-                  ok: response.ok,
-                  status: response.status,
-                  data: data
-                };
-              });
+              return response.json().then(data => ({
+                ok: response.ok,
+                status: response.status,
+                data: data
+              }));
             } else {
-              return response.text().then(text => {
-                console.log('Non-JSON response:', text);
-                return {
-                  ok: response.ok,
-                  status: response.status,
-                  data: { success: false, error: `Non-JSON response: ${text}` }
-                };
-              });
+              return response.text().then(text => ({
+                ok: response.ok,
+                status: response.status,
+                data: { success: false, error: `Non-JSON response: ${text}` }
+              }));
             }
           })
           .then(result => {
-            console.log('Final result object:', result);
-            
             if (result.ok && result.data.success) {
-              console.log('Delete successful!');
-              BBB_UTILS.showMessage(`Album "${albumName}" and ${result.data.deletedImageCount || 0} images deleted successfully`, 'success');
+              showMessage(`Album "${albumName}" and ${result.data.deletedImageCount || 0} images deleted successfully`, 'success');
               
               // If we're currently viewing this album, go back to albums
               if (window.currentAlbumId === albumId) {
-                console.log('Currently viewing deleted album, going back to albums');
                 goBackToAlbums();
               } else {
-                console.log('Refreshing albums list');
                 loadAlbums(); // Refresh the albums list
               }
             } else {
-              console.error('Delete failed:', result.data);
               const errorMessage = result.data.error || `Delete failed with status ${result.status}`;
-              BBB_UTILS.showMessage(`Error deleting album: ${errorMessage}`, 'error');
+              showMessage(`Error deleting album: ${errorMessage}`, 'error');
             }
           })
           .catch(err => {
-            console.error('Network or parsing error during album delete:', err);
-            console.error('Error details:', err.message);
-            console.error('Error stack:', err.stack);
-            BBB_UTILS.showMessage(`Error deleting album: ${err.message}`, 'error');
+            console.error('Error deleting album:', err);
+            showMessage(`Error deleting album: ${err.message}`, 'error');
           });
-          
-        console.log('=== DELETE ALBUM DEBUG END ===');
       }
 
       /**
@@ -1506,7 +1949,7 @@
        */
       function uploadToAlbum(albumId) {
         if (!albumId) {
-          BBB_UTILS.showMessage('Invalid album ID', 'error');
+          showMessage('Invalid album ID', 'error');
           return;
         }
         
@@ -1520,7 +1963,7 @@
         if (uploadInput) {
           uploadInput.click();
         } else {
-          BBB_UTILS.showMessage('Upload input not found', 'error');
+          showMessage('Upload input not found', 'error');
         }
       }
 
@@ -1532,8 +1975,10 @@
         
         document.getElementById('page-title').textContent = 'All Images';
         
-        const backButton = document.getElementById('back-to-albums') || createBackButton();
-        backButton.style.display = 'block';
+        const backButton = document.getElementById('back-to-albums');
+        if (backButton) {
+          backButton.style.display = 'block';
+        }
         
         document.getElementById('albums-section').style.display = 'none';
         document.getElementById('gallery-container').style.display = 'block';
@@ -1560,7 +2005,7 @@
         // Use the current album context if no albumId provided
         const targetAlbumId = albumId || window.currentAlbumId;
         
-        BBB_UTILS.showMessage('Loading images...', 'info');
+        showMessage('Loading images...', 'info');
         
         // Check sort and search options
         const sortSelect = document.getElementById('gallery-sort');
@@ -1621,11 +2066,11 @@
             renderGallery(images);
             
             // Clear loading message
-            BBB_UTILS.showMessage('', 'info');
+            showMessage('', 'info');
           })
           .catch(err => {
             console.error('Error loading gallery images:', err);
-            BBB_UTILS.showMessage('Error loading gallery images', 'error');
+            showMessage('Error loading gallery images', 'error');
             
             // Show empty gallery on error
             renderGallery([]);
@@ -1651,8 +2096,6 @@
           
           const noImagesIcon = document.createElement('div');
           noImagesIcon.innerHTML = '📷';
-          noImagesIcon.style.fontSize = '3rem';
-          noImagesIcon.style.marginBottom = '1rem';
           
           const noImagesText = document.createElement('p');
           const contextText = window.currentAlbumId ? 'this album' : 'the gallery';
@@ -1706,7 +2149,7 @@
             openLightbox(img);
           });
           
-          // Move to Album button (show for all images)
+          // Move to Album button
           const moveBtn = document.createElement('button');
           moveBtn.className = 'image-action-btn move-btn';
           moveBtn.innerHTML = '📁';
@@ -1721,12 +2164,6 @@
                           (image.uploadedBy && BBB_AUTH.currentUser && 
                            image.uploadedBy === BBB_AUTH.currentUser.id);
           
-          console.log('Delete button check for image:', image.id);
-          console.log('BBB_AUTH.hasRole("admin"):', BBB_AUTH.hasRole('admin'));
-          console.log('image.uploadedBy:', image.uploadedBy);
-          console.log('BBB_AUTH.currentUser:', BBB_AUTH.currentUser);
-          console.log('canDelete result:', canDelete);
-          
           if (canDelete) {
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'image-action-btn delete-btn';
@@ -1737,9 +2174,6 @@
               deleteImage(image.id);
             });
             imageActions.appendChild(deleteBtn);
-            console.log('Delete button added for image:', image.id);
-          } else {
-            console.log('Delete button NOT added for image:', image.id, '- insufficient permissions');
           }
           
           imageActions.appendChild(viewBtn);
@@ -1784,25 +2218,6 @@
       }
 
       /**
-       * Create back button utility
-       */
-      function createBackButton() {
-        const backButton = document.createElement('button');
-        backButton.id = 'back-to-albums';
-        backButton.className = 'btn mb-3';
-        backButton.innerHTML = '← Back to Albums';
-        backButton.onclick = goBackToAlbums;
-        backButton.style.display = 'none';
-        
-        const pageTitle = document.getElementById('page-title');
-        if (pageTitle) {
-          pageTitle.parentNode.insertBefore(backButton, pageTitle.nextSibling);
-        }
-        
-        return backButton;
-      }
-
-      /**
        * Go back to albums utility
        */
       function goBackToAlbums() {
@@ -1830,61 +2245,27 @@
       }
 
       /**
-       * Create filter/search bar
+       * Show message utility
        */
-      function createFilterBar() {
-        const filterBar = document.createElement('div');
-        filterBar.className = 'filter-bar';
+      function showMessage(message, type = 'info') {
+        const statusElement = document.getElementById('status-message');
+        if (!statusElement) return;
         
-        // Search
-        const searchContainer = document.createElement('div');
-        searchContainer.className = 'search-container';
+        if (!message) {
+          statusElement.style.display = 'none';
+          return;
+        }
         
-        const searchIcon = document.createElement('span');
-        searchIcon.className = 'search-icon';
-        searchIcon.innerHTML = '🔍';
+        statusElement.textContent = message;
+        statusElement.className = type;
+        statusElement.style.display = 'block';
         
-        const searchInput = document.createElement('input');
-        searchInput.type = 'text';
-        searchInput.className = 'search-input';
-        searchInput.placeholder = 'Search gallery...';
-        searchInput.id = 'gallery-search';
-        
-        searchContainer.appendChild(searchIcon);
-        searchContainer.appendChild(searchInput);
-        
-        // Sort
-        const sortContainer = document.createElement('div');
-        sortContainer.className = 'sort-container';
-        
-        const sortLabel = document.createElement('span');
-        sortLabel.className = 'sort-label';
-        sortLabel.textContent = 'Sort by:';
-        
-        const sortSelect = document.createElement('select');
-        sortSelect.className = 'sort-select';
-        sortSelect.id = 'gallery-sort';
-        
-        const sortOptions = [
-          { value: 'newest', text: 'Newest first' },
-          { value: 'oldest', text: 'Oldest first' },
-          { value: 'name', text: 'Name (A-Z)' }
-        ];
-        
-        sortOptions.forEach(option => {
-          const optionEl = document.createElement('option');
-          optionEl.value = option.value;
-          optionEl.textContent = option.text;
-          sortSelect.appendChild(optionEl);
-        });
-        
-        sortContainer.appendChild(sortLabel);
-        sortContainer.appendChild(sortSelect);
-        
-        filterBar.appendChild(searchContainer);
-        filterBar.appendChild(sortContainer);
-        
-        return filterBar;
+        // Auto-hide success messages after 3 seconds
+        if (type === 'success') {
+          setTimeout(() => {
+            statusElement.style.display = 'none';
+          }, 3000);
+        }
       }
       
       /**
@@ -1982,7 +2363,7 @@
        */
       function deleteImage(imageId) {
         if (!imageId || imageId.trim() === '') {
-          BBB_UTILS.showMessage('Invalid image ID provided', 'error');
+          showMessage('Invalid image ID provided', 'error');
           return;
         }
 
@@ -1992,10 +2373,9 @@
         
         console.log("Attempting to delete image:", imageId);
         
-        BBB_UTILS.showMessage('Deleting image...', 'info');
+        showMessage('Deleting image...', 'info');
         
         const deleteUrl = `${CLOUDFLARE_API}/delete/${encodeURIComponent(imageId)}`;
-        console.log("Delete URL:", deleteUrl);
         
         fetch(deleteUrl, {
           method: 'DELETE',
@@ -2005,8 +2385,6 @@
           }
         })
           .then(response => {
-            console.log("Delete response status:", response.status);
-            
             const contentType = response.headers.get('content-type');
             if (contentType && contentType.includes('application/json')) {
               return response.json().then(data => ({
@@ -2023,11 +2401,8 @@
             }
           })
           .then(result => {
-            console.log("Delete response result:", result);
-            
             if (result.ok && result.data.success) {
-              console.log("Delete successful");
-              BBB_UTILS.showMessage('Image deleted successfully', 'success');
+              showMessage('Image deleted successfully', 'success');
               
               // Remove image from DOM immediately
               const imgContainer = document.querySelector(`.gallery-img-container[data-id="${imageId}"]`);
@@ -2041,24 +2416,21 @@
                   // Check if gallery is empty and reload if needed
                   const remainingImages = document.querySelectorAll('.gallery-img-container');
                   if (remainingImages.length === 0) {
-                    console.log("Gallery is empty, reloading...");
                     loadGalleryImages();
                   }
                 }, 300);
               } else {
-                console.log("Image container not found in DOM, reloading gallery");
                 loadGalleryImages();
               }
               
             } else {
-              console.error("Delete failed:", result.data);
               const errorMessage = result.data.error || `Delete failed with status ${result.status}`;
-              BBB_UTILS.showMessage(`Error deleting image: ${errorMessage}`, 'error');
+              showMessage(`Error deleting image: ${errorMessage}`, 'error');
             }
           })
           .catch(err => {
-            console.error('Network or parsing error during delete:', err);
-            BBB_UTILS.showMessage(`Error deleting image: ${err.message}`, 'error');
+            console.error('Error deleting image:', err);
+            showMessage(`Error deleting image: ${err.message}`, 'error');
           });
       }
       
@@ -2190,15 +2562,15 @@
           if (failedUploads.length === 0) {
             if (uploadedCount > 1) {
               const albumText = window.currentAlbumId ? ' to album' : '';
-              BBB_UTILS.showMessage(`Successfully uploaded ${uploadedCount} images${albumText}`, 'success');
+              showMessage(`Successfully uploaded ${uploadedCount} images${albumText}`, 'success');
             } else {
-              BBB_UTILS.showMessage('Image uploaded successfully', 'success');
+              showMessage('Image uploaded successfully', 'success');
             }
           } else {
             if (uploadedCount > 0) {
-              BBB_UTILS.showMessage(`Uploaded ${uploadedCount} images, ${failedUploads.length} failed`, 'warning');
+              showMessage(`Uploaded ${uploadedCount} images, ${failedUploads.length} failed`, 'warning');
             } else {
-              BBB_UTILS.showMessage(`Failed to upload ${failedUploads.length} images`, 'error');
+              showMessage(`Failed to upload ${failedUploads.length} images`, 'error');
             }
           }
           
@@ -2208,7 +2580,181 @@
           }
         }
       }
-      
+
+      /**
+       * Show modal to select album for moving image
+       */
+      function showMoveToAlbumModal(imageId, imageName, currentAlbumId) {
+        if (!imageId) {
+          showMessage('Invalid image ID', 'error');
+          return;
+        }
+        
+        // Load available albums
+        showMessage('Loading albums...', 'info');
+        
+        fetch(`${CLOUDFLARE_API}/albums`)
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Failed to load albums: ${response.status}`);
+            }
+            return response.json();
+          })
+          .then(albums => {
+            showMessage('', 'info'); // Clear loading message
+            
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            
+            // Create options HTML
+            let albumOptions = '<option value="">📷 General Gallery (No Album)</option>';
+            albums.forEach(album => {
+              const selected = album.id === currentAlbumId ? 'selected' : '';
+              albumOptions += `<option value="${album.id}" ${selected}>📁 ${escapeHtml(album.name)} (${album.image_count || 0} images)</option>`;
+            });
+            
+            modal.innerHTML = `
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h3>Move Image to Album</h3>
+                  <button onclick="closeModal()" class="btn-close" title="Close">&times;</button>
+                </div>
+                <div class="modal-body">
+                  <p>Move "<strong>${escapeHtml(imageName)}</strong>" to:</p>
+                  <div class="form-group">
+                    <label for="move-album-select">Select Album:</label>
+                    <select id="move-album-select">
+                      ${albumOptions}
+                    </select>
+                  </div>
+                  <p style="color: #999; font-size: 0.9rem; margin-top: 1rem;">
+                    Current location: ${currentAlbumId ? '📁 Album' : '📷 General Gallery'}
+                  </p>
+                </div>
+                <div class="modal-footer">
+                  <button onclick="closeModal()" class="btn">Cancel</button>
+                  <button id="move-image-btn" class="btn btn-success">Move Image</button>
+                </div>
+              </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // Add click event listener to move button
+            const moveBtn = document.getElementById('move-image-btn');
+            if (moveBtn) {
+              moveBtn.addEventListener('click', function() {
+                const selectedAlbumId = document.getElementById('move-album-select').value;
+                moveImageToAlbum(imageId, selectedAlbumId, currentAlbumId);
+              });
+            }
+            
+            // Focus the select
+            setTimeout(() => {
+              const selectElement = document.getElementById('move-album-select');
+              if (selectElement) {
+                selectElement.focus();
+              }
+            }, 100);
+          })
+          .catch(err => {
+            console.error('Error loading albums for move modal:', err);
+            showMessage('Error loading albums', 'error');
+          });
+      }
+
+      /**
+       * Move image to selected album
+       */
+      function moveImageToAlbum(imageId, targetAlbumId, currentAlbumId) {
+        // Check if already in target location
+        if (targetAlbumId === currentAlbumId) {
+          showMessage('Image is already in the selected location', 'info');
+          closeModal();
+          return;
+        }
+        
+        const moveBtn = document.getElementById('move-image-btn');
+        const selectElement = document.getElementById('move-album-select');
+        
+        // Disable form while moving
+        if (moveBtn) {
+          moveBtn.disabled = true;
+          moveBtn.textContent = 'Moving...';
+        }
+        if (selectElement) {
+          selectElement.disabled = true;
+        }
+        
+        const targetName = targetAlbumId ? 'selected album' : 'General Gallery';
+        showMessage(`Moving image to ${targetName}...`, 'info');
+        
+        // Create the update payload
+        const updateData = {
+          albumId: targetAlbumId || null
+        };
+        
+        // Make API call to update image's album
+        fetch(`${CLOUDFLARE_API}/images/${imageId}/move`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(updateData)
+        })
+          .then(response => {
+            if (!response.ok) {
+              throw new Error(`Move failed: ${response.status}`);
+            }
+            
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+              return response.json();
+            } else {
+              return response.text().then(text => {
+                throw new Error(`Non-JSON response: ${text}`);
+              });
+            }
+          })
+          .then(result => {
+            if (result.success) {
+              const targetLocationName = targetAlbumId ? 'album' : 'General Gallery';
+              showMessage(`Image moved to ${targetLocationName} successfully!`, 'success');
+              closeModal();
+              
+              // Refresh the current view
+              if (window.currentAlbumId) {
+                // If viewing an album, reload that album
+                loadGalleryImages(window.currentAlbumId);
+              } else {
+                // If viewing all images, reload all
+                loadGalleryImages();
+              }
+              
+              // Also refresh albums list to update image counts
+              if (document.getElementById('albums-section').style.display !== 'none') {
+                loadAlbums();
+              }
+            } else {
+              throw new Error(result.error || 'Move failed');
+            }
+          })
+          .catch(err => {
+            console.error('Error moving image:', err);
+            showMessage(`Error moving image: ${err.message}`, 'error');
+            
+            // Re-enable form
+            if (moveBtn) {
+              moveBtn.disabled = false;
+              moveBtn.textContent = 'Move Image';
+            }
+            if (selectElement) {
+              selectElement.disabled = false;
+            }
+          });
+      }
+
       /**
        * Check if image migration is needed
        */
@@ -2242,19 +2788,19 @@
           }
           
           // Show migration message
-          BBB_UTILS.showMessage(`Found ${storedImages.length} images in your browser. Click the migration button to move them to the cloud.`, 'info');
+          showMessage(`Found ${storedImages.length} images in your browser. Click the migration button to move them to the cloud.`, 'info');
         } catch (err) {
           console.error('Error checking for migration:', err);
         }
       }
-      
+
       /**
        * Migrate images from localStorage to Cloudflare
        */
       function migrateLocalStorageImages(storedImages) {
         try {
           // Show migration message
-          BBB_UTILS.showMessage(`Migrating ${storedImages.length} existing images to cloud storage...`, 'info');
+          showMessage(`Migrating ${storedImages.length} existing images to cloud storage...`, 'info');
           
           // Get migration button and disable it
           const migrationBtn = document.querySelector('.migration-button');
@@ -2408,311 +2954,36 @@
             
             // Show status message
             if (migrationErrors === 0) {
-              BBB_UTILS.showMessage(`Successfully migrated ${migrationCount} images to cloud storage`, 'success');
+              showMessage(`Successfully migrated ${migrationCount} images to cloud storage`, 'success');
             } else {
-              BBB_UTILS.showMessage(`Migrated ${migrationCount} images, failed to migrate ${migrationErrors} images`, 'warning');
+              showMessage(`Migrated ${migrationCount} images, failed to migrate ${migrationErrors} images`, 'warning');
             }
           }
         } catch (err) {
           console.error('Error during gallery migration:', err);
-          BBB_UTILS.showMessage('Error migrating images: ' + err.message, 'error');
+          showMessage('Error migrating images: ' + err.message, 'error');
         }
-      }
-
-      // =============================================================================
-      // IMAGE MOVE TO ALBUM FUNCTIONALITY
-      // =============================================================================
-
-      /**
-       * Show modal to select album for moving image
-       */
-      function showMoveToAlbumModal(imageId, imageName, currentAlbumId) {
-        console.log('=== MOVE TO ALBUM MODAL START ===');
-        console.log('imageId:', imageId);
-        console.log('imageName:', imageName);
-        console.log('currentAlbumId:', currentAlbumId);
-        
-        if (!imageId) {
-          BBB_UTILS.showMessage('Invalid image ID', 'error');
-          return;
-        }
-        
-        // Load available albums
-        BBB_UTILS.showMessage('Loading albums...', 'info');
-        
-        fetch(`${CLOUDFLARE_API}/albums`)
-          .then(response => {
-            if (!response.ok) {
-              throw new Error(`Failed to load albums: ${response.status}`);
-            }
-            return response.json();
-          })
-          .then(albums => {
-            console.log('Albums loaded for move modal:', albums);
-            BBB_UTILS.showMessage('', 'info'); // Clear loading message
-            
-            const modal = document.createElement('div');
-            modal.className = 'modal-overlay';
-            
-            // Create options HTML
-            let albumOptions = '<option value="">📷 General Gallery (No Album)</option>';
-            albums.forEach(album => {
-              const selected = album.id === currentAlbumId ? 'selected' : '';
-              albumOptions += `<option value="${album.id}" ${selected}>📁 ${escapeHtml(album.name)} (${album.image_count || 0} images)</option>`;
-            });
-            
-            modal.innerHTML = `
-              <div class="modal-content">
-                <div class="modal-header">
-                  <h3>Move Image to Album</h3>
-                  <button onclick="closeModal()" class="btn-close" title="Close">&times;</button>
-                </div>
-                <div class="modal-body">
-                  <p>Move "<strong>${escapeHtml(imageName)}</strong>" to:</p>
-                  <div class="form-group">
-                    <label for="move-album-select">Select Album:</label>
-                    <select id="move-album-select" class="form-control">
-                      ${albumOptions}
-                    </select>
-                  </div>
-                  <p class="text-muted" style="font-size: 0.9rem; margin-top: 1rem;">
-                    Current location: ${currentAlbumId ? '📁 Album' : '📷 General Gallery'}
-                  </p>
-                </div>
-                <div class="modal-footer">
-                  <button onclick="closeModal()" class="btn">Cancel</button>
-                  <button id="move-image-btn" class="btn btn-success">Move Image</button>
-                </div>
-              </div>
-            `;
-            
-            document.body.appendChild(modal);
-            console.log('Move modal created and added to DOM');
-            
-            // Add click event listener to move button
-            const moveBtn = document.getElementById('move-image-btn');
-            if (moveBtn) {
-              moveBtn.addEventListener('click', function() {
-                console.log('Move button clicked!');
-                const selectedAlbumId = document.getElementById('move-album-select').value;
-                moveImageToAlbum(imageId, selectedAlbumId, currentAlbumId);
-              });
-              console.log('Move button event listener added');
-            } else {
-              console.error('Move button not found after modal creation');
-            }
-            
-            // Focus the select
-            setTimeout(() => {
-              const selectElement = document.getElementById('move-album-select');
-              if (selectElement) {
-                selectElement.focus();
-              }
-            }, 100);
-          })
-          .catch(err => {
-            console.error('Error loading albums for move modal:', err);
-            BBB_UTILS.showMessage('Error loading albums', 'error');
-          });
-      }
-
-      /**
-       * Move image to selected album
-       */
-      function moveImageToAlbum(imageId, targetAlbumId, currentAlbumId) {
-        console.log('=== MOVE IMAGE TO ALBUM START ===');
-        console.log('imageId:', imageId);
-        console.log('targetAlbumId:', targetAlbumId);
-        console.log('currentAlbumId:', currentAlbumId);
-        
-        // Check if already in target location
-        if (targetAlbumId === currentAlbumId) {
-          BBB_UTILS.showMessage('Image is already in the selected location', 'info');
-          closeModal();
-          return;
-        }
-        
-        const moveBtn = document.getElementById('move-image-btn');
-        const selectElement = document.getElementById('move-album-select');
-        
-        // Disable form while moving
-        if (moveBtn) {
-          moveBtn.disabled = true;
-          moveBtn.textContent = 'Moving...';
-        }
-        if (selectElement) {
-          selectElement.disabled = true;
-        }
-        
-        const targetName = targetAlbumId ? 'selected album' : 'General Gallery';
-        BBB_UTILS.showMessage(`Moving image to ${targetName}...`, 'info');
-        
-        // Create the update payload
-        const updateData = {
-          albumId: targetAlbumId || null
-        };
-        
-        console.log('Update data:', updateData);
-        
-        // Make API call to update image's album
-        fetch(`${CLOUDFLARE_API}/images/${imageId}/move`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(updateData)
-        })
-          .then(response => {
-            console.log('Move response status:', response.status);
-            console.log('Move response ok:', response.ok);
-            
-            if (!response.ok) {
-              throw new Error(`Move failed: ${response.status}`);
-            }
-            
-            const contentType = response.headers.get('content-type');
-            if (contentType && contentType.includes('application/json')) {
-              return response.json();
-            } else {
-              return response.text().then(text => {
-                throw new Error(`Non-JSON response: ${text}`);
-              });
-            }
-          })
-          .then(result => {
-            console.log('Move result:', result);
-            
-            if (result.success) {
-              const targetLocationName = targetAlbumId ? 'album' : 'General Gallery';
-              BBB_UTILS.showMessage(`Image moved to ${targetLocationName} successfully!`, 'success');
-              closeModal();
-              
-              // Refresh the current view
-              if (window.currentAlbumId) {
-                // If viewing an album, reload that album
-                loadGalleryImages(window.currentAlbumId);
-              } else {
-                // If viewing all images, reload all
-                loadGalleryImages();
-              }
-              
-              // Also refresh albums list to update image counts
-              if (document.getElementById('albums-section').style.display !== 'none') {
-                loadAlbums();
-              }
-            } else {
-              throw new Error(result.error || 'Move failed');
-            }
-          })
-          .catch(err => {
-            console.error('Error moving image:', err);
-            BBB_UTILS.showMessage(`Error moving image: ${err.message}`, 'error');
-            
-            // Re-enable form
-            if (moveBtn) {
-              moveBtn.disabled = false;
-              moveBtn.textContent = 'Move Image';
-            }
-            if (selectElement) {
-              selectElement.disabled = false;
-            }
-          });
-      }
-
-      // =============================================================================
-      // DEBUG AND TESTING FUNCTIONS
-      // =============================================================================
-
-      /**
-       * Test function to check if the delete endpoint is working
-       */
-      function testDeleteEndpoint() {
-        const testUrl = `${CLOUDFLARE_API}/health`;
-        
-        console.log("Testing worker health:", testUrl);
-        
-        fetch(testUrl)
-          .then(response => response.json())
-          .then(data => {
-            console.log("Worker health check:", data);
-            BBB_UTILS.showMessage(`Worker is ${data.status}. Environment check: Bucket=${data.environment.hasGalleryBucket}, DB=${data.environment.hasGalleryDB}`, 'info');
-          })
-          .catch(err => {
-            console.error("Health check failed:", err);
-            BBB_UTILS.showMessage(`Health check failed: ${err.message}`, 'error');
-          });
-      }
-
-      /**
-       * Debug function to list all images and their IDs
-       */
-      function debugListImages() {
-        console.log("=== DEBUG: Listing all images ===");
-        
-        fetch(`${CLOUDFLARE_API}/images`)
-          .then(response => response.json())
-          .then(images => {
-            console.log(`Found ${images.length} images:`);
-            images.forEach((img, index) => {
-              console.log(`${index + 1}. ID: ${img.id}, Filename: ${img.filename}, Path: ${img.path}, Album: ${img.album_id || 'none'}`);
-            });
-            
-            // Also check DOM elements
-            const domImages = document.querySelectorAll('.gallery-img-container[data-id]');
-            console.log(`Found ${domImages.length} images in DOM:`);
-            domImages.forEach((container, index) => {
-              console.log(`${index + 1}. DOM data-id: ${container.dataset.id}`);
-            });
-          })
-          .catch(err => {
-            console.error("Error listing images:", err);
-          });
-      }
-
-      /**
-       * Initialize database (for testing/setup)
-       */
-      function initializeDatabase() {
-        console.log('Initializing database...');
-        
-        fetch(`${CLOUDFLARE_API}/init-db`, {
-          method: 'POST'
-        })
-          .then(response => response.json())
-          .then(result => {
-            if (result.success) {
-              BBB_UTILS.showMessage('Database initialized successfully', 'success');
-            } else {
-              BBB_UTILS.showMessage(`Database initialization failed: ${result.error}`, 'error');
-            }
-          })
-          .catch(err => {
-            console.error('Error initializing database:', err);
-            BBB_UTILS.showMessage(`Error initializing database: ${err.message}`, 'error');
-          });
       }
 
       // =============================================================================
       // MAKE FUNCTIONS GLOBALLY AVAILABLE
       // =============================================================================
 
-      // Make functions globally available for onclick handlers and debugging
+      // Make functions globally available for onclick handlers
       window.showCreateAlbumModal = showCreateAlbumModal;
       window.createAlbum = createAlbum;
       window.viewAlbum = viewAlbum;
       window.renameAlbum = renameAlbum;
-      window.updateAlbum = updateAlbum; // ADD THIS LINE
+      window.updateAlbum = updateAlbum;
       window.deleteAlbum = deleteAlbum;
       window.uploadToAlbum = uploadToAlbum;
       window.viewAllImages = viewAllImages;
       window.closeModal = closeModal;
       window.goBackToAlbums = goBackToAlbums;
-      window.testDeleteEndpoint = testDeleteEndpoint;
-      window.debugListImages = debugListImages;
-      window.initializeDatabase = initializeDatabase;
       window.loadAlbums = loadAlbums;
       window.loadGalleryImages = loadGalleryImages;
+      window.checkMigrationNeeded = checkMigrationNeeded;
+      window.migrateLocalStorageImages = migrateLocalStorageImages;
     });
   </script>
 </body>
