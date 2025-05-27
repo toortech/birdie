@@ -6,8 +6,10 @@
   <title>Birdie Bush Bandits – Member Profile</title>
   <meta name="description" content="Detailed profile and statistics for a Birdie Bush Bandits golf group member.">
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  
   <!-- Add Google Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  
   <!-- Global CSS -->
   <link rel="stylesheet" href="css/style.css">
   
@@ -19,16 +21,229 @@
   <script src="js/ui.js"></script>
   
   <style>
-    /* Additional styles for profile page */
+    /* Enhanced CSS Variables - Same as about.html */
+    :root {
+      --bbb-primary: #004d00;
+      --bbb-secondary: #0046ad;
+      --bbb-gold: #ffd700;
+      --bbb-light-green: #e8f5e8;
+      --bbb-background: #f5f5f5;
+      --bbb-text: #212529;
+      --bbb-text-muted: #6c757d;
+      --bbb-border: #dee2e6;
+      --font-family-base: 'Inter', sans-serif;
+      --font-family-accent: 'Montserrat', serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family-base);
+      line-height: 1.6;
+      color: var(--bbb-text);
+      background: linear-gradient(135deg, var(--bbb-light-green) 0%, var(--bbb-background) 100%);
+      min-height: 100vh;
+    }
+
+    /* Header with Logo - Same as about.html */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header-logo {
+      height: 50px;
+      width: auto;
+      transition: transform 0.3s ease;
+    }
+
+    .header-logo:hover {
+      transform: scale(1.05);
+    }
+
+    .header-title {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-left: 1rem;
+      text-decoration: none;
+    }
+
+    .header-title:hover {
+      color: var(--bbb-secondary);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .founded-badge-header {
+      display: inline-block;
+      background: var(--bbb-gold);
+      color: var(--bbb-primary);
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-left: 1rem;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    }
+
+    /* User info and auth controls */
+    .user-info {
+      color: var(--bbb-primary);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .logout-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+
+    .logout-btn:hover {
+      background: #c82333;
+    }
+
+    .nav-link, .home-btn {
+      background: var(--bbb-secondary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.3s;
+    }
+
+    .nav-link:hover, .home-btn:hover {
+      background: var(--bbb-primary);
+    }
+
+    /* Profile Page Specific Styles - Updated to match about.html pattern */
+    .profile-hero {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+      color: var(--bbb-text);
+      text-align: center;
+      padding: 4rem 2rem 3rem 2rem;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 3px solid #dee2e6;
+      margin-top: 90px; /* Account for fixed header */
+    }
+
+    .profile-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 77, 0, 0.03) 0%, transparent 70%);
+      animation: rotate 30s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .profile-hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .profile-hero h1 {
+      font-family: var(--font-family-accent);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      color: var(--bbb-primary);
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+      animation: fadeInUp 1s ease-out;
+      margin: 0 0 1rem 0;
+    }
+
+    .profile-hero .tagline {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--bbb-text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+      animation: fadeInUp 1s ease-out 0.3s both;
+      font-weight: 500;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .profile-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* Enhanced profile header */
     .profile-header {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      margin: 4rem 0;
       display: flex;
       align-items: center;
       gap: 2rem;
-      margin-bottom: 2rem;
-      padding: 2rem;
-      background-color: white;
-      border-radius: 8px;
-      box-shadow: var(--shadow-md);
+    }
+
+    .profile-header:hover {
+      border-color: var(--bbb-gold);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
     }
     
     .profile-avatar {
@@ -41,6 +256,12 @@
       font-size: 3rem;
       font-weight: bold;
       color: white;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      transition: transform 0.3s ease;
+    }
+
+    .profile-avatar:hover {
+      transform: scale(1.05);
     }
     
     .profile-info {
@@ -49,95 +270,163 @@
     
     .profile-name {
       margin: 0;
-      font-size: 2rem;
+      font-size: 2.5rem;
       line-height: 1.2;
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
     }
     
     .profile-handicap {
       display: inline-block;
-      padding: 0.5rem 1rem;
+      padding: 0.75rem 1.5rem;
       border-radius: 50px;
       font-size: 1.2rem;
       font-weight: bold;
-      margin-top: 0.5rem;
+      margin-top: 1rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+
+    .profile-handicap:hover {
+      transform: translateY(-2px);
     }
     
     .profile-meta {
-      margin-top: 0.5rem;
+      margin-top: 1rem;
       color: var(--bbb-text-muted);
+      font-size: 1rem;
+      line-height: 1.6;
     }
-    
+
+    /* Enhanced stats grid */
     .stats-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 1rem;
-      margin-bottom: 2rem;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 2rem;
+      margin: 4rem 0;
     }
     
     .stat-box {
-      background-color: white;
-      border-radius: 8px;
-      padding: 1rem;
+      background: white;
+      border-radius: 20px;
+      padding: 2rem;
       text-align: center;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-box::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, var(--bbb-primary), var(--bbb-gold), var(--bbb-secondary));
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    .stat-box:hover::before {
+      transform: translateX(0);
+    }
+
+    .stat-box:hover {
+      border-color: var(--bbb-gold);
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
     }
     
     .stat-value {
-      font-size: 1.8rem;
+      font-size: 2.5rem;
       font-weight: bold;
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.5rem;
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
     }
     
     .stat-label {
-      font-size: 0.9rem;
+      font-size: 1rem;
       color: var(--bbb-text-muted);
+      font-weight: 500;
     }
-    
+
+    /* Enhanced section cards */
     .section-card {
-      background-color: white;
-      border-radius: 8px;
-      padding: 1.5rem;
-      margin-bottom: 2rem;
-      box-shadow: var(--shadow-md);
+      background: white;
+      border-radius: 20px;
+      padding: 3rem;
+      margin-bottom: 3rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .section-card:hover {
+      border-color: var(--bbb-gold);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
     }
     
     .section-title {
       margin-top: 0;
-      margin-bottom: 1.25rem;
-      font-size: 1.5rem;
+      margin-bottom: 2rem;
+      font-size: 2rem;
       color: var(--bbb-primary);
-      padding-bottom: 0.5rem;
-      border-bottom: 2px solid #f0f0f0;
+      padding-bottom: 1rem;
+      border-bottom: 3px solid var(--bbb-gold);
+      font-family: var(--font-family-accent);
+      position: relative;
     }
-    
+
+    .section-title::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 50px;
+      height: 3px;
+      background: var(--bbb-secondary);
+    }
+
+    /* Enhanced tab system */
     .tab-container {
       margin-bottom: 2rem;
     }
     
     .tab-buttons {
       display: flex;
-      gap: 0.5rem;
-      margin-bottom: 1rem;
+      gap: 1rem;
+      margin-bottom: 2rem;
       flex-wrap: wrap;
+      justify-content: center;
     }
     
     .tab-button {
-      padding: 0.75rem 1.25rem;
-      background-color: #f0f0f0;
-      border: none;
-      border-radius: 8px;
+      padding: 1rem 2rem;
+      background: #f8f9fa;
+      border: 2px solid transparent;
+      border-radius: 25px;
       cursor: pointer;
       font-weight: 600;
-      transition: all 0.2s ease;
+      font-family: var(--font-family-accent);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
     
     .tab-button:hover {
-      background-color: #e0e0e0;
+      background: #e9ecef;
+      transform: translateY(-2px);
     }
     
     .tab-button.active {
-      background-color: var(--bbb-secondary);
+      background: var(--bbb-secondary);
       color: white;
+      border-color: var(--bbb-gold);
+      box-shadow: 0 6px 20px rgba(0, 70, 173, 0.3);
     }
     
     .tab-content {
@@ -146,111 +435,193 @@
     
     .tab-content.active {
       display: block;
+      animation: fadeInUp 0.6s ease-out;
     }
-    
+
+    /* Enhanced tables */
     .course-performance-table {
       width: 100%;
       border-collapse: collapse;
-      margin-top: 1rem;
+      margin-top: 2rem;
+      background: white;
+      border-radius: 15px;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
     }
     
     .course-performance-table th,
     .course-performance-table td {
-      padding: 0.75rem;
+      padding: 1rem;
       text-align: left;
       border-bottom: 1px solid #f0f0f0;
     }
     
     .course-performance-table th {
       font-weight: 600;
-      color: var(--bbb-text-light);
+      color: white;
+      background: var(--bbb-primary);
+      font-family: var(--font-family-accent);
     }
-    
+
+    .course-performance-table tr:hover {
+      background: var(--bbb-light-green);
+    }
+
+    /* Enhanced score cards */
     .score-card {
-      border-radius: 8px;
-      padding: 1.25rem;
-      margin-bottom: 1rem;
-      background-color: #f9f9f9;
-      border-left: 4px solid var(--bbb-secondary);
+      border-radius: 15px;
+      padding: 2rem;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(135deg, #f9f9f9, white);
+      border-left: 6px solid var(--bbb-secondary);
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .score-card:hover {
+      transform: translateX(10px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+      border-left-color: var(--bbb-gold);
     }
     
     .score-card-header {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 0.75rem;
+      margin-bottom: 1rem;
+      align-items: center;
+    }
+
+    .score-card-header h4 {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      font-size: 1.3rem;
+      margin: 0;
     }
     
     .score-card-date {
       color: var(--bbb-text-muted);
-      font-size: 0.9rem;
+      font-size: 1rem;
+      font-weight: 500;
     }
     
     .score-card-details {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 1.5rem;
     }
     
     .score-card-detail {
-      flex: 1 1 120px;
+      text-align: center;
     }
     
     .score-card-label {
-      font-size: 0.8rem;
+      font-size: 0.9rem;
       color: var(--bbb-text-muted);
-      margin-bottom: 0.25rem;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
     }
     
     .score-card-value {
-      font-weight: 600;
-      font-size: 1.1rem;
+      font-weight: bold;
+      font-size: 1.3rem;
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
     }
-    
+
+    /* Enhanced achievements */
     .achievements-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 1rem;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 2rem;
     }
     
     .achievement-card {
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      padding: 1.25rem;
+      background: linear-gradient(135deg, var(--bbb-light-green), white);
+      border-radius: 20px;
+      padding: 2rem;
       text-align: center;
       position: relative;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      overflow: hidden;
+    }
+
+    .achievement-card::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 215, 0, 0.1) 0%, transparent 70%);
+      transform: scale(0);
+      transition: transform 0.3s ease;
+    }
+
+    .achievement-card:hover::before {
+      transform: scale(1);
+    }
+
+    .achievement-card:hover {
+      border-color: var(--bbb-gold);
+      transform: translateY(-10px);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
     }
     
     .achievement-icon {
-      font-size: 2.5rem;
-      margin-bottom: 0.75rem;
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      position: relative;
+      z-index: 2;
     }
     
     .achievement-title {
       font-weight: 600;
-      margin-bottom: 0.5rem;
+      margin-bottom: 1rem;
+      font-size: 1.2rem;
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
+      position: relative;
+      z-index: 2;
     }
     
     .achievement-desc {
-      font-size: 0.9rem;
+      font-size: 1rem;
       color: var(--bbb-text-muted);
+      position: relative;
+      z-index: 2;
+      line-height: 1.6;
     }
     
     .achievement-date {
       position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
+      top: 1rem;
+      right: 1rem;
       font-size: 0.8rem;
       color: var(--bbb-text-muted);
+      background: rgba(255,255,255,0.8);
+      padding: 0.25rem 0.5rem;
+      border-radius: 10px;
+      z-index: 3;
     }
-    
+
+    /* Enhanced chart container */
     .chart-container {
-      height: 300px;
-      margin-top: 1.5rem;
-      background-color: #f9f9f9;
-      border-radius: 8px;
-      padding: 1rem;
+      height: 400px;
+      margin-top: 2rem;
+      background: linear-gradient(135deg, #f9f9f9, white);
+      border-radius: 20px;
+      padding: 2rem;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .chart-container:hover {
+      border-color: var(--bbb-gold);
     }
     
     .chart-placeholder {
@@ -261,22 +632,288 @@
       color: var(--bbb-text-muted);
       font-style: italic;
       text-align: center;
+      font-size: 1.1rem;
     }
-    
+
+    /* Enhanced buttons to match about.html style */
+    .btn, button.btn {
+      background: #6c757d;
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 25px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      display: inline-block;
+      box-shadow: 0 4px 15px rgba(108, 117, 125, 0.2);
+      text-align: center;
+      border: 2px solid transparent;
+      font-family: var(--font-family-accent);
+      cursor: pointer;
+    }
+
+    .btn:hover, button.btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(108, 117, 125, 0.3);
+      background: #5a6268;
+    }
+
+    .btn.secondary {
+      background: transparent;
+      color: var(--bbb-secondary);
+      border: 2px solid var(--bbb-secondary);
+      box-shadow: 0 4px 15px rgba(0, 70, 173, 0.15);
+    }
+
+    .btn.secondary:hover {
+      background: var(--bbb-secondary);
+      color: white;
+      box-shadow: 0 6px 20px rgba(0, 70, 173, 0.25);
+    }
+
+    /* Error container styling */
+    .error-container {
+      background: white;
+      border-radius: 20px;
+      padding: 4rem;
+      margin: 4rem auto;
+      max-width: 600px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      border: 3px solid #ffcccc;
+    }
+
+    .error-container h2 {
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
+      margin-bottom: 1rem;
+    }
+
+    /* Member-only content styling */
+    .member-only {
+      display: none; /* Hidden by default, shown for authenticated users */
+    }
+
+    .auth-required {
+      /* Will be hidden for non-authenticated users */
+    }
+
+    /* Golf-specific decorative elements */
+    .golf-ball {
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      position: relative;
+      display: inline-block;
+      margin: 0 10px;
+      box-shadow: inset -3px -3px 5px rgba(0,0,0,0.2);
+    }
+
+    .golf-ball::before {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #ccc;
+      border-radius: 50%;
+      top: 4px;
+      left: 6px;
+      box-shadow: 4px 0 #ccc, 8px 0 #ccc, 2px 4px #ccc, 6px 4px #ccc, 10px 4px #ccc, 4px 8px #ccc, 8px 8px #ccc;
+    }
+
+    /* Responsive Design */
     @media (max-width: 768px) {
+      .header {
+        padding: 0.75rem 1rem;
+      }
+
+      .header-logo {
+        height: 40px;
+      }
+
+      .header-title {
+        font-size: 1.2rem;
+        margin-left: 0.5rem;
+      }
+
+      .header-content {
+        flex-wrap: wrap;
+      }
+
+      .header-right {
+        margin-top: 0.5rem;
+      }
+
+      .founded-badge-header {
+        margin-left: 0.5rem;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+      }
+
+      .profile-hero {
+        padding: 2rem 1rem 1.5rem 1rem;
+        margin-top: 120px; /* Extra space for mobile header that may wrap */
+      }
+
+      .profile-hero h1 {
+        font-size: 2rem;
+        line-height: 1.2;
+      }
+
+      .profile-hero .tagline {
+        font-size: 1rem;
+        padding: 0 1rem;
+      }
+
+      .profile-main {
+        padding: 0 1rem;
+      }
+
       .profile-header {
         flex-direction: column;
         align-items: center;
         text-align: center;
-        padding: 1.5rem;
+        padding: 2rem;
+        margin: 2rem 0;
       }
       
       .profile-info {
         text-align: center;
       }
+
+      .profile-name {
+        font-size: 2rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin: 2rem 0;
+      }
+
+      .stat-box {
+        padding: 1.5rem;
+      }
+
+      .stat-value {
+        font-size: 2rem;
+      }
+
+      .section-card {
+        padding: 2rem;
+        margin-bottom: 2rem;
+      }
+
+      .section-title {
+        font-size: 1.5rem;
+      }
       
       .tab-buttons {
         justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .tab-button {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+      }
+
+      .score-card {
+        padding: 1.5rem;
+      }
+
+      .score-card-details {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 1rem;
+      }
+
+      .achievements-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+      }
+
+      .achievement-card {
+        padding: 1.5rem;
+      }
+
+      .chart-container {
+        height: 300px;
+        padding: 1.5rem;
+      }
+    }
+
+    /* Extra small mobile devices */
+    @media (max-width: 480px) {
+      .profile-hero {
+        padding: 1.5rem 0.75rem 1rem 0.75rem;
+      }
+
+      .profile-hero h1 {
+        font-size: 1.75rem;
+      }
+
+      .profile-hero .tagline {
+        font-size: 0.95rem;
+      }
+
+      .profile-main {
+        padding: 0 0.75rem;
+      }
+
+      .profile-header {
+        padding: 1.5rem;
+      }
+
+      .profile-name {
+        font-size: 1.75rem;
+      }
+
+      .profile-avatar {
+        width: 100px;
+        height: 100px;
+        font-size: 2.5rem;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .stat-box {
+        padding: 1.25rem;
+      }
+
+      .section-card {
+        padding: 1.5rem;
+      }
+
+      .section-title {
+        font-size: 1.3rem;
+      }
+
+      .tab-button {
+        padding: 0.6rem 1.2rem;
+        font-size: 0.85rem;
+      }
+
+      .score-card {
+        padding: 1.25rem;
+      }
+
+      .achievement-card {
+        padding: 1.25rem;
+      }
+
+      .chart-container {
+        height: 250px;
+        padding: 1.25rem;
+      }
+
+      .error-container {
+        padding: 2rem;
+        margin: 2rem auto;
       }
     }
   </style>
@@ -303,43 +940,329 @@
   </script>
   
   <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- Fixed Header with Logo - Same as about.html -->
+  <header class="header">
+    <div class="header-content">
+      <div class="header-left">
+        <a href="index.html">
+          <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="header-logo">
+        </a>
+        <a href="index.html" class="header-title">Birdie Bush Bandits</a>
+        <div class="founded-badge-header">
+          🏌️ Founded August 2020
+        </div>
+      </div>
+      <div class="header-right">
+        <!-- Auth controls will be added here by JavaScript -->
+        <a href="members.html" class="nav-link">Back to Members</a>
+        <a href="index.html" class="home-btn" id="home-link">Home</a>
+      </div>
+    </div>
+  </header>
   
-  <main id="main"></main>
-  
+  <main id="main">
+    <!-- Hero Section - Same style as about.html -->
+    <section class="profile-hero">
+      <div class="profile-hero-content">
+        <h1 id="profile-hero-title">Member Profile <span class="golf-ball"></span></h1>
+        <p class="tagline" id="profile-hero-tagline">Detailed statistics and achievements</p>
+      </div>
+    </section>
+
+    <!-- Main Profile Content -->
+    <div class="profile-main">
+      <!-- Member Only Section -->
+      <section class="member-only">
+        <div style="background: #e8f5e8; padding: 2rem; margin: 2rem 0; border-radius: 20px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+          <h3 style="color: #004d00; margin-bottom: 1rem;">🏌️ Member Profile Access</h3>
+          <p>View comprehensive statistics, handicap progress, and detailed performance analytics.</p>
+        </div>
+      </section>
+
+      <!-- Profile content will be populated by JavaScript -->
+      <div id="profile-content">
+        <!-- Content will be loaded here -->
+      </div>
+    </div>
+  </main>
+
+  <!-- Enhanced Authentication Integration Script -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
+      console.log('Initializing member profile page with authentication...');
+      
+      // Check if BBB modules are loaded
+      if (typeof BBB_CONFIG === 'undefined' || 
+          typeof BBB_AUTH === 'undefined' || 
+          typeof BBB_DB === 'undefined' || 
+          typeof BBB_UI === 'undefined' || 
+          typeof BBB_UTILS === 'undefined') {
+        console.error('Required BBB modules not found!');
+        initializePublicPage();
+        return;
+      }
+      
       // Initialize modules
-      BBB_AUTH.init({
-        cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+      try {
+        BBB_AUTH.init({
+          cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+        });
+        
+        BBB_DB.init({
+          useCloudflare: BBB_CONFIG.cloudflareEnabled,
+          localStoragePrefix: 'bbb_'
+        });
+        
+        console.log('Modules initialized successfully');
+      } catch (error) {
+        console.error('Error initializing modules:', error);
+        initializePublicPage();
+        return;
+      }
+      
+      // Check authentication and render page accordingly
+      checkPageAuthentication();
+      
+      // Add scroll animations
+      addScrollAnimations();
+    });
+
+    /**
+     * Main authentication check for profile page
+     */
+    function checkPageAuthentication() {
+      console.log('Checking page authentication...');
+      
+      // Try to restore session from localStorage
+      const hasStoredAuth = restoreAuthSession();
+      
+      if (hasStoredAuth) {
+        console.log('Restored authentication from storage');
+        initializeAuthenticatedPage();
+      } else {
+        console.log('No stored authentication, checking current auth state...');
+        
+        // Check if already authenticated in current session
+        if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+          console.log('User already authenticated in current session');
+          initializeAuthenticatedPage();
+        } else {
+          console.log('User not authenticated, showing public page');
+          initializePublicPage();
+        }
+      }
+    }
+
+    /**
+     * Restore authentication session from localStorage
+     */
+    function restoreAuthSession() {
+      try {
+        const storedAuth = localStorage.getItem('bbb_auth_session');
+        const storedUser = localStorage.getItem('bbb_current_user');
+        
+        if (storedAuth && storedUser) {
+          console.log('Found stored authentication data');
+          
+          const authData = JSON.parse(storedAuth);
+          const userData = JSON.parse(storedUser);
+          
+          // Check if session is still valid
+          if (authData.expiresAt && new Date(authData.expiresAt) > new Date()) {
+            console.log('Restoring valid session for user:', userData.id);
+            
+            // Restore authentication state
+            BBB_AUTH.currentUser = userData;
+            BBB_AUTH.isAuthenticated = true;
+            
+            return true;
+          } else {
+            console.log('Session expired, clearing stored data');
+            clearAuthSession();
+          }
+        }
+        
+        return false;
+      } catch (error) {
+        console.error('Error restoring auth session:', error);
+        clearAuthSession();
+        return false;
+      }
+    }
+
+    /**
+     * Clear authentication session
+     */
+    function clearAuthSession() {
+      localStorage.removeItem('bbb_auth_session');
+      localStorage.removeItem('bbb_current_user');
+      BBB_AUTH.currentUser = null;
+      BBB_AUTH.isAuthenticated = false;
+    }
+
+    /**
+     * Initialize page for authenticated users
+     */
+    function initializeAuthenticatedPage() {
+      console.log('Initializing authenticated page for user:', BBB_AUTH.currentUser?.id);
+      
+      // Start session monitoring
+      startSessionMonitoring();
+      
+      // Show authenticated content
+      showAuthenticatedContent();
+      
+      // Add logout functionality to header
+      addLogoutFunctionality();
+      
+      // Show user info
+      showUserInfo();
+      
+      // Load member profile
+      loadMemberProfile();
+    }
+
+    /**
+     * Initialize page for public (non-authenticated) users
+     */
+    function initializePublicPage() {
+      console.log('Initializing public page');
+      
+      // Show public content
+      showPublicContent();
+      
+      // Keep home button visible
+      const homeLink = document.getElementById('home-link');
+      if (homeLink) {
+        homeLink.style.display = 'inline-block';
+      }
+      
+      // Load limited profile data for public view
+      loadMemberProfile();
+    }
+
+    /**
+     * Show content for authenticated users
+     */
+    function showAuthenticatedContent() {
+      // Show member-specific content
+      const memberContent = document.querySelectorAll('.member-only');
+      memberContent.forEach(element => {
+        element.style.display = 'block';
       });
-      
-      BBB_DB.init({
-        useCloudflare: BBB_CONFIG.cloudflareEnabled,
-        localStoragePrefix: 'bbb_'
+    }
+
+    /**
+     * Show content for public users
+     */
+    function showPublicContent() {
+      // Hide member-only content
+      const memberContent = document.querySelectorAll('.member-only');
+      memberContent.forEach(element => {
+        element.style.display = 'none';
       });
+    }
+
+    /**
+     * Add logout functionality to header
+     */
+    function addLogoutFunctionality() {
+      const headerRight = document.querySelector('.header-right');
+      if (headerRight && BBB_AUTH.isAuthenticated) {
+        // Check if logout button already exists
+        if (headerRight.querySelector('.logout-btn')) return;
+        
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'logout-btn';
+        logoutBtn.textContent = 'Logout';
+        
+        logoutBtn.onclick = function() {
+          if (confirm('Are you sure you want to logout?')) {
+            performLogout();
+          }
+        };
+        
+        headerRight.appendChild(logoutBtn);
+      }
+    }
+
+    /**
+     * Show user info
+     */
+    function showUserInfo() {
+      if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+        const headerRight = document.querySelector('.header-right');
+        if (headerRight) {
+          // Check if user info already exists
+          if (headerRight.querySelector('.user-info')) return;
+          
+          const userInfo = document.createElement('span');
+          userInfo.className = 'user-info';
+          userInfo.textContent = `Welcome, ${BBB_AUTH.currentUser.id}`;
+          
+          // Insert before logout button
+          const logoutBtn = headerRight.querySelector('.logout-btn');
+          if (logoutBtn) {
+            headerRight.insertBefore(userInfo, logoutBtn);
+          } else {
+            headerRight.appendChild(userInfo);
+          }
+        }
+      }
+    }
+
+    /**
+     * Perform logout
+     */
+    function performLogout() {
+      console.log('Logging out user...');
       
-      // Create header
-      const headerElements = BBB_UI.createHeader({
-        fixed: true,
-        showHomeLinkText: true,
-        additionalLinks: [
-          { url: 'members.html', text: 'Back to Members', className: 'nav-link' }
-        ]
-      });
+      // Clear authentication state
+      clearAuthSession();
       
-      document.body.insertBefore(headerElements.header, document.body.firstChild);
+      // Refresh page to show public content
+      window.location.reload();
+    }
+
+    /**
+     * Start session monitoring
+     */
+    function startSessionMonitoring() {
+      // Check session every 5 minutes
+      const sessionCheck = setInterval(() => {
+        const storedAuth = localStorage.getItem('bbb_auth_session');
+        
+        if (storedAuth) {
+          try {
+            const authData = JSON.parse(storedAuth);
+            
+            if (authData.expiresAt && new Date(authData.expiresAt) <= new Date()) {
+              console.log('Session expired, logging out...');
+              clearInterval(sessionCheck);
+              performLogout();
+            }
+          } catch (error) {
+            console.error('Error checking session:', error);
+            clearInterval(sessionCheck);
+            performLogout();
+          }
+        } else if (BBB_AUTH.isAuthenticated) {
+          // Session was cleared externally
+          console.log('Session cleared externally, logging out...');
+          clearInterval(sessionCheck);
+          performLogout();
+        }
+      }, 5 * 60 * 1000); // 5 minutes
       
-      // Get main content element
-      const main = document.getElementById('main');
-      main.appendChild(headerElements.mainWrapper);
-      
-      // Create page content
-      const mainContent = document.createElement('div');
-      
-      // Create status message container
-      const statusMessage = BBB_UI.createStatusMessage();
-      mainContent.appendChild(statusMessage);
-      
+      // Store interval ID for cleanup if needed
+      window.bbbSessionMonitor = sessionCheck;
+    }
+
+    /**
+     * Load member profile
+     */
+    function loadMemberProfile() {
       // Get member ID from URL parameter
       const urlParams = new URLSearchParams(window.location.search);
       const memberId = urlParams.get('id');
@@ -350,883 +1273,944 @@
         return;
       }
       
+      // Update hero section with member name
+      const memberName = memberId.charAt(0).toUpperCase() + memberId.slice(1);
+      document.getElementById('profile-hero-title').innerHTML = `${memberName}'s Profile <span class="golf-ball"></span>`;
+      document.getElementById('profile-hero-tagline').textContent = `Detailed statistics and achievements for ${memberName}`;
+      
       // Load member data
-      loadMemberProfile(memberId);
+      loadMemberData(memberId, memberName);
+    }
+
+    /**
+     * Show error message
+     * @param {string} message - Error message
+     */
+    function showError(message) {
+      const profileContent = document.getElementById('profile-content');
       
-      // Add content to main wrapper
-      headerElements.mainWrapper.appendChild(mainContent);
+      const errorContainer = document.createElement('div');
+      errorContainer.className = 'error-container';
       
-      /**
-       * Show error message
-       * @param {string} message - Error message
-       */
-      function showError(message) {
-        const errorContainer = document.createElement('div');
-        errorContainer.className = 'error-container';
-        errorContainer.style.textAlign = 'center';
-        errorContainer.style.margin = '3rem auto';
-        errorContainer.style.maxWidth = '600px';
-        
-        const errorIcon = document.createElement('div');
-        errorIcon.textContent = '⚠️';
-        errorIcon.style.fontSize = '3rem';
-        errorIcon.style.marginBottom = '1rem';
-        
-        const errorTitle = document.createElement('h2');
-        errorTitle.textContent = 'Error Loading Profile';
-        errorTitle.style.marginBottom = '1rem';
-        
-        const errorMessage = document.createElement('div');
-        errorMessage.innerHTML = message;
-        
-        const backButton = document.createElement('a');
-        backButton.href = 'members.html';
-        backButton.className = 'btn';
-        backButton.textContent = 'Return to Members';
-        backButton.style.marginTop = '1.5rem';
-        backButton.style.display = 'inline-block';
-        
-        errorContainer.appendChild(errorIcon);
-        errorContainer.appendChild(errorTitle);
-        errorContainer.appendChild(errorMessage);
-        errorContainer.appendChild(backButton);
-        
-        mainContent.appendChild(errorContainer);
+      const errorIcon = document.createElement('div');
+      errorIcon.textContent = '⚠️';
+      errorIcon.style.fontSize = '3rem';
+      errorIcon.style.marginBottom = '1rem';
+      
+      const errorTitle = document.createElement('h2');
+      errorTitle.textContent = 'Error Loading Profile';
+      errorTitle.style.marginBottom = '1rem';
+      
+      const errorMessage = document.createElement('div');
+      errorMessage.innerHTML = message;
+      
+      const backButton = document.createElement('a');
+      backButton.href = 'members.html';
+      backButton.className = 'btn';
+      backButton.textContent = 'Return to Members';
+      backButton.style.marginTop = '1.5rem';
+      backButton.style.display = 'inline-block';
+      
+      errorContainer.appendChild(errorIcon);
+      errorContainer.appendChild(errorTitle);
+      errorContainer.appendChild(errorMessage);
+      errorContainer.appendChild(backButton);
+      
+      profileContent.appendChild(errorContainer);
+    }
+
+    /**
+     * Load member data
+     * @param {string} memberId - Member ID
+     * @param {string} memberName - Member name
+     */
+    function loadMemberData(memberId, memberName) {
+      // Check if member exists in config
+      if (!BBB_CONFIG.members.includes(memberName)) {
+        showError(`Member "${memberName}" not found.`);
+        return;
       }
       
-      /**
-       * Load member profile data
-       * @param {string} memberId - Member ID
-       */
-      function loadMemberProfile(memberId) {
-        // Show loading indicator
-        BBB_UTILS.showMessage('Loading member profile...', 'info');
-        
-        // Get member name (capitalize first letter if needed)
-        const memberName = memberId.charAt(0).toUpperCase() + memberId.slice(1);
-        
-        // Check if member exists in config
-        if (!BBB_CONFIG.members.includes(memberName)) {
-          showError(`Member "${memberName}" not found.`);
-          return;
-        }
-        
-        // Load handicap data
-        BBB_DB.getMemberHandicap(memberId)
-          .then(handicapData => {
-            // Load scorecards
-            return BBB_DB.getScorecards()
-              .then(scorecards => {
-                const scorecardsArray = Object.values(scorecards);
-                
-                // Build member profile data
-                const profileData = buildProfileData(memberName, handicapData, scorecardsArray);
-                
-                // Render profile
-                renderProfile(profileData);
-              });
-          })
-          .catch(err => {
-            console.error('Error loading profile data:', err);
-            
-            // Still try to render with limited data
-            const profileData = buildProfileData(memberName, null, []);
-            renderProfile(profileData);
-          });
-      }
-      
-      /**
-       * Build comprehensive profile data from all sources
-       * @param {string} memberName - Member name
-       * @param {Object} handicapData - Handicap data
-       * @param {Array} scorecards - Array of scorecards
-       * @returns {Object} - Profile data
-       */
-      function buildProfileData(memberName, handicapData, scorecards) {
-        // Filter scorecards for this member
-        const memberScores = [];
-        
-        scorecards.forEach(scorecard => {
-          if (scorecard.players && Array.isArray(scorecard.players)) {
-            const playerData = scorecard.players.find(player => 
-              player.name === memberName
-            );
-            
-            if (playerData) {
-              memberScores.push({
-                date: new Date(scorecard.date || scorecard.createdAt),
-                course: scorecard.course,
-                tee: scorecard.tee,
-                totalShots: playerData.totalShots || 0,
-                stablefordPoints: playerData.totalPoints || 0,
-                handicap: playerData.handicap || 0,
-                courseHandicap: playerData.courseHandicap || 0,
-                holes: scorecard.holes || '18'
-              });
-            }
-          }
+      // Load handicap data
+      BBB_DB.getMemberHandicap(memberId)
+        .then(handicapData => {
+          // Load scorecards
+          return BBB_DB.getScorecards()
+            .then(scorecards => {
+              const scorecardsArray = Object.values(scorecards);
+              
+              // Build member profile data
+              const profileData = buildProfileData(memberName, handicapData, scorecardsArray);
+              
+              // Render profile
+              renderProfile(profileData);
+            });
+        })
+        .catch(err => {
+          console.error('Error loading profile data:', err);
+          
+          // Still try to render with limited data
+          const profileData = buildProfileData(memberName, null, []);
+          renderProfile(profileData);
         });
-        
-        // Sort by date descending
-        memberScores.sort((a, b) => b.date - a.date);
-        
-        // Calculate statistics
-        const stats = calculateStatistics(memberScores);
-        
-        // Generate course performance
-        const coursePerformance = generateCoursePerformance(memberScores);
-        
-        // Generate achievements
-        const achievements = generateAchievements(memberName, memberScores, handicapData);
-        
-        // Build profile object
+    }
+
+    /**
+     * Build comprehensive profile data from all sources
+     * @param {string} memberName - Member name
+     * @param {Object} handicapData - Handicap data
+     * @param {Array} scorecards - Array of scorecards
+     * @returns {Object} - Profile data
+     */
+    function buildProfileData(memberName, handicapData, scorecards) {
+      // Filter scorecards for this member
+      const memberScores = [];
+      
+      scorecards.forEach(scorecard => {
+        if (scorecard.players && Array.isArray(scorecard.players)) {
+          const playerData = scorecard.players.find(player => 
+            player.name === memberName
+          );
+          
+          if (playerData) {
+            memberScores.push({
+              date: new Date(scorecard.date || scorecard.createdAt),
+              course: scorecard.course,
+              tee: scorecard.tee,
+              totalShots: playerData.totalShots || 0,
+              stablefordPoints: playerData.totalPoints || 0,
+              handicap: playerData.handicap || 0,
+              courseHandicap: playerData.courseHandicap || 0,
+              holes: scorecard.holes || '18'
+            });
+          }
+        }
+      });
+      
+      // Sort by date descending
+      memberScores.sort((a, b) => b.date - a.date);
+      
+      // Calculate statistics
+      const stats = calculateStatistics(memberScores);
+      
+      // Generate course performance
+      const coursePerformance = generateCoursePerformance(memberScores);
+      
+      // Generate achievements
+      const achievements = generateAchievements(memberName, memberScores, handicapData);
+      
+      // Build profile object
+      return {
+        id: memberName.toLowerCase(),
+        name: memberName,
+        joinDate: "2020-08-01", // Default join date - the founding date
+        handicap: handicapData ? handicapData.index : null,
+        handicapCategory: getHandicapCategory(handicapData ? parseFloat(handicapData.index) : null),
+        handicapLastUpdated: handicapData ? new Date(handicapData.calculatedAt) : null,
+        scores: memberScores,
+        stats: stats,
+        coursePerformance: coursePerformance,
+        achievements: achievements
+      };
+    }
+
+    /**
+     * Calculate statistics from scores
+     * @param {Array} scores - Array of scores
+     * @returns {Object} - Statistics
+     */
+    function calculateStatistics(scores) {
+      if (!scores || scores.length === 0) {
         return {
-          id: memberName.toLowerCase(),
-          name: memberName,
-          joinDate: "2020-08-01", // Default join date - the founding date
-          handicap: handicapData ? handicapData.index : null,
-          handicapCategory: getHandicapCategory(handicapData ? parseFloat(handicapData.index) : null),
-          handicapLastUpdated: handicapData ? new Date(handicapData.calculatedAt) : null,
-          scores: memberScores,
-          stats: stats,
-          coursePerformance: coursePerformance,
-          achievements: achievements
+          roundsPlayed: 0,
+          averageScore: 0,
+          bestScore: 0,
+          averagePoints: 0,
+          bestPoints: 0,
+          latestScore: null
         };
       }
       
-      /**
-       * Calculate statistics from scores
-       * @param {Array} scores - Array of scores
-       * @returns {Object} - Statistics
-       */
-      function calculateStatistics(scores) {
-        if (!scores || scores.length === 0) {
-          return {
-            roundsPlayed: 0,
-            averageScore: 0,
-            bestScore: 0,
-            averagePoints: 0,
-            bestPoints: 0,
-            latestScore: null
+      // Calculate basic stats
+      let totalShots = 0;
+      let totalPoints = 0;
+      let bestScore = Infinity;
+      let bestPoints = 0;
+      
+      scores.forEach(score => {
+        // Only use full rounds for averages
+        if (score.holes === '18') {
+          totalShots += score.totalShots;
+          totalPoints += score.stablefordPoints;
+          
+          if (score.totalShots < bestScore) {
+            bestScore = score.totalShots;
+          }
+          
+          if (score.stablefordPoints > bestPoints) {
+            bestPoints = score.stablefordPoints;
+          }
+        }
+      });
+      
+      const fullRounds = scores.filter(s => s.holes === '18');
+      const averageScore = fullRounds.length > 0 ? Math.round((totalShots / fullRounds.length) * 10) / 10 : 0;
+      const averagePoints = fullRounds.length > 0 ? Math.round((totalPoints / fullRounds.length) * 10) / 10 : 0;
+      
+      return {
+        roundsPlayed: scores.length,
+        averageScore: averageScore,
+        bestScore: bestScore === Infinity ? 0 : bestScore,
+        averagePoints: averagePoints,
+        bestPoints: bestPoints,
+        latestScore: scores.length > 0 ? scores[0] : null
+      };
+    }
+
+    /**
+     * Generate course performance data
+     * @param {Array} scores - Array of scores
+     * @returns {Array} - Course performance data
+     */
+    function generateCoursePerformance(scores) {
+      if (!scores || scores.length === 0) {
+        return [];
+      }
+      
+      // Group scores by course
+      const courseMap = {};
+      
+      scores.forEach(score => {
+        if (!courseMap[score.course]) {
+          courseMap[score.course] = {
+            course: score.course,
+            rounds: 0,
+            totalShots: 0,
+            totalPoints: 0,
+            bestScore: Infinity,
+            bestPoints: 0
           };
         }
         
-        // Calculate basic stats
-        let totalShots = 0;
-        let totalPoints = 0;
-        let bestScore = Infinity;
-        let bestPoints = 0;
+        const courseData = courseMap[score.course];
+        courseData.rounds++;
+        courseData.totalShots += score.totalShots;
+        courseData.totalPoints += score.stablefordPoints;
         
-        scores.forEach(score => {
-          // Only use full rounds for averages
-          if (score.holes === '18') {
-            totalShots += score.totalShots;
-            totalPoints += score.stablefordPoints;
-            
-            if (score.totalShots < bestScore) {
-              bestScore = score.totalShots;
-            }
-            
-            if (score.stablefordPoints > bestPoints) {
-              bestPoints = score.stablefordPoints;
-            }
-          }
-        });
+        if (score.totalShots < courseData.bestScore) {
+          courseData.bestScore = score.totalShots;
+        }
         
-        const fullRounds = scores.filter(s => s.holes === '18');
-        const averageScore = fullRounds.length > 0 ? Math.round((totalShots / fullRounds.length) * 10) / 10 : 0;
-        const averagePoints = fullRounds.length > 0 ? Math.round((totalPoints / fullRounds.length) * 10) / 10 : 0;
-        
+        if (score.stablefordPoints > courseData.bestPoints) {
+          courseData.bestPoints = score.stablefordPoints;
+        }
+      });
+      
+      // Convert to array and calculate averages
+      const coursePerformance = Object.values(courseMap).map(course => {
         return {
-          roundsPlayed: scores.length,
-          averageScore: averageScore,
-          bestScore: bestScore === Infinity ? 0 : bestScore,
-          averagePoints: averagePoints,
-          bestPoints: bestPoints,
-          latestScore: scores.length > 0 ? scores[0] : null
+          course: course.course,
+          rounds: course.rounds,
+          averageScore: Math.round((course.totalShots / course.rounds) * 10) / 10,
+          averagePoints: Math.round((course.totalPoints / course.rounds) * 10) / 10,
+          bestScore: course.bestScore === Infinity ? 0 : course.bestScore,
+          bestPoints: course.bestPoints
+        };
+      });
+      
+      // Sort by most played courses
+      return coursePerformance.sort((a, b) => b.rounds - a.rounds);
+    }
+
+    /**
+     * Generate achievements
+     * @param {string} memberName - Member name
+     * @param {Array} scores - Array of scores
+     * @param {Object} handicapData - Handicap data
+     * @returns {Array} - Achievements
+     */
+    function generateAchievements(memberName, scores, handicapData) {
+      const achievements = [];
+      
+      // Default achievement: Founding member
+      achievements.push({
+        icon: '🏆',
+        title: 'Founding Member',
+        description: 'One of the original Birdie Bush Bandits',
+        date: new Date('2020-08-01')
+      });
+      
+      if (scores && scores.length > 0) {
+        // Most rounds played
+        if (scores.length >= 10) {
+          achievements.push({
+            icon: '🏌️',
+            title: 'Committed Golfer',
+            description: `Played ${scores.length} rounds with the Bandits`,
+            date: scores[0].date
+          });
+        }
+        
+        // Best round achievement
+        const bestRound = [...scores].sort((a, b) => a.totalShots - b.totalShots)[0];
+        if (bestRound) {
+          achievements.push({
+            icon: '🥇',
+            title: 'Personal Best',
+            description: `Shot ${bestRound.totalShots} at ${bestRound.course}`,
+            date: bestRound.date
+          });
+        }
+        
+        // Best Stableford achievement
+        const bestPoints = [...scores].sort((a, b) => b.stablefordPoints - a.stablefordPoints)[0];
+        if (bestPoints) {
+          achievements.push({
+            icon: '📊',
+            title: 'Points Master',
+            description: `Scored ${bestPoints.stablefordPoints} points at ${bestPoints.course}`,
+            date: bestPoints.date
+          });
+        }
+      }
+      
+      // Handicap achievement if available
+      if (handicapData && handicapData.index) {
+        const handicapValue = parseFloat(handicapData.index);
+        
+        if (handicapValue < 10) {
+          achievements.push({
+            icon: '⭐',
+            title: 'Single Digit Handicap',
+            description: `Achieved a handicap of ${handicapData.index}`,
+            date: new Date(handicapData.calculatedAt)
+          });
+        } else if (handicapValue < 18) {
+          achievements.push({
+            icon: '🏄',
+            title: 'Mid Handicapper',
+            description: `Achieved a handicap of ${handicapData.index}`,
+            date: new Date(handicapData.calculatedAt)
+          });
+        }
+      }
+      
+      return achievements;
+    }
+
+    /**
+     * Get handicap category text and color
+     * @param {number} handicap - Handicap value
+     * @returns {Object} - Category data
+     */
+    function getHandicapCategory(handicap) {
+      if (handicap === null) {
+        return {
+          label: 'No Handicap',
+          color: '#6c757d',
+          textColor: 'white'
         };
       }
       
-      /**
-       * Generate course performance data
-       * @param {Array} scores - Array of scores
-       * @returns {Array} - Course performance data
-       */
-      function generateCoursePerformance(scores) {
-        if (!scores || scores.length === 0) {
-          return [];
-        }
-        
-        // Group scores by course
-        const courseMap = {};
-        
-        scores.forEach(score => {
-          if (!courseMap[score.course]) {
-            courseMap[score.course] = {
-              course: score.course,
-              rounds: 0,
-              totalShots: 0,
-              totalPoints: 0,
-              bestScore: Infinity,
-              bestPoints: 0
-            };
-          }
-          
-          const courseData = courseMap[score.course];
-          courseData.rounds++;
-          courseData.totalShots += score.totalShots;
-          courseData.totalPoints += score.stablefordPoints;
-          
-          if (score.totalShots < courseData.bestScore) {
-            courseData.bestScore = score.totalShots;
-          }
-          
-          if (score.stablefordPoints > courseData.bestPoints) {
-            courseData.bestPoints = score.stablefordPoints;
-          }
-        });
-        
-        // Convert to array and calculate averages
-        const coursePerformance = Object.values(courseMap).map(course => {
-          return {
-            course: course.course,
-            rounds: course.rounds,
-            averageScore: Math.round((course.totalShots / course.rounds) * 10) / 10,
-            averagePoints: Math.round((course.totalPoints / course.rounds) * 10) / 10,
-            bestScore: course.bestScore === Infinity ? 0 : course.bestScore,
-            bestPoints: course.bestPoints
-          };
-        });
-        
-        // Sort by most played courses
-        return coursePerformance.sort((a, b) => b.rounds - a.rounds);
+      if (handicap < 5) {
+        return {
+          label: 'Elite',
+          color: '#28a745',
+          textColor: 'white'
+        };
+      } else if (handicap < 15) {
+        return {
+          label: 'Skilled',
+          color: '#17a2b8',
+          textColor: 'white'
+        };
+      } else if (handicap < 25) {
+        return {
+          label: 'Improving',
+          color: '#fd7e14',
+          textColor: 'white'
+        };
+      } else {
+        return {
+          label: 'Developing',
+          color: '#6c757d',
+          textColor: 'white'
+        };
+      }
+    }
+
+    /**
+     * Generate a consistent color based on name
+     * @param {string} name - Name to generate color from
+     * @returns {string} - CSS color
+     */
+    function getColorFromName(name) {
+      // Simple hash function
+      let hash = 0;
+      for (let i = 0; i < name.length; i++) {
+        hash = name.charCodeAt(i) + ((hash << 5) - hash);
       }
       
-      /**
-       * Generate achievements
-       * @param {string} memberName - Member name
-       * @param {Array} scores - Array of scores
-       * @param {Object} handicapData - Handicap data
-       * @returns {Array} - Achievements
-       */
-      function generateAchievements(memberName, scores, handicapData) {
-        const achievements = [];
-        
-        // Default achievement: Founding member
-        achievements.push({
-          icon: '🏆',
-          title: 'Founding Member',
-          description: 'One of the original Birdie Bush Bandits',
-          date: new Date('2020-08-01')
-        });
-        
-        if (scores && scores.length > 0) {
-          // Most rounds played
-          if (scores.length >= 10) {
-            achievements.push({
-              icon: '🏌️',
-              title: 'Committed Golfer',
-              description: `Played ${scores.length} rounds with the Bandits`,
-              date: scores[0].date
-            });
-          }
-          
-          // Best round achievement
-          const bestRound = [...scores].sort((a, b) => a.totalShots - b.totalShots)[0];
-          if (bestRound) {
-            achievements.push({
-              icon: '🥇',
-              title: 'Personal Best',
-              description: `Shot ${bestRound.totalShots} at ${bestRound.course}`,
-              date: bestRound.date
-            });
-          }
-          
-          // Best Stableford achievement
-          const bestPoints = [...scores].sort((a, b) => b.stablefordPoints - a.stablefordPoints)[0];
-          if (bestPoints) {
-            achievements.push({
-              icon: '📊',
-              title: 'Points Master',
-              description: `Scored ${bestPoints.stablefordPoints} points at ${bestPoints.course}`,
-              date: bestPoints.date
-            });
-          }
-        }
-        
-        // Handicap achievement if available
-        if (handicapData && handicapData.index) {
-          const handicapValue = parseFloat(handicapData.index);
-          
-          if (handicapValue < 10) {
-            achievements.push({
-              icon: '⭐',
-              title: 'Single Digit Handicap',
-              description: `Achieved a handicap of ${handicapData.index}`,
-              date: new Date(handicapData.calculatedAt)
-            });
-          } else if (handicapValue < 18) {
-            achievements.push({
-              icon: '🏄',
-              title: 'Mid Handicapper',
-              description: `Achieved a handicap of ${handicapData.index}`,
-              date: new Date(handicapData.calculatedAt)
-            });
-          }
-        }
-        
-        return achievements;
+      // Convert to HSL color with fixed saturation and lightness for good contrast
+      const h = hash % 360;
+      return `hsl(${h}, 70%, 40%)`;
+    }
+
+    /**
+     * Render the profile page with data
+     * @param {Object} profileData - Profile data
+     */
+    function renderProfile(profileData) {
+      const profileContent = document.getElementById('profile-content');
+      
+      // Profile header with avatar and basic info
+      const profileHeader = document.createElement('div');
+      profileHeader.className = 'profile-header';
+      
+      // Avatar
+      const avatarContainer = document.createElement('div');
+      avatarContainer.className = 'profile-avatar';
+      avatarContainer.style.backgroundColor = getColorFromName(profileData.name);
+      avatarContainer.textContent = profileData.name.charAt(0);
+      
+      // Info container
+      const infoContainer = document.createElement('div');
+      infoContainer.className = 'profile-info';
+      
+      // Member name
+      const nameHeading = document.createElement('h2');
+      nameHeading.className = 'profile-name';
+      nameHeading.textContent = profileData.name;
+      
+      // Handicap
+      const handicapBadge = document.createElement('div');
+      handicapBadge.className = 'profile-handicap';
+      
+      if (profileData.handicap) {
+        handicapBadge.textContent = `Handicap: ${profileData.handicap} (${profileData.handicapCategory.label})`;
+        handicapBadge.style.backgroundColor = profileData.handicapCategory.color;
+        handicapBadge.style.color = profileData.handicapCategory.textColor;
+      } else {
+        handicapBadge.textContent = 'No Handicap';
+        handicapBadge.style.backgroundColor = '#f0f0f0';
+        handicapBadge.style.color = '#666';
       }
       
-      /**
-       * Get handicap category text and color
-       * @param {number} handicap - Handicap value
-       * @returns {Object} - Category data
-       */
-      function getHandicapCategory(handicap) {
-        if (handicap === null) {
-          return {
-            label: 'No Handicap',
-            color: '#6c757d',
-            textColor: 'white'
-          };
-        }
-        
-        if (handicap < 5) {
-          return {
-            label: 'Elite',
-            color: '#28a745',
-            textColor: 'white'
-          };
-        } else if (handicap < 15) {
-          return {
-            label: 'Skilled',
-            color: '#17a2b8',
-            textColor: 'white'
-          };
-        } else if (handicap < 25) {
-          return {
-            label: 'Improving',
-            color: '#fd7e14',
-            textColor: 'white'
-          };
-        } else {
-          return {
-            label: 'Developing',
-            color: '#6c757d',
-            textColor: 'white'
-          };
-        }
+      // Member meta info
+      const metaInfo = document.createElement('div');
+      metaInfo.className = 'profile-meta';
+      metaInfo.textContent = `Member since ${new Date(profileData.joinDate).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}`;
+      
+      if (profileData.handicapLastUpdated) {
+        metaInfo.textContent += ` • Handicap last updated: ${new Date(profileData.handicapLastUpdated).toLocaleDateString()}`;
       }
       
-      /**
-       * Generate a consistent color based on name
-       * @param {string} name - Name to generate color from
-       * @returns {string} - CSS color
-       */
-      function getColorFromName(name) {
-        // Simple hash function
-        let hash = 0;
-        for (let i = 0; i < name.length; i++) {
-          hash = name.charCodeAt(i) + ((hash << 5) - hash);
-        }
-        
-        // Convert to HSL color with fixed saturation and lightness for good contrast
-        const h = hash % 360;
-        return `hsl(${h}, 70%, 40%)`;
-      }
+      // Add info to container
+      infoContainer.appendChild(nameHeading);
+      infoContainer.appendChild(handicapBadge);
+      infoContainer.appendChild(metaInfo);
       
-      /**
-       * Render the profile page with data
-       * @param {Object} profileData - Profile data
-       */
-      function renderProfile(profileData) {
-        // Clear any loading message
-        BBB_UTILS.showMessage('', 'info');
+      // Add everything to header
+      profileHeader.appendChild(avatarContainer);
+      profileHeader.appendChild(infoContainer);
+      
+      // Add header to page
+      profileContent.appendChild(profileHeader);
+      
+      // Statistics overview
+      const statsGrid = document.createElement('div');
+      statsGrid.className = 'stats-grid';
+      
+      const statBoxes = [
+        { label: 'Rounds Played', value: profileData.stats.roundsPlayed },
+        { label: 'Average Score', value: profileData.stats.averageScore || '-' },
+        { label: 'Best Score', value: profileData.stats.bestScore || '-' },
+        { label: 'Average Points', value: profileData.stats.averagePoints || '-' },
+        { label: 'Best Points', value: profileData.stats.bestPoints || '-' }
+      ];
+      
+      statBoxes.forEach(stat => {
+        const statBox = document.createElement('div');
+        statBox.className = 'stat-box';
         
-        // Create page title with member name
-        const titleContainer = BBB_UI.createPageTitle({
-          title: `${profileData.name}'s Profile`,
-          showFoundedText: false,
-          showGolfballs: false,
-          titleTag: 'h1'
-        });
-        mainContent.appendChild(titleContainer);
+        const statValue = document.createElement('div');
+        statValue.className = 'stat-value';
+        statValue.textContent = stat.value;
         
-        // Profile header with avatar and basic info
-        const profileHeader = document.createElement('div');
-        profileHeader.className = 'profile-header';
+        const statLabel = document.createElement('div');
+        statLabel.className = 'stat-label';
+        statLabel.textContent = stat.label;
         
-        // Avatar
-        const avatarContainer = document.createElement('div');
-        avatarContainer.className = 'profile-avatar';
-        avatarContainer.style.backgroundColor = getColorFromName(profileData.name);
-        avatarContainer.textContent = profileData.name.charAt(0);
+        statBox.appendChild(statValue);
+        statBox.appendChild(statLabel);
+        statsGrid.appendChild(statBox);
+      });
+      
+      profileContent.appendChild(statsGrid);
+      
+      // Tabs for different sections
+      const tabContainer = document.createElement('div');
+      tabContainer.className = 'tab-container section-card';
+      
+      const tabButtons = document.createElement('div');
+      tabButtons.className = 'tab-buttons';
+      
+      const tabs = [
+        { id: 'handicap', label: 'Handicap Progress' },
+        { id: 'scores', label: 'Recent Scores' },
+        { id: 'courses', label: 'Course Performance' },
+        { id: 'achievements', label: 'Achievements' }
+      ];
+      
+      // Create tab buttons
+      tabs.forEach((tab, index) => {
+        const button = document.createElement('button');
+        button.className = `tab-button ${index === 0 ? 'active' : ''}`;
+        button.dataset.tabId = tab.id;
+        button.textContent = tab.label;
         
-        // Info container
-        const infoContainer = document.createElement('div');
-        infoContainer.className = 'profile-info';
-        
-        // Member name
-        const nameHeading = document.createElement('h2');
-        nameHeading.className = 'profile-name';
-        nameHeading.textContent = profileData.name;
-        
-        // Handicap
-        const handicapBadge = document.createElement('div');
-        handicapBadge.className = 'profile-handicap';
-        
-        if (profileData.handicap) {
-          handicapBadge.textContent = `Handicap: ${profileData.handicap} (${profileData.handicapCategory.label})`;
-          handicapBadge.style.backgroundColor = profileData.handicapCategory.color;
-          handicapBadge.style.color = profileData.handicapCategory.textColor;
-        } else {
-          handicapBadge.textContent = 'No Handicap';
-          handicapBadge.style.backgroundColor = '#f0f0f0';
-          handicapBadge.style.color = '#666';
-        }
-        
-        // Member meta info
-        const metaInfo = document.createElement('div');
-        metaInfo.className = 'profile-meta';
-        metaInfo.textContent = `Member since ${new Date(profileData.joinDate).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}`;
-        
-        if (profileData.handicapLastUpdated) {
-          metaInfo.textContent += ` • Handicap last updated: ${new Date(profileData.handicapLastUpdated).toLocaleDateString()}`;
-        }
-        
-        // Add info to container
-        infoContainer.appendChild(nameHeading);
-        infoContainer.appendChild(handicapBadge);
-        infoContainer.appendChild(metaInfo);
-        
-        // Add everything to header
-        profileHeader.appendChild(avatarContainer);
-        profileHeader.appendChild(infoContainer);
-        
-        // Add header to page
-        mainContent.appendChild(profileHeader);
-        
-        // Statistics overview
-        const statsGrid = document.createElement('div');
-        statsGrid.className = 'stats-grid';
-        
-        const statBoxes = [
-          { label: 'Rounds Played', value: profileData.stats.roundsPlayed },
-          { label: 'Average Score', value: profileData.stats.averageScore || '-' },
-          { label: 'Best Score', value: profileData.stats.bestScore || '-' },
-          { label: 'Average Points', value: profileData.stats.averagePoints || '-' },
-          { label: 'Best Points', value: profileData.stats.bestPoints || '-' }
-        ];
-        
-        statBoxes.forEach(stat => {
-          const statBox = document.createElement('div');
-          statBox.className = 'stat-box';
-          
-          const statValue = document.createElement('div');
-          statValue.className = 'stat-value';
-          statValue.textContent = stat.value;
-          
-          const statLabel = document.createElement('div');
-          statLabel.className = 'stat-label';
-          statLabel.textContent = stat.label;
-          
-          statBox.appendChild(statValue);
-          statBox.appendChild(statLabel);
-          statsGrid.appendChild(statBox);
-        });
-        
-        mainContent.appendChild(statsGrid);
-        
-        // Tabs for different sections
-        const tabContainer = document.createElement('div');
-        tabContainer.className = 'tab-container';
-        
-        const tabButtons = document.createElement('div');
-        tabButtons.className = 'tab-buttons';
-        
-        const tabs = [
-          { id: 'handicap', label: 'Handicap Progress' },
-          { id: 'scores', label: 'Recent Scores' },
-          { id: 'courses', label: 'Course Performance' },
-          { id: 'achievements', label: 'Achievements' }
-        ];
-        
-        // Create tab buttons
-        tabs.forEach((tab, index) => {
-          const button = document.createElement('button');
-          button.className = `tab-button ${index === 0 ? 'active' : ''}`;
-          button.dataset.tabId = tab.id;
-          button.textContent = tab.label;
-          
-          button.addEventListener('click', () => {
-            // Update active button
-            document.querySelectorAll('.tab-button').forEach(btn => {
-              btn.classList.remove('active');
-            });
-            button.classList.add('active');
-            
-            // Show corresponding content
-            document.querySelectorAll('.tab-content').forEach(content => {
-              content.classList.remove('active');
-            });
-            document.getElementById(`tab-${tab.id}`).classList.add('active');
+        button.addEventListener('click', () => {
+          // Update active button
+          document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('active');
           });
+          button.classList.add('active');
           
-          tabButtons.appendChild(button);
+          // Show corresponding content
+          document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+          });
+          document.getElementById(`tab-${tab.id}`).classList.add('active');
         });
         
-        tabContainer.appendChild(tabButtons);
-        
-        // Tab contents
-        tabs.forEach((tab, index) => {
-          const content = document.createElement('div');
-          content.className = `tab-content section-card ${index === 0 ? 'active' : ''}`;
-          content.id = `tab-${tab.id}`;
-          
-          // Populate tab content based on type
-          switch (tab.id) {
-            case 'handicap':
-              renderHandicapTab(content, profileData);
-              break;
-            case 'scores':
-              renderScoresTab(content, profileData);
-              break;
-            case 'courses':
-              renderCoursesTab(content, profileData);
-              break;
-            case 'achievements':
-              renderAchievementsTab(content, profileData);
-              break;
-          }
-          
-          tabContainer.appendChild(content);
-        });
-        
-        mainContent.appendChild(tabContainer);
-      }
+        tabButtons.appendChild(button);
+      });
       
-      /**
-       * Render handicap progress tab
-       * @param {HTMLElement} container - Tab container
-       * @param {Object} profileData - Profile data
-       */
-      function renderHandicapTab(container, profileData) {
-        const title = document.createElement('h3');
-        title.className = 'section-title';
-        title.textContent = 'Handicap Progress';
-        container.appendChild(title);
+      tabContainer.appendChild(tabButtons);
+      
+      // Tab contents
+      tabs.forEach((tab, index) => {
+        const content = document.createElement('div');
+        content.className = `tab-content ${index === 0 ? 'active' : ''}`;
+        content.id = `tab-${tab.id}`;
         
-        if (!profileData.handicap) {
-          const noHandicap = document.createElement('p');
-          noHandicap.style.textAlign = 'center';
-          noHandicap.style.fontStyle = 'italic';
-          noHandicap.textContent = 'No handicap data available yet. Use the Handicap Calculator to record your scores.';
-          container.appendChild(noHandicap);
-          
-          const calcLink = document.createElement('div');
-          calcLink.style.textAlign = 'center';
-          calcLink.style.marginTop = '1rem';
-          
-          const calcButton = document.createElement('a');
-          calcButton.href = 'handicap-calculator.html';
-          calcButton.className = 'btn';
-          calcButton.textContent = 'Go to Handicap Calculator';
-          
-          calcLink.appendChild(calcButton);
-          container.appendChild(calcLink);
-          return;
+        // Populate tab content based on type
+        switch (tab.id) {
+          case 'handicap':
+            renderHandicapTab(content, profileData);
+            break;
+          case 'scores':
+            renderScoresTab(content, profileData);
+            break;
+          case 'courses':
+            renderCoursesTab(content, profileData);
+            break;
+          case 'achievements':
+            renderAchievementsTab(content, profileData);
+            break;
         }
         
-        // Current handicap info
-        const currentHcp = document.createElement('div');
-        currentHcp.style.textAlign = 'center';
-        currentHcp.style.marginBottom = '2rem';
+        tabContainer.appendChild(content);
+      });
+      
+      profileContent.appendChild(tabContainer);
+    }
+
+    /**
+     * Render handicap progress tab
+     * @param {HTMLElement} container - Tab container
+     * @param {Object} profileData - Profile data
+     */
+    function renderHandicapTab(container, profileData) {
+      const title = document.createElement('h3');
+      title.className = 'section-title';
+      title.textContent = 'Handicap Progress';
+      container.appendChild(title);
+      
+      if (!profileData.handicap) {
+        const noHandicap = document.createElement('p');
+        noHandicap.style.textAlign = 'center';
+        noHandicap.style.fontStyle = 'italic';
+        noHandicap.style.fontSize = '1.1rem';
+        noHandicap.textContent = 'No handicap data available yet. Use the Handicap Calculator to record your scores.';
+        container.appendChild(noHandicap);
         
-        const hcpValue = document.createElement('div');
-        hcpValue.style.fontSize = '3rem';
-        hcpValue.style.fontWeight = 'bold';
-        hcpValue.style.color = profileData.handicapCategory.color;
-        hcpValue.textContent = profileData.handicap;
+        const calcLink = document.createElement('div');
+        calcLink.style.textAlign = 'center';
+        calcLink.style.marginTop = '2rem';
         
-        const hcpLabel = document.createElement('div');
-        hcpLabel.textContent = `Current Handicap Index (${profileData.handicapCategory.label})`;
-        hcpLabel.style.color = 'var(--bbb-text-muted)';
+        const calcButton = document.createElement('a');
+        calcButton.href = 'handicap-calculator.html';
+        calcButton.className = 'btn';
+        calcButton.textContent = 'Go to Handicap Calculator';
         
-        currentHcp.appendChild(hcpValue);
-        currentHcp.appendChild(hcpLabel);
-        container.appendChild(currentHcp);
-        
-        // Handicap chart (placeholder for now)
-        const chartContainer = document.createElement('div');
-        chartContainer.className = 'chart-container';
-        
-        const chartPlaceholder = document.createElement('div');
-        chartPlaceholder.className = 'chart-placeholder';
-        chartPlaceholder.textContent = 'Handicap history chart will be displayed here';
-        
-        chartContainer.appendChild(chartPlaceholder);
-        container.appendChild(chartContainer);
-        
-        // Explanation
-        const explanation = document.createElement('div');
-        explanation.style.marginTop = '1.5rem';
-        explanation.style.fontSize = '0.9rem';
-        explanation.style.color = 'var(--bbb-text-muted)';
-        explanation.innerHTML = `
-          <p>The handicap index is calculated based on the World Handicap System (WHS). It represents your playing ability on a standard course using the 8 best differentials from your 20 most recent rounds.</p>
-          <p>Your actual Course Handicap will vary depending on the course and tees played.</p>
+        calcLink.appendChild(calcButton);
+        container.appendChild(calcLink);
+        return;
+      }
+      
+      // Current handicap info
+      const currentHcp = document.createElement('div');
+      currentHcp.style.textAlign = 'center';
+      currentHcp.style.marginBottom = '3rem';
+      currentHcp.style.padding = '2rem';
+      currentHcp.style.background = 'linear-gradient(135deg, var(--bbb-light-green), white)';
+      currentHcp.style.borderRadius = '20px';
+      
+      const hcpValue = document.createElement('div');
+      hcpValue.style.fontSize = '4rem';
+      hcpValue.style.fontWeight = 'bold';
+      hcpValue.style.color = profileData.handicapCategory.color;
+      hcpValue.style.fontFamily = 'var(--font-family-accent)';
+      hcpValue.textContent = profileData.handicap;
+      
+      const hcpLabel = document.createElement('div');
+      hcpLabel.textContent = `Current Handicap Index (${profileData.handicapCategory.label})`;
+      hcpLabel.style.color = 'var(--bbb-text-muted)';
+      hcpLabel.style.fontSize = '1.2rem';
+      hcpLabel.style.marginTop = '1rem';
+      
+      currentHcp.appendChild(hcpValue);
+      currentHcp.appendChild(hcpLabel);
+      container.appendChild(currentHcp);
+      
+      // Handicap chart (placeholder for now)
+      const chartContainer = document.createElement('div');
+      chartContainer.className = 'chart-container';
+      
+      const chartPlaceholder = document.createElement('div');
+      chartPlaceholder.className = 'chart-placeholder';
+      chartPlaceholder.innerHTML = `
+        <div style="font-size: 2rem; margin-bottom: 1rem;">📈</div>
+        <div>Handicap history chart will be displayed here</div>
+        <div style="margin-top: 1rem; font-size: 0.9rem;">Track your progress over time</div>
+      `;
+      
+      chartContainer.appendChild(chartPlaceholder);
+      container.appendChild(chartContainer);
+      
+      // Explanation
+      const explanation = document.createElement('div');
+      explanation.style.marginTop = '2rem';
+      explanation.style.fontSize = '1rem';
+      explanation.style.color = 'var(--bbb-text-muted)';
+      explanation.style.lineHeight = '1.6';
+      explanation.innerHTML = `
+        <p style="margin-bottom: 1rem;"><strong>About Your Handicap:</strong></p>
+        <p style="margin-bottom: 1rem;">The handicap index is calculated based on the World Handicap System (WHS). It represents your playing ability on a standard course using the 8 best differentials from your 20 most recent rounds.</p>
+        <p>Your actual Course Handicap will vary depending on the course and tees played.</p>
+      `;
+      
+      container.appendChild(explanation);
+    }
+
+    /**
+     * Render recent scores tab
+     * @param {HTMLElement} container - Tab container
+     * @param {Object} profileData - Profile data
+     */
+    function renderScoresTab(container, profileData) {
+      const title = document.createElement('h3');
+      title.className = 'section-title';
+      title.textContent = 'Recent Scores';
+      container.appendChild(title);
+      
+      if (!profileData.scores || profileData.scores.length === 0) {
+        const noScores = document.createElement('div');
+        noScores.style.textAlign = 'center';
+        noScores.style.padding = '3rem';
+        noScores.innerHTML = `
+          <div style="font-size: 3rem; margin-bottom: 1rem;">⛳</div>
+          <p style="font-style: italic; font-size: 1.1rem;">No scores recorded yet.</p>
+          <p style="color: var(--bbb-text-muted); margin-top: 1rem;">Start playing rounds to see your progress here!</p>
         `;
-        
-        container.appendChild(explanation);
+        container.appendChild(noScores);
+        return;
       }
       
-      /**
-       * Render recent scores tab
-       * @param {HTMLElement} container - Tab container
-       * @param {Object} profileData - Profile data
-       */
-      function renderScoresTab(container, profileData) {
-        const title = document.createElement('h3');
-        title.className = 'section-title';
-        title.textContent = 'Recent Scores';
-        container.appendChild(title);
+      // Show the last 10 scores
+      const recentScores = profileData.scores.slice(0, 10);
+      
+      recentScores.forEach(score => {
+        const scoreCard = document.createElement('div');
+        scoreCard.className = 'score-card';
         
-        if (!profileData.scores || profileData.scores.length === 0) {
-          const noScores = document.createElement('p');
-          noScores.style.textAlign = 'center';
-          noScores.style.fontStyle = 'italic';
-          noScores.textContent = 'No scores recorded yet.';
-          container.appendChild(noScores);
-          return;
-        }
+        // Header with course and date
+        const scoreHeader = document.createElement('div');
+        scoreHeader.className = 'score-card-header';
         
-        // Show the last 10 scores
-        const recentScores = profileData.scores.slice(0, 10);
+        const courseName = document.createElement('h4');
+        courseName.style.margin = '0';
+        courseName.textContent = score.course;
         
-        recentScores.forEach(score => {
-          const scoreCard = document.createElement('div');
-          scoreCard.className = 'score-card';
+        const scoreDate = document.createElement('div');
+        scoreDate.className = 'score-card-date';
+        scoreDate.textContent = BBB_UTILS.formatDate(score.date, 'short');
+        
+        scoreHeader.appendChild(courseName);
+        scoreHeader.appendChild(scoreDate);
+        
+        // Details
+        const scoreDetails = document.createElement('div');
+        scoreDetails.className = 'score-card-details';
+        
+        // Create detail items
+        const details = [
+          { label: 'Gross Score', value: score.totalShots },
+          { label: 'Stableford Points', value: score.stablefordPoints },
+          { label: 'Tee', value: BBB_CONFIG.teeColors[score.tee] || score.tee },
+          { label: 'Holes', value: score.holes === '9f' ? 'Front 9' : score.holes === '9b' ? 'Back 9' : 'Full 18' }
+        ];
+        
+        details.forEach(detail => {
+          const detailDiv = document.createElement('div');
+          detailDiv.className = 'score-card-detail';
           
-          // Header with course and date
-          const scoreHeader = document.createElement('div');
-          scoreHeader.className = 'score-card-header';
+          const label = document.createElement('div');
+          label.className = 'score-card-label';
+          label.textContent = detail.label;
           
-          const courseName = document.createElement('div');
-          courseName.style.fontWeight = 'bold';
-          courseName.style.fontSize = '1.1rem';
-          courseName.textContent = score.course;
+          const value = document.createElement('div');
+          value.className = 'score-card-value';
+          value.textContent = detail.value;
           
-          const scoreDate = document.createElement('div');
-          scoreDate.className = 'score-card-date';
-          scoreDate.textContent = BBB_UTILS.formatDate(score.date, 'short');
-          
-          scoreHeader.appendChild(courseName);
-          scoreHeader.appendChild(scoreDate);
-          
-          // Details
-          const scoreDetails = document.createElement('div');
-          scoreDetails.className = 'score-card-details';
-          
-          // Create detail items
-          const details = [
-            { label: 'Gross Score', value: score.totalShots },
-            { label: 'Stableford Points', value: score.stablefordPoints },
-            { label: 'Tee', value: BBB_CONFIG.teeColors[score.tee] || score.tee },
-            { label: 'Holes', value: score.holes === '9f' ? 'Front 9' : score.holes === '9b' ? 'Back 9' : 'Full 18' }
-          ];
-          
-          details.forEach(detail => {
-            const detailDiv = document.createElement('div');
-            detailDiv.className = 'score-card-detail';
-            
-            const label = document.createElement('div');
-            label.className = 'score-card-label';
-            label.textContent = detail.label;
-            
-            const value = document.createElement('div');
-            value.className = 'score-card-value';
-            value.textContent = detail.value;
-            
-            detailDiv.appendChild(label);
-            detailDiv.appendChild(value);
-            scoreDetails.appendChild(detailDiv);
-          });
-          
-          // Assemble score card
-          scoreCard.appendChild(scoreHeader);
-          scoreCard.appendChild(scoreDetails);
-          container.appendChild(scoreCard);
+          detailDiv.appendChild(label);
+          detailDiv.appendChild(value);
+          scoreDetails.appendChild(detailDiv);
         });
         
-        // View more button if needed
-        if (profileData.scores.length > 10) {
-          const viewMoreContainer = document.createElement('div');
-          viewMoreContainer.style.textAlign = 'center';
-          viewMoreContainer.style.marginTop = '1.5rem';
-          
-          const viewMoreBtn = document.createElement('button');
-          viewMoreBtn.className = 'btn';
-          viewMoreBtn.textContent = `View All ${profileData.scores.length} Scores`;
-          
-          viewMoreBtn.addEventListener('click', () => {
-            // This would show a modal or navigate to a scores history page
-            alert(`Full score history would be shown here (${profileData.scores.length} scores).`);
-          });
-          
-          viewMoreContainer.appendChild(viewMoreBtn);
-          container.appendChild(viewMoreContainer);
-        }
+        // Assemble score card
+        scoreCard.appendChild(scoreHeader);
+        scoreCard.appendChild(scoreDetails);
+        container.appendChild(scoreCard);
+      });
+      
+      // View more button if needed
+      if (profileData.scores.length > 10) {
+        const viewMoreContainer = document.createElement('div');
+        viewMoreContainer.style.textAlign = 'center';
+        viewMoreContainer.style.marginTop = '2rem';
+        
+        const viewMoreBtn = document.createElement('button');
+        viewMoreBtn.className = 'btn secondary';
+        viewMoreBtn.textContent = `View All ${profileData.scores.length} Scores`;
+        
+        viewMoreBtn.addEventListener('click', () => {
+          // This would show a modal or navigate to a scores history page
+          alert(`Full score history would be shown here (${profileData.scores.length} scores).`);
+        });
+        
+        viewMoreContainer.appendChild(viewMoreBtn);
+        container.appendChild(viewMoreContainer);
+      }
+    }
+
+    /**
+     * Render course performance tab
+     * @param {HTMLElement} container - Tab container
+     * @param {Object} profileData - Profile data
+     */
+    function renderCoursesTab(container, profileData) {
+      const title = document.createElement('h3');
+      title.className = 'section-title';
+      title.textContent = 'Course Performance';
+      container.appendChild(title);
+      
+      if (!profileData.coursePerformance || profileData.coursePerformance.length === 0) {
+        const noCourses = document.createElement('div');
+        noCourses.style.textAlign = 'center';
+        noCourses.style.padding = '3rem';
+        noCourses.innerHTML = `
+          <div style="font-size: 3rem; margin-bottom: 1rem;">🏌️</div>
+          <p style="font-style: italic; font-size: 1.1rem;">No course data available yet.</p>
+          <p style="color: var(--bbb-text-muted); margin-top: 1rem;">Play rounds at different courses to see your performance breakdown!</p>
+        `;
+        container.appendChild(noCourses);
+        return;
       }
       
-      /**
-       * Render course performance tab
-       * @param {HTMLElement} container - Tab container
-       * @param {Object} profileData - Profile data
-       */
-      function renderCoursesTab(container, profileData) {
-        const title = document.createElement('h3');
-        title.className = 'section-title';
-        title.textContent = 'Course Performance';
-        container.appendChild(title);
+      // Create performance table
+      const tableContainer = document.createElement('div');
+      tableContainer.style.overflowX = 'auto';
+      
+      const table = document.createElement('table');
+      table.className = 'course-performance-table';
+      
+      // Table header
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      
+      const headers = ['Course', 'Rounds', 'Avg Score', 'Best Score', 'Avg Points', 'Best Points'];
+      
+      headers.forEach(header => {
+        const th = document.createElement('th');
+        th.textContent = header;
+        headerRow.appendChild(th);
+      });
+      
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+      
+      // Table body
+      const tbody = document.createElement('tbody');
+      
+      profileData.coursePerformance.forEach(course => {
+        const row = document.createElement('tr');
         
-        if (!profileData.coursePerformance || profileData.coursePerformance.length === 0) {
-          const noCourses = document.createElement('p');
-          noCourses.style.textAlign = 'center';
-          noCourses.style.fontStyle = 'italic';
-          noCourses.textContent = 'No course data available yet.';
-          container.appendChild(noCourses);
-          return;
-        }
+        // Course name
+        const courseTd = document.createElement('td');
+        courseTd.textContent = course.course;
+        courseTd.style.fontWeight = '600';
         
-        // Create performance table
-        const table = document.createElement('table');
-        table.className = 'course-performance-table';
+        // Rounds
+        const roundsTd = document.createElement('td');
+        roundsTd.textContent = course.rounds;
         
-        // Table header
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
+        // Average score
+        const avgScoreTd = document.createElement('td');
+        avgScoreTd.textContent = course.averageScore;
         
-        const headers = ['Course', 'Rounds', 'Avg Score', 'Best Score', 'Avg Points', 'Best Points'];
+        // Best score
+        const bestScoreTd = document.createElement('td');
+        bestScoreTd.textContent = course.bestScore;
+        bestScoreTd.style.fontWeight = '600';
+        bestScoreTd.style.color = 'var(--bbb-primary)';
         
-        headers.forEach(header => {
-          const th = document.createElement('th');
-          th.textContent = header;
-          headerRow.appendChild(th);
-        });
+        // Average points
+        const avgPointsTd = document.createElement('td');
+        avgPointsTd.textContent = course.averagePoints;
         
-        thead.appendChild(headerRow);
-        table.appendChild(thead);
+        // Best points
+        const bestPointsTd = document.createElement('td');
+        bestPointsTd.textContent = course.bestPoints;
+        bestPointsTd.style.fontWeight = '600';
+        bestPointsTd.style.color = 'var(--bbb-secondary)';
         
-        // Table body
-        const tbody = document.createElement('tbody');
+        // Add all cells to row
+        row.appendChild(courseTd);
+        row.appendChild(roundsTd);
+        row.appendChild(avgScoreTd);
+        row.appendChild(bestScoreTd);
+        row.appendChild(avgPointsTd);
+        row.appendChild(bestPointsTd);
         
-        profileData.coursePerformance.forEach(course => {
-          const row = document.createElement('tr');
-          
-          // Course name
-          const courseTd = document.createElement('td');
-          courseTd.textContent = course.course;
-          courseTd.style.fontWeight = '600';
-          
-          // Rounds
-          const roundsTd = document.createElement('td');
-          roundsTd.textContent = course.rounds;
-          
-          // Average score
-          const avgScoreTd = document.createElement('td');
-          avgScoreTd.textContent = course.averageScore;
-          
-          // Best score
-          const bestScoreTd = document.createElement('td');
-          bestScoreTd.textContent = course.bestScore;
-          
-          // Average points
-          const avgPointsTd = document.createElement('td');
-          avgPointsTd.textContent = course.averagePoints;
-          
-          // Best points
-          const bestPointsTd = document.createElement('td');
-          bestPointsTd.textContent = course.bestPoints;
-          
-          // Add all cells to row
-          row.appendChild(courseTd);
-          row.appendChild(roundsTd);
-          row.appendChild(avgScoreTd);
-          row.appendChild(bestScoreTd);
-          row.appendChild(avgPointsTd);
-          row.appendChild(bestPointsTd);
-          
-          tbody.appendChild(row);
-        });
-        
-        table.appendChild(tbody);
-        container.appendChild(table);
-        
-        // Note about the data
-        const note = document.createElement('p');
-        note.style.marginTop = '1.5rem';
-        note.style.fontSize = '0.9rem';
-        note.style.fontStyle = 'italic';
-        note.style.color = 'var(--bbb-text-muted)';
-        note.textContent = 'Course performance is calculated based on all recorded rounds. Scores are gross scores without handicap adjustments.';
-        
-        container.appendChild(note);
+        tbody.appendChild(row);
+      });
+      
+      table.appendChild(tbody);
+      tableContainer.appendChild(table);
+      container.appendChild(tableContainer);
+      
+      // Note about the data
+      const note = document.createElement('div');
+      note.style.marginTop = '2rem';
+      note.style.fontSize = '1rem';
+      note.style.fontStyle = 'italic';
+      note.style.color = 'var(--bbb-text-muted)';
+      note.style.padding = '1.5rem';
+      note.style.background = 'var(--bbb-light-green)';
+      note.style.borderRadius = '15px';
+      note.innerHTML = `
+        <strong>📝 Note:</strong> Course performance is calculated based on all recorded rounds. Scores are gross scores without handicap adjustments.
+      `;
+      
+      container.appendChild(note);
+    }
+
+    /**
+     * Render achievements tab
+     * @param {HTMLElement} container - Tab container
+     * @param {Object} profileData - Profile data
+     */
+    function renderAchievementsTab(container, profileData) {
+      const title = document.createElement('h3');
+      title.className = 'section-title';
+      title.textContent = 'Achievements';
+      container.appendChild(title);
+      
+      if (!profileData.achievements || profileData.achievements.length === 0) {
+        const noAchievements = document.createElement('div');
+        noAchievements.style.textAlign = 'center';
+        noAchievements.style.padding = '3rem';
+        noAchievements.innerHTML = `
+          <div style="font-size: 3rem; margin-bottom: 1rem;">🏆</div>
+          <p style="font-style: italic; font-size: 1.1rem;">No achievements recorded yet.</p>
+          <p style="color: var(--bbb-text-muted); margin-top: 1rem;">Keep playing to unlock achievements!</p>
+        `;
+        container.appendChild(noAchievements);
+        return;
       }
       
-      /**
-       * Render achievements tab
-       * @param {HTMLElement} container - Tab container
-       * @param {Object} profileData - Profile data
-       */
-      function renderAchievementsTab(container, profileData) {
-        const title = document.createElement('h3');
-        title.className = 'section-title';
-        title.textContent = 'Achievements';
-        container.appendChild(title);
+      // Create achievements grid
+      const achievementsGrid = document.createElement('div');
+      achievementsGrid.className = 'achievements-grid';
+      
+      profileData.achievements.forEach(achievement => {
+        const achievementCard = document.createElement('div');
+        achievementCard.className = 'achievement-card';
         
-        if (!profileData.achievements || profileData.achievements.length === 0) {
-          const noAchievements = document.createElement('p');
-          noAchievements.style.textAlign = 'center';
-          noAchievements.style.fontStyle = 'italic';
-          noAchievements.textContent = 'No achievements recorded yet.';
-          container.appendChild(noAchievements);
-          return;
-        }
+        const achievementIcon = document.createElement('div');
+        achievementIcon.className = 'achievement-icon';
+        achievementIcon.textContent = achievement.icon;
         
-        // Create achievements grid
-        const achievementsGrid = document.createElement('div');
-        achievementsGrid.className = 'achievements-grid';
+        const achievementTitle = document.createElement('div');
+        achievementTitle.className = 'achievement-title';
+        achievementTitle.textContent = achievement.title;
         
-        profileData.achievements.forEach(achievement => {
-          const achievementCard = document.createElement('div');
-          achievementCard.className = 'achievement-card';
-          
-          const achievementIcon = document.createElement('div');
-          achievementIcon.className = 'achievement-icon';
-          achievementIcon.textContent = achievement.icon;
-          
-          const achievementTitle = document.createElement('div');
-          achievementTitle.className = 'achievement-title';
-          achievementTitle.textContent = achievement.title;
-          
-          const achievementDesc = document.createElement('div');
-          achievementDesc.className = 'achievement-desc';
-          achievementDesc.textContent = achievement.description;
-          
-          const achievementDate = document.createElement('div');
-          achievementDate.className = 'achievement-date';
-          achievementDate.textContent = BBB_UTILS.formatDate(achievement.date, 'short');
-          
-          achievementCard.appendChild(achievementIcon);
-          achievementCard.appendChild(achievementTitle);
-          achievementCard.appendChild(achievementDesc);
-          achievementCard.appendChild(achievementDate);
-          
-          achievementsGrid.appendChild(achievementCard);
+        const achievementDesc = document.createElement('div');
+        achievementDesc.className = 'achievement-desc';
+        achievementDesc.textContent = achievement.description;
+        
+        const achievementDate = document.createElement('div');
+        achievementDate.className = 'achievement-date';
+        achievementDate.textContent = BBB_UTILS.formatDate(achievement.date, 'short');
+        
+        achievementCard.appendChild(achievementIcon);
+        achievementCard.appendChild(achievementTitle);
+        achievementCard.appendChild(achievementDesc);
+        achievementCard.appendChild(achievementDate);
+        
+        achievementsGrid.appendChild(achievementCard);
+      });
+      
+      container.appendChild(achievementsGrid);
+    }
+
+    /**
+     * Add scroll animations
+     */
+    function addScrollAnimations() {
+      const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+          }
         });
-        
-        container.appendChild(achievementsGrid);
+      }, observerOptions);
+
+      // Apply animation styles and observe elements
+      setTimeout(() => {
+        const animatedElements = document.querySelectorAll('.profile-header, .stat-box, .section-card, .score-card, .achievement-card');
+        animatedElements.forEach((element, index) => {
+          element.style.opacity = '0';
+          element.style.transform = 'translateY(30px)';
+          element.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+          observer.observe(element);
+        });
+      }, 500); // Delay to ensure elements are rendered
+    }
+
+    // Handle browser back/forward with session check
+    window.addEventListener('pageshow', function(e) {
+      if (e.persisted) {
+        // Page was loaded from cache, recheck auth
+        checkPageAuthentication();
       }
     });
   </script>
