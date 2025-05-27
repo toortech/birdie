@@ -634,6 +634,11 @@
 
   <!-- Authentication Integration Script -->
   <script>
+    // Global state management for logout prevention
+    let isLoggingOut = false;
+    let isLoggingIn = false;
+    let logoutTimestamp = null;
+    
     // Enhanced Authentication Integration for Main Page
     document.addEventListener('DOMContentLoaded', function() {
       console.log('Initializing main page with authentication...');
@@ -676,19 +681,28 @@
     });
 
     /**
-     * Main authentication check for main page
+     * FIXED: Main authentication check for main page
+     * Priority Order: Logout flags > Login flags > Stored sessions
      */
     function checkPageAuthentication() {
       console.log('Checking page authentication...');
       
-      // Don't redirect if we're already on login page or just came from it
+      // PRIORITY 1: Check logout flags FIRST (highest priority)
+      if (checkLogoutFlags()) {
+        console.log('Logout flag detected, forcing public page');
+        clearAllAuthData(); // Clear everything immediately
+        initializePublicPage();
+        return;
+      }
+      
+      // PRIORITY 2: Check login flags SECOND
       const isFromLogin = sessionStorage.getItem('justLoggedIn') === 'true';
       if (isFromLogin) {
-        console.log('Just logged in, clearing flag');
+        console.log('Just logged in, clearing flag and proceeding with auth check');
         sessionStorage.removeItem('justLoggedIn');
       }
       
-      // Try to restore session from localStorage
+      // PRIORITY 3: Check stored sessions LAST (lowest priority)
       const hasStoredAuth = restoreAuthSession();
       
       if (hasStoredAuth) {
@@ -709,9 +723,90 @@
     }
 
     /**
-     * Restore authentication session from localStorage
+     * NEW: Check logout flags with multiple methods
+     */
+    function checkLogoutFlags() {
+      // Check sessionStorage logout flag
+      const justLoggedOut = sessionStorage.getItem('justLoggedOut') === 'true';
+      
+      // Check logout timestamp (protection for 5 seconds after logout)
+      const logoutTimestamp = sessionStorage.getItem('bbb_logout_timestamp');
+      const recentLogout = logoutTimestamp && 
+        (Date.now() - parseInt(logoutTimestamp)) < 5000; // 5 seconds protection
+      
+      // Check if currently in logout process
+      const currentlyLoggingOut = sessionStorage.getItem('bbb_logging_out') === 'true';
+      
+      if (justLoggedOut || recentLogout || currentlyLoggingOut || isLoggingOut) {
+        console.log('Logout flag detected:', {
+          justLoggedOut,
+          recentLogout,
+          currentlyLoggingOut,
+          isLoggingOut
+        });
+        return true;
+      }
+      
+      return false;
+    }
+
+    /**
+     * IMPROVED: Clear all authentication data synchronously
+     */
+    function clearAllAuthData() {
+      console.log('Clearing all authentication data...');
+      
+      try {
+        // Clear localStorage - synchronously verify
+        const authKeys = ['bbb_auth_session', 'bbb_current_user'];
+        authKeys.forEach(key => {
+          localStorage.removeItem(key);
+          // Verify removal
+          if (localStorage.getItem(key) !== null) {
+            console.warn(`Failed to clear ${key}, trying again...`);
+            localStorage.removeItem(key);
+          }
+        });
+        
+        // Clear sessionStorage selectively (keep logout flags)
+        const sessionsToKeep = ['justLoggedOut', 'bbb_logout_timestamp', 'bbb_logging_out'];
+        const allSessionKeys = Object.keys(sessionStorage);
+        allSessionKeys.forEach(key => {
+          if (key.startsWith('bbb_') && !sessionsToKeep.includes(key)) {
+            sessionStorage.removeItem(key);
+          }
+        });
+        
+        // Reset BBB_AUTH module state immediately
+        if (typeof BBB_AUTH !== 'undefined') {
+          BBB_AUTH.currentUser = null;
+          BBB_AUTH.isAuthenticated = false;
+        }
+        
+        // Stop any session monitoring
+        if (window.bbbSessionMonitor) {
+          clearInterval(window.bbbSessionMonitor);
+          window.bbbSessionMonitor = null;
+        }
+        
+        console.log('All authentication data cleared successfully');
+        return true;
+      } catch (error) {
+        console.error('Error clearing auth data:', error);
+        return false;
+      }
+    }
+
+    /**
+     * IMPROVED: Restore authentication session with logout check
      */
     function restoreAuthSession() {
+      // Don't restore if logout flags are present
+      if (checkLogoutFlags()) {
+        console.log('Logout flags present, skipping session restoration');
+        return false;
+      }
+      
       try {
         const storedAuth = localStorage.getItem('bbb_auth_session');
         const storedUser = localStorage.getItem('bbb_current_user');
@@ -733,46 +828,15 @@
             return true;
           } else {
             console.log('Session expired, clearing stored data');
-            clearAuthSession();
+            clearAllAuthData();
           }
         }
         
         return false;
       } catch (error) {
         console.error('Error restoring auth session:', error);
-        clearAuthSession();
+        clearAllAuthData();
         return false;
-      }
-    }
-
-    /**
-     * Clear authentication session
-     */
-    function clearAuthSession() {
-      try {
-        // Clear localStorage
-        localStorage.removeItem('bbb_auth_session');
-        localStorage.removeItem('bbb_current_user');
-        
-        // Clear sessionStorage (but preserve justLoggedOut flag)
-        const justLoggedOut = sessionStorage.getItem('justLoggedOut');
-        sessionStorage.removeItem('justLoggedIn');
-        sessionStorage.removeItem('redirectAfterLogin');
-        
-        // Restore the logout flag if it existed
-        if (justLoggedOut) {
-          sessionStorage.setItem('justLoggedOut', justLoggedOut);
-        }
-        
-        // Reset BBB_AUTH module state
-        if (typeof BBB_AUTH !== 'undefined') {
-          BBB_AUTH.currentUser = null;
-          BBB_AUTH.isAuthenticated = false;
-        }
-        
-        console.log('All authentication data cleared');
-      } catch (error) {
-        console.error('Error clearing auth session:', error);
       }
     }
 
@@ -808,6 +872,26 @@
       const loginLink = document.getElementById('login-link');
       if (loginLink) {
         loginLink.style.display = 'inline-block';
+      }
+      
+      // Clean up logout flags after a delay (don't interfere with logout process)
+      setTimeout(() => {
+        cleanupLogoutFlags();
+      }, 2000);
+    }
+
+    /**
+     * NEW: Clean up logout flags after public page is established
+     */
+    function cleanupLogoutFlags() {
+      try {
+        sessionStorage.removeItem('justLoggedOut');
+        sessionStorage.removeItem('bbb_logout_timestamp');
+        sessionStorage.removeItem('bbb_logging_out');
+        isLoggingOut = false;
+        console.log('Logout flags cleaned up');
+      } catch (error) {
+        console.error('Error cleaning up logout flags:', error);
       }
     }
 
@@ -981,10 +1065,6 @@
         
         logoutBtn.onclick = function() {
           if (confirm('Are you sure you want to logout?')) {
-            // Immediate state change to prevent any auth checks
-            BBB_AUTH.isAuthenticated = false;
-            BBB_AUTH.currentUser = null;
-            
             performLogout();
           }
         };
@@ -1019,51 +1099,70 @@
     }
 
     /**
-     * Perform logout
+     * COMPLETELY REWRITTEN: Perform logout with race condition prevention
      */
     function performLogout() {
-      console.log('Logging out user...');
+      console.log('Starting logout process...');
       
-      // Set flag to indicate user intentionally logged out
-      sessionStorage.setItem('justLoggedOut', 'true');
+      // Prevent multiple logout attempts
+      if (isLoggingOut) {
+        console.log('Logout already in progress, ignoring request');
+        return;
+      }
       
-      // Clear all authentication data immediately
-      clearAuthSession();
+      // Set logout state immediately
+      isLoggingOut = true;
       
-      // Reset BBB_AUTH state completely
+      // Set multiple logout flags IMMEDIATELY and SYNCHRONOUSLY
+      try {
+        sessionStorage.setItem('justLoggedOut', 'true');
+        sessionStorage.setItem('bbb_logout_timestamp', Date.now().toString());
+        sessionStorage.setItem('bbb_logging_out', 'true');
+        console.log('Logout flags set successfully');
+      } catch (error) {
+        console.error('Error setting logout flags:', error);
+      }
+      
+      // Reset BBB_AUTH state IMMEDIATELY (before any async operations)
       if (typeof BBB_AUTH !== 'undefined') {
         BBB_AUTH.currentUser = null;
         BBB_AUTH.isAuthenticated = false;
+        console.log('BBB_AUTH state reset immediately');
       }
       
-      // Stop session monitoring
+      // Stop any session monitoring immediately
       if (window.bbbSessionMonitor) {
         clearInterval(window.bbbSessionMonitor);
         window.bbbSessionMonitor = null;
+        console.log('Session monitoring stopped');
       }
       
-      // Clear any other session data except the logout flag
-      sessionStorage.removeItem('justLoggedIn');
-      sessionStorage.removeItem('redirectAfterLogin');
+      // Clear all authentication data synchronously
+      const clearSuccess = clearAllAuthData();
+      if (!clearSuccess) {
+        console.error('Failed to clear auth data, but continuing with logout...');
+      }
       
-      // Immediately update the page state to public mode
+      // Update UI immediately to public state
       hideAllAuthenticatedContent();
       showAllPublicContent();
       updateHeaderForLogout();
       
-      // Show logout success message briefly, then reload
+      // Show logout success message
       const headerRight = document.querySelector('.header-right');
       if (headerRight) {
         headerRight.innerHTML = '<span style="color: #28a745; font-weight: bold; animation: fadeInUp 0.5s ease-out;">✓ Logged out successfully!</span>';
-        
-        // Force reload after short delay to ensure clean state
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
-      } else {
-        // Fallback: immediate reload
-        window.location.reload();
       }
+      
+      console.log('Logout completed successfully');
+      
+      // Schedule cleanup and reload (non-blocking)
+      setTimeout(() => {
+        console.log('Performing delayed reload for clean state...');
+        // Clean up the logging out flag before reload
+        sessionStorage.removeItem('bbb_logging_out');
+        window.location.reload();
+      }, 1500);
     }
 
     /**
@@ -1120,6 +1219,12 @@
      * Start session monitoring
      */
     function startSessionMonitoring() {
+      // Don't start if logout is in progress
+      if (checkLogoutFlags()) {
+        console.log('Logout in progress, skipping session monitoring');
+        return;
+      }
+      
       // Check session every 5 minutes
       const sessionCheck = setInterval(() => {
         const storedAuth = localStorage.getItem('bbb_auth_session');
@@ -1199,7 +1304,24 @@
     window.addEventListener('pageshow', function(e) {
       if (e.persisted) {
         // Page was loaded from cache, recheck auth
+        console.log('Page loaded from cache, rechecking authentication...');
         checkPageAuthentication();
+      }
+    });
+
+    // NEW: Handle storage events (logout from other tabs)
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'bbb_auth_session' && e.newValue === null) {
+        console.log('Auth session cleared in another tab, logging out...');
+        performLogout();
+      }
+    });
+
+    // NEW: Handle beforeunload to cleanup
+    window.addEventListener('beforeunload', function() {
+      // Don't clear logout flags if we're in logout process
+      if (!isLoggingOut && !checkLogoutFlags()) {
+        cleanupLogoutFlags();
       }
     });
   </script>
