@@ -3,357 +3,1244 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stableford Scorecard</title>
+  <title>Stableford Scorecard - Birdie Bush Bandits</title>
+  <meta name="description" content="Create and track your Stableford scorecards for BBB golf rounds">
   <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
-  <!-- Add scripts to support BBB framework -->
+  
+  <!-- Add Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Core Modules - MUST be loaded before authentication script -->
   <script src="js/config.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/db.js"></script>
   <script src="js/ui.js"></script>
+  
   <!-- Add html2canvas library for image download functionality -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  
   <style>
-    /* Base styles */
-    body { 
-      background: #f5f5f5; 
-      color: #000; 
-      font-family: Arial, sans-serif; 
-      padding: 1rem; 
-      margin: 0 auto; 
-      max-width: 1200px;
-      position: relative;
+    /* Enhanced CSS Variables - Same as about.html */
+    :root {
+      --bbb-primary: #004d00;
+      --bbb-secondary: #0046ad;
+      --bbb-gold: #ffd700;
+      --bbb-light-green: #e8f5e8;
+      --bbb-background: #f5f5f5;
+      --bbb-text: #212529;
+      --bbb-text-muted: #6c757d;
+      --bbb-border: #dee2e6;
+      --font-family-base: 'Inter', sans-serif;
+      --font-family-accent: 'Montserrat', serif;
     }
-    
-    /* Validation & utility */
-    .invalid-hcp, .missing { border: 2px solid red; background-color: #ffcccc; }
-    .invalid-score { border: 2px solid orange; background-color: #ffeecc; }
-    
-    /* Logo in top-right corner */
-    .top-bar {
-      position: absolute;
-      top: 0;
-      right: 0;
-      z-index: 10;
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    
-    .corner-logo {
-      width: 80px;
-      height: 80px;
-      display: block;
+
+    body {
+      font-family: var(--font-family-base);
+      line-height: 1.6;
+      color: var(--bbb-text);
+      background: linear-gradient(135deg, var(--bbb-light-green) 0%, var(--bbb-background) 100%);
+      min-height: 100vh;
     }
-    
-    h1 { 
-      color: #003300; 
-      font-size: 2rem; 
-      text-align: center; 
-      margin-bottom: 1rem; 
-    }
-    
-    header { 
+
+    /* Header with Logo - Same as about.html */
+    .header {
       position: fixed;
       top: 0;
       left: 0;
-      padding: 1rem;
-      z-index: 5;
-    }
-    
-    .home-link { 
-      color: #000; 
-      font-weight: bold; 
-      text-decoration: none;
-      display: inline-block;
-      padding: 0.5rem 0.75rem;
-      background-color: rgba(255, 255, 255, 0.9);
-      border-radius: 4px;
-      transition: background-color 0.3s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    .home-link:hover {
-      background-color: rgba(255, 255, 255, 1);
-    }
-    
-    /* Main content wrapper */
-    main {
-      padding-top: 80px;
-    }
-    
-    /* Controls */
-    details#setup-controls { margin-bottom: 1rem; }
-    .controls { display: flex; flex-wrap: wrap; gap: 1rem; }
-    .controls > div { background: rgba(255,255,255,0.1); padding: 0.5rem; border-radius: 6px; flex: 1 1 200px; }
-    .controls label { display: block; margin-bottom: 0.25rem; font-weight: bold; }
-    .controls label.checkbox { display: inline-block; margin-right: 0.5rem; }
-    
-    /* Player selects styling */
-    .player-select {
       width: 100%;
-      padding: 0.5rem;
-      margin-top: 0.25rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      background-color: white;
-      cursor: pointer;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 100;
     }
-    
-    #player-selects label {
-      font-size: 0.9rem;
-      color: #666;
-    }
-    
-    #player-selects > div > div {
-      margin-bottom: 0.5rem;
-    }
-    
-    /* Buttons */
-    #button-group { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; margin-bottom: 1rem; }
-    select, button { padding: 0.5rem 1rem; cursor: pointer; }
-    button { background: #004c99; color: white; border: none; border-radius: 4px; }
-    button:hover { background: #003d7a; }
-    button:active { opacity: 0.8; transform: scale(0.98); }
-    button:disabled { background: #cccccc; cursor: not-allowed; }
-    
-    /* Table */
-    #table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 1rem; }
-    table { width: 100%; border-collapse: collapse; min-width: 600px; }
-    caption { caption-side: top; text-align: left; padding: 0.5rem; font-weight: bold; background: #eef; }
-    th, td { border: 1px solid #ccc; padding: 0.5rem; text-align: center; white-space: nowrap; }
-    th { background: #ddd; }
-    
-    /* Status messages */
-    #status-message { 
-      padding: 1rem;
-      margin: 1rem 0;
-      border-radius: 4px;
-      text-align: center;
-      display: none;
-    }
-    .success { background-color: #e8f5e9; color: #1b5e20; border: 1px solid #c8e6c9; }
-    .error { background-color: #ffcdd2; color: #b71c1c; border: 1px solid #ef9a9a; }
-    .warning { background-color: #fff8e1; color: #f57f17; border: 1px solid #ffe082; }
-    .info { background-color: #e3f2fd; color: #0d47a1; border: 1px solid #bbdefb; }
-    
-    /* Saved scorecards section */
-    #saved-scorecards {
-      margin-top: 2rem;
-      padding: 1rem;
-      background-color: #f0f8ff;
-      border-radius: 4px;
-      border: 1px solid #bbdefb;
-    }
-    
-    #saved-scorecards h2 {
-      margin-top: 0;
-      color: #0d47a1;
-    }
-    
-    #scorecard-list {
-      list-style: none;
-      padding: 0;
-    }
-    
-    #scorecard-list li {
-      padding: 0.5rem;
-      margin-bottom: 0.5rem;
-      background-color: white;
-      border-radius: 4px;
-      border: 1px solid #ddd;
+
+    .header-content {
       display: flex;
+      align-items: center;
       justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header-logo {
+      height: 50px;
+      width: auto;
+      transition: transform 0.3s ease;
+    }
+
+    .header-logo:hover {
+      transform: scale(1.05);
+    }
+
+    .header-title {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-left: 1rem;
+      text-decoration: none;
+    }
+
+    .header-title:hover {
+      color: var(--bbb-secondary);
+    }
+
+    .header-left {
+      display: flex;
       align-items: center;
     }
-    
-    #scorecard-list button {
-      padding: 0.25rem 0.5rem;
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .founded-badge-header {
+      display: inline-block;
+      background: var(--bbb-gold);
+      color: var(--bbb-primary);
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
+      font-weight: 600;
       font-size: 0.8rem;
+      margin-left: 1rem;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
     }
-    
-    /* Responsive */
+
+    /* User info and auth controls */
+    .user-info {
+      color: var(--bbb-primary);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .logout-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+
+    .logout-btn:hover {
+      background: #c82333;
+    }
+
+    .home-btn {
+      background: var(--bbb-secondary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.3s;
+    }
+
+    .home-btn:hover {
+      background: var(--bbb-primary);
+    }
+
+    /* Hero Section - Matching about.html style */
+    .scorecard-hero {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+      color: var(--bbb-text);
+      text-align: center;
+      padding: 4rem 2rem 3rem 2rem;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 3px solid #dee2e6;
+      margin-top: 90px;
+    }
+
+    .scorecard-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 77, 0, 0.03) 0%, transparent 70%);
+      animation: rotate 30s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .scorecard-hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .scorecard-hero h1 {
+      font-family: var(--font-family-accent);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      color: var(--bbb-primary);
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+      animation: fadeInUp 1s ease-out;
+      margin: 0 0 1rem 0;
+    }
+
+    .scorecard-hero .tagline {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--bbb-text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+      animation: fadeInUp 1s ease-out 0.3s both;
+      font-weight: 500;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Main Content Container */
+    .scorecard-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* Setup Controls Section */
+    .setup-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      margin: 3rem 0;
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .setup-section:hover {
+      border-color: var(--bbb-gold);
+      transform: translateY(-2px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    .setup-section summary {
+      font-family: var(--font-family-accent);
+      font-size: 1.3rem;
+      font-weight: 600;
+      color: var(--bbb-primary);
+      cursor: pointer;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    .controls > div {
+      background: linear-gradient(135deg, var(--bbb-light-green), rgba(255, 255, 255, 0.8));
+      padding: 1.5rem;
+      border-radius: 15px;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .controls > div:hover {
+      border-color: var(--bbb-gold);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+    }
+
+    .controls label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
+    }
+
+    .controls label.checkbox {
+      display: inline-flex;
+      align-items: center;
+      margin-right: 1rem;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--bbb-text);
+    }
+
+    .controls label.checkbox input {
+      margin-right: 0.5rem;
+      width: auto;
+    }
+
+    /* Player selects styling */
+    .player-select, select, input[type="number"] {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 0.5rem;
+      border: 2px solid var(--bbb-border);
+      border-radius: 8px;
+      background-color: white;
+      cursor: pointer;
+      font-family: var(--font-family-base);
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .player-select:focus, select:focus, input[type="number"]:focus {
+      outline: none;
+      border-color: var(--bbb-secondary);
+      box-shadow: 0 0 0 3px rgba(0, 70, 173, 0.1);
+    }
+
+    #player-selects label {
+      font-size: 1rem;
+      color: var(--bbb-primary);
+      font-weight: 600;
+    }
+
+    #player-selects > div > div {
+      margin-bottom: 1rem;
+    }
+
+    /* Button Group */
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 2rem 0;
+    }
+
+    .button-group button {
+      background: var(--bbb-secondary);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      padding: 1rem 2rem;
+      font-family: var(--font-family-accent);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 70, 173, 0.2);
+      min-width: 180px;
+    }
+
+    .button-group button:hover {
+      background: var(--bbb-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 70, 173, 0.3);
+    }
+
+    .button-group button:active {
+      transform: translateY(0);
+    }
+
+    .button-group button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 2px 8px rgba(108, 117, 125, 0.2);
+    }
+
+    .button-group button:disabled:hover {
+      background: #6c757d;
+      transform: none;
+    }
+
+    /* Special styling for download button */
+    .button-group button[id="download-image"] {
+      background: var(--bbb-gold);
+      color: var(--bbb-primary);
+      border: 2px solid var(--bbb-primary);
+    }
+
+    .button-group button[id="download-image"]:hover {
+      background: #ffed4e;
+      color: var(--bbb-primary);
+      border-color: var(--bbb-primary);
+    }
+
+    /* Table Container */
+    .table-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      margin: 3rem 0;
+      overflow-x: auto;
+    }
+
+    /* Table Styling */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px;
+      font-family: var(--font-family-base);
+    }
+
+    caption {
+      caption-side: top;
+      text-align: left;
+      padding: 1rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--bbb-light-green), #f8f9fa);
+      color: var(--bbb-primary);
+      font-family: var(--font-family-accent);
+      border-radius: 10px 10px 0 0;
+      margin-bottom: 0;
+    }
+
+    th, td {
+      border: 1px solid var(--bbb-border);
+      padding: 0.75rem;
+      text-align: center;
+      white-space: nowrap;
+    }
+
+    th {
+      background: linear-gradient(135deg, var(--bbb-primary), var(--bbb-secondary));
+      color: white;
+      font-family: var(--font-family-accent);
+      font-weight: 600;
+    }
+
+    tbody tr:nth-child(even) {
+      background-color: rgba(0, 77, 0, 0.02);
+    }
+
+    tbody tr:hover {
+      background-color: rgba(0, 77, 0, 0.05);
+    }
+
+    tfoot {
+      background: linear-gradient(135deg, #f8f9fa, var(--bbb-light-green));
+      font-weight: 600;
+      color: var(--bbb-primary);
+    }
+
+    /* Input styling within table */
+    table input[type="number"] {
+      width: 60px;
+      padding: 0.25rem;
+      border: 1px solid var(--bbb-border);
+      border-radius: 4px;
+      text-align: center;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+
+    table input[type="number"]:focus {
+      border-color: var(--bbb-secondary);
+      box-shadow: 0 0 0 2px rgba(0, 70, 173, 0.1);
+    }
+
+    /* Validation styles */
+    .invalid-hcp, .missing {
+      border: 2px solid #dc3545 !important;
+      background-color: #ffebee !important;
+    }
+
+    .invalid-score {
+      border: 2px solid #ff9800 !important;
+      background-color: #fff3e0 !important;
+    }
+
+    /* Status messages */
+    #status-message {
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 10px;
+      text-align: center;
+      display: none;
+      font-family: var(--font-family-base);
+      font-weight: 500;
+    }
+
+    .success {
+      background-color: #e8f5e9;
+      color: #1b5e20;
+      border: 2px solid #4caf50;
+    }
+
+    .error {
+      background-color: #ffebee;
+      color: #c62828;
+      border: 2px solid #f44336;
+    }
+
+    .warning {
+      background-color: #fff3e0;
+      color: #ef6c00;
+      border: 2px solid #ff9800;
+    }
+
+    .info {
+      background-color: #e3f2fd;
+      color: #1565c0;
+      border: 2px solid #2196f3;
+    }
+
+    /* Stroke info styling */
+    .stroke-info {
+      font-size: 0.7rem;
+      color: var(--bbb-text-muted);
+      font-style: italic;
+    }
+
+    .points {
+      font-weight: 600;
+      color: var(--bbb-primary);
+      font-size: 1.1rem;
+    }
+
+    /* Member-only content styling */
+    .member-only {
+      display: none;
+    }
+
+    .auth-required {
+      /* Will be hidden for non-authenticated users */
+    }
+
+    /* Auth prompt modal */
+    .auth-prompt-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+    }
+
+    /* Golf-specific decorative elements */
+    .golf-ball {
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      position: relative;
+      display: inline-block;
+      margin: 0 10px;
+      box-shadow: inset -3px -3px 5px rgba(0,0,0,0.2);
+    }
+
+    .golf-ball::before {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #ccc;
+      border-radius: 50%;
+      top: 4px;
+      left: 6px;
+      box-shadow: 4px 0 #ccc, 8px 0 #ccc, 2px 4px #ccc, 6px 4px #ccc, 10px 4px #ccc, 4px 8px #ccc, 8px 8px #ccc;
+    }
+
+    /* Responsive Design */
     @media (max-width: 768px) {
-      header {
-        padding: 0.75rem;
+      .header {
+        padding: 0.75rem 1rem;
       }
-      
-      main {
-        padding-top: 70px;
+
+      .header-logo {
+        height: 40px;
       }
-      
-      .corner-logo {
-        width: 70px;
-        height: 70px;
+
+      .header-title {
+        font-size: 1.2rem;
+        margin-left: 0.5rem;
       }
-      
-      .controls { flex-direction: column; }
-      #button-group { flex-direction: column; }
-      table { font-size: 0.8rem; }
-    }
-    
-    @media (max-width: 480px) {
-      body { padding: 0.5rem; }
-      
-      header {
+
+      .header-content {
+        flex-wrap: wrap;
+      }
+
+      .header-right {
+        margin-top: 0.5rem;
+      }
+
+      .founded-badge-header {
+        margin-left: 0.5rem;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+      }
+
+      .scorecard-hero {
+        padding: 2rem 1rem 1.5rem 1rem;
+        margin-top: 120px;
+      }
+
+      .scorecard-hero h1 {
+        font-size: 2rem;
+        line-height: 1.2;
+      }
+
+      .scorecard-hero .tagline {
+        font-size: 1rem;
+        padding: 0 1rem;
+      }
+
+      .scorecard-main {
+        padding: 0 1rem;
+      }
+
+      .setup-section {
+        padding: 1.5rem;
+        margin: 2rem 0;
+      }
+
+      .controls {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+
+      .controls > div {
+        padding: 1rem;
+      }
+
+      .button-group {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .button-group button {
+        width: 100%;
+        max-width: 300px;
+      }
+
+      .table-section {
+        padding: 1rem;
+        margin: 2rem 0;
+      }
+
+      table {
+        font-size: 0.8rem;
+      }
+
+      th, td {
         padding: 0.5rem;
       }
-      
-      main {
-        padding-top: 65px;
+
+      table input[type="number"] {
+        width: 50px;
+        font-size: 0.8rem;
       }
-      
-      .corner-logo {
-        width: 65px;
-        height: 65px;
+    }
+
+    @media (max-width: 480px) {
+      .scorecard-hero {
+        padding: 1.5rem 0.75rem 1rem 0.75rem;
       }
-      
-      .home-link {
-        padding: 0.4rem 0.6rem;
+
+      .scorecard-hero h1 {
+        font-size: 1.75rem;
+      }
+
+      .scorecard-hero .tagline {
+        font-size: 0.95rem;
+      }
+
+      .scorecard-main {
+        padding: 0 0.75rem;
+      }
+
+      .setup-section {
+        padding: 1rem;
+      }
+
+      .controls > div {
+        padding: 0.75rem;
+      }
+
+      .button-group button {
+        padding: 0.75rem 1.5rem;
+        font-size: 0.9rem;
+        min-width: 160px;
+      }
+
+      .table-section {
+        padding: 0.75rem;
+      }
+
+      table {
+        min-width: auto;
+        table-layout: auto;
+        font-size: 0.65rem;
+        width: 100%;
+      }
+
+      th, td {
+        white-space: normal;
+        word-wrap: break-word;
+        padding: 0.3rem;
+      }
+
+      table input[type="number"] {
+        width: 40px;
+        font-size: 0.7rem;
+        padding: 0.1rem;
+      }
+
+      .stroke-info {
+        font-size: 0.6rem;
+      }
+
+      .points {
         font-size: 0.9rem;
       }
-      
-      h1 { font-size: 1.5rem; }
-      .controls { flex-direction: column; gap: 0.5rem; }
-      .controls > div { flex: 1 1 100%; }
-      #button-group { flex-direction: column; }
-      select, button { width: 100%; }
-      /* Mobile table adjustments */
-      table { min-width: auto; table-layout: auto; font-size: 0.65rem; width: 100%; }
-      th, td { white-space: normal; word-wrap: break-word; padding: 0.2rem; }
-      input[type="number"] { width: 1.2rem; font-size: 0.7rem; }
-      .stroke-info, .points { font-size: 0.6em; }
     }
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    <img src="bbb-logo.svg" alt="Birdie Bush Bandits Logo" class="corner-logo">
-  </div>
-  
-  <header>
-    <nav><a href="index.html" class="home-link">🏠 Home</a></nav>
-  </header>
-  
-  <main>
-    <h1>Stableford Scorecard</h1>
-    <div id="status-message"></div>
-    <details id="setup-controls" open>
-      <summary>⚙️ Setup Options</summary>
-      <div class="controls">
-        <div>
-          <label for="course-select">Course:</label>
-          <select id="course-select">
-            <option value="Richings">Richings Park Golf Club</option>
-            <option value="Thorney">Thorney Park Golf Club</option>
-            <option value="Airlinks">London Airlinks Golf Club</option>
-            <option value="Ascot">Royal Ascot Golf Club</option>
-            <option value="Stoke">Stoke Park Golf Club</option>
-            <option value="Inspirations">Inspirations Golf Club</option>
-          </select>
-        </div>
-        <div>
-          <label for="tee-select">Tee Colour:</label>
-          <select id="tee-select">
-            <option value="white">White</option>
-            <option value="yellow">Yellow</option>
-            <option value="red">Red</option>
-          </select>
-        </div>
-        <div id="player-selects">
-          <label>Players:</label>
-          <div style="display: grid; gap: 0.5rem;">
-            <div>
-              <label for="player-1">Player 1:</label>
-              <select id="player-1" class="player-select">
-                <option value="">-- Select Player --</option>
-                <option value="Amrit">Amrit</option>
-                <option value="Kam">Kam</option>
-                <option value="Vish">Vish</option>
-                <option value="Ravi">Ravi</option>
-                <option value="Bal">Bal</option>
-                <option value="Vick">Vick</option>
-                <option value="Michael">Michael</option>
-                <option value="Justy">Justy</option>
-                <option value="Phuperjee">Phuperjee</option>
-                <option value="Indy">Indy</option>
-                <option value="Maj">Maj</option>
-                <option value="Sama">Sama</option>
-              </select>
-            </div>
-            <div>
-              <label for="player-2">Player 2:</label>
-              <select id="player-2" class="player-select">
-                <option value="">-- Select Player --</option>
-                <option value="Amrit">Amrit</option>
-                <option value="Kam">Kam</option>
-                <option value="Vish">Vish</option>
-                <option value="Ravi">Ravi</option>
-                <option value="Bal">Bal</option>
-                <option value="Vick">Vick</option>
-                <option value="Michael">Michael</option>
-                <option value="Justy">Justy</option>
-                <option value="Phuperjee">Phuperjee</option>
-                <option value="Indy">Indy</option>
-                <option value="Maj">Maj</option>
-                <option value="Sama">Sama</option>
-              </select>
-            </div>
-            <div>
-              <label for="player-3">Player 3:</label>
-              <select id="player-3" class="player-select">
-                <option value="">-- Select Player --</option>
-                <option value="Amrit">Amrit</option>
-                <option value="Kam">Kam</option>
-                <option value="Vish">Vish</option>
-                <option value="Ravi">Ravi</option>
-                <option value="Bal">Bal</option>
-                <option value="Vick">Vick</option>
-                <option value="Michael">Michael</option>
-                <option value="Justy">Justy</option>
-                <option value="Phuperjee">Phuperjee</option>
-                <option value="Indy">Indy</option>
-                <option value="Maj">Maj</option>
-                <option value="Sama">Sama</option>
-              </select>
-            </div>
-            <div>
-              <label for="player-4">Player 4:</label>
-              <select id="player-4" class="player-select">
-                <option value="">-- Select Player --</option>
-                <option value="Amrit">Amrit</option>
-                <option value="Kam">Kam</option>
-                <option value="Vish">Vish</option>
-                <option value="Ravi">Ravi</option>
-                <option value="Bal">Bal</option>
-                <option value="Vick">Vick</option>
-                <option value="Michael">Michael</option>
-                <option value="Justy">Justy</option>
-                <option value="Phuperjee">Phuperjee</option>
-                <option value="Indy">Indy</option>
-                <option value="Maj">Maj</option>
-                <option value="Sama">Sama</option>
-              </select>
-            </div>
-          </div>
-        </div>
-        <div>
-          <label>Holes:</label>
-          <label class="checkbox"><input type="radio" name="holes" value="18" checked> Full 18</label>
-          <label class="checkbox"><input type="radio" name="holes" value="9f"> Front 9</label>
-          <label class="checkbox"><input type="radio" name="holes" value="9b"> Back 9</label>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- Fixed Header with Logo - Same as about.html -->
+  <header class="header">
+    <div class="header-content">
+      <div class="header-left">
+        <a href="index.html">
+          <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="header-logo">
+        </a>
+        <a href="index.html" class="header-title">Birdie Bush Bandits</a>
+        <div class="founded-badge-header">
+          🏌️ Founded August 2020
         </div>
       </div>
-    </details>
-    <div id="button-group">
-      <button id="build">Build Scorecard</button>
-      <button id="reset">Reset</button>
-      <button id="save" disabled>Save Scorecard</button>
-      <button id="download-image">📸 Save Scorecard as Image</button>
+      <div class="header-right">
+        <!-- Auth controls will be added here by JavaScript -->
+        <a href="index.html" class="home-btn" id="home-link">Home</a>
+      </div>
     </div>
-    
-    <!-- Table container for the scorecard -->
-    <div id="table-container"></div>
+  </header>
+  
+  <main id="main">
+    <!-- Hero Section -->
+    <section class="scorecard-hero">
+      <div class="scorecard-hero-content">
+        <h1>Stableford Scorecard <span class="golf-ball"></span></h1>
+        <p class="tagline">Create and track your golf scores with our interactive scorecard system</p>
+      </div>
+    </section>
+
+    <!-- Main Scorecard Content -->
+    <div class="scorecard-main">
+      <!-- Status Message -->
+      <div id="status-message"></div>
+
+      <!-- Setup Controls Section -->
+      <section class="setup-section">
+        <details id="setup-controls" open>
+          <summary>⚙️ Scorecard Setup</summary>
+          <div class="controls">
+            <div>
+              <label for="course-select">Course:</label>
+              <select id="course-select">
+                <option value="Richings">Richings Park Golf Club</option>
+                <option value="Thorney">Thorney Park Golf Club</option>
+                <option value="Airlinks">London Airlinks Golf Club</option>
+                <option value="Ascot">Royal Ascot Golf Club</option>
+                <option value="Stoke">Stoke Park Golf Club</option>
+                <option value="Inspirations">Inspirations Golf Club</option>
+              </select>
+            </div>
+            <div>
+              <label for="tee-select">Tee Colour:</label>
+              <select id="tee-select">
+                <option value="white">White</option>
+                <option value="yellow">Yellow</option>
+                <option value="red">Red</option>
+              </select>
+            </div>
+            <div id="player-selects">
+              <label>Players:</label>
+              <div style="display: grid; gap: 0.75rem;">
+                <div>
+                  <label for="player-1">Player 1:</label>
+                  <select id="player-1" class="player-select">
+                    <option value="">-- Select Player --</option>
+                    <option value="Amrit">Amrit</option>
+                    <option value="Kam">Kam</option>
+                    <option value="Vish">Vish</option>
+                    <option value="Ravi">Ravi</option>
+                    <option value="Bal">Bal</option>
+                    <option value="Vick">Vick</option>
+                    <option value="Michael">Michael</option>
+                    <option value="Justy">Justy</option>
+                    <option value="Phuperjee">Phuperjee</option>
+                    <option value="Indy">Indy</option>
+                    <option value="Maj">Maj</option>
+                    <option value="Sama">Sama</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="player-2">Player 2:</label>
+                  <select id="player-2" class="player-select">
+                    <option value="">-- Select Player --</option>
+                    <option value="Amrit">Amrit</option>
+                    <option value="Kam">Kam</option>
+                    <option value="Vish">Vish</option>
+                    <option value="Ravi">Ravi</option>
+                    <option value="Bal">Bal</option>
+                    <option value="Vick">Vick</option>
+                    <option value="Michael">Michael</option>
+                    <option value="Justy">Justy</option>
+                    <option value="Phuperjee">Phuperjee</option>
+                    <option value="Indy">Indy</option>
+                    <option value="Maj">Maj</option>
+                    <option value="Sama">Sama</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="player-3">Player 3:</label>
+                  <select id="player-3" class="player-select">
+                    <option value="">-- Select Player --</option>
+                    <option value="Amrit">Amrit</option>
+                    <option value="Kam">Kam</option>
+                    <option value="Vish">Vish</option>
+                    <option value="Ravi">Ravi</option>
+                    <option value="Bal">Bal</option>
+                    <option value="Vick">Vick</option>
+                    <option value="Michael">Michael</option>
+                    <option value="Justy">Justy</option>
+                    <option value="Phuperjee">Phuperjee</option>
+                    <option value="Indy">Indy</option>
+                    <option value="Maj">Maj</option>
+                    <option value="Sama">Sama</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="player-4">Player 4:</label>
+                  <select id="player-4" class="player-select">
+                    <option value="">-- Select Player --</option>
+                    <option value="Amrit">Amrit</option>
+                    <option value="Kam">Kam</option>
+                    <option value="Vish">Vish</option>
+                    <option value="Ravi">Ravi</option>
+                    <option value="Bal">Bal</option>
+                    <option value="Vick">Vick</option>
+                    <option value="Michael">Michael</option>
+                    <option value="Justy">Justy</option>
+                    <option value="Phuperjee">Phuperjee</option>
+                    <option value="Indy">Indy</option>
+                    <option value="Maj">Maj</option>
+                    <option value="Sama">Sama</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+            <div>
+              <label>Holes:</label>
+              <label class="checkbox"><input type="radio" name="holes" value="18" checked> Full 18</label>
+              <label class="checkbox"><input type="radio" name="holes" value="9f"> Front 9</label>
+              <label class="checkbox"><input type="radio" name="holes" value="9b"> Back 9</label>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- Button Group -->
+      <div class="button-group" id="button-group">
+        <button id="build">Build Scorecard</button>
+        <button id="reset">Reset</button>
+        <button id="save" disabled>Save Scorecard</button>
+        <button id="download-image">📸 Save as Image</button>
+      </div>
+
+      <!-- Table Container -->
+      <section class="table-section">
+        <div id="table-container"></div>
+      </section>
+    </div>
   </main>
+
+  <!-- Authentication Integration Script -->
   <script>
-    (function() {
+    // Enhanced Authentication Integration for Scorecard Page
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Initializing scorecard page with authentication...');
+      
+      // Check if BBB modules are loaded
+      if (typeof BBB_CONFIG === 'undefined' || 
+          typeof BBB_AUTH === 'undefined' || 
+          typeof BBB_DB === 'undefined' || 
+          typeof BBB_UI === 'undefined' || 
+          typeof BBB_UTILS === 'undefined') {
+        console.error('Required BBB modules not found!');
+        // Continue without auth features
+        initializePublicPage();
+        return;
+      }
+      
+      // Initialize modules
+      try {
+        BBB_AUTH.init({
+          cloudflareEnabled: BBB_CONFIG.cloudflareEnabled
+        });
+        
+        BBB_DB.init({
+          useCloudflare: BBB_CONFIG.cloudflareEnabled,
+          localStoragePrefix: 'bbb_'
+        });
+        
+        console.log('Modules initialized successfully');
+      } catch (error) {
+        console.error('Error initializing modules:', error);
+        initializePublicPage();
+        return;
+      }
+      
+      // Check authentication and render page accordingly
+      checkPageAuthentication();
+      
+      // Initialize scorecard functionality
+      initializeScorecardApp();
+    });
+
+    /**
+     * Main authentication check for scorecard page
+     */
+    function checkPageAuthentication() {
+      console.log('Checking page authentication...');
+      
+      // Try to restore session from localStorage
+      const hasStoredAuth = restoreAuthSession();
+      
+      if (hasStoredAuth) {
+        console.log('Restored authentication from storage');
+        initializeAuthenticatedPage();
+      } else {
+        console.log('No stored authentication, checking current auth state...');
+        
+        // Check if already authenticated in current session
+        if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+          console.log('User already authenticated in current session');
+          initializeAuthenticatedPage();
+        } else {
+          console.log('User not authenticated, showing public page');
+          initializePublicPage();
+        }
+      }
+    }
+
+    /**
+     * Restore authentication session from localStorage
+     */
+    function restoreAuthSession() {
+      try {
+        const storedAuth = localStorage.getItem('bbb_auth_session');
+        const storedUser = localStorage.getItem('bbb_current_user');
+        
+        if (storedAuth && storedUser) {
+          console.log('Found stored authentication data');
+          
+          const authData = JSON.parse(storedAuth);
+          const userData = JSON.parse(storedUser);
+          
+          // Check if session is still valid
+          if (authData.expiresAt && new Date(authData.expiresAt) > new Date()) {
+            console.log('Restoring valid session for user:', userData.id);
+            
+            // Restore authentication state
+            BBB_AUTH.currentUser = userData;
+            BBB_AUTH.isAuthenticated = true;
+            
+            return true;
+          } else {
+            console.log('Session expired, clearing stored data');
+            clearAuthSession();
+          }
+        }
+        
+        return false;
+      } catch (error) {
+        console.error('Error restoring auth session:', error);
+        clearAuthSession();
+        return false;
+      }
+    }
+
+    /**
+     * Clear authentication session
+     */
+    function clearAuthSession() {
+      localStorage.removeItem('bbb_auth_session');
+      localStorage.removeItem('bbb_current_user');
+      BBB_AUTH.currentUser = null;
+      BBB_AUTH.isAuthenticated = false;
+    }
+
+    /**
+     * Initialize page for authenticated users
+     */
+    function initializeAuthenticatedPage() {
+      console.log('Initializing authenticated page for user:', BBB_AUTH.currentUser?.id);
+      
+      // Start session monitoring
+      startSessionMonitoring();
+      
+      // Show authenticated content
+      showAuthenticatedContent();
+      
+      // Add logout functionality to header
+      addLogoutFunctionality();
+      
+      // Show user info
+      showUserInfo();
+    }
+
+    /**
+     * Initialize page for public (non-authenticated) users
+     */
+    function initializePublicPage() {
+      console.log('Initializing public page');
+      
+      // Show public content
+      showPublicContent();
+      
+      // Keep home button visible
+      const homeLink = document.getElementById('home-link');
+      if (homeLink) {
+        homeLink.style.display = 'inline-block';
+      }
+    }
+
+    /**
+     * Show content for authenticated users
+     */
+    function showAuthenticatedContent() {
+      // Show member-specific content
+      const memberContent = document.querySelectorAll('.member-only');
+      memberContent.forEach(element => {
+        element.style.display = 'block';
+      });
+      
+      // Enable all features for authenticated users
+      const authRequiredElements = document.querySelectorAll('.auth-required');
+      authRequiredElements.forEach(element => {
+        element.onclick = null; // Remove click handler
+      });
+    }
+
+    /**
+     * Show content for public users
+     */
+    function showPublicContent() {
+      // Hide member-only content
+      const memberContent = document.querySelectorAll('.member-only');
+      memberContent.forEach(element => {
+        element.style.display = 'none';
+      });
+      
+      // Add auth prompts to protected features if any
+      const authRequiredElements = document.querySelectorAll('.auth-required');
+      authRequiredElements.forEach(element => {
+        element.onclick = function(e) {
+          e.preventDefault();
+          showAuthPrompt('this feature');
+        };
+      });
+    }
+
+    /**
+     * Show authentication prompt
+     */
+    function showAuthPrompt(feature) {
+      const modal = document.createElement('div');
+      modal.className = 'auth-prompt-modal';
+      
+      const content = document.createElement('div');
+      content.style.cssText = `
+        background: white;
+        padding: 2rem;
+        border-radius: 8px;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      `;
+      
+      content.innerHTML = `
+        <h3 style="color: #004d00; margin-bottom: 1rem;">Authentication Required</h3>
+        <p style="margin-bottom: 1.5rem;">You need to log in to access ${feature}.</p>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+          <button onclick="window.location.href='login.html'" style="
+            background: #004c99;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+          ">Login</button>
+          <button onclick="this.closest('.auth-prompt-modal').remove()" style="
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+          ">Cancel</button>
+        </div>
+      `;
+      
+      modal.appendChild(content);
+      document.body.appendChild(modal);
+      
+      // Close on outside click
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      });
+    }
+
+    /**
+     * Add logout functionality to header
+     */
+    function addLogoutFunctionality() {
+      const headerRight = document.querySelector('.header-right');
+      if (headerRight && BBB_AUTH.isAuthenticated) {
+        // Check if logout button already exists
+        if (headerRight.querySelector('.logout-btn')) return;
+        
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'logout-btn';
+        logoutBtn.textContent = 'Logout';
+        
+        logoutBtn.onclick = function() {
+          if (confirm('Are you sure you want to logout?')) {
+            performLogout();
+          }
+        };
+        
+        headerRight.appendChild(logoutBtn);
+      }
+    }
+
+    /**
+     * Show user info
+     */
+    function showUserInfo() {
+      if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+        const headerRight = document.querySelector('.header-right');
+        if (headerRight) {
+          // Check if user info already exists
+          if (headerRight.querySelector('.user-info')) return;
+          
+          const userInfo = document.createElement('span');
+          userInfo.className = 'user-info';
+          userInfo.textContent = `Welcome, ${BBB_AUTH.currentUser.id}`;
+          
+          // Insert before logout button
+          const logoutBtn = headerRight.querySelector('.logout-btn');
+          if (logoutBtn) {
+            headerRight.insertBefore(userInfo, logoutBtn);
+          } else {
+            headerRight.appendChild(userInfo);
+          }
+        }
+      }
+    }
+
+    /**
+     * Perform logout
+     */
+    function performLogout() {
+      console.log('Logging out user...');
+      
+      // Clear authentication state
+      clearAuthSession();
+      
+      // Refresh page to show public content
+      window.location.reload();
+    }
+
+    /**
+     * Start session monitoring
+     */
+    function startSessionMonitoring() {
+      // Check session every 5 minutes
+      const sessionCheck = setInterval(() => {
+        const storedAuth = localStorage.getItem('bbb_auth_session');
+        
+        if (storedAuth) {
+          try {
+            const authData = JSON.parse(storedAuth);
+            
+            if (authData.expiresAt && new Date(authData.expiresAt) <= new Date()) {
+              console.log('Session expired, logging out...');
+              clearInterval(sessionCheck);
+              performLogout();
+            }
+          } catch (error) {
+            console.error('Error checking session:', error);
+            clearInterval(sessionCheck);
+            performLogout();
+          }
+        } else if (BBB_AUTH.isAuthenticated) {
+          // Session was cleared externally
+          console.log('Session cleared externally, logging out...');
+          clearInterval(sessionCheck);
+          performLogout();
+        }
+      }, 5 * 60 * 1000); // 5 minutes
+      
+      // Store interval ID for cleanup if needed
+      window.bbbSessionMonitor = sessionCheck;
+    }
+
+    // Save page for post-login redirect when clicking login links
+    document.addEventListener('click', function(e) {
+      if (e.target.matches('a[href*="login"]') || 
+          e.target.matches('button[onclick*="login"]')) {
+        sessionStorage.setItem('redirectAfterLogin', window.location.href);
+      }
+    });
+
+    // Handle browser back/forward with session check
+    window.addEventListener('pageshow', function(e) {
+      if (e.persisted) {
+        // Page was loaded from cache, recheck auth
+        checkPageAuthentication();
+      }
+    });
+  </script>
+
+  <!-- Original Scorecard Functionality Script -->
+  <script>
+    function initializeScorecardApp() {
       'use strict';
       const buildBtn = document.getElementById('build');
       const saveBtn = document.getElementById('save');
@@ -761,50 +1648,11 @@
         }
       }
       
-      // Check for BBB modules and initialize if available
-      function initBBBModules() {
-        // Check if BBB modules are loaded
-        if (typeof BBB_AUTH !== 'undefined' && typeof BBB_DB !== 'undefined') {
-          try {
-            // Initialize BBB modules
-            if (typeof BBB_CONFIG !== 'undefined') {
-              BBB_AUTH.init({
-                cloudflareEnabled: BBB_CONFIG.cloudflareEnabled || false
-              });
-              
-              BBB_DB.init({
-                useCloudflare: BBB_CONFIG.cloudflareEnabled || false,
-                localStoragePrefix: 'bbb_'
-              });
-            } else {
-              // Fallback initialization
-              BBB_AUTH.init({
-                cloudflareEnabled: false
-              });
-              
-              BBB_DB.init({
-                useCloudflare: false,
-                localStoragePrefix: 'bbb_'
-              });
-            }
-            
-            // Load saved scorecards
-            loadSavedScorecards();
-            
-            console.log("BBB modules initialized successfully");
-          } catch (err) {
-            console.error("Error initializing BBB modules:", err);
-          }
-        } else {
-          console.log("BBB modules not available");
-        }
-      }
-      
-      // Initialize BBB modules after DOM content loaded
-      document.addEventListener('DOMContentLoaded', function() {
-        // Small delay to ensure all scripts are loaded
-        setTimeout(initBBBModules, 100);
-      });
+      // Initialize BBB modules
+      setTimeout(() => {
+        // Load saved scorecards
+        loadSavedScorecards();
+      }, 200);
       
       // Download scorecard as image
       function downloadScorecardAsImage() {
@@ -1038,24 +1886,6 @@
         }
       });
       
-      // View saved scorecards button
-      viewSavedBtn.addEventListener('click', function() {
-        try {
-          updateSavedScorecardsList();
-          savedScorecardsDiv.style.display = 'block';
-          tableContainer.style.display = 'none';
-        } catch (error) {
-          console.error("Error viewing saved scorecards:", error);
-          showMessage('Error viewing saved scorecards: ' + error.message, 'error');
-        }
-      });
-      
-      // Close saved scorecards button
-      closeSavedBtn.addEventListener('click', function() {
-        savedScorecardsDiv.style.display = 'none';
-        tableContainer.style.display = 'block';
-      });
-      
       // Build the scorecard
       function build(players) {
         tableContainer.innerHTML = '';
@@ -1217,10 +2047,7 @@
           }
         }
       }
-      
-      // Initialize the saved scorecards list
-      updateSavedScorecardsList();
-    })();
+    }
   </script>
 </body>
 </html>
