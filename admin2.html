@@ -39,9 +39,6 @@
     .header h1 {
       font-size: 1.8rem;
       font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
     }
 
     .header .user-info {
@@ -76,7 +73,6 @@
       color: #666;
       transition: all 0.3s ease;
       border-bottom: 3px solid transparent;
-      position: relative;
     }
 
     .tab-button.active {
@@ -213,12 +209,6 @@
       border-color: #17a2b8;
     }
 
-    .warning {
-      background: #fff3cd;
-      color: #856404;
-      border-color: #ffc107;
-    }
-
     .hidden {
       display: none;
     }
@@ -307,10 +297,6 @@
 
     .users-table tr:hover {
       background: #f8f9fa;
-    }
-
-    .users-table tr:last-child td {
-      border-bottom: none;
     }
 
     .role-badge {
@@ -405,6 +391,28 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 1rem;
+    }
+
+    .reset-options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .reset-option {
+      padding: 1rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.3s;
+      background: #f8f9fa;
+    }
+
+    .reset-option.active {
+      border-color: #004d00;
+      background: #e8f5e8;
     }
 
     .audit-log {
@@ -507,6 +515,10 @@
       }
 
       .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .reset-options {
         grid-template-columns: 1fr;
       }
 
@@ -638,7 +650,7 @@
         </div>
       </div>
 
-      <!-- Password Reset Tab (Enhanced) -->
+      <!-- Password Reset Tab -->
       <div id="password-reset-tab" class="tab-panel">
         <h2>Password Reset</h2>
         
@@ -649,12 +661,12 @@
         <form id="resetForm">
           <div class="form-group">
             <label>Reset Type:</label>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
-              <div class="reset-option active" onclick="selectResetType('temp')" style="padding: 1rem; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.3s; background: #f8f9fa;">
+            <div class="reset-options">
+              <div class="reset-option active" onclick="selectResetType('temp')">
                 <strong>Reset to Temporary</strong><br>
                 <small>User sets new password on next login</small>
               </div>
-              <div class="reset-option" onclick="selectResetType('specific')" style="padding: 1rem; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.3s; background: #f8f9fa;">
+              <div class="reset-option" onclick="selectResetType('specific')">
                 <strong>Set Specific Password</strong><br>
                 <small>Set a specific new password</small>
               </div>
@@ -1179,16 +1191,8 @@
       const options = document.querySelectorAll('.reset-option');
       if (type === 'temp') {
         options[0].classList.add('active');
-        options[0].style.borderColor = '#004d00';
-        options[0].style.background = '#e8f5e8';
-        options[1].style.borderColor = '#ddd';
-        options[1].style.background = '#f8f9fa';
       } else {
         options[1].classList.add('active');
-        options[1].style.borderColor = '#004d00';
-        options[1].style.background = '#e8f5e8';
-        options[0].style.borderColor = '#ddd';
-        options[0].style.background = '#f8f9fa';
       }
       
       // Show/hide password field
