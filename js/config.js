@@ -8,7 +8,49 @@ const BBB_CONFIG = {
   siteName: "Birdie Bush Bandits",
   foundedYear: 2020,
   version: "2.0",
-  cloudflareEnabled: false, // Set to true when Cloudflare integration is ready
+  cloudflareEnabled: true, // Updated to true for Cloudflare integration
+  
+  // Cloudflare Authentication Configuration
+  authWorkerUrl: 'https://bbb-auth-worker.cf1demouk.workers.dev',
+  apiTimeout: 10000,
+  sessionDuration: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
+  environment: 'production',
+  
+  // Authentication settings
+  auth: {
+    sessionKey: 'bbb_session_token',
+    userKey: 'bbb_current_user',
+    expiresKey: 'bbb_session_expires',
+    maxLoginAttempts: 5,
+    lockoutDuration: 15 * 60 * 1000, // 15 minutes
+    passwordMinLength: 6
+  },
+  
+  // User roles and permissions
+  roles: {
+    administrator: {
+      name: 'Administrator',
+      permissions: [
+        'view_all_content',
+        'upload_photos',
+        'delete_photos',
+        'manage_users',
+        'view_audit_logs',
+        'manage_scorecards',
+        'access_admin_panel'
+      ]
+    },
+    member: {
+      name: 'Member',
+      permissions: [
+        'view_member_content',
+        'upload_photos',
+        'view_own_scorecards',
+        'create_scorecards',
+        'use_handicap_calculator'
+      ]
+    }
+  },
   
   // Default members list - will be replaced by database in future
   members: [
@@ -117,11 +159,14 @@ const BBB_CONFIG = {
     red: "Red"
   },
   
-  // Gallery settings
+  // Gallery settings - Updated for Cloudflare auth
   gallery: {
-    password: "secret123", // Will be replaced with secure auth later
+    password: "secret123", // Legacy fallback - will be replaced with secure auth
     maxUploadSize: 5000000, // 5MB
-    supportedTypes: ["image/jpeg", "image/png", "image/gif"]
+    supportedTypes: ["image/jpeg", "image/png", "image/gif"],
+    requireAuth: true, // New: Require authentication for gallery access
+    adminOnlyUpload: false, // Set to true if only admins can upload
+    adminOnlyDelete: true // Only admins can delete photos
   },
   
   // Handicap calculation settings
@@ -129,6 +174,66 @@ const BBB_CONFIG = {
     minRounds: 3,
     maxRounds: 20,
     countMap: {3:1, 4:1, 5:1, 6:2, 7:2, 8:2, 9:3, 10:3, 11:3, 12:4, 13:4, 14:4, 15:5, 16:5, 17:6, 18:7, 19:8, 20:10}
+  },
+  
+  // Feature flags for different sections
+  features: {
+    photoGallery: {
+      enabled: true,
+      requireAuth: true,
+      allowUploads: true,
+      adminOnlyDelete: true
+    },
+    scorecards: {
+      enabled: true,
+      requireAuth: true,
+      allowSharing: false
+    },
+    handicapCalculator: {
+      enabled: true,
+      requireAuth: true,
+      saveResults: true
+    },
+    members: {
+      enabled: true,
+      requireAuth: true,
+      showProfiles: true
+    },
+    adminPanel: {
+      enabled: true,
+      adminOnly: true
+    }
+  },
+  
+  // API endpoints for different features
+  api: {
+    auth: {
+      login: '/auth/login',
+      logout: '/auth/logout',
+      verify: '/auth/verify',
+      changePassword: '/auth/change-password'
+    },
+    users: {
+      list: '/api/users',
+      profile: '/api/users/profile',
+      update: '/api/users/update'
+    }
+  },
+  
+  // Utility functions for permissions
+  hasPermission: function(userRole, permission) {
+    if (!userRole || !this.roles[userRole]) {
+      return false;
+    }
+    return this.roles[userRole].permissions.includes(permission);
+  },
+  
+  isAdmin: function(userRole) {
+    return userRole === 'administrator';
+  },
+  
+  isMember: function(userRole) {
+    return userRole === 'member' || userRole === 'administrator';
   }
 };
 
