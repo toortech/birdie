@@ -540,7 +540,7 @@
           <label class="captcha-label">Security Verification</label>
           <!-- Turnstile widget will be rendered here -->
           <div id="turnstile-widget" class="cf-turnstile" 
-               data-sitekey="0x4AAAAAABfEpGjFkd7F7pec"
+               data-sitekey="0x4AAAAAAAkn8uYHvMZNPEbI"
                data-callback="onTurnstileSuccess"
                data-error-callback="onTurnstileError"
                data-expired-callback="onTurnstileExpired"
@@ -733,12 +733,12 @@
         captchaContainer.className = 'captcha-container';
       }
       
-      // Auto-reset the CAPTCHA
-      setTimeout(() => {
-        if (window.turnstile) {
-          window.turnstile.reset();
-        }
-      }, 2000);
+      // Auto-reset the CAPTCHA - REMOVED to prevent reloading
+      // setTimeout(() => {
+      //   if (window.turnstile) {
+      //     window.turnstile.reset();
+      //   }
+      // }, 2000);
     };
 
     /**
@@ -750,7 +750,7 @@
     };
 
     /**
-     * Reset CAPTCHA state
+     * Reset CAPTCHA state - only when needed
      */
     function resetCaptcha() {
       window.captchaToken = null;
@@ -774,8 +774,8 @@
         errorDiv.style.display = 'none';
       }
       
-      // Reset Turnstile widget
-      if (window.turnstile) {
+      // Only reset Turnstile widget on login failure, not on expiration
+      if (window.turnstile && !window.captchaVerified) {
         window.turnstile.reset();
       }
     }
@@ -969,18 +969,27 @@
         console.log('Attempting login for user:', username);
         console.log('CAPTCHA token present:', !!window.captchaToken);
         
-        // ENHANCED: Try to login with Cloudflare auth method
-        let loginPromise;
-        
-        if (BBB_CONFIG.cloudflareEnabled && typeof BBB_AUTH.cloudflareLogin === 'function') {
-          console.log('Using Cloudflare authentication');
-          loginPromise = BBB_AUTH.cloudflareLogin(username, password);
-        } else {
-          console.log('Using fallback local authentication');
-          loginPromise = BBB_AUTH.login(username, password);
+        // ENHANCED: Only use Cloudflare authentication
+        if (!BBB_CONFIG.cloudflareEnabled) {
+          showError('Cloudflare authentication is required but not enabled.');
+          isLoggingIn = false;
+          loginBtn.disabled = false;
+          hideLoading();
+          return;
         }
         
-        loginPromise
+        if (typeof BBB_AUTH.cloudflareLogin !== 'function') {
+          showError('Cloudflare authentication method not available.');
+          isLoggingIn = false;
+          loginBtn.disabled = false;
+          hideLoading();
+          return;
+        }
+        
+        console.log('Using Cloudflare authentication with CAPTCHA token');
+        
+        // Pass CAPTCHA token to Cloudflare login if method supports it
+        BBB_AUTH.cloudflareLogin(username, password, window.captchaToken)
           .then(user => {
             console.log('Login successful:', user);
             loginProcessed = true;
