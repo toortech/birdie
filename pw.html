@@ -199,9 +199,16 @@
     function selectResetType(type) {
       resetType = type;
       
-      // Update UI
+      // Update UI - find the clicked element
       document.querySelectorAll('.reset-option').forEach(el => el.classList.remove('active'));
-      event.target.closest('.reset-option').classList.add('active');
+      
+      // Find and activate the correct option
+      const options = document.querySelectorAll('.reset-option');
+      if (type === 'temp') {
+        options[0].classList.add('active');
+      } else {
+        options[1].classList.add('active');
+      }
       
       // Show/hide password field
       const passwordGroup = document.getElementById('passwordGroup');
