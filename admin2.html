@@ -340,11 +340,15 @@
       width: 100%;
       height: 100%;
       background: rgba(0,0,0,0.6);
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       z-index: 1000;
       backdrop-filter: blur(4px);
+    }
+
+    .modal.show {
+      display: flex;
     }
 
     .modal-content {
@@ -619,8 +623,8 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
           <h2>User Management</h2>
           <div>
-            <button class="btn-success" id="addUserBtn">➕ Add User</button>
-            <button class="btn-small" id="refreshUsersBtn">🔄 Refresh</button>
+            <button class="btn-success" onclick="showCreateUserModal()">➕ Add User</button>
+            <button class="btn-small" onclick="loadUsers()">🔄 Refresh</button>
           </div>
         </div>
 
@@ -734,7 +738,7 @@
   </div>
 
   <!-- Create User Modal -->
-  <div id="createUserModal" class="modal hidden" style="display: none;">
+  <div id="createUserModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title">➕ Create New User</h3>
@@ -786,7 +790,7 @@
   </div>
 
   <!-- Edit User Modal -->
-  <div id="editUserModal" class="modal hidden" style="display: none;">
+  <div id="editUserModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h3 class="modal-title">✏️ Edit User</h3>
@@ -797,7 +801,7 @@
         
         <div class="form-group">
           <label for="editUsername">Username:</label>
-          <input type="text" id="editUsername" disabled style="background: #f0f0f0;">
+          <input type="text" id="editUsername" readonly style="background: #f0f0f0; cursor: not-allowed;">
         </div>
         
         <div class="form-row">
@@ -826,7 +830,7 @@
 
         <div class="form-group">
           <label>
-            <input type="checkbox" id="editIsActive"> User is active
+            <input type="checkbox" id="editIsActive" style="width: auto; margin-right: 0.5rem;"> User is active
           </label>
         </div>
 
@@ -847,43 +851,9 @@
 
     // Initialize admin dashboard
     document.addEventListener('DOMContentLoaded', function() {
-      // Ensure modals are hidden on page load
-      document.getElementById('createUserModal').style.display = 'none';
-      document.getElementById('editUserModal').style.display = 'none';
-      
-      // Set up button event listeners
-      setupEventListeners();
-      
+      console.log('DOM loaded, initializing dashboard...');
       checkAdminAuth();
     });
-
-    function setupEventListeners() {
-      // Add User button
-      const addUserBtn = document.getElementById('addUserBtn');
-      if (addUserBtn) {
-        addUserBtn.addEventListener('click', function() {
-          console.log('Add User button clicked');
-          showCreateUserModal();
-        });
-      }
-
-      // Refresh Users button
-      const refreshUsersBtn = document.getElementById('refreshUsersBtn');
-      if (refreshUsersBtn) {
-        refreshUsersBtn.addEventListener('click', function() {
-          console.log('Refresh Users button clicked');
-          loadUsers();
-        });
-      }
-
-      // Tab buttons
-      document.querySelectorAll('.tab-button').forEach((btn, index) => {
-        btn.addEventListener('click', function() {
-          const tabNames = ['overview', 'users', 'password-reset', 'logs', 'analytics'];
-          showTab(tabNames[index]);
-        });
-      });
-    }
 
     async function checkAdminAuth() {
       // Check if user is logged in and is admin
@@ -1034,7 +1004,7 @@
           <td>${user.isActive ? '✅ Active' : '❌ Inactive'}</td>
           <td>
             <div class="action-buttons">
-              <button class="btn-icon" onclick="editUser('${user.id}')" title="Edit User">✏️</button>
+              <button class="btn-icon" onclick="editUser('${user.id}')" title="Edit User" style="background: #007bff;">✏️</button>
               <button class="btn-icon btn-danger" onclick="resetUserPassword('${user.username}')" title="Reset Password">🔒</button>
             </div>
           </td>
@@ -1062,9 +1032,8 @@
       console.log('Showing create user modal');
       const modal = document.getElementById('createUserModal');
       if (modal) {
-        modal.classList.remove('hidden');
-        modal.style.display = 'flex';
-        console.log('Modal should now be visible');
+        modal.classList.add('show');
+        console.log('Create user modal should now be visible');
       } else {
         console.error('Create user modal not found');
       }
@@ -1074,12 +1043,51 @@
       console.log('Hiding create user modal');
       const modal = document.getElementById('createUserModal');
       if (modal) {
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
+        modal.classList.remove('show');
         document.getElementById('createUserForm').reset();
       }
     }
 
+    function editUser(userId) {
+      console.log('Edit user function called with ID:', userId);
+      const user = allUsers.find(u => u.id === userId);
+      if (!user) {
+        console.error('User not found:', userId);
+        showGlobalMessage('User not found', 'error');
+        return;
+      }
+
+      console.log('Found user to edit:', user);
+
+      // Populate the edit form
+      document.getElementById('editUserId').value = user.id;
+      document.getElementById('editUsername').value = user.username;
+      document.getElementById('editFirstName').value = user.firstName || '';
+      document.getElementById('editLastName').value = user.lastName || '';
+      document.getElementById('editEmail').value = user.email || '';
+      document.getElementById('editRole').value = user.role;
+      document.getElementById('editIsActive').checked = user.isActive;
+
+      // Show the modal
+      const modal = document.getElementById('editUserModal');
+      if (modal) {
+        modal.classList.add('show');
+        console.log('Edit user modal should now be visible');
+      } else {
+        console.error('Edit user modal not found');
+      }
+    }
+
+    function hideEditUserModal() {
+      console.log('Hiding edit user modal');
+      const modal = document.getElementById('editUserModal');
+      if (modal) {
+        modal.classList.remove('show');
+        document.getElementById('editUserForm').reset();
+      }
+    }
+
+    // Form submission handlers
     document.getElementById('createUserForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
@@ -1133,26 +1141,6 @@
       }
     });
 
-    function editUser(userId) {
-      const user = allUsers.find(u => u.id === userId);
-      if (!user) return;
-
-      document.getElementById('editUserId').value = user.id;
-      document.getElementById('editUsername').value = user.username;
-      document.getElementById('editFirstName').value = user.firstName || '';
-      document.getElementById('editLastName').value = user.lastName || '';
-      document.getElementById('editEmail').value = user.email || '';
-      document.getElementById('editRole').value = user.role;
-      document.getElementById('editIsActive').checked = user.isActive;
-
-      document.getElementById('editUserModal').classList.remove('hidden');
-    }
-
-    function hideEditUserModal() {
-      document.getElementById('editUserModal').classList.add('hidden');
-      document.getElementById('editUserForm').reset();
-    }
-
     document.getElementById('editUserForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
@@ -1163,6 +1151,10 @@
       const role = document.getElementById('editRole').value;
       const isActive = document.getElementById('editIsActive').checked;
       const editBtn = document.getElementById('editUserBtn');
+
+      console.log('Submitting edit user form with data:', {
+        userId, firstName, lastName, email, role, isActive
+      });
 
       editBtn.disabled = true;
       editBtn.textContent = '⏳ Saving...';
@@ -1183,6 +1175,7 @@
         });
 
         const data = await response.json();
+        console.log('Update user response:', data);
 
         if (data.success) {
           showGlobalMessage(data.message, 'success');
@@ -1523,17 +1516,10 @@
       document.getElementById('globalMessage').classList.add('hidden');
     }
 
-    // Load data on page load
-    window.addEventListener('load', function() {
-      if (adminToken) {
-        loadOverviewData();
-      }
-    });
-
     // Close modals when clicking outside
     window.addEventListener('click', function(e) {
       if (e.target.classList.contains('modal')) {
-        e.target.classList.add('hidden');
+        e.target.classList.remove('show');
       }
     });
 
@@ -1542,7 +1528,7 @@
       // ESC to close modals
       if (e.key === 'Escape') {
         document.querySelectorAll('.modal').forEach(modal => {
-          modal.classList.add('hidden');
+          modal.classList.remove('show');
         });
       }
       
