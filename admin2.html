@@ -619,8 +619,8 @@
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
           <h2>User Management</h2>
           <div>
-            <button class="btn-success" onclick="showCreateUserModal()">➕ Add User</button>
-            <button class="btn-small" onclick="loadUsers()">🔄 Refresh</button>
+            <button class="btn-success" id="addUserBtn">➕ Add User</button>
+            <button class="btn-small" id="refreshUsersBtn">🔄 Refresh</button>
           </div>
         </div>
 
@@ -851,8 +851,39 @@
       document.getElementById('createUserModal').style.display = 'none';
       document.getElementById('editUserModal').style.display = 'none';
       
+      // Set up button event listeners
+      setupEventListeners();
+      
       checkAdminAuth();
     });
+
+    function setupEventListeners() {
+      // Add User button
+      const addUserBtn = document.getElementById('addUserBtn');
+      if (addUserBtn) {
+        addUserBtn.addEventListener('click', function() {
+          console.log('Add User button clicked');
+          showCreateUserModal();
+        });
+      }
+
+      // Refresh Users button
+      const refreshUsersBtn = document.getElementById('refreshUsersBtn');
+      if (refreshUsersBtn) {
+        refreshUsersBtn.addEventListener('click', function() {
+          console.log('Refresh Users button clicked');
+          loadUsers();
+        });
+      }
+
+      // Tab buttons
+      document.querySelectorAll('.tab-button').forEach((btn, index) => {
+        btn.addEventListener('click', function() {
+          const tabNames = ['overview', 'users', 'password-reset', 'logs', 'analytics'];
+          showTab(tabNames[index]);
+        });
+      });
+    }
 
     async function checkAdminAuth() {
       // Check if user is logged in and is admin
@@ -894,13 +925,24 @@
     }
 
     function showTab(tabName) {
+      console.log('Switching to tab:', tabName);
+      
       // Update tab buttons
       document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-      event.target.classList.add('active');
+      
+      // Find the clicked button and make it active
+      const tabNames = ['overview', 'users', 'password-reset', 'logs', 'analytics'];
+      const tabIndex = tabNames.indexOf(tabName);
+      if (tabIndex >= 0) {
+        document.querySelectorAll('.tab-button')[tabIndex].classList.add('active');
+      }
 
       // Update tab panels
       document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
-      document.getElementById(`${tabName}-tab`).classList.add('active');
+      const targetPanel = document.getElementById(`${tabName}-tab`);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
 
       // Load data for specific tabs
       if (tabName === 'users') {
@@ -1017,12 +1059,25 @@
 
     // User Management Functions
     function showCreateUserModal() {
-      document.getElementById('createUserModal').classList.remove('hidden');
+      console.log('Showing create user modal');
+      const modal = document.getElementById('createUserModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+        console.log('Modal should now be visible');
+      } else {
+        console.error('Create user modal not found');
+      }
     }
 
     function hideCreateUserModal() {
-      document.getElementById('createUserModal').classList.add('hidden');
-      document.getElementById('createUserForm').reset();
+      console.log('Hiding create user modal');
+      const modal = document.getElementById('createUserModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+        document.getElementById('createUserForm').reset();
+      }
     }
 
     document.getElementById('createUserForm').addEventListener('submit', async function(e) {
