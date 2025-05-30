@@ -22,7 +22,7 @@ const BBB_CONFIG = {
   turnstile: {
     // Site key (public) - visible in client-side code
     // TODO: Replace with your actual Turnstile site key
-    siteKey: 'YOUR_TURNSTILE_SITE_KEY_HERE',
+    siteKey: '0x4AAAAAABfEpGjFkd7F7pec',
     
     // Secret key (private) - only used in Cloudflare Worker
     // DO NOT include the secret key in client-side code!
@@ -265,7 +265,7 @@ const BBB_CONFIG = {
     }
     
     // Check Turnstile configuration
-    if (!this.turnstile.siteKey || this.turnstile.siteKey === 'YOUR_TURNSTILE_SITE_KEY_HERE') {
+    if (!this.turnstile.siteKey || this.turnstile.siteKey === '0x4AAAAAABfEpGjFkd7F7pec') {
       errors.push('Turnstile site key must be configured');
     }
     
