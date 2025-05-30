@@ -707,7 +707,7 @@
       // Update CAPTCHA site key from config
       if (BBB_CONFIG && BBB_CONFIG.turnstile && BBB_CONFIG.turnstile.siteKey) {
         const turnstileDiv = document.querySelector('.cf-turnstile');
-        if (turnstileDiv && BBB_CONFIG.turnstile.siteKey !== 'YOUR_TURNSTILE_SITE_KEY_HERE') {
+        if (turnstileDiv && BBB_CONFIG.turnstile.siteKey !== '0x4AAAAAABfEpGjFkd7F7pec') {
           turnstileDiv.setAttribute('data-sitekey', BBB_CONFIG.turnstile.siteKey);
           console.log('Turnstile site key loaded from config');
         } else {
