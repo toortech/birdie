@@ -483,6 +483,198 @@
       }
     }
   </style>
+  
+  <!-- Load modules with fallbacks and error handling -->
+  <script>
+    // First, create fallback modules in case external files fail
+    console.log('🔧 Setting up BBB module fallbacks...');
+
+    // Fallback BBB_CONFIG
+    window.BBB_CONFIG = {
+      cloudflareEnabled: true,
+      requireCaptcha: true,
+      authWorkerUrl: 'https://bbb-auth-worker.cf1demouk.workers.dev',
+      turnstile: {
+        siteKey: '0x4AAAAAABfEpGjFkd7F7pec',
+        theme: 'light',
+        size: 'normal',
+        retry: 'auto',
+        retryInterval: 8000,
+        refreshExpired: 'auto'
+      },
+      // Essential utility functions
+      hasPermission: function(userRole, permission) {
+        if (!userRole || !permission) return false;
+        const role = this.roles?.[userRole];
+        if (!role) return false;
+        return role.permissions?.includes(permission) || false;
+      },
+      roles: {
+        administrator: {
+          name: 'Administrator',
+          permissions: ['view_all_content', 'manage_users', 'manage_scorecards', 'manage_gallery', 'view_analytics', 'manage_system', 'access_admin_panel'],
+          securityLevel: 'MAXIMUM'
+        },
+        member: {
+          name: 'Member', 
+          permissions: ['view_member_content', 'upload_photos', 'view_own_scorecards', 'create_scorecards', 'view_gallery'],
+          securityLevel: 'MAXIMUM'
+        }
+      }
+    };
+
+    // Fallback BBB_AUTH with all necessary methods
+    window.BBB_AUTH = {
+      currentUser: null,
+      isAuthenticated: false,
+      userRoles: [],
+      sessionToken: null,
+      
+      init: function(options = {}) {
+        console.log('✅ BBB_AUTH initialized (fallback version)');
+        return this;
+      },
+
+      loginWithCaptcha: async function(username, password, captchaToken) {
+        console.log('🔐 Attempting secure login with CAPTCHA...');
+        
+        if (!captchaToken) {
+          throw new Error('CAPTCHA verification is required for login');
+        }
+
+        const response = await fetch(`${BBB_CONFIG.authWorkerUrl}/auth/login-with-captcha`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ username, password, captchaToken, siteKey: BBB_CONFIG.turnstile.siteKey, timestamp: Date.now() })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        if (!data.success) {
+          throw new Error(data.error || 'Login failed');
+        }
+
+        this.currentUser = data.user;
+        this.isAuthenticated = true;
+        this.userRoles = data.user ? [data.user.role] : ['member'];
+        this.sessionToken = data.token || null;
+
+        return this.currentUser;
+      },
+
+      // Role and permission methods for future features
+      hasRole: function(roles) {
+        if (!this.isAuthenticated) return false;
+        const rolesToCheck = Array.isArray(roles) ? roles : [roles];
+        return this.userRoles.some(role => rolesToCheck.includes(role));
+      },
+
+      hasPermission: function(permission) {
+        if (!this.isAuthenticated || !this.currentUser) return false;
+        return BBB_CONFIG.hasPermission(this.currentUser.role, permission);
+      },
+
+      isAdmin: function() {
+        return this.hasRole('administrator') || this.hasRole('admin');
+      },
+
+      isMember: function() {
+        return this.hasRole(['member', 'administrator', 'admin']);
+      },
+
+      protectPage: function(requiredRoles, redirectUrl = '/login.html') {
+        const sessionData = localStorage.getItem('bbb_auth_session');
+        let captchaVerified = false;
+        
+        if (sessionData) {
+          try {
+            const session = JSON.parse(sessionData);
+            captchaVerified = session.captchaVerified === true;
+          } catch (error) {
+            console.error('Error checking session CAPTCHA status:', error);
+          }
+        }
+        
+        if (!this.isAuthenticated || !this.hasRole(requiredRoles) || !captchaVerified) {
+          console.log('Access denied: Authentication, role, or CAPTCHA verification failed');
+          sessionStorage.setItem('redirectAfterLogin', window.location.href);
+          window.location.href = redirectUrl;
+        }
+      },
+
+      setupProtectedElements: function() {
+        document.querySelectorAll('[data-auth-required]').forEach(el => {
+          el.style.display = this.isAuthenticated ? '' : 'none';
+        });
+        
+        document.querySelectorAll('[data-role-required]').forEach(el => {
+          const requiredRoles = el.dataset.roleRequired.split(',');
+          el.style.display = this.hasRole(requiredRoles) ? '' : 'none';
+        });
+        
+        document.querySelectorAll('[data-auth-anonymous]').forEach(el => {
+          el.style.display = !this.isAuthenticated ? '' : 'none';
+        });
+        
+        document.querySelectorAll('[data-admin-only]').forEach(el => {
+          el.style.display = this.isAdmin() ? '' : 'none';
+        });
+      },
+
+      logout: async function() {
+        console.log('Securely logging out user:', this.currentUser?.username);
+        
+        if (this.sessionToken) {
+          try {
+            await fetch(`${BBB_CONFIG.authWorkerUrl}/auth/logout`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ token: this.sessionToken, securityLogout: true, timestamp: Date.now() })
+            });
+          } catch (error) {
+            console.error('Server logout failed:', error);
+          }
+        }
+        
+        this.clearSession();
+        sessionStorage.setItem('justLoggedOut', 'true');
+        sessionStorage.setItem('bbb_logout_timestamp', Date.now().toString());
+      },
+
+      clearSession: function() {
+        const keysToRemove = ['bbb_auth', 'bbb_session_token', 'bbb_current_user', 'bbb_session_expires', 'bbb_auth_session'];
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        
+        this.currentUser = null;
+        this.isAuthenticated = false;
+        this.userRoles = [];
+        this.sessionToken = null;
+      }
+    };
+
+    // Fallback BBB_DB
+    window.BBB_DB = {
+      init: function(options = {}) {
+        console.log('✅ BBB_DB initialized (fallback version)');
+        return this;
+      }
+    };
+
+    console.log('✅ BBB fallback modules ready');
+  </script>
+
+  <!-- Try to load external modules, but don't fail if they don't exist -->
+  <script src="/js/config.js" onerror="console.log('External config.js not found, using fallback')"></script>
+  <script src="/js/utils.js" onerror="console.log('External utils.js not found, using fallback')"></script>
+  <script src="/js/auth.js" onerror="console.log('External auth.js not found, using fallback')"></script>
+  <script src="/js/db.js" onerror="console.log('External db.js not found, using fallback')"></script>
+  <script src="/js/ui.js" onerror="console.log('External ui.js not found, using fallback')"></script>
 </head>
 <body>
   <div class="login-container">
@@ -564,28 +756,15 @@
     </div>
   </div>
   
-  <!-- COMPLETELY NEW STANDALONE LOGIN SYSTEM -->
   <script>
-    console.log('🚀 Starting BBB Secure Login System...');
-
-    // Configuration
-    const BBB_CONFIG = {
-      cloudflareEnabled: true,
-      requireCaptcha: true,
-      authWorkerUrl: 'https://bbb-auth-worker.cf1demouk.workers.dev',
-      turnstile: {
-        siteKey: '0x4AAAAAABfEpGjFkd7F7pec',
-        theme: 'light',
-        size: 'normal'
-      }
-    };
-
-    // CAPTCHA state
+    // CAPTCHA state management
     let captchaToken = null;
     let captchaCompleted = false;
     let isLoggingIn = false;
+    let loginProcessed = false;
+    let authCheckCompleted = false;
 
-    // CAPTCHA callbacks
+    // Turnstile CAPTCHA callbacks
     window.onCaptchaSuccess = function(token) {
       console.log('✅ CAPTCHA completed successfully');
       captchaToken = token;
@@ -597,13 +776,13 @@
       const loginBtn = document.getElementById('login-btn');
       loginBtn.disabled = false;
       loginBtn.textContent = 'Login to BBB';
-      loginBtn.style.background = 'linear-gradient(135deg, #0046ad, #004d00)';
       
       const captchaContainer = document.querySelector('.captcha-container');
       captchaContainer.style.borderLeft = '4px solid #28a745';
       captchaContainer.style.backgroundColor = '#f8f9fa';
       captchaContainer.style.padding = '0.5rem';
       captchaContainer.style.borderRadius = '8px';
+      captchaContainer.style.transition = 'all 0.3s ease';
     };
 
     window.onCaptchaError = function(error) {
@@ -618,57 +797,308 @@
       const loginBtn = document.getElementById('login-btn');
       loginBtn.disabled = true;
       loginBtn.textContent = 'Complete Security Check First';
-      loginBtn.style.background = '#6c757d';
+      
+      const captchaContainer = document.querySelector('.captcha-container');
+      captchaContainer.style.borderLeft = '4px solid #dc3545';
+      captchaContainer.style.backgroundColor = '#fff5f5';
+      captchaContainer.style.padding = '0.5rem';
+      captchaContainer.style.borderRadius = '8px';
     };
 
     window.onCaptchaExpired = function() {
       console.log('⏰ CAPTCHA expired');
-      onCaptchaError('expired');
+      captchaToken = null;
+      captchaCompleted = false;
+      
+      document.getElementById('captcha-success').style.display = 'none';
+      document.getElementById('captcha-error').style.display = 'block';
+      document.getElementById('captcha-error').textContent = 'Security verification expired. Please complete it again.';
+      
+      const loginBtn = document.getElementById('login-btn');
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Complete Security Check First';
+      
+      const captchaContainer = document.querySelector('.captcha-container');
+      captchaContainer.style.borderLeft = '';
+      captchaContainer.style.backgroundColor = '';
+      captchaContainer.style.padding = '';
     };
 
     window.onCaptchaTimeout = function() {
       console.log('⏰ CAPTCHA timeout');
-      onCaptchaError('timeout');
+      onCaptchaExpired();
     };
 
-    // Secure login function
-    async function secureLogin(username, password, captchaToken) {
-      console.log('🔐 Attempting secure login...');
+    // Initialize modules
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('🚀 Initializing login page with CAPTCHA...');
       
-      if (!captchaToken) {
-        throw new Error('CAPTCHA verification is required');
+      // The modules are already available (either from external files or fallbacks)
+      console.log('📋 Checking BBB modules...');
+      console.log('BBB_CONFIG available:', typeof BBB_CONFIG !== 'undefined');
+      console.log('BBB_AUTH available:', typeof BBB_AUTH !== 'undefined');
+      console.log('BBB_DB available:', typeof BBB_DB !== 'undefined');
+
+      // Initialize auth system
+      try {
+        BBB_AUTH.init({
+          cloudflareEnabled: true,
+          requireCaptcha: true
+        });
+        
+        BBB_DB.init({
+          useCloudflare: true,
+          localStoragePrefix: 'bbb_'
+        });
+
+        console.log('✅ BBB modules initialized successfully with Cloudflare requirement');
+      } catch (error) {
+        console.error('❌ Error initializing BBB modules:', error);
+        showError('System error: Failed to initialize secure authentication.');
+        return;
       }
-
-      const response = await fetch(`${BBB_CONFIG.authWorkerUrl}/auth/login-with-captcha`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ 
-          username, 
-          password,
-          captchaToken,
-          siteKey: BBB_CONFIG.turnstile.siteKey,
-          timestamp: Date.now()
-        })
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || `Login failed: ${response.status}`);
+      
+      // Check logout flags first
+      if (checkLogoutFlags()) {
+        console.log('📋 Logout flag detected, showing logout notice and clearing auth data');
+        showLogoutNotice();
+        clearStoredAuth();
+        authCheckCompleted = true;
+      } else {
+        // Check if already logged in
+        if (!loginProcessed && !isLoggingIn && !authCheckCompleted) {
+          checkExistingAuth();
+        }
       }
+      
+      // Set up login form
+      setupLoginForm();
+    });
 
-      const data = await response.json();
-
-      if (!data.success) {
-        throw new Error(data.error || 'Login failed');
+    // All the existing functions remain the same...
+    function checkLogoutFlags() {
+      const justLoggedOut = sessionStorage.getItem('justLoggedOut') === 'true';
+      const logoutTimestamp = sessionStorage.getItem('bbb_logout_timestamp');
+      const recentLogout = logoutTimestamp && 
+        (Date.now() - parseInt(logoutTimestamp)) < 10000;
+      const currentlyLoggingOut = sessionStorage.getItem('bbb_logging_out') === 'true';
+      
+      if (justLoggedOut || recentLogout || currentlyLoggingOut) {
+        console.log('Logout flag detected:', {
+          justLoggedOut,
+          recentLogout,
+          currentlyLoggingOut
+        });
+        return true;
       }
-
-      return data;
+      
+      return false;
     }
 
-    // UI helpers
+    function showLogoutNotice() {
+      const logoutNotice = document.getElementById('logout-notice');
+      if (logoutNotice) {
+        logoutNotice.style.display = 'block';
+        
+        setTimeout(() => {
+          cleanupLogoutFlags();
+        }, 3000);
+      }
+    }
+
+    function cleanupLogoutFlags() {
+      try {
+        sessionStorage.removeItem('justLoggedOut');
+        sessionStorage.removeItem('bbb_logout_timestamp');
+        sessionStorage.removeItem('bbb_logging_out');
+        console.log('Logout flags cleaned up');
+      } catch (error) {
+        console.error('Error cleaning up logout flags:', error);
+      }
+    }
+
+    function checkExistingAuth() {
+      console.log('Checking existing authentication...');
+      
+      if (checkLogoutFlags()) {
+        console.log('Logout flags present, clearing auth data and showing logout notice');
+        showLogoutNotice();
+        clearStoredAuth();
+        authCheckCompleted = true;
+        return;
+      }
+      
+      try {
+        const storedAuth = localStorage.getItem('bbb_auth_session');
+        const storedUser = localStorage.getItem('bbb_current_user');
+        
+        if (storedAuth && storedUser) {
+          console.log('Found stored authentication data');
+          
+          const authData = JSON.parse(storedAuth);
+          const userData = JSON.parse(storedUser);
+          
+          if (authData.expiresAt && new Date(authData.expiresAt) > new Date()) {
+            console.log('Valid session found for user:', userData.id);
+            
+            if (checkLogoutFlags()) {
+              console.log('Logout flags detected during session restore, aborting auto-login');
+              showLogoutNotice();
+              clearStoredAuth();
+              authCheckCompleted = true;
+              return;
+            }
+            
+            BBB_AUTH.currentUser = userData;
+            BBB_AUTH.isAuthenticated = true;
+            
+            showSuccess('Already logged in! Redirecting...');
+            setTimeout(() => {
+              redirectAfterLogin();
+            }, 1000);
+            
+            authCheckCompleted = true;
+            return;
+          } else {
+            console.log('Session expired, clearing stored data');
+            clearStoredAuth();
+          }
+        }
+        
+        if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser && !checkLogoutFlags()) {
+          console.log('User already authenticated in current session');
+          showSuccess('Already logged in! Redirecting...');
+          setTimeout(() => {
+            redirectAfterLogin();
+          }, 1000);
+        } else {
+          console.log('No existing authentication found');
+        }
+        
+        authCheckCompleted = true;
+      } catch (error) {
+        console.error('Error checking existing auth:', error);
+        clearStoredAuth();
+        authCheckCompleted = true;
+      }
+    }
+
+    function clearStoredAuth() {
+      try {
+        const authKeys = ['bbb_auth_session', 'bbb_current_user'];
+        authKeys.forEach(key => {
+          localStorage.removeItem(key);
+          if (localStorage.getItem(key) !== null) {
+            console.warn(`Failed to clear ${key}, trying again...`);
+            localStorage.removeItem(key);
+          }
+        });
+        
+        if (typeof BBB_AUTH !== 'undefined') {
+          BBB_AUTH.currentUser = null;
+          BBB_AUTH.isAuthenticated = false;
+        }
+        
+        console.log('Stored authentication data cleared');
+      } catch (error) {
+        console.error('Error clearing stored auth:', error);
+      }
+    }
+
+    function setupLoginForm() {
+      const loginForm = document.getElementById('login-form');
+      const loginBtn = document.getElementById('login-btn');
+      
+      loginForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        if (isLoggingIn || loginProcessed) {
+          console.log('Login already in progress or completed');
+          return;
+        }
+        
+        if (checkLogoutFlags()) {
+          console.log('Recent logout detected, please wait before logging in again');
+          showError('Please wait a few seconds after logout before logging in again.');
+          return;
+        }
+        
+        if (!captchaCompleted || !captchaToken) {
+          showError('Please complete the security verification first.');
+          document.getElementById('captcha-error').style.display = 'block';
+          document.getElementById('captcha-error').textContent = 'Security verification is required to login.';
+          return;
+        }
+        
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        
+        if (!username || !password) {
+          showError('Please enter both username and password.');
+          return;
+        }
+        
+        isLoggingIn = true;
+        showLoading();
+        loginBtn.disabled = true;
+        hideMessages();
+        
+        console.log('Attempting secure login for user:', username);
+        
+        BBB_AUTH.loginWithCaptcha(username, password, captchaToken)
+          .then(user => {
+            console.log('Secure login successful:', user);
+            loginProcessed = true;
+            
+            const expiresAt = new Date();
+            expiresAt.setHours(expiresAt.getHours() + 24);
+            
+            const authSession = {
+              timestamp: new Date().toISOString(),
+              expiresAt: expiresAt.toISOString(),
+              userId: user.id,
+              captchaVerified: true
+            };
+            
+            localStorage.setItem('bbb_auth_session', JSON.stringify(authSession));
+            localStorage.setItem('bbb_current_user', JSON.stringify(user));
+            
+            showSuccess('Secure login successful! Redirecting...');
+            
+            setTimeout(() => {
+              redirectAfterLogin();
+            }, 1500);
+          })
+          .catch(err => {
+            console.error('Secure login error:', err);
+            isLoggingIn = false;
+            loginBtn.disabled = false;
+            hideLoading();
+            
+            if (window.turnstile) {
+              try {
+                window.turnstile.reset();
+                captchaToken = null;
+                captchaCompleted = false;
+                document.getElementById('captcha-success').style.display = 'none';
+                document.getElementById('captcha-error').style.display = 'block';
+                document.getElementById('captcha-error').textContent = 'Please complete security verification again.';
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Complete Security Check First';
+              } catch (resetError) {
+                console.error('Error resetting CAPTCHA:', resetError);
+              }
+            }
+            
+            if (err.message && err.message.includes('captcha')) {
+              showError('Security verification failed. Please try again.');
+            } else {
+              showError('Invalid username or password. Please try again.');
+            }
+          });
+      });
+    }
+
     function showLoading() {
       document.getElementById('loading').style.display = 'block';
     }
@@ -700,121 +1130,81 @@
     function redirectAfterLogin() {
       try {
         sessionStorage.setItem('justLoggedIn', 'true');
+        cleanupLogoutFlags();
+        
         const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || 'index.html';
-        console.log('🔄 Redirecting to:', redirectUrl);
+        console.log('Redirecting to:', redirectUrl);
+        
         sessionStorage.removeItem('redirectAfterLogin');
         
         setTimeout(() => {
           window.location.href = redirectUrl;
         }, 100);
+        
       } catch (error) {
-        console.error('❌ Error during redirect:', error);
+        console.error('Error during redirect:', error);
+        sessionStorage.setItem('justLoggedIn', 'true');
+        cleanupLogoutFlags();
         window.location.href = 'index.html';
       }
     }
 
-    // Initialize login form
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 Initializing secure login...');
-      
-      const loginForm = document.getElementById('login-form');
-      const loginBtn = document.getElementById('login-btn');
-      
-      loginForm.addEventListener('submit', async function(event) {
-        event.preventDefault();
-        
-        if (isLoggingIn) {
-          console.log('⚠️ Login already in progress');
-          return;
-        }
-        
-        if (!captchaCompleted || !captchaToken) {
-          showError('Please complete the security verification first.');
-          document.getElementById('captcha-error').style.display = 'block';
-          document.getElementById('captcha-error').textContent = 'Security verification is required to login.';
-          return;
-        }
-        
-        const username = document.getElementById('username').value.trim();
-        const password = document.getElementById('password').value;
-        
-        if (!username || !password) {
-          showError('Please enter both username and password.');
-          return;
-        }
-        
-        isLoggingIn = true;
-        showLoading();
-        loginBtn.disabled = true;
+    // Handle page navigation events
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted) {
+        console.log('Page loaded from cache, resetting state');
+        isLoggingIn = false;
+        loginProcessed = false;
+        authCheckCompleted = false;
+        captchaToken = null;
+        captchaCompleted = false;
         hideMessages();
+        document.getElementById('login-btn').disabled = true;
+        document.getElementById('login-btn').textContent = 'Complete Security Check First';
         
-        console.log('🔐 Attempting secure login for user:', username);
-        
-        try {
-          const result = await secureLogin(username, password, captchaToken);
-          console.log('✅ Secure login successful:', result.user);
-          
-          // Store session
-          const expiresAt = new Date();
-          expiresAt.setHours(expiresAt.getHours() + 24);
-          
-          const authSession = {
-            timestamp: new Date().toISOString(),
-            expiresAt: expiresAt.toISOString(),
-            userId: result.user.id,
-            captchaVerified: true
-          };
-          
-          localStorage.setItem('bbb_auth_session', JSON.stringify(authSession));
-          localStorage.setItem('bbb_current_user', JSON.stringify(result.user));
-          
-          showSuccess('Secure login successful! Redirecting...');
-          
-          setTimeout(() => {
-            redirectAfterLogin();
-          }, 1500);
-          
-        } catch (error) {
-          console.error('❌ Secure login error:', error);
-          isLoggingIn = false;
-          loginBtn.disabled = false;
-          hideLoading();
-          
-          // Reset CAPTCHA on failure
-          if (window.turnstile) {
-            try {
-              window.turnstile.reset();
-              captchaToken = null;
-              captchaCompleted = false;
-              document.getElementById('captcha-success').style.display = 'none';
-              document.getElementById('captcha-error').style.display = 'block';
-              document.getElementById('captcha-error').textContent = 'Please complete security verification again.';
-              loginBtn.disabled = true;
-              loginBtn.textContent = 'Complete Security Check First';
-              loginBtn.style.background = '#6c757d';
-            } catch (resetError) {
-              console.error('❌ Error resetting CAPTCHA:', resetError);
-            }
-          }
-          
-          if (error.message && error.message.includes('captcha')) {
-            showError('Security verification failed. Please try again.');
-          } else {
-            showError(error.message || 'Invalid username or password. Please try again.');
-          }
+        if (checkLogoutFlags()) {
+          showLogoutNotice();
+          clearStoredAuth();
+        } else if (!authCheckCompleted) {
+          checkExistingAuth();
         }
-      });
-
-      // Check for logout notice
-      if (sessionStorage.getItem('justLoggedOut') === 'true') {
-        document.getElementById('logout-notice').style.display = 'block';
-        setTimeout(() => {
-          sessionStorage.removeItem('justLoggedOut');
-        }, 3000);
       }
-
-      console.log('✅ BBB Secure Login System Ready!');
     });
+
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'bbb_auth_session' && e.newValue === null) {
+        console.log('Auth session cleared in another tab');
+        clearStoredAuth();
+        if (!checkLogoutFlags()) {
+          showError('Your session was ended in another tab. Please log in again.');
+        }
+      }
+    });
+
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden && checkLogoutFlags()) {
+        showLogoutNotice();
+        clearStoredAuth();
+      }
+    });
+
+    setInterval(function() {
+      if (checkLogoutFlags() && document.getElementById('logout-notice').style.display !== 'block') {
+        console.log('Periodic check detected logout flags');
+        showLogoutNotice();
+        clearStoredAuth();
+      }
+    }, 1000);
+
+    document.getElementById('username').addEventListener('input', function() {
+      setTimeout(() => {
+        const logoutNotice = document.getElementById('logout-notice');
+        if (logoutNotice && logoutNotice.style.display === 'block') {
+          logoutNotice.style.display = 'none';
+        }
+      }, 5000);
+    });
+
   </script>
 </body>
 </html>
