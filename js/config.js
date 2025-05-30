@@ -263,11 +263,10 @@ const BBB_CONFIG = {
     if (!this.requireCaptcha) {
       errors.push('CAPTCHA verification must be enabled');
     }
-    
     // Check Turnstile configuration
-    if (!this.turnstile.siteKey || this.turnstile.siteKey === 'YOUR_TURNSTILE_SITE_KEY_HERE') {
-      errors.push('Turnstile site key must be configured');
-    }
+if (!this.turnstile.siteKey || this.turnstile.siteKey === 'YOUR_TURNSTILE_SITE_KEY_HERE') {
+  errors.push('Turnstile site key must be configured');
+}
     
     if (!this.authWorkerUrl || this.authWorkerUrl.includes('your-auth-worker')) {
       errors.push('Cloudflare Worker URL must be configured');
