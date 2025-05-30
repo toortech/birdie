@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - Birdie Bush Bandits</title>
+  <meta name="description" content="Login to access the Birdie Bush Bandits golf group website.">
+  <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  <!-- Add Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Cloudflare Turnstile -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  
+  <style>
+    /* REMOVED: CSS Variables block - now using global variables from style.css */
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family-base);
+      line-height: 1.6;
+      color: var(--bbb-text);
+      background: linear-gradient(135deg, var(--bbb-light-green) 0%, var(--bbb-background) 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Background Animation */
+    body::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 77, 0, 0.03) 0%, transparent 70%);
+      animation: rotate 30s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Login Container */
+    .login-container {
+      max-width: 450px;
+      width: 100%;
+      background: white;
+      padding: 3rem 2.5rem;
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+      animation: slideInUp 0.8s ease-out;
+    }
+
+    .login-container:hover {
+      border-color: var(--bbb-gold);
+      transform: translateY(-5px);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Logo Section */
+    .logo-container {
+      text-align: center;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .logo {
+      max-width: 120px;
+      height: auto;
+      filter: drop-shadow(2px 2px 8px rgba(0,0,0,0.1));
+      transition: transform 0.3s ease;
+      animation: logoFloat 3s ease-in-out infinite;
+    }
+
+    .logo:hover {
+      transform: scale(1.05) rotate(3deg);
+    }
+
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .logo-title {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-top: 0.5rem;
+    }
+
+    .founded-badge {
+      display: inline-block;
+      background: var(--bbb-gold);
+      color: var(--bbb-primary);
+      padding: 0.3rem 0.8rem;
+      border-radius: 15px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-top: 0.5rem;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    }
+
+    /* Main Title */
+    h1 {
+      color: var(--bbb-primary);
+      text-align: center;
+      margin-bottom: 2rem;
+      font-size: 2rem;
+      font-family: var(--font-family-accent);
+      font-weight: 700;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+
+    /* Form Styling */
+    .form-group {
+      margin-bottom: 1.8rem;
+      position: relative;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 0.7rem;
+      font-weight: 600;
+      color: var(--bbb-primary);
+      font-size: 0.95rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 1rem 1.2rem;
+      border: 2px solid var(--bbb-border);
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: var(--font-family-base);
+      transition: all 0.3s ease;
+      background: #fafafa;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: var(--bbb-secondary);
+      background: white;
+      box-shadow: 0 4px 15px rgba(0, 70, 173, 0.15);
+      transform: translateY(-2px);
+    }
+
+    input:hover {
+      border-color: var(--bbb-primary);
+      background: white;
+    }
+
+    /* CAPTCHA Section */
+    .captcha-container {
+      margin-bottom: 1.8rem;
+      text-align: center;
+      position: relative;
+    }
+
+    .captcha-label {
+      display: block;
+      margin-bottom: 0.7rem;
+      font-weight: 600;
+      color: var(--bbb-primary);
+      font-size: 0.95rem;
+    }
+
+    .cf-turnstile {
+      display: inline-block;
+      margin: 0 auto;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .cf-turnstile:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      transform: translateY(-1px);
+    }
+
+    /* Captcha Error Styling */
+    .captcha-error {
+      color: #dc3545;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      display: none;
+      background: #f8d7da;
+      padding: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #f5c6cb;
+    }
+
+    .captcha-success {
+      color: #155724;
+      font-size: 0.9rem;
+      margin-top: 0.5rem;
+      display: none;
+      background: #d4edda;
+      padding: 0.5rem;
+      border-radius: 5px;
+      border: 1px solid #c3e6cb;
+    }
+
+    /* Login Button */
+    button {
+      width: 100%;
+      padding: 1rem 1.5rem;
+      background: linear-gradient(135deg, var(--bbb-secondary), var(--bbb-primary));
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      font-family: var(--font-family-base);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 70, 173, 0.3);
+    }
+
+    button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    button:hover::before {
+      left: 100%;
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 70, 173, 0.4);
+    }
+
+    button:active {
+      transform: translateY(-1px);
+    }
+
+    button:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: 0 2px 5px rgba(108, 117, 125, 0.2);
+    }
+
+    button:disabled::before {
+      display: none;
+    }
+
+    /* Success and Error Messages */
+    .error-message {
+      color: #dc3545;
+      margin-top: 1.5rem;
+      text-align: center;
+      display: none;
+      background: #f8d7da;
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: 1px solid #f5c6cb;
+      font-weight: 500;
+      animation: shake 0.5s ease-in-out;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-5px); }
+      75% { transform: translateX(5px); }
+    }
+
+    .success-message {
+      color: #155724;
+      background: #d4edda;
+      padding: 0.8rem;
+      border-radius: 8px;
+      border: 1px solid #c3e6cb;
+      text-align: center;
+      font-weight: 500;
+      margin-top: 1.5rem;
+      display: none;
+      animation: slideInUp 0.5s ease-out;
+    }
+
+    /* Loading State */
+    .loading {
+      display: none;
+      text-align: center;
+      margin-top: 1.5rem;
+      color: var(--bbb-secondary);
+      font-weight: 500;
+      animation: pulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    /* Help Text */
+    .help-text {
+      text-align: center;
+      margin-top: 2rem;
+      color: var(--bbb-text-muted);
+      font-size: 0.95rem;
+      line-height: 1.5;
+    }
+
+    /* Back to Home Link */
+    .back-home {
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+
+    .back-home a {
+      color: var(--bbb-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .back-home a:hover {
+      color: var(--bbb-primary);
+      transform: translateX(-3px);
+    }
+
+    /* Golf Ball Decoration */
+    .golf-ball {
+      width: 16px;
+      height: 16px;
+      background: white;
+      border-radius: 50%;
+      position: relative;
+      display: inline-block;
+      margin: 0 8px;
+      box-shadow: inset -2px -2px 4px rgba(0,0,0,0.2);
+    }
+
+    .golf-ball::before {
+      content: '';
+      position: absolute;
+      width: 1.5px;
+      height: 1.5px;
+      background: #ccc;
+      border-radius: 50%;
+      top: 3px;
+      left: 5px;
+      box-shadow: 3px 0 #ccc, 6px 0 #ccc, 1.5px 3px #ccc, 4.5px 3px #ccc, 7.5px 3px #ccc, 3px 6px #ccc, 6px 6px #ccc;
+    }
+
+    /* Logout notice styling */
+    .logout-notice {
+      background: #d4edda;
+      color: #155724;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      border: 1px solid #c3e6cb;
+      font-weight: 500;
+      animation: slideInUp 0.5s ease-out;
+    }
+
+    /* Security Notice */
+    .security-notice {
+      background: #e7f3ff;
+      color: #004085;
+      padding: 1rem;
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      border: 1px solid #b3d7ff;
+      font-size: 0.9rem;
+      animation: slideInUp 0.5s ease-out;
+    }
+
+    .security-notice strong {
+      color: var(--bbb-primary);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .login-container {
+        margin: 1rem;
+        padding: 2rem 1.5rem;
+        max-width: 400px;
+      }
+
+      h1 {
+        font-size: 1.7rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .logo {
+        max-width: 100px;
+      }
+
+      .form-group {
+        margin-bottom: 1.5rem;
+      }
+
+      input, button {
+        padding: 0.9rem 1rem;
+        font-size: 0.95rem;
+      }
+
+      .help-text {
+        font-size: 0.9rem;
+      }
+
+      .cf-turnstile {
+        transform: scale(0.9);
+        transform-origin: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
+        padding: 0.5rem;
+      }
+
+      .login-container {
+        padding: 1.5rem 1rem;
+        margin: 0.5rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .logo {
+        max-width: 90px;
+      }
+
+      .logo-title {
+        font-size: 1.1rem;
+      }
+
+      .founded-badge {
+        font-size: 0.7rem;
+        padding: 0.25rem 0.6rem;
+      }
+
+      .cf-turnstile {
+        transform: scale(0.8);
+        transform-origin: center;
+      }
+    }
+  </style>
+  
+  <!-- Core Modules (loaded in specific order) -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+</head>
+<body>
+  <div class="login-container">
+    <div class="logo-container">
+      <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="logo">
+      <div class="logo-title">Birdie Bush Bandits</div>
+      <div class="founded-badge">
+        🏌️ Founded August 2020
+      </div>
+    </div>
+    
+    <!-- Security Notice -->
+    <div class="security-notice">
+      <strong>🔒 Secure Login</strong><br>
+      This login is protected by Cloudflare security verification.
+    </div>
+    
+    <!-- Logout notice (shown when user just logged out) -->
+    <div id="logout-notice" class="logout-notice" style="display: none;">
+      <strong>✓ You have been logged out successfully.</strong><br>
+      Please enter your credentials to log in again.
+    </div>
+    
+    <h1>Member Login <span class="golf-ball"></span></h1>
+    
+    <form id="login-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="Enter your username" required autocomplete="username">
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Enter your password" required autocomplete="current-password">
+      </div>
+      
+      <!-- CAPTCHA Section -->
+      <div class="captcha-container">
+        <label class="captcha-label">Security Verification</label>
+        <div class="cf-turnstile" 
+             data-sitekey="WILL_BE_SET_BY_CONFIG"
+             data-callback="onCaptchaSuccess"
+             data-error-callback="onCaptchaError"
+             data-expired-callback="onCaptchaExpired"
+             data-timeout-callback="onCaptchaTimeout"
+             data-theme="light"
+             data-size="normal">
+        </div>
+        <div id="captcha-error" class="captcha-error">
+          Please complete the security verification.
+        </div>
+        <div id="captcha-success" class="captcha-success">
+          ✓ Security verification completed.
+        </div>
+      </div>
+      
+      <button type="submit" id="login-btn" disabled>Complete Security Check First</button>
+      
+      <div id="loading" class="loading">
+        <strong>🔒 Verifying credentials...</strong> Please wait while we authenticate your login.
+      </div>
+      
+      <div id="error-message" class="error-message">
+        <strong>Login Failed:</strong> Invalid username or password. Please try again.
+      </div>
+
+      <div id="success-message" class="success-message">
+        <strong>Success!</strong> Welcome back to BBB! Redirecting you now...
+      </div>
+    </form>
+    
+    <div class="help-text">
+      <p>Need help accessing your account? Contact your club administrator.</p>
+      <p><small>Login attempts are monitored for security purposes.</small></p>
+    </div>
+
+    <div class="back-home">
+      <a href="index.html">← Back to Home</a>
+    </div>
+  </div>
+  
+  <script>
+    // CAPTCHA state management
+    let captchaToken = null;
+    let captchaCompleted = false;
+    let isLoggingIn = false;
+    let loginProcessed = false;
+    let authCheckCompleted = false;
+
+    // Turnstile CAPTCHA callbacks
+    window.onCaptchaSuccess = function(token) {
+      console.log('CAPTCHA completed successfully');
+      captchaToken = token;
+      captchaCompleted = true;
+      
+      // Update UI
+      document.getElementById('captcha-error').style.display = 'none';
+      document.getElementById('captcha-success').style.display = 'block';
+      
+      // Enable login button
+      const loginBtn = document.getElementById('login-btn');
+      loginBtn.disabled = false;
+      loginBtn.textContent = 'Login to BBB';
+      
+      // Add success styling to captcha container
+      const captchaContainer = document.querySelector('.captcha-container');
+      captchaContainer.style.borderLeft = '4px solid #28a745';
+      captchaContainer.style.backgroundColor = '#f8f9fa';
+      captchaContainer.style.padding = '0.5rem';
+      captchaContainer.style.borderRadius = '8px';
+      captchaContainer.style.transition = 'all 0.3s ease';
+    };
+
+    window.onCaptchaError = function(error) {
+      console.error('CAPTCHA error:', error);
+      captchaToken = null;
+      captchaCompleted = false;
+      
+      // Update UI
+      document.getElementById('captcha-success').style.display = 'none';
+      document.getElementById('captcha-error').style.display = 'block';
+      document.getElementById('captcha-error').textContent = 'CAPTCHA verification failed. Please try again.';
+      
+      // Disable login button
+      const loginBtn = document.getElementById('login-btn');
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Complete Security Check First';
+      
+      // Add error styling to captcha container
+      const captchaContainer = document.querySelector('.captcha-container');
+      captchaContainer.style.borderLeft = '4px solid #dc3545';
+      captchaContainer.style.backgroundColor = '#fff5f5';
+      captchaContainer.style.padding = '0.5rem';
+      captchaContainer.style.borderRadius = '8px';
+    };
+
+    window.onCaptchaExpired = function() {
+      console.log('CAPTCHA expired');
+      captchaToken = null;
+      captchaCompleted = false;
+      
+      // Update UI
+      document.getElementById('captcha-success').style.display = 'none';
+      document.getElementById('captcha-error').style.display = 'block';
+      document.getElementById('captcha-error').textContent = 'Security verification expired. Please complete it again.';
+      
+      // Disable login button
+      const loginBtn = document.getElementById('login-btn');
+      loginBtn.disabled = true;
+      loginBtn.textContent = 'Complete Security Check First';
+      
+      // Reset captcha container styling
+      const captchaContainer = document.querySelector('.captcha-container');
+      captchaContainer.style.borderLeft = '';
+      captchaContainer.style.backgroundColor = '';
+      captchaContainer.style.padding = '';
+    };
+
+    window.onCaptchaTimeout = function() {
+      console.log('CAPTCHA timeout');
+      onCaptchaExpired(); // Same handling as expired
+    };
+
+    // Initialize modules
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('Initializing login page with CAPTCHA...');
+      
+      // Check if BBB modules are loaded
+      if (typeof BBB_CONFIG === 'undefined' || 
+          typeof BBB_AUTH === 'undefined' || 
+          typeof BBB_DB === 'undefined') {
+        console.error('Required BBB modules not found!');
+        showError('System error: Authentication modules not loaded.');
+        return;
+      }
+
+      // Initialize auth system - MUST USE CLOUDFLARE
+      try {
+        BBB_AUTH.init({
+          cloudflareEnabled: true, // Force Cloudflare authentication
+          requireCaptcha: true     // Require CAPTCHA for all logins
+        });
+        
+        // Initialize database
+        BBB_DB.init({
+          useCloudflare: true, // Force Cloudflare
+          localStoragePrefix: 'bbb_'
+        });
+
+        console.log('BBB modules initialized successfully with Cloudflare requirement');
+      } catch (error) {
+        console.error('Error initializing BBB modules:', error);
+        showError('System error: Failed to initialize secure authentication.');
+        return;
+      }
+      
+      // Check logout flags first
+      if (checkLogoutFlags()) {
+        console.log('Logout flag detected, showing logout notice and clearing auth data');
+        showLogoutNotice();
+        clearStoredAuth();
+        authCheckCompleted = true;
+      } else {
+        // Check if already logged in
+        if (!loginProcessed && !isLoggingIn && !authCheckCompleted) {
+          checkExistingAuth();
+        }
+      }
+      
+      // Set up login form
+      setupLoginForm();
+      
+      // Update CAPTCHA site key from config
+      if (BBB_CONFIG && BBB_CONFIG.turnstile && BBB_CONFIG.turnstile.siteKey) {
+        const turnstileDiv = document.querySelector('.cf-turnstile');
+        if (turnstileDiv && BBB_CONFIG.turnstile.siteKey !== 'YOUR_TURNSTILE_SITE_KEY_HERE') {
+          turnstileDiv.setAttribute('data-sitekey', BBB_CONFIG.turnstile.siteKey);
+          console.log('Turnstile site key loaded from config');
+        } else {
+          console.error('Turnstile site key not configured in BBB_CONFIG');
+          showError('CAPTCHA configuration error. Please contact administrator.');
+          return;
+        }
+      } else {
+        console.error('Turnstile configuration not found in BBB_CONFIG');
+        showError('CAPTCHA configuration missing. Please contact administrator.');
+        return;
+      }
+    });
+
+    /**
+     * Check logout flags with multiple methods
+     */
+    function checkLogoutFlags() {
+      const justLoggedOut = sessionStorage.getItem('justLoggedOut') === 'true';
+      const logoutTimestamp = sessionStorage.getItem('bbb_logout_timestamp');
+      const recentLogout = logoutTimestamp && 
+        (Date.now() - parseInt(logoutTimestamp)) < 10000;
+      const currentlyLoggingOut = sessionStorage.getItem('bbb_logging_out') === 'true';
+      
+      if (justLoggedOut || recentLogout || currentlyLoggingOut) {
+        console.log('Logout flag detected:', {
+          justLoggedOut,
+          recentLogout,
+          currentlyLoggingOut
+        });
+        return true;
+      }
+      
+      return false;
+    }
+
+    /**
+     * Show logout notice when user was logged out
+     */
+    function showLogoutNotice() {
+      const logoutNotice = document.getElementById('logout-notice');
+      if (logoutNotice) {
+        logoutNotice.style.display = 'block';
+        
+        setTimeout(() => {
+          cleanupLogoutFlags();
+        }, 3000);
+      }
+    }
+
+    /**
+     * Clean up logout flags
+     */
+    function cleanupLogoutFlags() {
+      try {
+        sessionStorage.removeItem('justLoggedOut');
+        sessionStorage.removeItem('bbb_logout_timestamp');
+        sessionStorage.removeItem('bbb_logging_out');
+        console.log('Logout flags cleaned up');
+      } catch (error) {
+        console.error('Error cleaning up logout flags:', error);
+      }
+    }
+
+    /**
+     * Check if user is already authenticated
+     */
+    function checkExistingAuth() {
+      console.log('Checking existing authentication...');
+      
+      if (checkLogoutFlags()) {
+        console.log('Logout flags present, clearing auth data and showing logout notice');
+        showLogoutNotice();
+        clearStoredAuth();
+        authCheckCompleted = true;
+        return;
+      }
+      
+      try {
+        const storedAuth = localStorage.getItem('bbb_auth_session');
+        const storedUser = localStorage.getItem('bbb_current_user');
+        
+        if (storedAuth && storedUser) {
+          console.log('Found stored authentication data');
+          
+          const authData = JSON.parse(storedAuth);
+          const userData = JSON.parse(storedUser);
+          
+          if (authData.expiresAt && new Date(authData.expiresAt) > new Date()) {
+            console.log('Valid session found for user:', userData.id);
+            
+            if (checkLogoutFlags()) {
+              console.log('Logout flags detected during session restore, aborting auto-login');
+              showLogoutNotice();
+              clearStoredAuth();
+              authCheckCompleted = true;
+              return;
+            }
+            
+            BBB_AUTH.currentUser = userData;
+            BBB_AUTH.isAuthenticated = true;
+            
+            showSuccess('Already logged in! Redirecting...');
+            setTimeout(() => {
+              redirectAfterLogin();
+            }, 1000);
+            
+            authCheckCompleted = true;
+            return;
+          } else {
+            console.log('Session expired, clearing stored data');
+            clearStoredAuth();
+          }
+        }
+        
+        if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser && !checkLogoutFlags()) {
+          console.log('User already authenticated in current session');
+          showSuccess('Already logged in! Redirecting...');
+          setTimeout(() => {
+            redirectAfterLogin();
+          }, 1000);
+        } else {
+          console.log('No existing authentication found');
+        }
+        
+        authCheckCompleted = true;
+      } catch (error) {
+        console.error('Error checking existing auth:', error);
+        clearStoredAuth();
+        authCheckCompleted = true;
+      }
+    }
+
+    /**
+     * Clear stored authentication data
+     */
+    function clearStoredAuth() {
+      try {
+        const authKeys = ['bbb_auth_session', 'bbb_current_user'];
+        authKeys.forEach(key => {
+          localStorage.removeItem(key);
+          if (localStorage.getItem(key) !== null) {
+            console.warn(`Failed to clear ${key}, trying again...`);
+            localStorage.removeItem(key);
+          }
+        });
+        
+        if (typeof BBB_AUTH !== 'undefined') {
+          BBB_AUTH.currentUser = null;
+          BBB_AUTH.isAuthenticated = false;
+        }
+        
+        console.log('Stored authentication data cleared');
+      } catch (error) {
+        console.error('Error clearing stored auth:', error);
+      }
+    }
+
+    /**
+     * Setup login form handlers with CAPTCHA validation
+     */
+    function setupLoginForm() {
+      const loginForm = document.getElementById('login-form');
+      const loginBtn = document.getElementById('login-btn');
+      
+      loginForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        
+        // Prevent multiple login attempts
+        if (isLoggingIn || loginProcessed) {
+          console.log('Login already in progress or completed');
+          return;
+        }
+        
+        // Check for logout flags
+        if (checkLogoutFlags()) {
+          console.log('Recent logout detected, please wait before logging in again');
+          showError('Please wait a few seconds after logout before logging in again.');
+          return;
+        }
+        
+        // CAPTCHA validation - REQUIRED
+        if (!captchaCompleted || !captchaToken) {
+          showError('Please complete the security verification first.');
+          document.getElementById('captcha-error').style.display = 'block';
+          document.getElementById('captcha-error').textContent = 'Security verification is required to login.';
+          return;
+        }
+        
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value;
+        
+        if (!username || !password) {
+          showError('Please enter both username and password.');
+          return;
+        }
+        
+        // Set login state
+        isLoggingIn = true;
+        
+        // Show loading state
+        showLoading();
+        loginBtn.disabled = true;
+        
+        // Clear any previous messages
+        hideMessages();
+        
+        console.log('Attempting secure login for user:', username);
+        
+        // Login with CAPTCHA token - REQUIRED for Cloudflare
+        BBB_AUTH.loginWithCaptcha(username, password, captchaToken)
+          .then(user => {
+            console.log('Secure login successful:', user);
+            loginProcessed = true;
+            
+            // Store session with expiration
+            const expiresAt = new Date();
+            expiresAt.setHours(expiresAt.getHours() + 24);
+            
+            const authSession = {
+              timestamp: new Date().toISOString(),
+              expiresAt: expiresAt.toISOString(),
+              userId: user.id,
+              captchaVerified: true
+            };
+            
+            localStorage.setItem('bbb_auth_session', JSON.stringify(authSession));
+            localStorage.setItem('bbb_current_user', JSON.stringify(user));
+            
+            showSuccess('Secure login successful! Redirecting...');
+            
+            setTimeout(() => {
+              redirectAfterLogin();
+            }, 1500);
+          })
+          .catch(err => {
+            console.error('Secure login error:', err);
+            isLoggingIn = false;
+            loginBtn.disabled = false;
+            hideLoading();
+            
+            // Reset CAPTCHA on login failure
+            if (window.turnstile) {
+              try {
+                window.turnstile.reset();
+                captchaToken = null;
+                captchaCompleted = false;
+                document.getElementById('captcha-success').style.display = 'none';
+                document.getElementById('captcha-error').style.display = 'block';
+                document.getElementById('captcha-error').textContent = 'Please complete security verification again.';
+                loginBtn.disabled = true;
+                loginBtn.textContent = 'Complete Security Check First';
+              } catch (resetError) {
+                console.error('Error resetting CAPTCHA:', resetError);
+              }
+            }
+            
+            // Show appropriate error message
+            if (err.message && err.message.includes('captcha')) {
+              showError('Security verification failed. Please try again.');
+            } else {
+              showError('Invalid username or password. Please try again.');
+            }
+          });
+      });
+    }
+
+    /**
+     * Show loading state
+     */
+    function showLoading() {
+      document.getElementById('loading').style.display = 'block';
+    }
+
+    /**
+     * Hide loading state
+     */
+    function hideLoading() {
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    /**
+     * Show error message
+     */
+    function showError(message) {
+      hideMessages();
+      const errorElement = document.getElementById('error-message');
+      errorElement.textContent = message;
+      errorElement.style.display = 'block';
+    }
+
+    /**
+     * Show success message
+     */
+    function showSuccess(message) {
+      hideMessages();
+      const successElement = document.getElementById('success-message');
+      successElement.textContent = message;
+      successElement.style.display = 'block';
+    }
+
+    /**
+     * Hide all messages
+     */
+    function hideMessages() {
+      document.getElementById('error-message').style.display = 'none';
+      document.getElementById('success-message').style.display = 'none';
+      document.getElementById('loading').style.display = 'none';
+    }
+
+    /**
+     * Redirect after successful login
+     */
+    function redirectAfterLogin() {
+      try {
+        sessionStorage.setItem('justLoggedIn', 'true');
+        cleanupLogoutFlags();
+        
+        const redirectUrl = sessionStorage.getItem('redirectAfterLogin') || 'index.html';
+        console.log('Redirecting to:', redirectUrl);
+        
+        sessionStorage.removeItem('redirectAfterLogin');
+        
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 100);
+        
+      } catch (error) {
+        console.error('Error during redirect:', error);
+        sessionStorage.setItem('justLoggedIn', 'true');
+        cleanupLogoutFlags();
+        window.location.href = 'index.html';
+      }
+    }
+
+    // Handle page navigation events
+    window.addEventListener('pageshow', function(event) {
+      if (event.persisted) {
+        console.log('Page loaded from cache, resetting state');
+        isLoggingIn = false;
+        loginProcessed = false;
+        authCheckCompleted = false;
+        captchaToken = null;
+        captchaCompleted = false;
+        hideMessages();
+        document.getElementById('login-btn').disabled = true;
+        document.getElementById('login-btn').textContent = 'Complete Security Check First';
+        
+        if (checkLogoutFlags()) {
+          showLogoutNotice();
+          clearStoredAuth();
+        } else if (!authCheckCompleted) {
+          checkExistingAuth();
+        }
+      }
+    });
+
+    // Handle storage events for cross-tab logout
+    window.addEventListener('storage', function(e) {
+      if (e.key === 'bbb_auth_session' && e.newValue === null) {
+        console.log('Auth session cleared in another tab');
+        clearStoredAuth();
+        if (!checkLogoutFlags()) {
+          showError('Your session was ended in another tab. Please log in again.');
+        }
+      }
+    });
+
+    // Handle visibility change
+    document.addEventListener('visibilitychange', function() {
+      if (!document.hidden && checkLogoutFlags()) {
+        showLogoutNotice();
+        clearStoredAuth();
+      }
+    });
+
+    // Periodic check for logout flags
+    setInterval(function() {
+      if (checkLogoutFlags() && document.getElementById('logout-notice').style.display !== 'block') {
+        console.log('Periodic check detected logout flags');
+        showLogoutNotice();
+        clearStoredAuth();
+      }
+    }, 1000);
+
+    // Clear logout notice when user starts typing (after delay)
+    document.getElementById('username').addEventListener('input', function() {
+      setTimeout(() => {
+        const logoutNotice = document.getElementById('logout-notice');
+        if (logoutNotice && logoutNotice.style.display === 'block') {
+          logoutNotice.style.display = 'none';
+        }
+      }, 5000);
+    });
+
+  </script>
+</body>
+</html>
