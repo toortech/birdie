@@ -15,7 +15,7 @@ const BBB_CONFIG = {
   
   // Cloudflare Worker Authentication URL
   // IMPORTANT: Replace with your actual Cloudflare Worker URL
-  authWorkerUrl: 'https://your-auth-worker.your-subdomain.workers.dev',
+  authWorkerUrl: 'https://bbb-auth-worker.cf1demouk.workers.dev',
   
   // Cloudflare Turnstile CAPTCHA Configuration
   // IMPORTANT: Replace with your actual Turnstile keys from Cloudflare Dashboard
