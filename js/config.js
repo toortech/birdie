@@ -265,7 +265,7 @@ const BBB_CONFIG = {
     }
     
     // Check Turnstile configuration
-    if (!this.turnstile.siteKey || this.turnstile.siteKey === '0x4AAAAAABfEpGjFkd7F7pec') {
+    if (!this.turnstile.siteKey || this.turnstile.siteKey === 'YOUR_TURNSTILE_SITE_KEY_HERE') {
       errors.push('Turnstile site key must be configured');
     }
     
