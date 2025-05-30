@@ -743,6 +743,20 @@
     document.addEventListener('DOMContentLoaded', function() {
       console.log('🚀 Initializing secure login page...');
       
+      // Make modules globally available
+      window.BBB_CONFIG = BBB_CONFIG;
+      window.BBB_AUTH = BBB_AUTH;
+      window.BBB_DB = BBB_DB;
+      
+      // Check if BBB modules are loaded (this is what the original code checks)
+      if (typeof BBB_CONFIG === 'undefined' || 
+          typeof BBB_AUTH === 'undefined' || 
+          typeof BBB_DB === 'undefined') {
+        console.error('❌ Required BBB modules not found!');
+        showError('System error: Authentication modules not loaded.');
+        return;
+      }
+
       // Initialize BBB modules
       try {
         BBB_AUTH.init({
@@ -755,7 +769,7 @@
           localStoragePrefix: 'bbb_'
         });
 
-        console.log('✅ BBB modules initialized successfully');
+        console.log('✅ BBB modules initialized successfully with Cloudflare requirement');
       } catch (error) {
         console.error('❌ Error initializing BBB modules:', error);
         showError('System error: Failed to initialize secure authentication.');
