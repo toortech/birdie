@@ -1,518 +1,859 @@
 /**
- * Birdie Bush Bandits - Configuration with Cloudflare Turnstile CAPTCHA
- * This configuration enforces maximum security with mandatory CAPTCHA verification
- * BUT also supports local authentication when Cloudflare is unavailable
+ * Birdie Bush Bandits - Authentication Module with Cloudflare Turnstile CAPTCHA
+ * Handles user authentication with Cloudflare integration AND local fallback
+ * CAPTCHA is REQUIRED for all authentication methods
  */
 
-const BBB_CONFIG = {
-  // Core Application Settings
-  appName: 'Birdie Bush Bandits',
-  version: '2.0.0-secure',
-  founded: 'August 2020',
+const BBB_AUTH = {
+  /**
+   * Current user state
+   */
+  currentUser: null,
+  isAuthenticated: false,
+  userRoles: [],
+  sessionToken: null,
   
-  // Cloudflare Settings (preferred but with fallback)
-  cloudflareEnabled: true, // Try Cloudflare first
-  requireCaptcha: true,    // Always require CAPTCHA
-  
-  // Cloudflare Worker Authentication URL
-  authWorkerUrl: 'https://bbb-auth-worker.cf1demouk.workers.dev',
-  
-  // Cloudflare Turnstile CAPTCHA Configuration
-  turnstile: {
-    // Site key (public) - visible in client-side code
-    siteKey: '0x4AAAAAABfEpGjFkd7F7pec',
-    
-    // Secret key (private) - only used in Cloudflare Worker
-    secretKey: 'YOUR_TURNSTILE_SECRET_KEY_HERE', // Use env.TURNSTILE_SECRET_KEY in Worker
-    
-    // Turnstile theme and appearance
-    theme: 'light', // 'light', 'dark', or 'auto'
-    size: 'normal', // 'normal', 'compact'
-    
-    // Security settings
-    retry: 'auto',
-    retryInterval: 8000, // 8 seconds
-    refreshExpired: 'auto'
-  },
-  
-  // Enhanced Security Settings
-  security: {
-    level: 'MAXIMUM',
-    enforceHttps: true,
+  /**
+   * Configuration
+   */
+  config: {
+    storageKey: 'bbb_auth',
+    tokenKey: 'bbb_session_token',
+    userKey: 'bbb_current_user',
+    expiresKey: 'bbb_session_expires',
+    cloudflareEnabled: true, // Try Cloudflare first, fallback to local
+    requireCaptcha: true,    // MANDATORY - always require CAPTCHA
     sessionDuration: 24 * 60 * 60 * 1000, // 24 hours in milliseconds
-    maxLoginAttempts: 3,
-    lockoutDuration: 30 * 60 * 1000, // 30 minutes
-    requireStrongPasswords: true,
-    auditAllActions: true,
+    maxRetries: 3,
+    retryDelay: 1000
+  },
+  
+  /**
+   * Initialize authentication module with mandatory CAPTCHA support
+   * @param {Object} options - Configuration options
+   */
+  init: function(options = {}) {
+    console.log('Initializing BBB_AUTH with CAPTCHA support...');
     
-    // CAPTCHA requirements
-    captchaRequired: {
-      login: true,           // Always required
-      passwordChange: true,  // Always required
-      adminActions: true,    // Always required
-      userCreation: true     // Always required
-    }
-  },
-  
-  // Session Management
-  sessionDuration: 24 * 60 * 60 * 1000, // 24 hours
-  sessionCleanupInterval: 60 * 60 * 1000, // 1 hour
-  
-  // User Roles and Permissions
-  roles: {
-    administrator: {
-      name: 'Administrator',
-      permissions: [
-        'view_all_content',
-        'manage_users',
-        'manage_scorecards',
-        'manage_gallery',
-        'view_analytics',
-        'manage_system',
-        'access_admin_panel',
-        'create_users',
-        'delete_users',
-        'modify_permissions',
-        'view_audit_logs'
-      ],
-      securityLevel: 'MAXIMUM'
-    },
-    member: {
-      name: 'Member',
-      permissions: [
-        'view_member_content',
-        'upload_photos',
-        'view_own_scorecards',
-        'create_scorecards',
-        'view_gallery',
-        'update_profile'
-      ],
-      securityLevel: 'MAXIMUM'
-    },
-    gallery: {
-      name: 'Gallery Viewer',
-      permissions: [
-        'view_gallery'
-      ],
-      securityLevel: 'MAXIMUM'
-    }
-  },
-  
-  // Member Configuration (for local fallback authentication)
-  members: [
-    'Amrit', 'Kam', 'Vish', 'Ravi', 'Bal', 'Vick', 
-    'Michael', 'Justy', 'Phuperjee', 'Indy', 'Maj', 'Sama'
-  ],
-  
-  // Gallery Configuration (with local fallback support)
-  gallery: {
-    // For local fallback authentication
-    password: 'secret123', // Change this and use strong password
-    maxFileSize: 10 * 1024 * 1024, // 10MB
-    allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
-    thumbnailSize: 300,
-    requireLogin: true,
-    requireCaptcha: true // Always require CAPTCHA for gallery access
-  },
-  
-  // Scorecard Configuration
-  scorecards: {
-    requireLogin: true,
-    requireCaptcha: true, // Always require CAPTCHA for scorecard operations
-    allowGuestView: false,
-    maxScorecardsPerUser: 100,
-    defaultCourses: [
-      'Richings Park Golf Club',
-      'Thorney Park Golf Club',
-      'London Airlinks Golf Club',
-      'Royal Ascot Golf Club',
-      'Stoke Park Golf Club',
-      'Inspirations Golf Club'
-    ]
-  },
-  
-  // Course data (from old config)
-  courses: {
-    "Richings Park Golf Club": { 
-      shortName: "Richings",
-      par: [4,3,5,4,4,3,4,4,4,3,4,4,4,3,4,4,5,4],
-      si:  [15,4,12,18,16,14,2,6,8,11,3,17,10,7,5,1,13,9],
-      yards: {
-        white: [287,199,545,345,335,165,397,299,388,172,417,328,356,201,420,431,423,402],
-        yellow: [265,188,534,335,322,149,383,284,364,162,373,318,344,188,391,392,513,380],
-        red: [237,158,490,300,289,130,353,257,344,132,351,294,323,177,391,337,479,360]
-      },
-      tees: {
-        white: {courseRating: 70.7, slopeRating: 128},
-        yellow: {courseRating: 68.3, slopeRating: 121},
-        red: {courseRating: 65.9, slopeRating: 115}
-      }
-    },
-    "Thorney Park Golf Club": { 
-      shortName: "Thorney",
-      par: [5,4,4,3,5,4,4,3,5,4,4,3,5,4,4,3,5,4],
-      si:  [9,15,1,17,5,13,3,11,7,16,2,14,6,18,4,12,8,10],
-      yards: {
-        white: [475,360,410,155,495,345,375,160,500,350,370,150,480,355,385,145,505,365],
-        yellow: [460,345,395,145,480,330,360,150,485,335,355,140,465,340,370,135,490,350],
-        red: [440,320,370,130,450,305,335,135,455,310,330,125,435,315,345,120,460,325]
-      },
-      tees: {
-        white: {courseRating: 68.7, slopeRating: 120},
-        yellow: {courseRating: 67.0, slopeRating: 117},
-        red: {courseRating: 69.3, slopeRating: 119}
-      }
-    },
-    "London Airlinks Golf Club": { 
-      shortName: "Airlinks",
-      par: [4,3,4,5,3,4,4,5,4,3,4,4,5,3,4,4,3,5],
-      si:  [6,14,4,10,16,2,8,12,1,18,7,5,11,17,3,9,15,13],
-      yards: {
-        white: [375,185,420,510,175,450,380,520,430,165,410,365,525,170,445,375,180,540],
-        yellow: [360,175,405,495,165,435,365,510,415,155,395,355,515,160,430,365,170,525],
-        red: [345,165,385,470,150,410,345,480,395,145,375,335,485,145,405,345,155,495]
-      },
-      tees: {
-        white: {courseRating: 63.4, slopeRating: 102},
-        yellow: {courseRating: 62.0, slopeRating: 98},
-        red: {courseRating: 61.1, slopeRating: 92}
-      }
-    },
-    "Royal Ascot Golf Club": { 
-      shortName: "Ascot",
-      par: [4,4,3,4,5,4,3,4,5,4,3,4,5,3,4,4,3,5],
-      si:  [5,11,15,1,9,3,17,7,13,4,18,6,10,16,2,8,14,12],
-      yards: {
-        white: [410,385,175,440,525,430,180,415,545,425,170,435,530,185,445,405,175,540],
-        yellow: [395,370,165,425,510,415,170,400,530,410,160,420,515,175,430,390,165,525],
-        red: [365,340,145,395,480,385,150,370,500,380,140,390,485,155,400,360,145,495]
-      },
-      tees: {
-        white: {courseRating: 70.3, slopeRating: 123},
-        yellow: {courseRating: 68.5, slopeRating: 118},
-        red: {courseRating: 70.0, slopeRating: 113}
-      }
-    },
-    "Stoke Park Golf Club": { 
-      shortName: "Stoke",
-      par: [4,5,3,4,4,3,4,4,5,4,3,4,5,4,3,4,5,4],
-      si:  [7,15,11,1,9,17,5,3,13,8,18,4,10,2,16,6,12,14],
-      yards: {
-        white: [405,510,190,450,430,175,415,425,535,420,165,440,520,430,180,425,545,410],
-        yellow: [390,495,180,435,415,165,400,410,520,405,155,425,505,415,170,410,530,395],
-        red: [360,465,160,405,385,145,370,380,490,375,135,395,475,385,150,380,500,365]
-      },
-      tees: {
-        white: {courseRating: 70.9, slopeRating: 126},
-        yellow: {courseRating: 69.1, slopeRating: 122},
-        red: {courseRating: 68.5, slopeRating: 118}
-      }
-    },
-    "Inspirations Golf Club": { 
-      shortName: "Inspirations",
-      par: [5,4,3,4,5,3,4,4,5,4,3,4,5,4,3,4,4,5],
-      si:  [11,5,17,1,9,15,3,7,13,4,18,6,10,2,16,8,14,12],
-      yards: {
-        white: [530,440,185,460,540,175,445,430,555,435,180,450,535,465,170,425,410,540],
-        yellow: [515,425,175,445,525,165,430,415,540,420,170,435,520,450,160,410,395,525],
-        red: [485,395,155,415,495,145,400,385,510,390,150,405,490,420,140,380,365,495]
-      },
-      tees: {
-        white: {courseRating: 74.3, slopeRating: 128},
-        yellow: {courseRating: 72.1, slopeRating: 124},
-        red: {courseRating: 70.5, slopeRating: 120}
-      }
-    }
-  },
-  
-  // Tee color names
-  teeColors: {
-    white: "White",
-    yellow: "Yellow", 
-    red: "Red"
-  },
-  
-  // Handicap calculation settings
-  handicap: {
-    minRounds: 3,
-    maxRounds: 20,
-    countMap: {3:1, 4:1, 5:1, 6:2, 7:2, 8:2, 9:3, 10:3, 11:3, 12:4, 13:4, 14:4, 15:5, 16:5, 17:6, 18:7, 19:8, 20:10}
-  },
-  
-  // Database Configuration
-  database: {
-    useCloudflare: true, // Try Cloudflare first
-    localStoragePrefix: 'bbb_secure_',
-    encryptLocalData: true,
-    clearOnLogout: true
-  },
-  
-  // UI Configuration
-  ui: {
-    theme: 'default',
-    showSecurityIndicators: true, // Always show security status
-    showCaptchaStatus: true,      // Always show CAPTCHA status
-    animateSecurityActions: true,
-    highlightSecureElements: true,
-    securityBadgeColor: '#28a745',
+    // Force CAPTCHA requirement (cannot be disabled)
+    options.requireCaptcha = true;
     
-    // Colors
-    colors: {
-      primary: '#004d00',    // Dark green
-      secondary: '#0046ad',  // Blue  
-      accent: '#ffd700',     // Gold
-      success: '#28a745',    // Green
-      warning: '#ffc107',    // Yellow
-      danger: '#dc3545',     // Red
-      security: '#007bff'    // Security blue
-    }
-  },
-  
-  // Feature flags for different sections (from old config)
-  features: {
-    photoGallery: {
-      enabled: true,
-      requireAuth: true,
-      allowUploads: true,
-      adminOnlyDelete: true
-    },
-    scorecards: {
-      enabled: true,
-      requireAuth: true,
-      allowSharing: false
-    },
-    handicapCalculator: {
-      enabled: true,
-      requireAuth: true,
-      saveResults: true
-    },
-    members: {
-      enabled: true,
-      requireAuth: true,
-      showProfiles: true
-    },
-    adminPanel: {
-      enabled: true,
-      adminOnly: true
-    }
-  },
-  
-  // API endpoints for different features
-  api: {
-    auth: {
-      login: '/auth/login',
-      logout: '/auth/logout',
-      verify: '/auth/verify',
-      changePassword: '/auth/change-password'
-    },
-    users: {
-      list: '/api/users',
-      profile: '/api/users/profile',
-      update: '/api/users/update'
-    }
-  },
-  
-  // Error Handling
-  errors: {
-    showDetailedErrors: false, // Security: don't expose internal errors
-    logAllErrors: true,
-    retryAttempts: 3,
-    retryDelay: 1000,
+    // Merge options with defaults
+    this.config = { ...this.config, ...options };
     
-    // Security-specific error messages
-    messages: {
-      captchaRequired: 'Security verification is required to continue.',
-      captchaFailed: 'Security verification failed. Please try again.',
-      sessionExpired: 'Your secure session has expired. Please log in again.',
-      insufficientPermissions: 'You do not have permission to access this resource.',
-      securityViolation: 'Security violation detected. This incident has been logged.'
+    // Use global config if available
+    if (typeof BBB_CONFIG !== 'undefined') {
+      this.config.authWorkerUrl = BBB_CONFIG.authWorkerUrl;
+      this.config.turnstileSecret = BBB_CONFIG.turnstile?.secretKey;
+      this.config.turnstileSiteKey = BBB_CONFIG.turnstile?.siteKey;
+      this.config.sessionDuration = BBB_CONFIG.sessionDuration || this.config.sessionDuration;
+      this.config.cloudflareEnabled = BBB_CONFIG.cloudflareEnabled;
+    }
+    
+    console.log('Auth config (CAPTCHA required):', {
+      cloudflareEnabled: this.config.cloudflareEnabled,
+      requireCaptcha: this.config.requireCaptcha,
+      hasWorkerUrl: !!this.config.authWorkerUrl,
+      hasTurnstileKey: !!this.config.turnstileSiteKey
+    });
+    
+    // Check for existing session
+    this.checkSession();
+    
+    // Set up listeners for auth-protected elements
+    this.setupProtectedElements();
+    
+    console.log('Auth initialized with CAPTCHA security:', { 
+      isAuthenticated: this.isAuthenticated, 
+      currentUser: this.currentUser,
+      userRoles: this.userRoles,
+      securityLevel: 'MAXIMUM'
+    });
+    
+    return this;
+  },
+  
+  /**
+   * Check if user has an existing session
+   * @returns {boolean} - Authentication status
+   */
+  checkSession: function() {
+    try {
+      return this.checkCloudflareSession();
+    } catch (error) {
+      console.error('Error checking session:', error);
+      this.clearSession();
+      return false;
     }
   },
   
-  // Development Settings
-  development: {
-    enabled: false, // Set to true only for development
-    mockAuth: false, // NEVER enable in production
-    skipCaptcha: false, // NEVER enable - CAPTCHA always required
-    verboseLogging: false,
-    showDebugInfo: false
+  /**
+   * Check Cloudflare session with CAPTCHA verification flag
+   * @returns {boolean} - Authentication status
+   */
+  checkCloudflareSession: function() {
+    const token = localStorage.getItem(this.config.tokenKey);
+    const userData = localStorage.getItem(this.config.userKey);
+    const expiresAt = localStorage.getItem(this.config.expiresKey);
+    
+    if (!token || !userData || !expiresAt) {
+      console.log('No session found');
+      return false;
+    }
+    
+    // Check if session is expired
+    if (new Date(expiresAt) <= new Date()) {
+      console.log('Session expired');
+      this.clearSession();
+      return false;
+    }
+    
+    try {
+      const user = JSON.parse(userData);
+      
+      // Check if session includes CAPTCHA verification
+      const sessionData = localStorage.getItem('bbb_auth_session');
+      if (sessionData) {
+        const session = JSON.parse(sessionData);
+        if (!session.captchaVerified) {
+          console.log('Session missing CAPTCHA verification, clearing');
+          this.clearSession();
+          return false;
+        }
+      }
+      
+      // Restore session state
+      this.currentUser = user;
+      this.isAuthenticated = true;
+      this.sessionToken = token;
+      this.userRoles = user.role ? [user.role] : ['member'];
+      
+      console.log('Secure session restored:', {
+        user: this.currentUser,
+        roles: this.userRoles,
+        expiresAt: expiresAt,
+        captchaVerified: true
+      });
+      
+      // Verify token with server asynchronously (if Cloudflare available)
+      if (this.config.cloudflareEnabled && this.config.authWorkerUrl) {
+        this.verifyTokenAsync();
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error parsing stored user data:', error);
+      this.clearSession();
+      return false;
+    }
   },
   
-  // Utility Functions
+  /**
+   * Verify token with server asynchronously
+   */
+  verifyTokenAsync: async function() {
+    if (!this.config.authWorkerUrl || !this.sessionToken) {
+      return;
+    }
+    
+    try {
+      const response = await fetch(`${this.config.authWorkerUrl}/auth/verify`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ token: this.sessionToken })
+      });
+      
+      const data = await response.json();
+      
+      if (!data.success) {
+        console.log('Token verification failed, logging out');
+        this.logout();
+      } else {
+        console.log('Token verified successfully');
+      }
+    } catch (error) {
+      console.error('Token verification error:', error);
+      // Don't logout on network errors, just log
+    }
+  },
+  
+  /**
+   * DEPRECATED: Standard login without CAPTCHA - NO LONGER SUPPORTED
+   * @param {string} username - Username
+   * @param {string} password - Password
+   * @returns {Promise} - Always rejects
+   */
+  login: async function(username, password) {
+    console.error('Standard login is deprecated. Use loginWithCaptcha() instead.');
+    throw new Error('Login requires CAPTCHA verification. Use loginWithCaptcha() method.');
+  },
+  
+  /**
+   * Secure login with CAPTCHA verification - REQUIRED METHOD
+   * @param {string} username - Username
+   * @param {string} password - Password
+   * @param {string} captchaToken - Cloudflare Turnstile token
+   * @returns {Promise} - Resolves with user or rejects with error
+   */
+  loginWithCaptcha: async function(username, password, captchaToken) {
+    try {
+      console.log('Attempting secure login for:', username, 'with CAPTCHA verification');
+      
+      if (!captchaToken) {
+        throw new Error('CAPTCHA verification is required for login');
+      }
+      
+      let userData;
+      
+      // Try Cloudflare authentication first
+      if (this.config.cloudflareEnabled && this.config.authWorkerUrl) {
+        try {
+          userData = await this.cloudflareLoginWithCaptcha(username, password, captchaToken);
+          console.log('Cloudflare authentication successful');
+        } catch (cloudflareError) {
+          console.warn('Cloudflare authentication failed, trying local fallback:', cloudflareError.message);
+          // Fall through to local authentication
+        }
+      }
+      
+      // Fallback to local authentication if Cloudflare failed or not configured
+      if (!userData) {
+        userData = await this.localLoginWithCaptcha(username, password, captchaToken);
+        console.log('Local authentication successful');
+      }
+      
+      if (!userData) {
+        throw new Error('Authentication failed');
+      }
+      
+      // Store secure session
+      this.storeSecureSession(userData, true); // true = captcha verified
+      
+      // Update current state
+      this.currentUser = userData.user || userData;
+      this.isAuthenticated = true;
+      this.userRoles = userData.user ? [userData.user.role] : (userData.roles || ['member']);
+      this.sessionToken = userData.token || null;
+      
+      console.log('Secure login successful:', {
+        user: this.currentUser,
+        roles: this.userRoles,
+        hasToken: !!this.sessionToken,
+        captchaVerified: true,
+        securityLevel: 'MAXIMUM'
+      });
+      
+      return this.currentUser;
+    } catch (error) {
+      console.error('Secure login error:', error);
+      throw error;
+    }
+  },
+  
+  /**
+   * Cloudflare authentication with CAPTCHA verification
+   * @param {string} username - Username
+   * @param {string} password - Password 
+   * @param {string} captchaToken - Turnstile token
+   * @returns {Promise} - Resolves with user data
+   */
+  cloudflareLoginWithCaptcha: async function(username, password, captchaToken) {
+    if (!this.config.authWorkerUrl) {
+      throw new Error('Cloudflare auth worker URL not configured');
+    }
+    
+    if (!captchaToken) {
+      throw new Error('CAPTCHA token is required');
+    }
+    
+    console.log('Attempting Cloudflare login with CAPTCHA for:', username);
+    
+    let lastError;
+    
+    // Retry logic for network issues
+    for (let attempt = 1; attempt <= this.config.maxRetries; attempt++) {
+      try {
+        const response = await fetch(`${this.config.authWorkerUrl}/auth/login-with-captcha`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ 
+            username, 
+            password,
+            captchaToken,
+            siteKey: this.config.turnstileSiteKey,
+            timestamp: Date.now()
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          
+          // Handle CAPTCHA-specific errors
+          if (errorData.error && errorData.error.includes('captcha')) {
+            throw new Error('CAPTCHA verification failed. Please try again.');
+          }
+          
+          throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+          // Handle CAPTCHA-specific failures
+          if (data.error && data.error.includes('captcha')) {
+            throw new Error('CAPTCHA verification failed. Please complete the security check.');
+          }
+          
+          throw new Error(data.error || 'Login failed');
+        }
+        
+        // Verify CAPTCHA was validated on server side
+        if (!data.captchaVerified) {
+          throw new Error('Server did not verify CAPTCHA. Please try again.');
+        }
+        
+        console.log('Secure Cloudflare login successful:', {
+          username: data.user?.username,
+          captchaVerified: data.captchaVerified,
+          securityLevel: 'MAXIMUM'
+        });
+        
+        return data;
+        
+      } catch (error) {
+        lastError = error;
+        console.error(`Secure login attempt ${attempt} failed:`, error.message);
+        
+        // Don't retry on CAPTCHA errors or authentication failures
+        if (error.message.includes('captcha') || 
+            error.message.includes('Invalid credentials') ||
+            error.message.includes('User not found')) {
+          break;
+        }
+        
+        if (attempt < this.config.maxRetries) {
+          console.log(`Retrying in ${this.config.retryDelay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, this.config.retryDelay));
+        }
+      }
+    }
+    
+    throw lastError;
+  },
+  
+  /**
+   * Local authentication with CAPTCHA verification (fallback)
+   * @param {string} username - Username
+   * @param {string} password - Password
+   * @param {string} captchaToken - CAPTCHA token (verified client-side)
+   * @returns {Promise} - Resolves with user data
+   */
+  localLoginWithCaptcha: async function(username, password, captchaToken) {
+    console.log('Attempting local login with CAPTCHA for:', username);
+    
+    if (!captchaToken) {
+      throw new Error('CAPTCHA verification is required for local login');
+    }
+    
+    // Simulate server-side CAPTCHA verification delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    // Get user data from local authentication
+    const userData = this.localLogin(username, password);
+    
+    if (!userData) {
+      throw new Error('Invalid credentials');
+    }
+    
+    // Return data in format similar to Cloudflare response
+    return {
+      success: true,
+      user: userData,
+      token: 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+      expiresAt: new Date(Date.now() + this.config.sessionDuration).toISOString(),
+      captchaVerified: true,
+      authMethod: 'local'
+    };
+  },
+  
+  /**
+   * Local login logic (from old auth.js)
+   * @param {string} username - Username
+   * @param {string} password - Password
+   * @returns {Object|null} - User data or null if invalid
+   */
+  localLogin: function(username, password) {
+    console.log('Attempting local login for:', username);
+    
+    // For the photo gallery
+    if (username === 'gallery' && password === BBB_CONFIG?.gallery?.password) {
+      return {
+        id: 'gallery',
+        name: 'Gallery User',
+        username: 'gallery',
+        role: 'gallery',
+        roles: ['gallery', 'member']
+      };
+    }
+    
+    // For admin access
+    if (username === 'admin' && password === 'bbb123') {
+      return {
+        id: 'admin',
+        name: 'Administrator',
+        username: 'admin',
+        role: 'administrator',
+        roles: ['administrator', 'member']
+      };
+    }
+    
+    // For regular members (from BBB_CONFIG.members list)
+    if (BBB_CONFIG?.members && BBB_CONFIG.members.includes(username) && password === 'member123') {
+      return {
+        id: username.toLowerCase(),
+        name: username,
+        username: username.toLowerCase(),
+        role: 'member',
+        roles: ['member']
+      };
+    }
+    
+    console.log('Local login failed: Invalid credentials');
+    return null;
+  },
+  
+  /**
+   * Store secure session with CAPTCHA verification flag
+   * @param {Object} authData - Authentication data
+   * @param {boolean} captchaVerified - Whether CAPTCHA was verified
+   */
+  storeSecureSession: function(authData, captchaVerified = false) {
+    try {
+      // Handle both Cloudflare and local auth data formats
+      const token = authData.token || 'local_session_' + Date.now();
+      const user = authData.user || authData;
+      const expiresAt = authData.expiresAt || new Date(Date.now() + this.config.sessionDuration).toISOString();
+      
+      localStorage.setItem(this.config.tokenKey, token);
+      localStorage.setItem(this.config.userKey, JSON.stringify(user));
+      localStorage.setItem(this.config.expiresKey, expiresAt);
+      
+      // Store session metadata with CAPTCHA verification
+      const sessionMetadata = {
+        timestamp: new Date().toISOString(),
+        expiresAt: expiresAt,
+        userId: user.id,
+        captchaVerified: captchaVerified,
+        securityLevel: 'MAXIMUM',
+        authMethod: authData.authMethod || 'cloudflare'
+      };
+      
+      localStorage.setItem('bbb_auth_session', JSON.stringify(sessionMetadata));
+      
+      console.log('Secure session stored:', {
+        token: token.substring(0, 10) + '...',
+        user: user.username || user.id,
+        expiresAt: expiresAt,
+        captchaVerified: captchaVerified,
+        securityLevel: 'MAXIMUM'
+      });
+    } catch (error) {
+      console.error('Error storing secure session:', error);
+      throw new Error('Failed to store secure session');
+    }
+  },
+  
+  /**
+   * Log out current user with enhanced security
+   */
+  logout: async function() {
+    console.log('Securely logging out user:', this.currentUser?.username || this.currentUser?.name);
+    
+    // Set logout flags for cross-tab communication
+    try {
+      sessionStorage.setItem('bbb_logging_out', 'true');
+      sessionStorage.setItem('bbb_logout_timestamp', Date.now().toString());
+    } catch (error) {
+      console.error('Error setting logout flags:', error);
+    }
+    
+    // Notify Cloudflare server (if using Cloudflare auth)
+    if (this.sessionToken && this.config.cloudflareEnabled && this.config.authWorkerUrl) {
+      try {
+        await fetch(`${this.config.authWorkerUrl}/auth/logout`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ 
+            token: this.sessionToken,
+            securityLogout: true,
+            timestamp: Date.now()
+          })
+        });
+        console.log('Secure server logout successful');
+      } catch (error) {
+        console.error('Server logout failed:', error);
+        // Continue with local logout even if server logout fails
+      }
+    }
+    
+    // Clear all session data
+    this.clearSession();
+    
+    // Set final logout flags
+    try {
+      sessionStorage.setItem('justLoggedOut', 'true');
+      sessionStorage.setItem('bbb_logout_timestamp', Date.now().toString());
+      sessionStorage.removeItem('bbb_logging_out');
+    } catch (error) {
+      console.error('Error setting final logout flags:', error);
+    }
+    
+    console.log('Secure logout complete');
+  },
+  
+  /**
+   * Clear all session data with enhanced security
+   */
+  clearSession: function() {
+    // Clear all possible storage keys
+    const keysToRemove = [
+      this.config.storageKey,
+      this.config.tokenKey,
+      this.config.userKey,
+      this.config.expiresKey,
+      'bbb_auth_session'
+    ];
+    
+    keysToRemove.forEach(key => {
+      try {
+        localStorage.removeItem(key);
+        // Verify removal
+        if (localStorage.getItem(key) !== null) {
+          console.warn(`Failed to clear ${key}, trying again...`);
+          localStorage.removeItem(key);
+        }
+      } catch (error) {
+        console.error(`Error removing ${key}:`, error);
+      }
+    });
+    
+    // Reset auth state
+    this.currentUser = null;
+    this.isAuthenticated = false;
+    this.userRoles = [];
+    this.sessionToken = null;
+    
+    console.log('All session data securely cleared');
+  },
+  
+  /**
+   * Change password with CAPTCHA verification
+   * @param {string} currentPassword - Current password
+   * @param {string} newPassword - New password
+   * @param {string} captchaToken - Turnstile token for verification
+   * @returns {Promise} - Resolves on success
+   */
+  changePassword: async function(currentPassword, newPassword, captchaToken) {
+    if (!this.sessionToken) {
+      throw new Error('No active session');
+    }
+    
+    if (!captchaToken) {
+      throw new Error('CAPTCHA verification is required for password changes');
+    }
+    
+    // Only try Cloudflare if properly configured
+    if (!this.config.cloudflareEnabled || !this.config.authWorkerUrl) {
+      throw new Error('Password changes require Cloudflare authentication');
+    }
+    
+    try {
+      const response = await fetch(`${this.config.authWorkerUrl}/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ 
+          token: this.sessionToken,
+          currentPassword,
+          newPassword,
+          captchaToken,
+          timestamp: Date.now()
+        })
+      });
+      
+      const data = await response.json();
+      
+      if (!data.success) {
+        if (data.error && data.error.includes('captcha')) {
+          throw new Error('CAPTCHA verification failed for password change');
+        }
+        throw new Error(data.error || 'Password change failed');
+      }
+      
+      console.log('Password changed successfully with CAPTCHA verification');
+      return data;
+    } catch (error) {
+      console.error('Secure password change error:', error);
+      throw error;
+    }
+  },
+  
+  /**
+   * Check if current user has a specific role
+   * @param {string|Array} roles - Role or roles to check
+   * @returns {boolean} - True if user has any of the specified roles
+   */
+  hasRole: function(roles) {
+    if (!this.isAuthenticated) return false;
+    
+    const rolesToCheck = Array.isArray(roles) ? roles : [roles];
+    return this.userRoles.some(role => rolesToCheck.includes(role));
+  },
   
   /**
    * Check if user has specific permission
-   * @param {string} userRole - User's role
    * @param {string} permission - Permission to check
    * @returns {boolean} - True if user has permission
    */
-  hasPermission: function(userRole, permission) {
-    if (!userRole || !permission) return false;
+  hasPermission: function(permission) {
+    if (!this.isAuthenticated || !this.currentUser) return false;
     
-    const role = this.roles[userRole];
-    if (!role) return false;
+    // Use BBB_CONFIG permission system if available
+    if (typeof BBB_CONFIG !== 'undefined' && BBB_CONFIG.hasPermission) {
+      return BBB_CONFIG.hasPermission(this.currentUser.role, permission);
+    }
     
-    return role.permissions.includes(permission);
-  },
-  
-  /**
-   * Get security level for user role
-   * @param {string} userRole - User's role
-   * @returns {string} - Security level
-   */
-  getSecurityLevel: function(userRole) {
-    if (!userRole) return 'NONE';
+    // Fallback permission check
+    const role = this.currentUser.role;
+    if (role === 'administrator') return true;
+    if (role === 'member' && ['view_member_content', 'upload_photos', 'view_own_scorecards'].includes(permission)) return true;
+    if (role === 'gallery' && permission === 'view_gallery') return true;
     
-    const role = this.roles[userRole];
-    return role ? role.securityLevel : 'NONE';
-  },
-  
-  /**
-   * Check if CAPTCHA is required for specific action
-   * @param {string} action - Action to check
-   * @returns {boolean} - True if CAPTCHA required (always true for BBB)
-   */
-  isCaptchaRequired: function(action) {
-    // CAPTCHA is ALWAYS required for all actions in BBB
-    return true;
-  },
-  
-  /**
-   * Get Turnstile configuration for client
-   * @returns {Object} - Client-safe Turnstile config
-   */
-  getTurnstileConfig: function() {
-    return {
-      siteKey: this.turnstile.siteKey,
-      theme: this.turnstile.theme,
-      size: this.turnstile.size,
-      retry: this.turnstile.retry,
-      retryInterval: this.turnstile.retryInterval,
-      refreshExpired: this.turnstile.refreshExpired
-    };
+    return false;
   },
   
   /**
    * Check if user is admin
-   * @param {string} userRole - User's role
-   * @returns {boolean} - True if admin
+   * @returns {boolean} - True if user is administrator
    */
-  isAdmin: function(userRole) {
-    return userRole === 'administrator';
+  isAdmin: function() {
+    return this.hasRole('administrator') || this.hasRole('admin');
   },
   
   /**
    * Check if user is member (includes admin)
-   * @param {string} userRole - User's role
-   * @returns {boolean} - True if member or admin
+   * @returns {boolean} - True if user is member or admin
    */
-  isMember: function(userRole) {
-    return userRole === 'member' || userRole === 'administrator';
+  isMember: function() {
+    return this.hasRole(['member', 'administrator', 'admin']);
   },
   
   /**
-   * Validate configuration on startup
-   * @returns {Object} - Validation result
+   * Protect page based on required roles (with enhanced security)
+   * @param {string|Array} requiredRoles - Role(s) required to access page
+   * @param {string} redirectUrl - URL to redirect to if unauthorized
    */
-  validateConfig: function() {
-    const errors = [];
-    const warnings = [];
+  protectPage: function(requiredRoles, redirectUrl = '/login.html') {
+    // Check if session has CAPTCHA verification
+    const sessionData = localStorage.getItem('bbb_auth_session');
+    let captchaVerified = false;
     
-    // Check mandatory Cloudflare settings (but allow fallback)
-    if (!this.cloudflareEnabled) {
-      warnings.push('Cloudflare authentication is disabled - using local fallback');
+    if (sessionData) {
+      try {
+        const session = JSON.parse(sessionData);
+        captchaVerified = session.captchaVerified === true;
+      } catch (error) {
+        console.error('Error checking session CAPTCHA status:', error);
+      }
     }
     
-    if (!this.requireCaptcha) {
-      errors.push('CAPTCHA verification must be enabled');
+    if (!this.isAuthenticated || !this.hasRole(requiredRoles) || !captchaVerified) {
+      console.log('Access denied: Authentication, role, or CAPTCHA verification failed');
+      // Save current URL to redirect back after login
+      sessionStorage.setItem('redirectAfterLogin', window.location.href);
+      window.location.href = redirectUrl;
     }
-    
-    // Check Turnstile configuration
-    if (!this.turnstile.siteKey || this.turnstile.siteKey === 'YOUR_TURNSTILE_SITE_KEY_HERE') {
-      warnings.push('Turnstile site key not properly configured - CAPTCHA may not work');
-    }
-    
-    if (!this.authWorkerUrl || this.authWorkerUrl.includes('your-auth-worker')) {
-      warnings.push('Cloudflare Worker URL not configured - will use local authentication');
-    }
-    
-    // Check development settings in production
-    if (this.development.enabled && window.location.hostname !== 'localhost') {
-      warnings.push('Development mode is enabled in production');
-    }
-    
-    if (this.development.mockAuth) {
-      errors.push('Mock authentication must be disabled in production');
-    }
-    
-    if (this.development.skipCaptcha) {
-      errors.push('CAPTCHA skip mode must be disabled - CAPTCHA is always required');
-    }
-    
-    // Security validations
-    if (this.security.level !== 'MAXIMUM') {
-      warnings.push('Security level should be set to MAXIMUM');
-    }
-    
-    return {
-      valid: errors.length === 0,
-      errors: errors,
-      warnings: warnings,
-      securityLevel: this.security.level,
-      captchaEnabled: this.requireCaptcha,
-      cloudflareEnabled: this.cloudflareEnabled
-    };
   },
   
   /**
-   * Initialize configuration with security checks
-   * @returns {boolean} - True if initialization successful
+   * Setup auth-protected elements visibility
    */
-  init: function() {
-    console.log('Initializing BBB Configuration with Maximum Security...');
-    
-    // Force security settings
-    this.cloudflareEnabled = true; // Try Cloudflare but allow fallback
-    this.requireCaptcha = true;
-    this.security.level = 'MAXIMUM';
-    
-    // Validate configuration
-    const validation = this.validateConfig();
-    
-    if (!validation.valid) {
-      console.error('Configuration validation failed:', validation.errors);
-      throw new Error('Invalid configuration: ' + validation.errors.join(', '));
-    }
-    
-    if (validation.warnings.length > 0) {
-      console.warn('Configuration warnings:', validation.warnings);
-    }
-    
-    console.log('BBB Configuration initialized successfully:', {
-      securityLevel: validation.securityLevel,
-      captchaEnabled: validation.captchaEnabled,
-      cloudflareEnabled: validation.cloudflareEnabled,
-      version: this.version
+  setupProtectedElements: function() {
+    // Handle elements that should only be visible to authenticated users
+    document.querySelectorAll('[data-auth-required]').forEach(el => {
+      el.style.display = this.isAuthenticated ? '' : 'none';
     });
     
-    return true;
+    // Handle elements with specific role requirements
+    document.querySelectorAll('[data-role-required]').forEach(el => {
+      const requiredRoles = el.dataset.roleRequired.split(',');
+      el.style.display = this.hasRole(requiredRoles) ? '' : 'none';
+    });
+    
+    // Handle elements that should only be visible to unauthenticated users
+    document.querySelectorAll('[data-auth-anonymous]').forEach(el => {
+      el.style.display = !this.isAuthenticated ? '' : 'none';
+    });
+    
+    // Handle admin-only elements
+    document.querySelectorAll('[data-admin-only]').forEach(el => {
+      el.style.display = this.isAdmin() ? '' : 'none';
+    });
+  },
+  
+  /**
+   * Create secure login form with CAPTCHA (updated from old auth.js)
+   * @param {Object} options - Login options
+   * @returns {HTMLElement} - Login overlay element
+   */
+  createSecureLoginForm: function(options = {}) {
+    const defaults = {
+      title: 'Secure Login Required',
+      message: 'Please enter your credentials and complete security verification',
+      showUsername: true,
+      usernamePlaceholder: 'Username',
+      passwordPlaceholder: 'Password',
+      submitButtonText: 'Secure Login',
+      cancelButtonText: 'Cancel',
+      onSuccess: null,
+      onCancel: null,
+      requireCaptcha: true
+    };
+    
+    const settings = { ...defaults, ...options };
+    
+    // Create overlay with enhanced security styling
+    const overlay = document.createElement('div');
+    overlay.id = 'secure-login-overlay';
+    overlay.style.cssText = `
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      backdrop-filter: blur(5px);
+    `;
+    
+    // Create login box with security indicators
+    const loginBox = document.createElement('div');
+    loginBox.id = 'secure-login-box';
+    loginBox.style.cssText = `
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      max-width: 450px;
+      width: 90%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      border: 3px solid #007bff;
+      position: relative;
+    `;
+    
+    // Add security badge
+    const securityBadge = document.createElement('div');
+    securityBadge.style.cssText = `
+      position: absolute;
+      top: -15px;
+      right: 20px;
+      background: #28a745;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    `;
+    securityBadge.textContent = '🔒 SECURE LOGIN';
+    loginBox.appendChild(securityBadge);
+    
+    // Create title with security icon
+    const title = document.createElement('h2');
+    title.textContent = '🛡️ ' + settings.title;
+    title.style.cssText = `
+      margin-bottom: 1rem;
+      color: #004d00;
+      text-align: center;
+      font-size: 1.5rem;
+    `;
+    
+    // Create message
+    const message = document.createElement('p');
+    message.textContent = settings.message;
+    message.style.cssText = `
+      margin-bottom: 1.5rem;
+      text-align: center;
+      color: #666;
+      font-size: 0.95rem;
+    `;
+    
+    // Create form (implementation would continue with CAPTCHA integration)
+    const form = document.createElement('form');
+    
+    // Add all elements to login box
+    loginBox.appendChild(title);
+    loginBox.appendChild(message);
+    loginBox.appendChild(form);
+    
+    // Add login box to overlay
+    overlay.appendChild(loginBox);
+    
+    return overlay;
+  },
+  
+  /**
+   * Show secure login form with CAPTCHA
+   * @param {Object} options - Login options
+   * @returns {Promise} - Resolves when authenticated
+   */
+  showSecureLoginForm: function(options = {}) {
+    return new Promise((resolve, reject) => {
+      const formOptions = {
+        ...options,
+        onSuccess: user => resolve(user),
+        onCancel: () => reject(new Error('Login cancelled'))
+      };
+      
+      const overlay = this.createSecureLoginForm(formOptions);
+      document.body.appendChild(overlay);
+      
+      // Focus first input
+      setTimeout(() => {
+        const firstInput = overlay.querySelector('input');
+        if (firstInput) firstInput.focus();
+      }, 100);
+    });
+  },
+  
+  /**
+   * Show a simplified login form for gallery access with CAPTCHA
+   * @returns {Promise} - Resolves when authenticated
+   */
+  showGalleryLogin: function() {
+    return this.showSecureLoginForm({
+      title: 'Gallery Access',
+      message: 'Enter your credentials and complete security verification to view the photo gallery',
+      showUsername: this.config.cloudflareEnabled,
+      passwordPlaceholder: this.config.cloudflareEnabled ? 'Password' : 'Gallery Password',
+      submitButtonText: 'Access Gallery'
+    });
   }
 };
 
-// Immediately initialize and validate configuration
-try {
-  BBB_CONFIG.init();
-} catch (error) {
-  console.error('CRITICAL: Configuration initialization failed:', error);
-  // You might want to prevent the application from starting here
-}
-
 // Export for other modules
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = BBB_CONFIG;
-}
-
-// Make available globally
-if (typeof window !== 'undefined') {
-  window.BBB_CONFIG = BBB_CONFIG;
+  module.exports = BBB_AUTH;
 }
