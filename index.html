@@ -141,7 +141,7 @@
       padding: 8rem 2rem 4rem 2rem;
       position: relative;
       overflow: hidden;
-      margin-top: 70px; /* Account for fixed header */
+      margin-top: 70px;
     }
 
     .hero::before {
@@ -211,7 +211,7 @@
       padding: 2rem 2rem;
       max-width: 1200px;
       margin: 0 auto;
-      margin-top: 1rem; /* Much closer to construction banner */
+      margin-top: 1rem;
     }
 
     .nav-title {
@@ -333,16 +333,7 @@
       margin: 0 auto;
     }
 
-    .featured-image {
-      max-width: 100%;
-      height: 400px;
-      object-fit: cover;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-      margin-top: 2rem;
-    }
-
-    /* Features Grid in Featured Section */
+    /* Features Grid */
     .features-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -391,12 +382,6 @@
       padding: 2rem;
     }
 
-    .return-text {
-      font-style: italic;
-      opacity: 0.8;
-      margin-bottom: 1rem;
-    }
-
     /* Under Construction Banner */
     .construction-banner {
       background: linear-gradient(45deg, var(--bbb-gold), #ffed4e);
@@ -405,7 +390,7 @@
       text-align: center;
       font-weight: 600;
       animation: pulse 2s infinite;
-      margin-top: 90px; /* Account for fixed header */
+      margin-top: 90px;
     }
 
     @keyframes pulse {
@@ -415,11 +400,7 @@
 
     /* Member-only content styling */
     .member-only {
-      display: none; /* Hidden by default, shown for authenticated users */
-    }
-
-    .auth-required {
-      /* Will be hidden for non-authenticated users */
+      display: none;
     }
 
     /* Auth prompt modal */
@@ -466,12 +447,12 @@
       }
 
       .construction-banner {
-        margin-top: 120px; /* Extra space for mobile header that may wrap */
+        margin-top: 120px;
       }
       
       .nav-section, .featured-section {
         padding: 1.5rem 1rem;
-        margin-top: 0.5rem; /* Closer on mobile too */
+        margin-top: 0.5rem;
       }
       
       .nav-grid {
@@ -520,7 +501,6 @@
         </div>
       </div>
       <div class="header-right">
-        <!-- Auth controls will be added here by JavaScript -->
         <a href="login.html" class="login-btn" id="login-link">Login</a>
       </div>
     </div>
@@ -625,16 +605,23 @@
     <p>&copy; 2025 Birdie Bush Bandits - Founded August 2020</p>
   </footer>
 
-  <!-- Load BBB Modules with Fallbacks -->
+  <!-- Embedded BBB Modules - All Self-Contained -->
   <script>
-    // Create fallback modules first
-    console.log('🔧 Setting up BBB module fallbacks...');
+    console.log('🚀 Loading BBB System - Standalone Version');
 
-    // Fallback BBB_CONFIG (matches the fixed config.js)
-    window.BBB_CONFIG = window.BBB_CONFIG || {
+    // ===== BBB_CONFIG Module =====
+    window.BBB_CONFIG = {
+      // Core Application Settings
+      appName: 'Birdie Bush Bandits',
+      version: '2.0.0-standalone',
+      founded: 'August 2020',
+      
+      // Cloudflare Settings (with local fallback)
       cloudflareEnabled: true,
       requireCaptcha: true,
       authWorkerUrl: 'https://bbb-auth-worker.cf1demouk.workers.dev',
+      
+      // Cloudflare Turnstile CAPTCHA Configuration
       turnstile: {
         siteKey: '0x4AAAAAABfEpGjFkd7F7pec',
         theme: 'light',
@@ -643,14 +630,20 @@
         retryInterval: 8000,
         refreshExpired: 'auto'
       },
+      
+      // Member Configuration (for local authentication)
       members: ['Amrit', 'Kam', 'Vish', 'Ravi', 'Bal', 'Vick', 'Michael', 'Justy', 'Phuperjee', 'Indy', 'Maj', 'Sama'],
-      gallery: { password: 'secret123' },
-      hasPermission: function(userRole, permission) {
-        if (!userRole || !permission) return false;
-        const role = this.roles?.[userRole];
-        if (!role) return false;
-        return role.permissions?.includes(permission) || false;
+      
+      // Gallery Configuration
+      gallery: {
+        password: 'secret123',
+        maxFileSize: 10 * 1024 * 1024,
+        allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
+        requireLogin: true,
+        requireCaptcha: true
       },
+      
+      // User Roles and Permissions
       roles: {
         administrator: {
           name: 'Administrator',
@@ -658,7 +651,7 @@
           securityLevel: 'MAXIMUM'
         },
         member: {
-          name: 'Member', 
+          name: 'Member',
           permissions: ['view_member_content', 'upload_photos', 'view_own_scorecards', 'create_scorecards', 'view_gallery'],
           securityLevel: 'MAXIMUM'
         },
@@ -667,47 +660,113 @@
           permissions: ['view_gallery'],
           securityLevel: 'MAXIMUM'
         }
+      },
+      
+      // Session Management
+      sessionDuration: 24 * 60 * 60 * 1000, // 24 hours
+      
+      // Utility Functions
+      hasPermission: function(userRole, permission) {
+        if (!userRole || !permission) return false;
+        const role = this.roles[userRole];
+        if (!role) return false;
+        return role.permissions.includes(permission);
+      },
+      
+      isAdmin: function(userRole) {
+        return userRole === 'administrator';
+      },
+      
+      isMember: function(userRole) {
+        return userRole === 'member' || userRole === 'administrator';
+      },
+      
+      isCaptchaRequired: function(action) {
+        return true; // Always required for BBB
+      },
+      
+      getTurnstileConfig: function() {
+        return {
+          siteKey: this.turnstile.siteKey,
+          theme: this.turnstile.theme,
+          size: this.turnstile.size,
+          retry: this.turnstile.retry,
+          retryInterval: this.turnstile.retryInterval,
+          refreshExpired: this.turnstile.refreshExpired
+        };
       }
     };
 
-    // Fallback BBB_AUTH (matches the fixed auth.js)
-    window.BBB_AUTH = window.BBB_AUTH || {
+    // ===== BBB_AUTH Module =====
+    window.BBB_AUTH = {
       currentUser: null,
       isAuthenticated: false,
       userRoles: [],
       sessionToken: null,
       
+      config: {
+        storageKey: 'bbb_auth',
+        tokenKey: 'bbb_session_token',
+        userKey: 'bbb_current_user',
+        expiresKey: 'bbb_session_expires',
+        cloudflareEnabled: true,
+        requireCaptcha: true,
+        sessionDuration: 24 * 60 * 60 * 1000,
+        maxRetries: 3,
+        retryDelay: 1000
+      },
+      
       init: function(options = {}) {
-        console.log('✅ BBB_AUTH initialized (fallback version)');
-        // Check for existing session on init
+        console.log('✅ BBB_AUTH initializing...');
+        
+        // Force CAPTCHA requirement
+        options.requireCaptcha = true;
+        this.config = { ...this.config, ...options };
+        
+        // Use global config
+        if (BBB_CONFIG) {
+          this.config.authWorkerUrl = BBB_CONFIG.authWorkerUrl;
+          this.config.turnstileSiteKey = BBB_CONFIG.turnstile?.siteKey;
+          this.config.sessionDuration = BBB_CONFIG.sessionDuration || this.config.sessionDuration;
+          this.config.cloudflareEnabled = BBB_CONFIG.cloudflareEnabled;
+        }
+        
+        // Check for existing session
         this.checkSession();
+        
+        console.log('✅ BBB_AUTH initialized:', {
+          isAuthenticated: this.isAuthenticated,
+          currentUser: this.currentUser,
+          userRoles: this.userRoles
+        });
+        
         return this;
       },
-
+      
       checkSession: function() {
         try {
-          const token = localStorage.getItem('bbb_session_token');
-          const userData = localStorage.getItem('bbb_current_user');
-          const expiresAt = localStorage.getItem('bbb_session_expires');
+          const token = localStorage.getItem(this.config.tokenKey);
+          const userData = localStorage.getItem(this.config.userKey);
+          const expiresAt = localStorage.getItem(this.config.expiresKey);
           
           if (!token || !userData || !expiresAt) {
-            console.log('No session found');
+            console.log('❌ No session found');
             return false;
           }
           
           // Check if session is expired
           if (new Date(expiresAt) <= new Date()) {
-            console.log('Session expired');
+            console.log('❌ Session expired');
             this.clearSession();
             return false;
           }
           
-          // Check if session includes CAPTCHA verification
+          // Check CAPTCHA verification
           const sessionData = localStorage.getItem('bbb_auth_session');
           if (sessionData) {
             const session = JSON.parse(sessionData);
             if (!session.captchaVerified) {
-              console.log('Session missing CAPTCHA verification, clearing');
+              console.log('❌ Session missing CAPTCHA verification');
               this.clearSession();
               return false;
             }
@@ -722,80 +781,137 @@
           this.userRoles = user.role ? [user.role] : ['member'];
           
           console.log('✅ Session restored:', {
-            user: this.currentUser,
+            user: this.currentUser.username || this.currentUser.id,
             roles: this.userRoles,
-            expiresAt: expiresAt,
-            captchaVerified: true
+            expiresAt: expiresAt
           });
           
           return true;
         } catch (error) {
-          console.error('Error checking session:', error);
+          console.error('❌ Error checking session:', error);
           this.clearSession();
           return false;
         }
       },
-
+      
       loginWithCaptcha: async function(username, password, captchaToken) {
-        console.log('🔐 Attempting secure login with CAPTCHA...');
-        
-        if (!captchaToken) {
-          throw new Error('CAPTCHA verification is required for login');
-        }
-
-        // Try Cloudflare first
         try {
-          if (BBB_CONFIG.cloudflareEnabled && BBB_CONFIG.authWorkerUrl) {
-            const response = await fetch(`${BBB_CONFIG.authWorkerUrl}/auth/login-with-captcha`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({ username, password, captchaToken, siteKey: BBB_CONFIG.turnstile.siteKey, timestamp: Date.now() })
-            });
-
-            if (response.ok) {
-              const data = await response.json();
-              if (data.success && data.captchaVerified) {
-                this.currentUser = data.user;
-                this.isAuthenticated = true;
-                this.userRoles = data.user ? [data.user.role] : ['member'];
-                this.sessionToken = data.token || null;
-                return this.currentUser;
-              }
+          console.log('🔐 Attempting secure login for:', username);
+          
+          if (!captchaToken) {
+            throw new Error('CAPTCHA verification is required for login');
+          }
+          
+          let userData;
+          
+          // Try Cloudflare authentication first
+          if (this.config.cloudflareEnabled && this.config.authWorkerUrl) {
+            try {
+              userData = await this.cloudflareLoginWithCaptcha(username, password, captchaToken);
+              console.log('✅ Cloudflare authentication successful');
+            } catch (cloudflareError) {
+              console.warn('⚠️ Cloudflare auth failed, trying local:', cloudflareError.message);
             }
           }
-        } catch (cloudflareError) {
-          console.warn('Cloudflare auth failed, trying local:', cloudflareError.message);
+          
+          // Fallback to local authentication
+          if (!userData) {
+            userData = await this.localLoginWithCaptcha(username, password, captchaToken);
+            console.log('✅ Local authentication successful');
+          }
+          
+          if (!userData) {
+            throw new Error('Authentication failed');
+          }
+          
+          // Store secure session
+          this.storeSecureSession(userData, true);
+          
+          // Update current state
+          this.currentUser = userData.user || userData;
+          this.isAuthenticated = true;
+          this.userRoles = userData.user ? [userData.user.role] : (userData.roles || ['member']);
+          this.sessionToken = userData.token || null;
+          
+          console.log('✅ Secure login successful:', {
+            user: this.currentUser,
+            roles: this.userRoles,
+            hasToken: !!this.sessionToken
+          });
+          
+          return this.currentUser;
+        } catch (error) {
+          console.error('❌ Secure login error:', error);
+          throw error;
         }
-
-        // Fallback to local authentication
+      },
+      
+      cloudflareLoginWithCaptcha: async function(username, password, captchaToken) {
+        if (!this.config.authWorkerUrl) {
+          throw new Error('Cloudflare auth worker URL not configured');
+        }
+        
+        const response = await fetch(`${this.config.authWorkerUrl}/auth/login-with-captcha`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({ 
+            username, 
+            password,
+            captchaToken,
+            siteKey: this.config.turnstileSiteKey,
+            timestamp: Date.now()
+          })
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (!data.success) {
+          throw new Error(data.error || 'Login failed');
+        }
+        
+        if (!data.captchaVerified) {
+          throw new Error('Server did not verify CAPTCHA');
+        }
+        
+        return data;
+      },
+      
+      localLoginWithCaptcha: async function(username, password, captchaToken) {
+        console.log('🔐 Attempting local login with CAPTCHA for:', username);
+        
+        if (!captchaToken) {
+          throw new Error('CAPTCHA verification is required');
+        }
+        
+        // Simulate server delay
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         const userData = this.localLogin(username, password);
+        
         if (!userData) {
           throw new Error('Invalid credentials');
         }
-
-        // Create local session data
-        const authData = {
+        
+        return {
           success: true,
           user: userData,
           token: 'local_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
-          expiresAt: new Date(Date.now() + (24 * 60 * 60 * 1000)).toISOString(),
+          expiresAt: new Date(Date.now() + this.config.sessionDuration).toISOString(),
           captchaVerified: true,
           authMethod: 'local'
         };
-
-        this.currentUser = authData.user;
-        this.isAuthenticated = true;
-        this.userRoles = authData.user.role ? [authData.user.role] : ['member'];
-        this.sessionToken = authData.token;
-
-        return this.currentUser;
       },
-
+      
       localLogin: function(username, password) {
-        console.log('Attempting local login for:', username);
+        console.log('🔐 Local login attempt for:', username);
         
-        // For the photo gallery
+        // Gallery access
         if (username === 'gallery' && password === BBB_CONFIG?.gallery?.password) {
           return {
             id: 'gallery',
@@ -806,7 +922,7 @@
           };
         }
         
-        // For admin access
+        // Admin access
         if (username === 'admin' && password === 'bbb123') {
           return {
             id: 'admin',
@@ -817,7 +933,7 @@
           };
         }
         
-        // For regular members
+        // Member access
         if (BBB_CONFIG?.members && BBB_CONFIG.members.includes(username) && password === 'member123') {
           return {
             id: username.toLowerCase(),
@@ -828,30 +944,132 @@
           };
         }
         
-        console.log('Local login failed: Invalid credentials');
+        console.log('❌ Local login failed: Invalid credentials');
         return null;
       },
-
+      
+      storeSecureSession: function(authData, captchaVerified = false) {
+        try {
+          const token = authData.token || 'local_session_' + Date.now();
+          const user = authData.user || authData;
+          const expiresAt = authData.expiresAt || new Date(Date.now() + this.config.sessionDuration).toISOString();
+          
+          localStorage.setItem(this.config.tokenKey, token);
+          localStorage.setItem(this.config.userKey, JSON.stringify(user));
+          localStorage.setItem(this.config.expiresKey, expiresAt);
+          
+          // Store session metadata
+          const sessionMetadata = {
+            timestamp: new Date().toISOString(),
+            expiresAt: expiresAt,
+            userId: user.id,
+            captchaVerified: captchaVerified,
+            securityLevel: 'MAXIMUM',
+            authMethod: authData.authMethod || 'cloudflare'
+          };
+          
+          localStorage.setItem('bbb_auth_session', JSON.stringify(sessionMetadata));
+          
+          console.log('✅ Secure session stored for:', user.username || user.id);
+        } catch (error) {
+          console.error('❌ Error storing secure session:', error);
+          throw new Error('Failed to store secure session');
+        }
+      },
+      
+      logout: async function() {
+        console.log('🚪 Logging out user:', this.currentUser?.username || this.currentUser?.name);
+        
+        // Set logout flags
+        try {
+          sessionStorage.setItem('bbb_logging_out', 'true');
+          sessionStorage.setItem('bbb_logout_timestamp', Date.now().toString());
+        } catch (error) {
+          console.error('❌ Error setting logout flags:', error);
+        }
+        
+        // Notify server if using Cloudflare
+        if (this.sessionToken && this.config.cloudflareEnabled && this.config.authWorkerUrl) {
+          try {
+            await fetch(`${this.config.authWorkerUrl}/auth/logout`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ 
+                token: this.sessionToken,
+                securityLogout: true,
+                timestamp: Date.now()
+              })
+            });
+            console.log('✅ Server logout successful');
+          } catch (error) {
+            console.error('❌ Server logout failed:', error);
+          }
+        }
+        
+        // Clear session
+        this.clearSession();
+        
+        // Set final logout flags
+        try {
+          sessionStorage.setItem('justLoggedOut', 'true');
+          sessionStorage.setItem('bbb_logout_timestamp', Date.now().toString());
+          sessionStorage.removeItem('bbb_logging_out');
+        } catch (error) {
+          console.error('❌ Error setting final logout flags:', error);
+        }
+        
+        console.log('✅ Logout complete');
+      },
+      
+      clearSession: function() {
+        const keysToRemove = [
+          this.config.storageKey,
+          this.config.tokenKey,
+          this.config.userKey,
+          this.config.expiresKey,
+          'bbb_auth_session'
+        ];
+        
+        keysToRemove.forEach(key => {
+          try {
+            localStorage.removeItem(key);
+            if (localStorage.getItem(key) !== null) {
+              localStorage.removeItem(key);
+            }
+          } catch (error) {
+            console.error(`❌ Error removing ${key}:`, error);
+          }
+        });
+        
+        this.currentUser = null;
+        this.isAuthenticated = false;
+        this.userRoles = [];
+        this.sessionToken = null;
+        
+        console.log('✅ Session data cleared');
+      },
+      
       // Role and permission methods
       hasRole: function(roles) {
         if (!this.isAuthenticated) return false;
         const rolesToCheck = Array.isArray(roles) ? roles : [roles];
         return this.userRoles.some(role => rolesToCheck.includes(role));
       },
-
+      
       hasPermission: function(permission) {
         if (!this.isAuthenticated || !this.currentUser) return false;
         return BBB_CONFIG.hasPermission(this.currentUser.role, permission);
       },
-
+      
       isAdmin: function() {
         return this.hasRole('administrator') || this.hasRole('admin');
       },
-
+      
       isMember: function() {
         return this.hasRole(['member', 'administrator', 'admin']);
       },
-
+      
       setupProtectedElements: function() {
         document.querySelectorAll('[data-auth-required]').forEach(el => {
           el.style.display = this.isAuthenticated ? '' : 'none';
@@ -869,191 +1087,134 @@
         document.querySelectorAll('[data-admin-only]').forEach(el => {
           el.style.display = this.isAdmin() ? '' : 'none';
         });
-      },
-
-      logout: async function() {
-        console.log('Securely logging out user:', this.currentUser?.username);
-        
-        if (this.sessionToken && BBB_CONFIG.cloudflareEnabled && BBB_CONFIG.authWorkerUrl) {
-          try {
-            await fetch(`${BBB_CONFIG.authWorkerUrl}/auth/logout`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              credentials: 'include',
-              body: JSON.stringify({ token: this.sessionToken, securityLogout: true, timestamp: Date.now() })
-            });
-          } catch (error) {
-            console.error('Server logout failed:', error);
-          }
-        }
-        
-        this.clearSession();
-        sessionStorage.setItem('justLoggedOut', 'true');
-        sessionStorage.setItem('bbb_logout_timestamp', Date.now().toString());
-      },
-
-      clearSession: function() {
-        const keysToRemove = ['bbb_auth', 'bbb_session_token', 'bbb_current_user', 'bbb_session_expires', 'bbb_auth_session'];
-        keysToRemove.forEach(key => localStorage.removeItem(key));
-        
-        this.currentUser = null;
-        this.isAuthenticated = false;
-        this.userRoles = [];
-        this.sessionToken = null;
       }
     };
 
-    // Fallback BBB_DB
-    window.BBB_DB = window.BBB_DB || {
+    // ===== BBB_DB Module =====
+    window.BBB_DB = {
+      config: {
+        useCloudflare: false,
+        localStoragePrefix: 'bbb_',
+        encryptLocalData: false,
+        clearOnLogout: true
+      },
+      
       init: function(options = {}) {
-        console.log('✅ BBB_DB initialized (fallback version)');
+        console.log('✅ BBB_DB initialized');
+        this.config = { ...this.config, ...options };
         return this;
       }
     };
 
-    // Fallback BBB_UI and BBB_UTILS
-    window.BBB_UI = window.BBB_UI || { init: function() { return this; } };
-    window.BBB_UTILS = window.BBB_UTILS || { init: function() { return this; } };
+    // ===== BBB_UI Module =====
+    window.BBB_UI = {
+      init: function() {
+        console.log('✅ BBB_UI initialized');
+        return this;
+      }
+    };
 
-    console.log('✅ BBB fallback modules ready');
-  </script>
+    // ===== BBB_UTILS Module =====
+    window.BBB_UTILS = {
+      init: function() {
+        console.log('✅ BBB_UTILS initialized');
+        return this;
+      }
+    };
 
-  <!-- Try to load external modules, but don't fail if they don't exist -->
-  <script src="js/config.js" onerror="console.log('External config.js not found, using fallback')"></script>
-  <script src="js/utils.js" onerror="console.log('External utils.js not found, using fallback')"></script>
-  <script src="js/auth.js" onerror="console.log('External auth.js not found, using fallback')"></script>
-  <script src="js/db.js" onerror="console.log('External db.js not found, using fallback')"></script>
-  <script src="js/ui.js" onerror="console.log('External ui.js not found, using fallback')"></script>
+    console.log('✅ All BBB modules loaded successfully');
 
-  <!-- Authentication Integration Script -->
-  <script>
-    // Global state management for logout prevention
+    // ===== MAIN APPLICATION LOGIC =====
+    
+    // Global state management
     let isLoggingOut = false;
     let isLoggingIn = false;
-    let logoutTimestamp = null;
     
-    // Enhanced Authentication Integration for Main Page
+    // Initialize application
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('🚀 Initializing main page with authentication...');
+      console.log('🚀 Initializing BBB Application...');
       
       // Initialize modules
       try {
-        console.log('📋 Available modules:', {
-          CONFIG: typeof BBB_CONFIG !== 'undefined',
-          AUTH: typeof BBB_AUTH !== 'undefined', 
-          DB: typeof BBB_DB !== 'undefined',
-          UI: typeof BBB_UI !== 'undefined',
-          UTILS: typeof BBB_UTILS !== 'undefined'
-        });
-
         BBB_AUTH.init({
-          cloudflareEnabled: BBB_CONFIG.cloudflareEnabled || true,
+          cloudflareEnabled: BBB_CONFIG.cloudflareEnabled,
           requireCaptcha: true
         });
         
-        if (BBB_DB && BBB_DB.init) {
-          BBB_DB.init({
-            useCloudflare: BBB_CONFIG.cloudflareEnabled || true,
-            localStoragePrefix: 'bbb_'
-          });
-        }
+        BBB_DB.init({
+          useCloudflare: BBB_CONFIG.cloudflareEnabled,
+          localStoragePrefix: 'bbb_'
+        });
         
-        console.log('✅ Modules initialized successfully');
+        BBB_UI.init();
+        BBB_UTILS.init();
+        
+        console.log('✅ All modules initialized');
       } catch (error) {
         console.error('❌ Error initializing modules:', error);
       }
       
-      // Check authentication and render page accordingly
+      // Check authentication and setup page
       checkPageAuthentication();
       
-      // Add interactive animations
+      // Add page animations
       addPageAnimations();
     });
 
     /**
-     * FIXED: Main authentication check for main page
-     * Priority Order: Logout flags > Login flags > Stored sessions
+     * Main authentication check
      */
     function checkPageAuthentication() {
       console.log('🔍 Checking page authentication...');
       
-      // PRIORITY 1: Check logout flags FIRST (highest priority)
+      // Check logout flags first
       if (checkLogoutFlags()) {
-        console.log('📋 Logout flag detected, forcing public page');
+        console.log('🚪 Logout flag detected, showing public page');
         clearAllAuthData();
         initializePublicPage();
         return;
       }
       
-      // PRIORITY 2: Check login flags SECOND
+      // Check login flags
       const isFromLogin = sessionStorage.getItem('justLoggedIn') === 'true';
       if (isFromLogin) {
-        console.log('📋 Just logged in, clearing flag and proceeding with auth check');
+        console.log('✅ Just logged in, clearing flag');
         sessionStorage.removeItem('justLoggedIn');
       }
       
-      // PRIORITY 3: Check stored sessions LAST (lowest priority)
+      // Check stored sessions
       const hasStoredAuth = BBB_AUTH.checkSession();
       
       if (hasStoredAuth && BBB_AUTH.isAuthenticated) {
         console.log('✅ Authentication restored from storage');
         initializeAuthenticatedPage();
       } else {
-        console.log('❌ No valid authentication found, showing public page');
+        console.log('❌ No valid authentication, showing public page');
         initializePublicPage();
       }
     }
 
-    /**
-     * Check logout flags with multiple methods
-     */
     function checkLogoutFlags() {
       const justLoggedOut = sessionStorage.getItem('justLoggedOut') === 'true';
       const logoutTimestamp = sessionStorage.getItem('bbb_logout_timestamp');
-      const recentLogout = logoutTimestamp && 
-        (Date.now() - parseInt(logoutTimestamp)) < 5000;
+      const recentLogout = logoutTimestamp && (Date.now() - parseInt(logoutTimestamp)) < 5000;
       const currentlyLoggingOut = sessionStorage.getItem('bbb_logging_out') === 'true';
       
-      if (justLoggedOut || recentLogout || currentlyLoggingOut || isLoggingOut) {
-        console.log('🚪 Logout flag detected:', {
-          justLoggedOut,
-          recentLogout,
-          currentlyLoggingOut,
-          isLoggingOut
-        });
-        return true;
-      }
-      
-      return false;
+      return justLoggedOut || recentLogout || currentlyLoggingOut || isLoggingOut;
     }
 
-    /**
-     * Clear all authentication data synchronously
-     */
     function clearAllAuthData() {
       console.log('🧹 Clearing all authentication data...');
       
       try {
-        // Clear localStorage
         const authKeys = ['bbb_auth_session', 'bbb_current_user', 'bbb_session_token', 'bbb_session_expires'];
         authKeys.forEach(key => {
           localStorage.removeItem(key);
           if (localStorage.getItem(key) !== null) {
-            console.warn(`Failed to clear ${key}, trying again...`);
             localStorage.removeItem(key);
           }
         });
         
-        // Clear sessionStorage selectively (keep logout flags)
-        const sessionsToKeep = ['justLoggedOut', 'bbb_logout_timestamp', 'bbb_logging_out'];
-        const allSessionKeys = Object.keys(sessionStorage);
-        allSessionKeys.forEach(key => {
-          if (key.startsWith('bbb_') && !sessionsToKeep.includes(key)) {
-            sessionStorage.removeItem(key);
-          }
-        });
-        
-        // Reset BBB_AUTH module state immediately
         if (BBB_AUTH) {
           BBB_AUTH.currentUser = null;
           BBB_AUTH.isAuthenticated = false;
@@ -1061,59 +1222,39 @@
           BBB_AUTH.sessionToken = null;
         }
         
-        console.log('✅ All authentication data cleared successfully');
-        return true;
+        console.log('✅ Authentication data cleared');
       } catch (error) {
         console.error('❌ Error clearing auth data:', error);
-        return false;
       }
     }
 
-    /**
-     * Initialize page for authenticated users
-     */
     function initializeAuthenticatedPage() {
-      console.log('🔓 Initializing authenticated page for user:', BBB_AUTH.currentUser?.id || BBB_AUTH.currentUser?.username);
+      console.log('🔓 Initializing authenticated page for:', BBB_AUTH.currentUser?.username || BBB_AUTH.currentUser?.id);
       
-      // Show authenticated content
       showAuthenticatedContent();
-      
-      // Add logout functionality to header
       addLogoutFunctionality();
-      
-      // Show user info
       showUserInfo();
       
-      // Setup protected elements
       if (BBB_AUTH.setupProtectedElements) {
         BBB_AUTH.setupProtectedElements();
       }
     }
 
-    /**
-     * Initialize page for public (non-authenticated) users
-     */
     function initializePublicPage() {
       console.log('🔒 Initializing public page');
       
-      // Show public content
       showPublicContent();
       
-      // Keep login button visible
       const loginLink = document.getElementById('login-link');
       if (loginLink) {
         loginLink.style.display = 'inline-block';
       }
       
-      // Clean up logout flags after a delay
       setTimeout(() => {
         cleanupLogoutFlags();
       }, 2000);
     }
 
-    /**
-     * Clean up logout flags after public page is established
-     */
     function cleanupLogoutFlags() {
       try {
         sessionStorage.removeItem('justLoggedOut');
@@ -1126,19 +1267,16 @@
       }
     }
 
-    /**
-     * Show content for authenticated users
-     */
     function showAuthenticatedContent() {
       console.log('✅ Showing authenticated content');
       
-      // Show member-specific content
+      // Show member content
       const memberContent = document.querySelectorAll('.member-only');
       memberContent.forEach(element => {
         element.style.display = 'block';
       });
       
-      // Update navigation to show authenticated features
+      // Update navigation
       updateNavigationForAuth();
       
       // Hide login button
@@ -1148,38 +1286,31 @@
       }
     }
 
-    /**
-     * Show content for public users
-     */
     function showPublicContent() {
       console.log('🔒 Showing public content');
       
-      // Hide member-only content
+      // Hide member content
       const memberContent = document.querySelectorAll('.member-only');
       memberContent.forEach(element => {
         element.style.display = 'none';
       });
       
-      // Update navigation for public users
+      // Update navigation
       updateNavigationForPublic();
     }
 
-    /**
-     * Update navigation for authenticated users
-     */
     function updateNavigationForAuth() {
       console.log('🔓 Updating navigation for authenticated users');
       
-      // Find auth-required cards and make links functional
       const authCards = document.querySelectorAll('.nav-card[data-auth-required="true"]');
       authCards.forEach(card => {
         const link = card.querySelector('.auth-required-link');
         if (link) {
-          // Remove any click handlers that prevent navigation
+          // Remove click handlers that prevent navigation
           link.onclick = null;
           link.removeAttribute('onclick');
           
-          // Ensure href is set correctly for direct navigation
+          // Ensure href is correct
           const href = link.getAttribute('href');
           if (href) {
             link.href = href;
@@ -1193,7 +1324,7 @@
             card.appendChild(badge);
           }
           
-          // Remove login required badge if it exists
+          // Remove login required badge
           const loginBadge = card.querySelector('.login-required-badge');
           if (loginBadge) {
             loginBadge.remove();
@@ -1202,33 +1333,29 @@
       });
     }
 
-    /**
-     * Update navigation for public users
-     */
     function updateNavigationForPublic() {
       console.log('🔒 Updating navigation for public users');
       
-      // Find auth-required cards and add auth prompts
       const authCards = document.querySelectorAll('.nav-card[data-auth-required="true"]');
       authCards.forEach(card => {
         const link = card.querySelector('.auth-required-link');
         if (link) {
           const originalHref = link.getAttribute('href');
           
-          // Remove any existing click handlers and re-add auth prompt
+          // Add auth prompt click handler
           link.onclick = function(e) {
             e.preventDefault();
             const featureName = card.querySelector('h3').textContent.toLowerCase();
             showAuthPrompt(featureName, originalHref);
           };
           
-          // Remove authenticated badge if it exists
+          // Remove authenticated badge
           const authBadge = card.querySelector('.auth-badge');
           if (authBadge) {
             authBadge.remove();
           }
           
-          // Add login required badge if it doesn't exist
+          // Add login required badge
           if (!card.querySelector('.login-required-badge')) {
             const badge = document.createElement('span');
             badge.className = 'login-required-badge';
@@ -1239,9 +1366,6 @@
       });
     }
 
-    /**
-     * Show authentication prompt
-     */
     function showAuthPrompt(feature, targetUrl = null) {
       const modal = document.createElement('div');
       modal.className = 'auth-prompt-modal';
@@ -1258,7 +1382,7 @@
       `;
       
       content.innerHTML = `
-        <h3 style="color: #004d00; margin-bottom: 1rem;">Authentication Required</h3>
+        <h3 style="color: #004d00; margin-bottom: 1rem;">🔒 Authentication Required</h3>
         <p style="margin-bottom: 1.5rem;">You need to log in to access the ${feature}.</p>
         <div style="display: flex; gap: 1rem; justify-content: center;">
           <button id="login-prompt-btn" style="
@@ -1284,7 +1408,6 @@
       modal.appendChild(content);
       document.body.appendChild(modal);
       
-      // Handle login button click
       content.querySelector('#login-prompt-btn').onclick = function() {
         if (targetUrl) {
           sessionStorage.setItem('redirectAfterLogin', targetUrl);
@@ -1294,7 +1417,6 @@
         window.location.href = 'login.html';
       };
       
-      // Close on outside click
       modal.addEventListener('click', (e) => {
         if (e.target === modal) {
           modal.remove();
@@ -1302,13 +1424,9 @@
       });
     }
 
-    /**
-     * Add logout functionality to header
-     */
     function addLogoutFunctionality() {
       const headerRight = document.querySelector('.header-right');
       if (headerRight && BBB_AUTH.isAuthenticated) {
-        // Check if logout button already exists
         if (headerRight.querySelector('.logout-btn')) return;
         
         const logoutBtn = document.createElement('button');
@@ -1325,21 +1443,16 @@
       }
     }
 
-    /**
-     * Show user info
-     */
     function showUserInfo() {
       if (BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
         const headerRight = document.querySelector('.header-right');
         if (headerRight) {
-          // Check if user info already exists
           if (headerRight.querySelector('.user-info')) return;
           
           const userInfo = document.createElement('span');
           userInfo.className = 'user-info';
-          userInfo.textContent = `Welcome, ${BBB_AUTH.currentUser.id || BBB_AUTH.currentUser.username || BBB_AUTH.currentUser.name}`;
+          userInfo.textContent = `Welcome, ${BBB_AUTH.currentUser.username || BBB_AUTH.currentUser.id || BBB_AUTH.currentUser.name}`;
           
-          // Insert before logout button
           const logoutBtn = headerRight.querySelector('.logout-btn');
           if (logoutBtn) {
             headerRight.insertBefore(userInfo, logoutBtn);
@@ -1350,42 +1463,37 @@
       }
     }
 
-    /**
-     * Perform logout with race condition prevention
-     */
     function performLogout() {
       console.log('🚪 Starting logout process...');
       
       if (isLoggingOut) {
-        console.log('Logout already in progress, ignoring request');
+        console.log('⚠️ Logout already in progress');
         return;
       }
       
       isLoggingOut = true;
       
-      // Set logout flags immediately
+      // Set logout flags
       try {
         sessionStorage.setItem('justLoggedOut', 'true');
         sessionStorage.setItem('bbb_logout_timestamp', Date.now().toString());
         sessionStorage.setItem('bbb_logging_out', 'true');
-        console.log('✅ Logout flags set successfully');
+        console.log('✅ Logout flags set');
       } catch (error) {
         console.error('❌ Error setting logout flags:', error);
       }
       
       // Perform logout
       if (BBB_AUTH && BBB_AUTH.logout) {
-        BBB_AUTH.logout().then(() => {
-          console.log('✅ BBB_AUTH logout completed');
-        }).catch(error => {
-          console.error('❌ BBB_AUTH logout error:', error);
+        BBB_AUTH.logout().catch(error => {
+          console.error('❌ Logout error:', error);
         });
       }
       
-      // Clear all auth data
+      // Clear auth data
       clearAllAuthData();
       
-      // Update UI immediately
+      // Update UI
       hideAllAuthenticatedContent();
       showAllPublicContent();
       updateHeaderForLogout();
@@ -1393,22 +1501,18 @@
       // Show success message
       const headerRight = document.querySelector('.header-right');
       if (headerRight) {
-        headerRight.innerHTML = '<span style="color: #28a745; font-weight: bold; animation: fadeInUp 0.5s ease-out;">✓ Logged out successfully!</span>';
+        headerRight.innerHTML = '<span style="color: #28a745; font-weight: bold;">✓ Logged out successfully!</span>';
       }
       
-      console.log('✅ Logout completed successfully');
+      console.log('✅ Logout completed');
       
-      // Schedule cleanup and reload
+      // Reload page
       setTimeout(() => {
-        console.log('🔄 Performing delayed reload for clean state...');
         sessionStorage.removeItem('bbb_logging_out');
         window.location.reload();
       }, 1500);
     }
 
-    /**
-     * Hide all authenticated content immediately
-     */
     function hideAllAuthenticatedContent() {
       const memberContent = document.querySelectorAll('.member-only');
       memberContent.forEach(element => {
@@ -1419,16 +1523,10 @@
       authBadges.forEach(badge => badge.remove());
     }
 
-    /**
-     * Show all public content immediately
-     */
     function showAllPublicContent() {
       updateNavigationForPublic();
     }
 
-    /**
-     * Update header for logout state
-     */
     function updateHeaderForLogout() {
       const headerRight = document.querySelector('.header-right');
       if (headerRight) {
@@ -1451,9 +1549,6 @@
       }
     }
 
-    /**
-     * Add page animations
-     */
     function addPageAnimations() {
       const observerOptions = {
         threshold: 0.5,
@@ -1485,7 +1580,7 @@
       });
     }
 
-    // Save page for post-login redirect when clicking login links
+    // Event listeners
     document.addEventListener('click', function(e) {
       if (e.target.matches('a[href*="login"]') || 
           e.target.matches('button[onclick*="login"]')) {
@@ -1493,28 +1588,27 @@
       }
     });
 
-    // Handle browser back/forward with session check
     window.addEventListener('pageshow', function(e) {
       if (e.persisted) {
-        console.log('📄 Page loaded from cache, rechecking authentication...');
+        console.log('📄 Page loaded from cache, rechecking auth...');
         checkPageAuthentication();
       }
     });
 
-    // Handle storage events (logout from other tabs)
     window.addEventListener('storage', function(e) {
       if (e.key === 'bbb_auth_session' && e.newValue === null) {
-        console.log('🚪 Auth session cleared in another tab, logging out...');
+        console.log('🚪 Auth session cleared in another tab');
         performLogout();
       }
     });
 
-    // Handle beforeunload to cleanup
     window.addEventListener('beforeunload', function() {
       if (!isLoggingOut && !checkLogoutFlags()) {
         cleanupLogoutFlags();
       }
     });
+
+    console.log('🎯 BBB Application fully initialized and ready!');
   </script>
 </body>
 </html>
