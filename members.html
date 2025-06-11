@@ -184,11 +184,6 @@
       to { transform: rotate(360deg); }
     }
 
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
     .members-hero-content {
       position: relative;
       z-index: 2;
@@ -361,7 +356,6 @@
       border: 3px solid transparent;
       transition: all 0.3s ease;
       overflow: hidden;
-      position: relative;
     }
 
     .member-card:hover {
@@ -414,72 +408,6 @@
     .btn-sm {
       padding: 0.5rem 1rem;
       font-size: 0.9rem;
-    }
-
-    /* NEW: Data source indicators */
-    .source-indicator {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      padding: 4px 8px;
-      border-radius: 12px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      z-index: 5;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .source-indicator.cloudflare {
-      background: linear-gradient(135deg, #28a745, #20c997);
-      color: white;
-    }
-
-    .source-indicator.static {
-      background: linear-gradient(135deg, #6c757d, #5a6268);
-      color: white;
-    }
-
-    /* NEW: Loading states */
-    .loading-state {
-      text-align: center;
-      padding: 3rem;
-      color: #666;
-      font-style: italic;
-    }
-
-    .loading-spinner {
-      font-size: 2rem;
-      animation: spin 2s linear infinite;
-      margin-bottom: 1rem;
-    }
-
-    /* NEW: Error states */
-    .error-state {
-      text-align: center;
-      padding: 3rem;
-      color: #dc3545;
-      background: #f8d7da;
-      border-radius: 15px;
-      margin: 2rem 0;
-      border: 2px solid #f5c6cb;
-    }
-
-    .retry-btn {
-      background: var(--bbb-primary);
-      color: white;
-      border: none;
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      margin-top: 1rem;
-      transition: all 0.3s ease;
-    }
-
-    .retry-btn:hover {
-      background: var(--bbb-secondary);
-      transform: translateY(-2px);
     }
 
     /* Member-only content styling */
@@ -720,9 +648,6 @@
             <option value="handicap-asc">Handicap (Low to High)</option>
             <option value="handicap-desc">Handicap (High to Low)</option>
           </select>
-          <button class="btn btn-sm" id="refresh-btn" onclick="retryLoadMembers()" style="margin-left: 1rem;">
-            🔄 Refresh Data
-          </button>
         </div>
       </section>
 
@@ -736,7 +661,7 @@
   <!-- Enhanced Authentication Integration Script -->
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('Initializing members page with dynamic authentication...');
+      console.log('Initializing members page with authentication...');
       
       // Check if BBB modules are loaded
       if (typeof BBB_CONFIG === 'undefined' || 
@@ -1006,7 +931,7 @@
     }
 
     /**
-     * UPDATED: Load member data with dynamic Cloudflare integration
+     * Load member data with dynamic Cloudflare integration
      */
     async function loadMemberData() {
       console.log('Loading member data with dynamic integration...');
@@ -1015,13 +940,9 @@
       const statsRow = document.getElementById('stats-row');
       const membersGrid = document.getElementById('members-grid');
       
-      // Clear existing content and show loading
-      if (statsRow) {
-        statsRow.innerHTML = '<div class="loading-state"><div class="loading-spinner">⛳</div>Loading member statistics...</div>';
-      }
-      if (membersGrid) {
-        membersGrid.innerHTML = '<div class="loading-state"><div class="loading-spinner">⛳</div>Loading members...</div>';
-      }
+      // Clear existing content
+      if (statsRow) statsRow.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">Loading member statistics...</div>';
+      if (membersGrid) membersGrid.innerHTML = '<div style="text-align: center; padding: 3rem; color: #666; font-style: italic;">Loading members...</div>';
       
       try {
         // Step 1: Load members using the new dynamic system
@@ -1073,6 +994,9 @@
         setupSorting(memberData, scorecardsArray);
         renderMembers(memberData, scorecardsArray, 'name-asc');
         
+        // Add refresh button
+        addRefreshButton();
+        
         // Show success message
         const dataSource = members[0]?.source || 'unknown';
         const sourceLabel = dataSource === 'cloudflare' ? 'Cloudflare' : 'Local Data';
@@ -1080,102 +1004,81 @@
         
       } catch (error) {
         console.error('Error loading member data:', error);
-        showMemberLoadError(error, statsRow, membersGrid);
-      }
-    }
-
-    /**
-     * NEW: Show member loading error with retry option
-     */
-    function showMemberLoadError(error, statsRow, membersGrid) {
-      // Show error in stats
-      if (statsRow) {
-        statsRow.innerHTML = `
-          <div class="error-state">
-            <strong>⚠️ Error Loading Member Data</strong><br>
-            <span style="font-size: 0.9rem;">${error.message}</span>
-          </div>
-        `;
-      }
-      
-      // Show error in members grid
-      if (membersGrid) {
-        membersGrid.innerHTML = `
-          <div class="error-state">
-            <div style="font-size: 2rem; margin-bottom: 1rem;">⚠️</div>
-            <div style="font-size: 1.2rem; margin-bottom: 1rem;">Unable to Load Members</div>
-            <div style="font-size: 0.9rem; color: #666; margin-bottom: 2rem;">${error.message}</div>
-            <button class="retry-btn" onclick="retryLoadMembers()">
-              🔄 Retry Loading
-            </button>
-          </div>
-        `;
-      }
-      
-      // Try fallback to static data
-      tryFallbackMembers();
-    }
-
-    /**
-     * NEW: Try fallback to static member data
-     */
-    async function tryFallbackMembers() {
-      try {
-        console.log('Attempting fallback data loading...');
-        const fallbackMembers = BBB_DB.getStaticMembers();
         
-        if (fallbackMembers && fallbackMembers.length > 0) {
-          console.log('Using static members as fallback');
-          const fallbackData = fallbackMembers.map(member => ({
-            member: member.display_name,
-            handicap: null,
-            memberData: member
-          }));
-          
-          updateStats(fallbackData, []);
-          setupSorting(fallbackData, []);
-          renderMembers(fallbackData, [], 'name-asc');
-          
-          BBB_UTILS.showMessage('Loaded static member data as fallback', 'warning', 5000);
+        // Show error in UI
+        if (statsRow) {
+          statsRow.innerHTML = `
+            <div style="text-align: center; padding: 2rem; color: #dc3545; background: #f8d7da; border-radius: 8px; margin: 1rem 0;">
+              <strong>⚠️ Error Loading Member Data</strong><br>
+              <span style="font-size: 0.9rem;">${error.message}</span>
+            </div>
+          `;
         }
-      } catch (fallbackError) {
-        console.error('Fallback loading also failed:', fallbackError);
-        BBB_UTILS.showMessage('Failed to load member data. Please try refreshing the page.', 'error', 8000);
+        
+        if (membersGrid) {
+          membersGrid.innerHTML = `
+            <div style="text-align: center; padding: 3rem; color: #dc3545;">
+              <div style="font-size: 2rem; margin-bottom: 1rem;">⚠️</div>
+              <div style="font-size: 1.2rem; margin-bottom: 1rem;">Unable to Load Members</div>
+              <div style="font-size: 0.9rem; color: #666; margin-bottom: 2rem;">${error.message}</div>
+              <button onclick="retryLoadMembers()" style="
+                background: #004d00; 
+                color: white; 
+                border: none; 
+                padding: 0.75rem 1.5rem; 
+                border-radius: 8px; 
+                cursor: pointer;
+                font-size: 1rem;
+              ">
+                🔄 Retry Loading
+              </button>
+            </div>
+          `;
+        }
+        
+        // Try fallback to cached or static data
+        try {
+          console.log('Attempting fallback data loading...');
+          const fallbackMembers = BBB_DB.getStaticMembers();
+          
+          if (fallbackMembers && fallbackMembers.length > 0) {
+            console.log('Using static members as fallback');
+            const fallbackData = fallbackMembers.map(member => ({
+              member: member.display_name,
+              handicap: null,
+              memberData: member
+            }));
+            
+            updateStats(fallbackData, []);
+            setupSorting(fallbackData, []);
+            renderMembers(fallbackData, [], 'name-asc');
+            
+            BBB_UTILS.showMessage('Loaded static member data as fallback', 'warning', 5000);
+          }
+        } catch (fallbackError) {
+          console.error('Fallback loading also failed:', fallbackError);
+          BBB_UTILS.showMessage('Failed to load member data. Please try refreshing the page.', 'error', 8000);
+        }
       }
     }
 
     /**
-     * NEW: Retry loading members (called from retry button)
+     * Retry loading members (called from retry button)
      */
     async function retryLoadMembers() {
       console.log('Retrying member data load...');
       
-      // Disable retry button
-      const retryBtn = document.getElementById('refresh-btn');
-      if (retryBtn) {
-        retryBtn.disabled = true;
-        retryBtn.innerHTML = '⏳ Refreshing...';
+      // Clear cache to force fresh data
+      if (typeof BBB_DB.clearMemberCache === 'function') {
+        BBB_DB.clearMemberCache();
       }
       
-      try {
-        // Clear cache to force fresh data
-        if (typeof BBB_DB.clearMemberCache === 'function') {
-          BBB_DB.clearMemberCache();
-        }
-        
-        // Reload member data
-        await loadMemberData();
-      } finally {
-        // Re-enable retry button
-        if (retryBtn) {
-          retryBtn.disabled = false;
-          retryBtn.innerHTML = '🔄 Refresh Data';
-        }
-      }
+      // Reload member data
+      await loadMemberData();
     }
 
     /**
-     * UPDATED: Enhanced updateStats function with member source information
+     * Enhanced updateStats function with member source information
      */
     function updateStats(memberData, scorecards) {
       const statsRow = document.getElementById('stats-row');
@@ -1271,90 +1174,6 @@
     }
 
     /**
-     * UPDATED: Enhanced renderMembers function with dynamic data support
-     */
-    function renderMembers(memberData, scorecards, sortCriteria) {
-      const membersGrid = document.getElementById('members-grid');
-      
-      // Clear existing members
-      membersGrid.innerHTML = '';
-      
-      // Sort the member data
-      const sortedData = [...memberData].sort((a, b) => {
-        switch(sortCriteria) {
-          case 'name-asc':
-            return a.member.localeCompare(b.member);
-          case 'name-desc':
-            return b.member.localeCompare(a.member);
-          case 'handicap-asc':
-            const hcpA = a.handicap ? parseFloat(a.handicap.index) : 999;
-            const hcpB = b.handicap ? parseFloat(b.handicap.index) : 999;
-            return hcpA - hcpB;
-          case 'handicap-desc':
-            const hcpA2 = a.handicap ? parseFloat(a.handicap.index) : -1;
-            const hcpB2 = b.handicap ? parseFloat(b.handicap.index) : -1;
-            return hcpB2 - hcpA2;
-          default:
-            return 0;
-        }
-      });
-      
-      // Create member cards
-      sortedData.forEach(data => {
-        // Find recent scores for this member
-        const recentScores = findRecentScores(scorecards, data.member);
-        
-        // Create member card with enhanced data
-        const memberCard = createMemberCard(data.member, data.handicap, recentScores, data.memberData);
-        membersGrid.appendChild(memberCard);
-      });
-      
-      // Add data source summary at the bottom
-      if (sortedData.length > 0) {
-        addDataSourceSummary(membersGrid, sortedData);
-      }
-    }
-
-    /**
-     * NEW: Add data source summary to members grid
-     */
-    function addDataSourceSummary(membersGrid, sortedData) {
-      const sourceInfo = document.createElement('div');
-      sourceInfo.style.cssText = `
-        grid-column: 1 / -1;
-        text-align: center;
-        padding: 2rem;
-        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-        border-radius: 15px;
-        margin-top: 1rem;
-        font-size: 0.9rem;
-        color: #666;
-        border: 2px solid #dee2e6;
-      `;
-      
-      const cloudflareCount = sortedData.filter(d => d.memberData?.source === 'cloudflare').length;
-      const staticCount = sortedData.filter(d => d.memberData?.source === 'static').length;
-      
-      let sourceText = '';
-      if (cloudflareCount > 0 && staticCount > 0) {
-        sourceText = `📊 Showing ${sortedData.length} members: ${cloudflareCount} from live data, ${staticCount} from static data`;
-      } else if (cloudflareCount > 0) {
-        sourceText = `☁️ All ${sortedData.length} members loaded from live Cloudflare data`;
-      } else {
-        sourceText = `💾 All ${sortedData.length} members loaded from static data`;
-      }
-      
-      sourceInfo.innerHTML = `
-        <div style="font-weight: 600; margin-bottom: 0.5rem;">${sourceText}</div>
-        <div style="font-size: 0.8rem;">
-          Live data includes real-time handicaps, login activity, and enhanced profiles
-        </div>
-      `;
-      
-      membersGrid.appendChild(sourceInfo);
-    }
-
-    /**
      * Find recent scores for a member
      */
     function findRecentScores(scorecards, memberName) {
@@ -1384,7 +1203,7 @@
     }
 
     /**
-     * UPDATED: Enhanced createMemberCard with dynamic data support
+     * Enhanced createMemberCard with dynamic data support
      */
     function createMemberCard(memberName, handicapData, recentScores, memberData = null) {
       // Helper function to generate a consistent color based on name
@@ -1403,9 +1222,21 @@
       // Add data source indicator
       if (memberData?.source) {
         const sourceIndicator = document.createElement('div');
-        sourceIndicator.className = `source-indicator ${memberData.source}`;
+        sourceIndicator.style.cssText = `
+          position: absolute;
+          top: 10px;
+          left: 10px;
+          background: ${memberData.source === 'cloudflare' ? '#28a745' : '#6c757d'};
+          color: white;
+          padding: 2px 6px;
+          border-radius: 10px;
+          font-size: 0.7rem;
+          font-weight: 500;
+          z-index: 5;
+        `;
         sourceIndicator.textContent = memberData.source === 'cloudflare' ? '☁️ LIVE' : '💾 STATIC';
         memberCard.appendChild(sourceIndicator);
+        memberCard.style.position = 'relative';
       }
       
       // Card header with profile image
@@ -1591,6 +1422,113 @@
       memberCard.appendChild(cardContent);
       
       return memberCard;
+    }
+
+    /**
+     * Enhanced renderMembers function with dynamic data support
+     */
+    function renderMembers(memberData, scorecards, sortCriteria) {
+      const membersGrid = document.getElementById('members-grid');
+      
+      // Clear existing members
+      membersGrid.innerHTML = '';
+      
+      // Sort the member data
+      const sortedData = [...memberData].sort((a, b) => {
+        switch(sortCriteria) {
+          case 'name-asc':
+            return a.member.localeCompare(b.member);
+          case 'name-desc':
+            return b.member.localeCompare(a.member);
+          case 'handicap-asc':
+            const hcpA = a.handicap ? parseFloat(a.handicap.index) : 999;
+            const hcpB = b.handicap ? parseFloat(b.handicap.index) : 999;
+            return hcpA - hcpB;
+          case 'handicap-desc':
+            const hcpA2 = a.handicap ? parseFloat(a.handicap.index) : -1;
+            const hcpB2 = b.handicap ? parseFloat(b.handicap.index) : -1;
+            return hcpB2 - hcpA2;
+          default:
+            return 0;
+        }
+      });
+      
+      // Create member cards
+      sortedData.forEach(data => {
+        // Find recent scores for this member
+        const recentScores = findRecentScores(scorecards, data.member);
+        
+        // Create member card with enhanced data
+        const memberCard = createMemberCard(data.member, data.handicap, recentScores, data.memberData);
+        membersGrid.appendChild(memberCard);
+      });
+      
+      // Add data source summary at the bottom
+      if (sortedData.length > 0) {
+        const sourceInfo = document.createElement('div');
+        sourceInfo.style.cssText = `
+          grid-column: 1 / -1;
+          text-align: center;
+          padding: 2rem;
+          background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+          border-radius: 15px;
+          margin-top: 1rem;
+          font-size: 0.9rem;
+          color: #666;
+          border: 2px solid #dee2e6;
+        `;
+        
+        const cloudflareCount = sortedData.filter(d => d.memberData?.source === 'cloudflare').length;
+        const staticCount = sortedData.filter(d => d.memberData?.source === 'static').length;
+        
+        let sourceText = '';
+        if (cloudflareCount > 0 && staticCount > 0) {
+          sourceText = `📊 Showing ${sortedData.length} members: ${cloudflareCount} from live data, ${staticCount} from static data`;
+        } else if (cloudflareCount > 0) {
+          sourceText = `☁️ All ${sortedData.length} members loaded from live Cloudflare data`;
+        } else {
+          sourceText = `💾 All ${sortedData.length} members loaded from static data`;
+        }
+        
+        sourceInfo.innerHTML = `
+          <div style="font-weight: 600; margin-bottom: 0.5rem;">${sourceText}</div>
+          <div style="font-size: 0.8rem;">
+            Live data includes real-time handicaps, login activity, and enhanced profiles
+          </div>
+        `;
+        
+        membersGrid.appendChild(sourceInfo);
+      }
+    }
+
+    /**
+     * Add refresh button to members page
+     */
+    function addRefreshButton() {
+      const controlsSection = document.querySelector('.controls-section');
+      if (controlsSection) {
+        const refreshBtn = document.createElement('button');
+        refreshBtn.className = 'btn btn-sm';
+        refreshBtn.innerHTML = '🔄 Refresh Data';
+        refreshBtn.style.marginLeft = '1rem';
+        
+        refreshBtn.addEventListener('click', async () => {
+          refreshBtn.disabled = true;
+          refreshBtn.textContent = '⏳ Refreshing...';
+          
+          try {
+            await retryLoadMembers();
+          } finally {
+            refreshBtn.disabled = false;
+            refreshBtn.innerHTML = '🔄 Refresh Data';
+          }
+        });
+        
+        const sortContainer = controlsSection.querySelector('.sort-container');
+        if (sortContainer) {
+          sortContainer.appendChild(refreshBtn);
+        }
+      }
     }
 
     /**
