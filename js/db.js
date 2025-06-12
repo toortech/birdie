@@ -1,7 +1,6 @@
 /**
- * Birdie Bush Bandits - Enhanced Database Module
- * Handles data persistence with course data management
- * ADDITIONS: Course data management and handicap calculation support
+ * Birdie Bush Bandits - Complete Enhanced Database Module
+ * Handles data persistence with course data management and all existing functionality
  */
 
 const BBB_DB = {
@@ -23,11 +22,11 @@ const BBB_DB = {
     HANDICAPS: 'handicaps',
     GALLERY: 'gallery',
     SETTINGS: 'settings',
-    COURSES: 'courses'  // NEW: Course data collection
+    COURSES: 'courses'  // Course data collection
   },
 
   // =============================================================================
-  // COURSE DATA MANAGEMENT (NEW SECTION)
+  // COURSE DATA MANAGEMENT
   // =============================================================================
 
   /**
@@ -311,41 +310,6 @@ const BBB_DB = {
   },
 
   /**
-   * Save course data (for future dynamic course management)
-   * @param {Object} courseData - Complete course data object
-   * @returns {Promise} - Resolves when complete
-   */
-  saveCourses: async function(courseData) {
-    try {
-      return await this.save(this.collections.COURSES, 'all', courseData);
-    } catch (error) {
-      console.error('Error saving course data:', error);
-      throw error;
-    }
-  },
-
-  /**
-   * Add a new course (for future functionality)
-   * @param {string} courseName - Course name
-   * @param {Object} courseInfo - Course information
-   * @returns {Promise} - Resolves when complete
-   */
-  addCourse: async function(courseName, courseInfo) {
-    try {
-      const courses = this.getCourses();
-      courses[courseName] = courseInfo;
-      return await this.saveCourses(courses);
-    } catch (error) {
-      console.error(`Error adding course ${courseName}:`, error);
-      throw error;
-    }
-  },
-
-  // =============================================================================
-  // ENHANCED HANDICAP FUNCTIONS (UPDATED)
-  // =============================================================================
-
-  /**
    * Enhanced handicap calculation with course data integration
    * @param {Array} rounds - Array of round objects {score, courseName, teeColor}
    * @returns {Object} - {handicapIndex, differentials, roundsUsed}
@@ -419,7 +383,7 @@ const BBB_DB = {
   },
 
   // =============================================================================
-  // EXISTING FUNCTIONS (UNCHANGED - keeping all your existing functionality)
+  // CORE DATABASE FUNCTIONS
   // =============================================================================
   
   /**
@@ -528,10 +492,438 @@ const BBB_DB = {
     }
   },
 
-  // ... (keep all your existing member management functions)
-  // ... (keep all your existing storage functions)
-  // ... (keep all your existing handicap/scorecard/gallery functions)
+  // =============================================================================
+  // MEMBER MANAGEMENT FUNCTIONS
+  // =============================================================================
+  
+  /**
+   * Get all members with caching and fallback support
+   * @param {Object} options - Loading options
+   * @returns {Promise} - Resolves with members array
+   */
+  getMembers: async function(options = {}) {
+    const defaults = {
+      useCache: true,
+      fallbackToStatic: true,
+      strategy: 'cloudflare-first'
+    };
+    
+    const settings = { ...defaults, ...options };
+    
+    console.log('Getting members with strategy:', settings.strategy);
+    
+    try {
+      // Check cache first if enabled
+      if (settings.useCache) {
+        const cached = this.getCachedMembers();
+        if (cached) {
+          console.log('Returning cached members:', cached.length);
+          return cached;
+        }
+      }
+      
+      // Strategy-based loading
+      switch (settings.strategy) {
+        case 'cloudflare-first':
+          return await this.getMembersCloudflareFirst(settings);
+          
+        case 'static-only':
+          return this.getStaticMembers();
+          
+        case 'cache-first':
+          // Cache check already done above, fall through to cloudflare-first
+          return await this.getMembersCloudflareFirst(settings);
+          
+        default:
+          return await this.getMembersCloudflareFirst(settings);
+      }
+      
+    } catch (error) {
+      console.error('Error in getMembers:', error);
+      
+      // Final fallback to static members
+      if (settings.fallbackToStatic) {
+        console.log('Using static members as final fallback');
+        return this.getStaticMembers();
+      }
+      
+      throw error;
+    }
+  },
+  
+  /**
+   * Try Cloudflare first, fallback to static
+   * @param {Object} settings - Loading settings
+   * @returns {Promise} - Resolves with members array
+   */
+  getMembersCloudflareFirst: async function(settings) {
+    const maxRetries = 2;
+    const retryDelay = 1000;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Attempt ${attempt}: Loading members from Cloudflare`);
+        
+        if (this.config.useCloudflare) {
+          const members = await this.getMembersFromCloudflare();
+          
+          if (members && members.length > 0) {
+            // Cache the results
+            this.cacheMembers(members);
+            console.log('Successfully loaded members from Cloudflare:', members.length);
+            return members;
+          }
+        }
+        
+        throw new Error('Cloudflare returned no members or is disabled');
+        
+      } catch (cloudflareError) {
+        console.warn(`Cloudflare attempt ${attempt} failed:`, cloudflareError.message);
+        
+        if (attempt < maxRetries) {
+          console.log(`Retrying in ${retryDelay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+      }
+    }
+    
+    // If all Cloudflare attempts failed, use static fallback
+    if (settings.fallbackToStatic) {
+      console.log('All Cloudflare attempts failed, using static members');
+      return this.getStaticMembers();
+    }
+    
+    throw new Error('Failed to load members from Cloudflare and static fallback disabled');
+  },
+  
+  /**
+   * Get static members as fallback
+   * @returns {Array} - Array of static member objects
+   */
+  getStaticMembers: function() {
+    const staticMembers = [
+      "Amrit", "Kam", "Vish", "Ravi", "Bal", "Vick", 
+      "Michael", "Justy", "Phuperjee", "Indy", "Maj", "Sama"
+    ];
+    
+    return staticMembers.map(name => ({
+      id: name.toLowerCase(),
+      username: name.toLowerCase(),
+      display_name: name,
+      user_id: name.toLowerCase(),
+      joined_date: '2020-08-01',
+      is_active: 1,
+      source: 'static',
+      role: 'member'
+    }));
+  },
 
+  /**
+   * Cache members data
+   * @param {Array} members - Members to cache
+   */
+  cacheMembers: function(members) {
+    try {
+      const cacheData = {
+        members: members,
+        timestamp: Date.now(),
+        source: members[0]?.source || 'unknown',
+        count: members.length
+      };
+      
+      localStorage.setItem('bbb_members_cache', JSON.stringify(cacheData));
+      console.log('Cached members data:', { count: members.length, source: cacheData.source });
+    } catch (error) {
+      console.warn('Failed to cache members:', error);
+    }
+  },
+  
+  /**
+   * Get cached members if valid
+   * @returns {Array|null} - Cached members or null if invalid/expired
+   */
+  getCachedMembers: function() {
+    try {
+      const cached = localStorage.getItem('bbb_members_cache');
+      if (!cached) {
+        return null;
+      }
+      
+      const cacheData = JSON.parse(cached);
+      const age = Date.now() - cacheData.timestamp;
+      const ttl = 5 * 60 * 1000; // 5 minutes
+      
+      if (age > ttl) {
+        console.log('Member cache expired');
+        localStorage.removeItem('bbb_members_cache');
+        return null;
+      }
+      
+      console.log('Using cached members:', { count: cacheData.count, age: Math.round(age / 1000) + 's' });
+      return cacheData.members;
+      
+    } catch (error) {
+      console.warn('Error reading member cache:', error);
+      localStorage.removeItem('bbb_members_cache');
+      return null;
+    }
+  },
+
+  // =============================================================================
+  // HANDICAP FUNCTIONS
+  // =============================================================================
+
+  /**
+   * Get handicap data for a member
+   * @param {string} memberId - Member ID
+   * @returns {Promise} - Resolves with handicap data
+   */
+  getMemberHandicap: async function(memberId) {
+    try {
+      return await this.get(this.collections.HANDICAPS, memberId);
+    } catch (error) {
+      console.error(`Error getting handicap for ${memberId}:`, error);
+      return null;
+    }
+  },
+  
+  /**
+   * Save handicap data for a member
+   * @param {string} memberId - Member ID
+   * @param {Object} handicapData - Handicap data
+   * @returns {Promise} - Resolves when complete
+   */
+  saveMemberHandicap: async function(memberId, handicapData) {
+    try {
+      return await this.save(this.collections.HANDICAPS, memberId, handicapData);
+    } catch (error) {
+      console.error(`Error saving handicap for ${memberId}:`, error);
+      throw error;
+    }
+  },
+
+  // =============================================================================
+  // SCORECARD FUNCTIONS
+  // =============================================================================
+  
+  /**
+   * Get all scorecards
+   * @returns {Promise} - Resolves with scorecards
+   */
+  getScorecards: async function() {
+    try {
+      return await this.get(this.collections.SCORECARDS);
+    } catch (error) {
+      console.error('Error getting scorecards:', error);
+      return {};
+    }
+  },
+  
+  /**
+   * Save a scorecard
+   * @param {Object} scorecard - Scorecard data
+   * @returns {Promise} - Resolves when complete
+   */
+  saveScorecard: async function(scorecard) {
+    try {
+      // Generate ID if not provided
+      const id = scorecard.id || `sc_${Date.now()}_${Math.floor(Math.random() * 10000)}`;
+      scorecard.id = id;
+      
+      // Add timestamp if not provided
+      if (!scorecard.createdAt) {
+        scorecard.createdAt = new Date().toISOString();
+      }
+      
+      return await this.save(this.collections.SCORECARDS, id, scorecard);
+    } catch (error) {
+      console.error('Error saving scorecard:', error);
+      throw error;
+    }
+  },
+  
+  /**
+   * Delete a scorecard
+   * @param {string} id - Scorecard ID
+   * @returns {Promise} - Resolves when complete
+   */
+  deleteScorecard: async function(id) {
+    try {
+      return await this.delete(this.collections.SCORECARDS, id);
+    } catch (error) {
+      console.error(`Error deleting scorecard ${id}:`, error);
+      throw error;
+    }
+  },
+
+  // =============================================================================
+  // GALLERY FUNCTIONS
+  // =============================================================================
+  
+  /**
+   * Get gallery images
+   * @returns {Promise} - Resolves with gallery images
+   */
+  getGalleryImages: async function() {
+    try {
+      const gallery = await this.get(this.collections.GALLERY, 'images');
+      return gallery || { images: [] };
+    } catch (error) {
+      console.error('Error getting gallery images:', error);
+      return { images: [] };
+    }
+  },
+  
+  /**
+   * Save gallery image
+   * @param {Object} imageData - Image data
+   * @returns {Promise} - Resolves when complete
+   */
+  saveGalleryImage: async function(imageData) {
+    try {
+      // Get existing gallery
+      const gallery = await this.getGalleryImages();
+      
+      // Add new image
+      const newImage = {
+        id: `img_${Date.now()}_${Math.floor(Math.random() * 10000)}`,
+        src: imageData.src,
+        alt: imageData.alt || 'Gallery image',
+        uploadedAt: new Date().toISOString()
+      };
+      
+      gallery.images.push(newImage);
+      
+      // Save gallery
+      return await this.save(this.collections.GALLERY, 'images', gallery);
+    } catch (error) {
+      console.error('Error saving gallery image:', error);
+      throw error;
+    }
+  },
+  
+  /**
+   * Delete gallery image
+   * @param {string} imageId - Image ID
+   * @returns {Promise} - Resolves when complete
+   */
+  deleteGalleryImage: async function(imageId) {
+    try {
+      // Get existing gallery
+      const gallery = await this.getGalleryImages();
+      
+      // Remove image with matching ID
+      gallery.images = gallery.images.filter(img => img.id !== imageId);
+      
+      // Save gallery
+      return await this.save(this.collections.GALLERY, 'images', gallery);
+    } catch (error) {
+      console.error(`Error deleting gallery image ${imageId}:`, error);
+      throw error;
+    }
+  },
+
+  // =============================================================================
+  // CLOUDFLARE STUB FUNCTIONS
+  // =============================================================================
+  
+  /**
+   * Get from Cloudflare KV/D1
+   * @param {string} collection - Collection name
+   * @param {string|null} id - Item ID
+   * @returns {Promise} - Resolves with data
+   */
+  cloudflareGet: async function(collection, id) {
+    // This will be implemented when Cloudflare integration is ready
+    const endpoint = id 
+      ? `${this.config.apiEndpoint}/${collection}/${id}` 
+      : `${this.config.apiEndpoint}/${collection}`;
+      
+    const response = await fetch(endpoint);
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    }
+    
+    return await response.json();
+  },
+  
+  /**
+   * Save to Cloudflare KV/D1
+   * @param {string} collection - Collection name
+   * @param {string} id - Item ID
+   * @param {*} data - Data to save
+   * @returns {Promise} - Resolves when complete
+   */
+  cloudflareSave: async function(collection, id, data) {
+    // This will be implemented when Cloudflare integration is ready
+    const endpoint = `${this.config.apiEndpoint}/${collection}/${id}`;
+    
+    const response = await fetch(endpoint, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(data)
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    }
+    
+    return await response.json();
+  },
+  
+  /**
+   * Delete from Cloudflare KV/D1
+   * @param {string} collection - Collection name
+   * @param {string} id - Item ID
+   * @returns {Promise} - Resolves when complete
+   */
+  cloudflareDelete: async function(collection, id) {
+    // This will be implemented when Cloudflare integration is ready
+    const endpoint = `${this.config.apiEndpoint}/${collection}/${id}`;
+    
+    const response = await fetch(endpoint, {
+      method: 'DELETE'
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    }
+    
+    return true;
+  },
+  
+  /**
+   * Query from Cloudflare KV/D1
+   * @param {string} collection - Collection name
+   * @param {Object} query - Query parameters
+   * @returns {Promise} - Resolves with filtered items
+   */
+  cloudflareQuery: async function(collection, query) {
+    // This will be implemented when Cloudflare integration is ready
+    const endpoint = `${this.config.apiEndpoint}/${collection}/query`;
+    
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ query })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    }
+    
+    return await response.json();
+  },
+
+  // =============================================================================
+  // LOCAL STORAGE FUNCTIONS
+  // =============================================================================
+  
   /**
    * Get from localStorage
    * @param {string} collection - Collection name
@@ -554,7 +946,7 @@ const BBB_DB = {
           const key = localStorage.key(i);
           
           // If key starts with our prefix, it's part of our collection
-          if (key.startsWith(prefix)) {
+          if (key && key.startsWith(prefix)) {
             const id = key.substring(prefix.length);
             items[id] = JSON.parse(localStorage.getItem(key));
           }
@@ -631,8 +1023,6 @@ const BBB_DB = {
       return {};
     }
   }
-
-  // ... (include all your other existing methods like getMembers, getMemberHandicap, etc.)
 };
 
 // Export for other modules
