@@ -1024,8 +1024,8 @@
         window.bbbSessionMonitor = sessionCheck;
       }
       
-      // ENHANCED: Populate members dropdown with multiple fallback strategies
-      async function populateMembersDropdown() {
+      // FIXED: Populate members dropdown with immediate static fallback
+      function populateMembersDropdown() {
         console.log("Starting member population...");
         
         // Show loading state
@@ -1035,41 +1035,28 @@
         let members = [];
         let source = 'unknown';
         
+        // Use timeout to prevent infinite loading
+        const loadingTimeout = setTimeout(() => {
+          console.warn("Member loading timeout, forcing static fallback");
+          loadStaticMembersImmediately();
+        }, 2000); // 2 second timeout
+        
         try {
-          // Strategy 1: Try dynamic member loading if configured
-          if (typeof BBB_CONFIG !== 'undefined' && 
-              BBB_CONFIG.features && 
-              BBB_CONFIG.features.members && 
-              BBB_CONFIG.features.members.dynamicLoading && 
-              BBB_CONFIG.memberUtils) {
-            
-            console.log("Attempting dynamic member loading...");
-            
-            try {
-              members = await BBB_CONFIG.memberUtils.getAllMembers();
-              source = 'dynamic';
-              console.log("Loaded", members.length, "members dynamically");
-            } catch (error) {
-              console.warn("Dynamic member loading failed:", error);
-              // Fall through to next strategy
-            }
-          }
-          
-          // Strategy 2: Try BBB_CONFIG.members (original member array)
-          if (members.length === 0 && typeof BBB_CONFIG !== 'undefined' && BBB_CONFIG.members && Array.isArray(BBB_CONFIG.members)) {
+          // Strategy 1: Try BBB_CONFIG.members (original member array) - MOST RELIABLE
+          if (typeof BBB_CONFIG !== 'undefined' && BBB_CONFIG.members && Array.isArray(BBB_CONFIG.members) && BBB_CONFIG.members.length > 0) {
             console.log("Using BBB_CONFIG.members array");
             members = BBB_CONFIG.members.map(name => ({
               id: name.toLowerCase(),
               display_name: name,
               username: name.toLowerCase(),
-              source: 'static'
+              source: 'config'
             }));
             source = 'config';
-            console.log("Loaded", members.length, "members from config");
+            console.log("Loaded", members.length, "members from BBB_CONFIG.members");
           }
           
-          // Strategy 3: Try BBB_CONFIG.staticMembers
-          if (members.length === 0 && typeof BBB_CONFIG !== 'undefined' && BBB_CONFIG.staticMembers && Array.isArray(BBB_CONFIG.staticMembers)) {
+          // Strategy 2: Try BBB_CONFIG.staticMembers
+          else if (typeof BBB_CONFIG !== 'undefined' && BBB_CONFIG.staticMembers && Array.isArray(BBB_CONFIG.staticMembers) && BBB_CONFIG.staticMembers.length > 0) {
             console.log("Using BBB_CONFIG.staticMembers array");
             members = BBB_CONFIG.staticMembers.map(name => ({
               id: name.toLowerCase(),
@@ -1078,12 +1065,43 @@
               source: 'static'
             }));
             source = 'static';
-            console.log("Loaded", members.length, "members from staticMembers");
+            console.log("Loaded", members.length, "members from BBB_CONFIG.staticMembers");
           }
           
-          // Strategy 4: Last resort fallback
-          if (members.length === 0) {
-            console.warn("All member loading strategies failed, using hardcoded fallback");
+          // Strategy 3: Try dynamic member loading (if static failed)
+          else if (typeof BBB_CONFIG !== 'undefined' && 
+              BBB_CONFIG.features && 
+              BBB_CONFIG.features.members && 
+              BBB_CONFIG.features.members.dynamicLoading && 
+              BBB_CONFIG.memberUtils) {
+            
+            console.log("Attempting dynamic member loading as fallback...");
+            
+            // Try dynamic loading with timeout
+            Promise.race([
+              BBB_CONFIG.memberUtils.getAllMembers(),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Dynamic loading timeout')), 1500))
+            ]).then(dynamicMembers => {
+              if (dynamicMembers && dynamicMembers.length > 0) {
+                clearTimeout(loadingTimeout);
+                members = dynamicMembers;
+                source = 'dynamic';
+                console.log("Loaded", members.length, "members dynamically");
+                populateDropdownWithMembers(members, source);
+              } else {
+                throw new Error('No dynamic members returned');
+              }
+            }).catch(error => {
+              console.warn("Dynamic member loading failed:", error);
+              loadStaticMembersImmediately();
+            });
+            
+            return; // Exit here for async dynamic loading
+          }
+          
+          // Strategy 4: Hardcoded fallback
+          else {
+            console.warn("No config members found, using hardcoded fallback");
             const fallbackMembers = [
               "Amrit", "Kam", "Vish", "Ravi", "Bal", "Vick", 
               "Michael", "Justy", "Phuperjee", "Indy", "Maj", "Sama"
@@ -1096,24 +1114,57 @@
               source: 'fallback'
             }));
             source = 'fallback';
-            console.log("Using fallback members:", members.length);
+            console.log("Using hardcoded fallback members:", members.length);
           }
+          
+          // Clear timeout since we have members
+          clearTimeout(loadingTimeout);
           
         } catch (error) {
           console.error("Error in member loading:", error);
-          // Use absolute fallback
-          members = [
-            { id: 'amrit', display_name: 'Amrit', username: 'amrit', source: 'emergency' },
-            { id: 'kam', display_name: 'Kam', username: 'kam', source: 'emergency' },
-            { id: 'vish', display_name: 'Vish', username: 'vish', source: 'emergency' }
-          ];
-          source = 'emergency';
+          clearTimeout(loadingTimeout);
+          loadStaticMembersImmediately();
+          return;
         }
         
-        // Populate the dropdown
+        // Populate dropdown immediately with static members
+        populateDropdownWithMembers(members, source);
+        
+        // Emergency static member loader
+        function loadStaticMembersImmediately() {
+          console.log("Loading static members immediately...");
+          const emergencyMembers = [
+            { id: 'amrit', display_name: 'Amrit', username: 'amrit', source: 'emergency' },
+            { id: 'kam', display_name: 'Kam', username: 'kam', source: 'emergency' },
+            { id: 'vish', display_name: 'Vish', username: 'vish', source: 'emergency' },
+            { id: 'ravi', display_name: 'Ravi', username: 'ravi', source: 'emergency' },
+            { id: 'bal', display_name: 'Bal', username: 'bal', source: 'emergency' },
+            { id: 'vick', display_name: 'Vick', username: 'vick', source: 'emergency' },
+            { id: 'michael', display_name: 'Michael', username: 'michael', source: 'emergency' },
+            { id: 'justy', display_name: 'Justy', username: 'justy', source: 'emergency' },
+            { id: 'phuperjee', display_name: 'Phuperjee', username: 'phuperjee', source: 'emergency' },
+            { id: 'indy', display_name: 'Indy', username: 'indy', source: 'emergency' },
+            { id: 'maj', display_name: 'Maj', username: 'maj', source: 'emergency' },
+            { id: 'sama', display_name: 'Sama', username: 'sama', source: 'emergency' }
+          ];
+          
+          populateDropdownWithMembers(emergencyMembers, 'emergency');
+        }
+      }
+      
+      // Helper function to populate dropdown
+      function populateDropdownWithMembers(members, source) {
+      // Helper function to populate dropdown
+      function populateDropdownWithMembers(members, source) {
         try {
           memberSelect.classList.remove('loading');
           memberSelect.innerHTML = '<option value="">-- Select Member --</option>';
+          
+          if (!members || members.length === 0) {
+            memberSelect.innerHTML = '<option value="">No members found</option>';
+            console.error("No members provided to populate dropdown");
+            return;
+          }
           
           members.forEach(member => {
             const option = document.createElement('option');
@@ -1138,6 +1189,7 @@
           
         } catch (error) {
           console.error("Error populating dropdown:", error);
+          memberSelect.classList.remove('loading');
           memberSelect.innerHTML = '<option value="">Error loading members</option>';
         }
       }
@@ -1687,7 +1739,7 @@
       }
       
       // Initialize page
-      async function initializePage() {
+      function initializePage() {
         console.log("Initializing page...");
         
         // Set up event handlers
@@ -1712,7 +1764,7 @@
         exportButton.addEventListener('click', exportToCSV);
         
         // Initial setup
-        await populateMembersDropdown();
+        populateMembersDropdown(); // Changed from await - no longer async
         checkAdminStatus();
         
         // Add initial rounds
