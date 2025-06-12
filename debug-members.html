@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Debug Member Loading</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    
+    .debug-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .member-select {
+      width: 100%;
+      max-width: 300px;
+      padding: 0.75rem;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 1rem;
+      margin: 1rem 0;
+    }
+    
+    .debug-info {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 4px;
+      margin: 1rem 0;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+    
+    .btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 0.5rem;
+    }
+    
+    .btn:hover {
+      background: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <div class="debug-container">
+    <h1>Member Loading Debug Test</h1>
+    
+    <h3>Step 1: Basic Member Dropdown</h3>
+    <select id="member-select" class="member-select">
+      <option value="">Loading members...</option>
+    </select>
+    
+    <h3>Step 2: Debug Controls</h3>
+    <button class="btn" onclick="testMemberLoading()">Test Member Loading</button>
+    <button class="btn" onclick="forceLoadMembers()">Force Load Members</button>
+    <button class="btn" onclick="checkVariables()">Check Variables</button>
+    
+    <h3>Step 3: Debug Information</h3>
+    <div id="debug-info" class="debug-info">Ready for testing...</div>
+  </div>
+
+  <script>
+    // Debug logging function
+    function debugLog(message) {
+      const debugDiv = document.getElementById('debug-info');
+      const timestamp = new Date().toLocaleTimeString();
+      debugDiv.textContent += `[${timestamp}] ${message}\n`;
+      console.log(`[DEBUG] ${message}`);
+    }
+    
+    // Get the member select element
+    const memberSelect = document.getElementById('member-select');
+    
+    // Test 1: Immediate member loading (simplest possible)
+    function forceLoadMembers() {
+      debugLog("Starting forceLoadMembers()...");
+      
+      try {
+        // Clear any existing options
+        memberSelect.innerHTML = '';
+        
+        // Add default option
+        const defaultOption = document.createElement('option');
+        defaultOption.value = '';
+        defaultOption.textContent = '-- Select Member --';
+        memberSelect.appendChild(defaultOption);
+        
+        // Hardcoded member list
+        const members = [
+          'Amrit', 'Kam', 'Vish', 'Ravi', 'Bal', 'Vick',
+          'Michael', 'Justy', 'Phuperjee', 'Indy', 'Maj', 'Sama'
+        ];
+        
+        debugLog(`Adding ${members.length} members to dropdown...`);
+        
+        // Add each member
+        members.forEach((name, index) => {
+          const option = document.createElement('option');
+          option.value = name.toLowerCase();
+          option.textContent = name;
+          memberSelect.appendChild(option);
+          debugLog(`Added member ${index + 1}: ${name}`);
+        });
+        
+        debugLog(`Successfully loaded ${members.length} members!`);
+        debugLog(`Dropdown now has ${memberSelect.options.length} total options`);
+        
+      } catch (error) {
+        debugLog(`ERROR in forceLoadMembers: ${error.message}`);
+        console.error('Error in forceLoadMembers:', error);
+      }
+    }
+    
+    // Test 2: Check what variables are available
+    function checkVariables() {
+      debugLog("Checking available variables...");
+      
+      // Check if common variables exist
+      const checks = [
+        { name: 'BBB_CONFIG', exists: typeof BBB_CONFIG !== 'undefined' },
+        { name: 'BBB_AUTH', exists: typeof BBB_AUTH !== 'undefined' },
+        { name: 'BBB_DB', exists: typeof BBB_DB !== 'undefined' },
+        { name: 'BBB_UTILS', exists: typeof BBB_UTILS !== 'undefined' },
+        { name: 'BBB_UI', exists: typeof BBB_UI !== 'undefined' }
+      ];
+      
+      checks.forEach(check => {
+        debugLog(`${check.name}: ${check.exists ? 'Available' : 'Not found'}`);
+      });
+      
+      // If BBB_CONFIG exists, check its members
+      if (typeof BBB_CONFIG !== 'undefined') {
+        debugLog('BBB_CONFIG found! Checking members...');
+        
+        if (BBB_CONFIG.members) {
+          debugLog(`BBB_CONFIG.members: ${JSON.stringify(BBB_CONFIG.members)}`);
+        } else {
+          debugLog('BBB_CONFIG.members: Not found');
+        }
+        
+        if (BBB_CONFIG.staticMembers) {
+          debugLog(`BBB_CONFIG.staticMembers: ${JSON.stringify(BBB_CONFIG.staticMembers)}`);
+        } else {
+          debugLog('BBB_CONFIG.staticMembers: Not found');
+        }
+      }
+      
+      // Check DOM elements
+      debugLog(`memberSelect element: ${memberSelect ? 'Found' : 'Not found'}`);
+      debugLog(`Current dropdown options: ${memberSelect ? memberSelect.options.length : 'N/A'}`);
+    }
+    
+    // Test 3: Simulate the original function logic
+    function testMemberLoading() {
+      debugLog("Testing member loading logic...");
+      
+      try {
+        // Test the original function structure
+        debugLog("Step 1: Remove loading class");
+        memberSelect.classList.remove('loading');
+        
+        debugLog("Step 2: Clear dropdown");
+        memberSelect.innerHTML = '<option value="">-- Select Member --</option>';
+        
+        debugLog("Step 3: Define static members");
+        const staticMembers = [
+          "Amrit", "Kam", "Vish", "Ravi", "Bal", "Vick", 
+          "Michael", "Justy", "Phuperjee", "Indy", "Maj", "Sama"
+        ];
+        
+        debugLog(`Step 4: Loop through ${staticMembers.length} members`);
+        staticMembers.forEach((name, index) => {
+          const option = document.createElement('option');
+          option.value = name.toLowerCase();
+          option.textContent = name;
+          memberSelect.appendChild(option);
+          
+          if (index < 3) { // Only log first 3 to avoid spam
+            debugLog(`  Added: ${name} (value: ${option.value})`);
+          }
+        });
+        
+        debugLog(`Step 5: Completed! Dropdown has ${memberSelect.options.length} options`);
+        
+      } catch (error) {
+        debugLog(`ERROR in testMemberLoading: ${error.message}`);
+        console.error('Error in testMemberLoading:', error);
+      }
+    }
+    
+    // Auto-run basic check when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      debugLog("Page loaded, running initial checks...");
+      checkVariables();
+      
+      // Try to load members immediately
+      setTimeout(() => {
+        debugLog("Attempting automatic member loading...");
+        testMemberLoading();
+      }, 500);
+    });
+    
+    // Also run immediately (in case DOMContentLoaded already fired)
+    setTimeout(() => {
+      if (document.readyState === 'complete') {
+        debugLog("Document already loaded, running checks...");
+        checkVariables();
+        testMemberLoading();
+      }
+    }, 100);
+  </script>
+</body>
+</html>
