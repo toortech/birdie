@@ -13,8 +13,15 @@
   <!-- Global CSS -->
   <link rel="stylesheet" href="css/style.css">
   
+  <!-- Core Modules (loaded in specific order) -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+
   <style>
-    /* Enhanced CSS Variables - Same as about.html */
+    /* Enhanced CSS Variables */
     :root {
       --bbb-primary: #004d00;
       --bbb-secondary: #0046ad;
@@ -42,7 +49,7 @@
       min-height: 100vh;
     }
 
-    /* Header with Logo - Same as about.html */
+    /* Header with Logo */
     .header {
       position: fixed;
       top: 0;
@@ -157,7 +164,7 @@
       position: relative;
       overflow: hidden;
       border-bottom: 3px solid #dee2e6;
-      margin-top: 90px; /* Account for fixed header */
+      margin-top: 90px;
     }
 
     .calculator-hero::before {
@@ -219,44 +226,45 @@
       padding: 0 2rem;
     }
 
-    /* Debug panel for development */
-    .debug-panel {
-      background: #f8f9fa;
-      border: 2px solid #dee2e6;
-      border-radius: 8px;
-      padding: 1rem;
-      margin: 1rem 0;
-      font-family: monospace;
-      font-size: 0.9rem;
-      max-height: 200px;
-      overflow-y: auto;
+    /* Golf-specific decorative elements */
+    .golf-ball {
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      position: relative;
+      display: inline-block;
+      margin: 0 10px;
+      box-shadow: inset -3px -3px 5px rgba(0,0,0,0.2);
     }
 
-    .debug-panel h4 {
-      margin: 0 0 0.5rem 0;
-      font-family: var(--font-family-accent);
-      color: var(--bbb-primary);
+    .golf-ball::before {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #ccc;
+      border-radius: 50%;
+      top: 4px;
+      left: 6px;
+      box-shadow: 4px 0 #ccc, 8px 0 #ccc, 2px 4px #ccc, 6px 4px #ccc, 10px 4px #ccc, 4px 8px #ccc, 8px 8px #ccc;
     }
 
-    .debug-status {
-      margin: 0.5rem 0;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
+    /* Calculator Container */
+    .calculator {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      margin: 4rem 0;
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
     }
 
-    .debug-status.success {
-      background: #d4edda;
-      color: #155724;
-    }
-
-    .debug-status.error {
-      background: #f8d7da;
-      color: #721c24;
-    }
-
-    .debug-status.warning {
-      background: #fff3cd;
-      color: #856404;
+    .calculator:hover {
+      border-color: var(--bbb-gold);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
     }
 
     /* Member Selection Section */
@@ -307,23 +315,6 @@
       font-family: var(--font-family-base);
     }
 
-    /* Calculator Container */
-    .calculator {
-      background: white;
-      padding: 3rem;
-      border-radius: 20px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      margin: 4rem 0;
-      border: 3px solid transparent;
-      transition: all 0.3s ease;
-    }
-
-    .calculator:hover {
-      border-color: var(--bbb-gold);
-      transform: translateY(-5px);
-      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
-    }
-
     /* Buttons */
     .btn {
       background: var(--bbb-secondary);
@@ -356,14 +347,42 @@
       box-shadow: none;
     }
 
-    .btn.debug {
-      background: #17a2b8;
-      font-size: 0.8rem;
-      padding: 0.5rem 1rem;
+    .btn.help-toggle {
+      background: var(--bbb-gold);
+      color: var(--bbb-primary);
+      margin-bottom: 1.5rem;
     }
 
-    .btn.debug:hover {
-      background: #138496;
+    .btn.help-toggle:hover {
+      background: #e6c200;
+      color: var(--bbb-primary);
+    }
+
+    /* Help Section */
+    .help-section {
+      background: linear-gradient(135deg, #e3f2fd, #f8f9fa);
+      padding: 2rem;
+      border-radius: 15px;
+      margin-bottom: 2rem;
+      border: 2px solid #bbdefb;
+      display: none;
+    }
+
+    .help-section h3 {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+
+    .help-section ol {
+      padding-left: 1.5rem;
+      font-family: var(--font-family-base);
+    }
+
+    .help-section li {
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
     }
 
     /* Status Messages */
@@ -403,13 +422,31 @@
 
     /* Responsive Design */
     @media (max-width: 768px) {
+      .header {
+        padding: 0.75rem 1rem;
+      }
+
+      .header-logo {
+        height: 40px;
+      }
+
+      .header-title {
+        font-size: 1.2rem;
+        margin-left: 0.5rem;
+      }
+
+      .calculator-hero {
+        padding: 2rem 1rem 1.5rem 1rem;
+        margin-top: 120px;
+      }
+
+      .calculator-main {
+        padding: 0 1rem;
+      }
+
       .calculator {
         padding: 1.5rem;
         margin: 2rem 0;
-      }
-      
-      .debug-panel {
-        font-size: 0.8rem;
       }
     }
   </style>
@@ -430,6 +467,7 @@
         </div>
       </div>
       <div class="header-right">
+        <!-- Auth controls will be added here by JavaScript -->
         <a href="index.html" class="home-btn" id="home-link">Home</a>
       </div>
     </div>
@@ -439,23 +477,13 @@
     <!-- Hero Section -->
     <section class="calculator-hero">
       <div class="calculator-hero-content">
-        <h1>Handicap Calculator</h1>
+        <h1>Handicap Calculator <span class="golf-ball"></span></h1>
         <p class="tagline">Calculate your official handicap using the World Handicap System</p>
       </div>
     </section>
 
     <!-- Main Calculator Content -->
     <div class="calculator-main">
-      
-      <!-- Debug Panel for Development -->
-      <div class="debug-panel" id="debug-panel">
-        <h4>Module Loading Status</h4>
-        <div id="debug-content">Checking module status...</div>
-        <button class="btn debug" onclick="checkModuleStatus()">Refresh Status</button>
-        <button class="btn debug" onclick="testMemberLoading()">Test Member Loading</button>
-        <button class="btn debug" onclick="forceLoadMembers()">Force Load Members</button>
-      </div>
-      
       <div id="status-message"></div>
       
       <div id="handicap-calculator" class="calculator">
@@ -463,230 +491,284 @@
         <div class="member-selection-section">
           <label for="member-select">Calculate Handicap For:</label>
           <select id="member-select" class="member-select">
-            <option value="">Loading members...</option>
+            <option value="">-- Select Member --</option>
+            <!-- Members will be populated by JavaScript -->
           </select>
           <div id="admin-message" class="admin-message" style="display: none;">
             <small>As an admin, you can calculate and save handicaps for any member.</small>
           </div>
         </div>
         
-        <div style="text-align: center; padding: 2rem;">
-          <p><strong>Member loading test in progress...</strong></p>
-          <p>Check the debug panel above to see what's happening with module loading.</p>
+        <!-- Help section toggle -->
+        <button id="help-toggle" class="btn help-toggle">Show Help</button>
+        
+        <!-- Help section content -->
+        <div id="help-section" class="help-section">
+          <h3>How to Use the Handicap Calculator</h3>
+          <ol>
+            <li>Select the member whose handicap you want to calculate.</li>
+            <li>Enter details for at least 3 rounds of golf (up to 20).</li>
+            <li>For each round, select the course and tee color played.</li>
+            <li>Enter the gross score for the round.</li>
+            <li>The course rating and slope rating will be filled automatically.</li>
+            <li>Your score differential will be calculated automatically.</li>
+            <li>Click "Calculate Handicap" to get the handicap index.</li>
+            <li>Click "Save Handicap" to save it to the member's profile.</li>
+          </ol>
+          <p>The handicap index is calculated using the World Handicap System (WHS) formula.</p>
+        </div>
+        
+        <!-- Simple test buttons for now -->
+        <div style="text-align: center; padding: 2rem; border: 2px dashed #ccc; border-radius: 8px; background: #f8f9fa;">
+          <h3>Calculator Ready</h3>
+          <p>Member dropdown should now be populated from your config files.</p>
+          <button class="btn" onclick="testCalculator()">Test Calculator Functions</button>
         </div>
       </div>
     </div>
   </main>
 
-  <!-- MODULE LOADING DIAGNOSTIC SCRIPT -->
+  <!-- Clean Initialization Script -->
   <script>
-    console.log("=== BBB MODULE LOADING DIAGNOSTIC ===");
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("=== HANDICAP CALCULATOR INITIALIZATION ===");
+      
+      // Simple initialization - no complex async logic
+      initializeCalculator();
+    });
     
-    // Track which modules load successfully
-    window.BBB_MODULES_STATUS = {
-      config: false,
-      utils: false,
-      auth: false,
-      db: false,
-      ui: false,
-      startTime: Date.now()
-    };
-    
-    // Function to update debug panel
-    function updateDebugPanel() {
-      const debugContent = document.getElementById('debug-content');
-      if (!debugContent) return;
+    function initializeCalculator() {
+      console.log("Initializing calculator...");
       
-      const elapsed = Date.now() - window.BBB_MODULES_STATUS.startTime;
-      let html = `<div>Loading time: ${elapsed}ms</div>`;
-      
-      Object.keys(window.BBB_MODULES_STATUS).forEach(key => {
-        if (key === 'startTime') return;
-        
-        const status = window.BBB_MODULES_STATUS[key];
-        const statusClass = status ? 'success' : 'error';
-        const statusText = status ? '✓ Loaded' : '✗ Failed';
-        
-        html += `<div class="debug-status ${statusClass}">${key.toUpperCase()}: ${statusText}</div>`;
-      });
-      
-      // Check if BBB_CONFIG is available and has members
-      if (typeof BBB_CONFIG !== 'undefined') {
-        const hasMembers = BBB_CONFIG.members && BBB_CONFIG.members.length > 0;
-        const membersClass = hasMembers ? 'success' : 'warning';
-        const membersText = hasMembers ? `✓ ${BBB_CONFIG.members.length} members` : '! No members array';
-        html += `<div class="debug-status ${membersClass}">MEMBERS: ${membersText}</div>`;
-        
-        if (hasMembers) {
-          html += `<div style="margin-top: 0.5rem; font-size: 0.8rem;">Members: ${BBB_CONFIG.members.slice(0, 5).join(', ')}${BBB_CONFIG.members.length > 5 ? '...' : ''}</div>`;
+      // Initialize modules if available
+      if (typeof BBB_AUTH !== 'undefined' && BBB_AUTH.init) {
+        try {
+          BBB_AUTH.init({
+            cloudflareEnabled: BBB_CONFIG ? BBB_CONFIG.cloudflareEnabled : false
+          });
+          console.log("✓ BBB_AUTH initialized");
+        } catch (error) {
+          console.warn("BBB_AUTH initialization failed:", error);
         }
       }
       
-      debugContent.innerHTML = html;
+      if (typeof BBB_DB !== 'undefined' && BBB_DB.init) {
+        try {
+          BBB_DB.init({
+            useCloudflare: BBB_CONFIG ? BBB_CONFIG.cloudflareEnabled : false,
+            localStoragePrefix: 'bbb_'
+          });
+          console.log("✓ BBB_DB initialized");
+        } catch (error) {
+          console.warn("BBB_DB initialization failed:", error);
+        }
+      }
+      
+      // Load members from config
+      populateMembersDropdown();
+      
+      // Set up basic event handlers
+      setupEventHandlers();
+      
+      // Check authentication
+      checkAuthentication();
+      
+      console.log("Calculator initialization complete");
     }
     
-    // Function to check module status
-    function checkModuleStatus() {
-      console.log("Checking module status...");
+    function populateMembersDropdown() {
+      console.log("Populating members dropdown...");
       
-      // Check each module
-      window.BBB_MODULES_STATUS.config = typeof BBB_CONFIG !== 'undefined';
-      window.BBB_MODULES_STATUS.utils = typeof BBB_UTILS !== 'undefined';
-      window.BBB_MODULES_STATUS.auth = typeof BBB_AUTH !== 'undefined';
-      window.BBB_MODULES_STATUS.db = typeof BBB_DB !== 'undefined';
-      window.BBB_MODULES_STATUS.ui = typeof BBB_UI !== 'undefined';
-      
-      updateDebugPanel();
-      
-      // Also log to console
-      console.log("Module Status:", window.BBB_MODULES_STATUS);
-      
-      if (typeof BBB_CONFIG !== 'undefined') {
-        console.log("BBB_CONFIG.members:", BBB_CONFIG.members);
-      }
-    }
-    
-    // Function to test member loading
-    function testMemberLoading() {
-      console.log("Testing member loading...");
-      const memberSelect = document.getElementById('member-select');
-      
-      if (!memberSelect) {
-        console.error("Member select element not found!");
-        return;
-      }
-      
-      // Try to load members using different strategies
-      let members = [];
-      let source = 'none';
-      
-      // Strategy 1: BBB_CONFIG.members
-      if (typeof BBB_CONFIG !== 'undefined' && BBB_CONFIG.members && BBB_CONFIG.members.length > 0) {
-        members = BBB_CONFIG.members;
-        source = 'BBB_CONFIG.members';
-      }
-      // Strategy 2: BBB_CONFIG.staticMembers  
-      else if (typeof BBB_CONFIG !== 'undefined' && BBB_CONFIG.staticMembers && BBB_CONFIG.staticMembers.length > 0) {
-        members = BBB_CONFIG.staticMembers;
-        source = 'BBB_CONFIG.staticMembers';
-      }
-      
-      console.log(`Found ${members.length} members from ${source}:`, members);
-      
-      if (members.length > 0) {
-        populateMembers(members, source);
-      } else {
-        console.error("No members found in any source!");
-        forceLoadMembers();
-      }
-    }
-    
-    // Function to force load members (hardcoded fallback)
-    function forceLoadMembers() {
-      console.log("Force loading hardcoded members...");
-      const hardcodedMembers = [
-        "Amrit", "Kam", "Vish", "Ravi", "Bal", "Vick", 
-        "Michael", "Justy", "Phuperjee", "Indy", "Maj", "Sama"
-      ];
-      
-      populateMembers(hardcodedMembers, 'hardcoded');
-    }
-    
-    // Function to populate member dropdown
-    function populateMembers(members, source) {
       const memberSelect = document.getElementById('member-select');
       if (!memberSelect) {
         console.error("Member select element not found!");
         return;
       }
-      
-      console.log(`Populating ${members.length} members from ${source}...`);
       
       // Clear existing options
       memberSelect.innerHTML = '<option value="">-- Select Member --</option>';
       
-      // Add each member
+      let members = [];
+      let source = 'none';
+      
+      // Try to get members from BBB_CONFIG
+      if (typeof BBB_CONFIG !== 'undefined') {
+        console.log("BBB_CONFIG found, checking for members...");
+        
+        if (BBB_CONFIG.members && Array.isArray(BBB_CONFIG.members) && BBB_CONFIG.members.length > 0) {
+          members = BBB_CONFIG.members;
+          source = 'BBB_CONFIG.members';
+          console.log(`Found ${members.length} members in BBB_CONFIG.members`);
+        } else if (BBB_CONFIG.staticMembers && Array.isArray(BBB_CONFIG.staticMembers) && BBB_CONFIG.staticMembers.length > 0) {
+          members = BBB_CONFIG.staticMembers;
+          source = 'BBB_CONFIG.staticMembers';
+          console.log(`Found ${members.length} members in BBB_CONFIG.staticMembers`);
+        } else {
+          console.warn("BBB_CONFIG found but no members array");
+        }
+      } else {
+        console.warn("BBB_CONFIG not found");
+      }
+      
+      // Fallback to hardcoded members if config fails
+      if (members.length === 0) {
+        console.log("Using hardcoded member fallback");
+        members = [
+          "Amrit", "Kam", "Vish", "Ravi", "Bal", "Vick", 
+          "Michael", "Justy", "Phuperjee", "Indy", "Maj", "Sama"
+        ];
+        source = 'hardcoded fallback';
+      }
+      
+      // Populate dropdown
       members.forEach((member, index) => {
         const option = document.createElement('option');
-        option.value = typeof member === 'string' ? member.toLowerCase() : (member.id || member.username || member.display_name).toLowerCase();
-        option.textContent = typeof member === 'string' ? member : (member.display_name || member.username || member.id);
+        option.value = typeof member === 'string' ? member.toLowerCase() : member.id || member.username;
+        option.textContent = typeof member === 'string' ? member : member.display_name || member.username;
         memberSelect.appendChild(option);
-        
-        console.log(`Added member ${index + 1}: ${option.textContent} (${option.value})`);
       });
       
-      console.log(`Successfully populated ${members.length} members from ${source}`);
+      console.log(`✓ Successfully populated ${members.length} members from ${source}`);
+      showMessage(`Loaded ${members.length} members from ${source}`, 'success');
       
-      // Show success message
-      showMessage(`Successfully loaded ${members.length} members from ${source}`, 'success');
+      // Auto-select current user if authenticated
+      if (typeof BBB_AUTH !== 'undefined' && BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+        const userOption = Array.from(memberSelect.options).find(opt => opt.value === BBB_AUTH.currentUser.id);
+        if (userOption) {
+          userOption.selected = true;
+          console.log(`Auto-selected current user: ${BBB_AUTH.currentUser.id}`);
+        }
+      }
     }
     
-    // Simple message function
-    function showMessage(message, type) {
-      const statusElement = document.getElementById('status-message');
-      if (statusElement) {
-        statusElement.textContent = message;
-        statusElement.className = type;
-        statusElement.style.display = 'block';
-        
-        setTimeout(() => {
-          statusElement.style.display = 'none';
-        }, 3000);
+    function setupEventHandlers() {
+      console.log("Setting up event handlers...");
+      
+      // Help toggle
+      const helpToggle = document.getElementById('help-toggle');
+      const helpSection = document.getElementById('help-section');
+      
+      if (helpToggle && helpSection) {
+        helpToggle.addEventListener('click', function() {
+          if (helpSection.style.display === 'none') {
+            helpSection.style.display = 'block';
+            helpToggle.textContent = 'Hide Help';
+          } else {
+            helpSection.style.display = 'none';
+            helpToggle.textContent = 'Show Help';
+          }
+        });
       }
+      
+      // Member selection change
+      const memberSelect = document.getElementById('member-select');
+      if (memberSelect) {
+        memberSelect.addEventListener('change', function() {
+          console.log(`Member selected: ${this.value}`);
+          // TODO: Load handicap history for selected member
+        });
+      }
+    }
+    
+    function checkAuthentication() {
+      console.log("Checking authentication...");
+      
+      if (typeof BBB_AUTH === 'undefined') {
+        console.log("BBB_AUTH not available, skipping auth check");
+        return;
+      }
+      
+      // Try to restore session
+      try {
+        const storedAuth = localStorage.getItem('bbb_auth_session');
+        const storedUser = localStorage.getItem('bbb_current_user');
+        
+        if (storedAuth && storedUser) {
+          const authData = JSON.parse(storedAuth);
+          const userData = JSON.parse(storedUser);
+          
+          if (authData.expiresAt && new Date(authData.expiresAt) > new Date()) {
+            BBB_AUTH.currentUser = userData;
+            BBB_AUTH.isAuthenticated = true;
+            console.log(`✓ Restored session for user: ${userData.id}`);
+            
+            // Add auth controls to header
+            addAuthControls();
+            
+            // Show admin message if user is admin
+            if (BBB_AUTH.hasRole && BBB_AUTH.hasRole('admin')) {
+              const adminMessage = document.getElementById('admin-message');
+              if (adminMessage) {
+                adminMessage.style.display = 'block';
+              }
+            }
+          }
+        }
+      } catch (error) {
+        console.warn("Auth restoration failed:", error);
+      }
+    }
+    
+    function addAuthControls() {
+      const headerRight = document.querySelector('.header-right');
+      if (!headerRight || !BBB_AUTH.isAuthenticated) return;
+      
+      // Add user info
+      if (!headerRight.querySelector('.user-info')) {
+        const userInfo = document.createElement('span');
+        userInfo.className = 'user-info';
+        userInfo.textContent = `Welcome, ${BBB_AUTH.currentUser.id}`;
+        headerRight.insertBefore(userInfo, headerRight.firstChild);
+      }
+      
+      // Add logout button
+      if (!headerRight.querySelector('.logout-btn')) {
+        const logoutBtn = document.createElement('button');
+        logoutBtn.className = 'logout-btn';
+        logoutBtn.textContent = 'Logout';
+        logoutBtn.onclick = function() {
+          if (confirm('Are you sure you want to logout?')) {
+            localStorage.removeItem('bbb_auth_session');
+            localStorage.removeItem('bbb_current_user');
+            window.location.reload();
+          }
+        };
+        headerRight.appendChild(logoutBtn);
+      }
+    }
+    
+    function showMessage(message, type = 'info') {
+      const statusElement = document.getElementById('status-message');
+      if (!statusElement) return;
+      
+      statusElement.textContent = message;
+      statusElement.className = type;
+      statusElement.style.display = 'block';
+      
+      // Auto-hide after 3 seconds
+      setTimeout(() => {
+        statusElement.style.display = 'none';
+      }, 3000);
       
       console.log(`[${type.toUpperCase()}] ${message}`);
     }
     
-    // Initial status check when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-      console.log("DOM loaded, checking initial status...");
-      setTimeout(checkModuleStatus, 100);
-      setTimeout(testMemberLoading, 500);
-    });
-    
-    // Update status every 2 seconds for the first 10 seconds
-    let statusUpdateCount = 0;
-    const statusInterval = setInterval(() => {
-      checkModuleStatus();
-      statusUpdateCount++;
+    function testCalculator() {
+      console.log("Testing calculator functions...");
       
-      if (statusUpdateCount >= 5) {
-        clearInterval(statusInterval);
-        console.log("Status monitoring complete");
-      }
-    }, 2000);
-  </script>
-
-  <!-- ATTEMPT TO LOAD EXTERNAL MODULES -->
-  <script>
-    // Function to handle script loading success
-    function onModuleLoad(moduleName) {
-      console.log(`✓ ${moduleName} loaded successfully`);
-      window.BBB_MODULES_STATUS[moduleName.toLowerCase()] = true;
-      updateDebugPanel();
+      const memberSelect = document.getElementById('member-select');
+      const memberCount = memberSelect ? memberSelect.options.length - 1 : 0; // -1 for default option
+      
+      showMessage(`Calculator ready! Found ${memberCount} members. BBB_CONFIG: ${typeof BBB_CONFIG !== 'undefined' ? 'Available' : 'Missing'}`, 'info');
+      
+      // Log current state
+      console.log("Current state:", {
+        membersLoaded: memberCount,
+        configAvailable: typeof BBB_CONFIG !== 'undefined',
+        authAvailable: typeof BBB_AUTH !== 'undefined',
+        isAuthenticated: BBB_AUTH ? BBB_AUTH.isAuthenticated : false
+      });
     }
-    
-    // Function to handle script loading failure
-    function onModuleError(moduleName, error) {
-      console.error(`✗ ${moduleName} failed to load:`, error);
-      window.BBB_MODULES_STATUS[moduleName.toLowerCase()] = false;
-      updateDebugPanel();
-    }
-  </script>
-  
-  <!-- Try to load your external modules -->
-  <script src="js/config.js" onload="onModuleLoad('config')" onerror="onModuleError('config', 'File not found or syntax error')"></script>
-  <script src="js/utils.js" onload="onModuleLoad('utils')" onerror="onModuleError('utils', 'File not found or syntax error')"></script>
-  <script src="js/auth.js" onload="onModuleLoad('auth')" onerror="onModuleError('auth', 'File not found or syntax error')"></script>
-  <script src="js/db.js" onload="onModuleLoad('db')" onerror="onModuleError('db', 'File not found or syntax error')"></script>
-  <script src="js/ui.js" onload="onModuleLoad('ui')" onerror="onModuleError('ui', 'File not found or syntax error')"></script>
-
-  <!-- Try member loading after a delay to let modules load -->
-  <script>
-    setTimeout(() => {
-      console.log("Final attempt to load members after module loading...");
-      testMemberLoading();
-    }, 1000);
   </script>
 </body>
 </html>
