@@ -1,6 +1,6 @@
 /**
- * Birdie Bush Bandits - Updated Configuration File
- * Contains all shared data for the site including dynamic member management
+ * Birdie Bush Bandits - Merged Configuration File
+ * Contains all shared data for the site including both static and dynamic member management
  */
 
 // Global site configuration
@@ -54,7 +54,13 @@ const BBB_CONFIG = {
     }
   },
   
-  // UPDATED: Static members as fallback only
+  // RESTORED: Original members list for backward compatibility and fallback
+  members: [
+    "Amrit", "Kam", "Vish", "Ravi", "Bal", "Vick", 
+    "Michael", "Justy", "Phuperjee", "Indy", "Maj", "Sama"
+  ],
+  
+  // KEPT: Static members as fallback (same as members for now)
   staticMembers: [
     "Amrit", "Kam", "Vish", "Ravi", "Bal", "Vick", 
     "Michael", "Justy", "Phuperjee", "Indy", "Maj", "Sama"
@@ -185,14 +191,14 @@ const BBB_CONFIG = {
     red: "Red"
   },
   
-  // Gallery settings
+  // Gallery settings - Updated for Cloudflare auth
   gallery: {
-    password: "secret123", // Legacy fallback
+    password: "secret123", // Legacy fallback - will be replaced with secure auth
     maxUploadSize: 5000000, // 5MB
     supportedTypes: ["image/jpeg", "image/png", "image/gif"],
-    requireAuth: true,
-    adminOnlyUpload: false,
-    adminOnlyDelete: true
+    requireAuth: true, // New: Require authentication for gallery access
+    adminOnlyUpload: false, // Set to true if only admins can upload
+    adminOnlyDelete: true // Only admins can delete photos
   },
   
   // Handicap calculation settings
@@ -255,14 +261,14 @@ const BBB_CONFIG = {
     }
   },
   
-  // NEW: Member utility functions
-  members: {
+  // ENHANCED: Member utility functions with backward compatibility
+  memberUtils: {
     /**
      * Get the current members source (dynamic or static)
      * @returns {string} - 'dynamic' or 'static'
      */
     getSource: function() {
-      return this.features.members.dynamicLoading && this.cloudflareEnabled ? 'dynamic' : 'static';
+      return BBB_CONFIG.features.members.dynamicLoading && BBB_CONFIG.cloudflareEnabled ? 'dynamic' : 'static';
     },
     
     /**
@@ -270,7 +276,7 @@ const BBB_CONFIG = {
      * @returns {Array} - Array of static member objects
      */
     getStaticMembers: function() {
-      return this.staticMembers.map(name => ({
+      return BBB_CONFIG.staticMembers.map(name => ({
         id: name.toLowerCase(),
         username: name.toLowerCase(),
         display_name: name,
@@ -282,12 +288,41 @@ const BBB_CONFIG = {
     },
     
     /**
+     * Get original members array for backward compatibility
+     * @returns {Array} - Array of member names
+     */
+    getOriginalMembers: function() {
+      return BBB_CONFIG.members;
+    },
+    
+    /**
      * Check if member exists in static list
      * @param {string} memberName - Member name to check
      * @returns {boolean}
      */
     isStaticMember: function(memberName) {
-      return this.staticMembers.includes(memberName);
+      return BBB_CONFIG.staticMembers.includes(memberName);
+    },
+    
+    /**
+     * Get all members (try dynamic first, fallback to static)
+     * @returns {Promise<Array>} - Promise resolving to array of member objects
+     */
+    async getAllMembers() {
+      if (this.getSource() === 'dynamic') {
+        try {
+          const response = await fetch(`${BBB_CONFIG.authWorkerUrl}/auth/members`);
+          if (response.ok) {
+            const dynamicMembers = await response.json();
+            return dynamicMembers;
+          }
+        } catch (error) {
+          console.warn('Failed to load dynamic members, falling back to static:', error);
+        }
+      }
+      
+      // Fallback to static members
+      return this.getStaticMembers();
     }
   },
   
