@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Debug Course Ratings</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 2rem;
+      background: #f5f5f5;
+    }
+    
+    .debug-container {
+      background: white;
+      padding: 2rem;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .test-section {
+      background: #f8f9fa;
+      padding: 1rem;
+      border-radius: 4px;
+      margin: 1rem 0;
+      border-left: 4px solid #007bff;
+    }
+    
+    .debug-info {
+      background: #e9ecef;
+      padding: 1rem;
+      border-radius: 4px;
+      margin: 1rem 0;
+      font-family: monospace;
+      white-space: pre-wrap;
+      font-size: 0.9rem;
+    }
+    
+    .btn {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      margin: 0.5rem;
+    }
+    
+    .btn:hover {
+      background: #0056b3;
+    }
+    
+    .error {
+      color: #dc3545;
+      background: #f8d7da;
+      border: 1px solid #f5c6cb;
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin: 0.5rem 0;
+    }
+    
+    .success {
+      color: #155724;
+      background: #d4edda;
+      border: 1px solid #c3e6cb;
+      padding: 0.5rem;
+      border-radius: 4px;
+      margin: 0.5rem 0;
+    }
+    
+    select, input {
+      padding: 0.5rem;
+      margin: 0.5rem;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="debug-container">
+    <h1>Course Ratings Debug Tool</h1>
+    
+    <div class="test-section">
+      <h3>Step 1: Check if modules are loaded</h3>
+      <button class="btn" onclick="checkModules()">Check Modules</button>
+      <div id="module-status" class="debug-info">Click button to check...</div>
+    </div>
+    
+    <div class="test-section">
+      <h3>Step 2: Test course data access</h3>
+      <button class="btn" onclick="testCourseData()">Test Course Data</button>
+      <div id="course-data" class="debug-info">Click button to test...</div>
+    </div>
+    
+    <div class="test-section">
+      <h3>Step 3: Test rating lookup</h3>
+      <select id="test-course">
+        <option value="">Select course...</option>
+        <option value="Richings Park Golf Club">Richings Park Golf Club</option>
+        <option value="Thorney Park Golf Club">Thorney Park Golf Club</option>
+        <option value="London Airlinks Golf Club">London Airlinks Golf Club</option>
+      </select>
+      
+      <select id="test-tee">
+        <option value="">Select tee...</option>
+        <option value="white">White</option>
+        <option value="yellow">Yellow</option>
+        <option value="red">Red</option>
+      </select>
+      
+      <button class="btn" onclick="testRatingLookup()">Get Ratings</button>
+      <div id="rating-result" class="debug-info">Select course and tee, then click button...</div>
+    </div>
+    
+    <div class="test-section">
+      <h3>Step 4: Test differential calculation</h3>
+      <input type="number" id="test-score" placeholder="Enter score (e.g. 85)" min="50" max="150">
+      <button class="btn" onclick="testDifferentialCalc()">Calculate Differential</button>
+      <div id="differential-result" class="debug-info">Enter score and click button...</div>
+    </div>
+    
+    <div class="test-section">
+      <h3>Step 5: Raw course data inspection</h3>
+      <button class="btn" onclick="inspectRawData()">Inspect Raw Data</button>
+      <div id="raw-data" class="debug-info">Click button to inspect...</div>
+    </div>
+  </div>
+
+  <!-- Load your modules -->
+  <script src="js/config.js" onerror="console.log('config.js failed to load')"></script>
+  <script src="js/utils.js" onerror="console.log('utils.js failed to load')"></script>
+  <script src="js/auth.js" onerror="console.log('auth.js failed to load')"></script>
+  <script src="js/db.js" onerror="console.log('db.js failed to load')"></script>
+  <script src="js/ui.js" onerror="console.log('ui.js failed to load')"></script>
+
+  <script>
+    function debugLog(elementId, message, type = 'info') {
+      const element = document.getElementById(elementId);
+      if (element) {
+        element.textContent = message;
+        element.className = `debug-info ${type}`;
+      }
+      console.log(`[${type.toUpperCase()}] ${message}`);
+    }
+    
+    function checkModules() {
+      let status = 'MODULE STATUS:\n\n';
+      
+      // Check each module
+      const modules = [
+        { name: 'BBB_CONFIG', obj: typeof BBB_CONFIG !== 'undefined' ? BBB_CONFIG : null },
+        { name: 'BBB_UTILS', obj: typeof BBB_UTILS !== 'undefined' ? BBB_UTILS : null },
+        { name: 'BBB_AUTH', obj: typeof BBB_AUTH !== 'undefined' ? BBB_AUTH : null },
+        { name: 'BBB_DB', obj: typeof BBB_DB !== 'undefined' ? BBB_DB : null },
+        { name: 'BBB_UI', obj: typeof BBB_UI !== 'undefined' ? BBB_UI : null }
+      ];
+      
+      modules.forEach(module => {
+        if (module.obj) {
+          status += `✓ ${module.name}: LOADED\n`;
+          
+          // Check for specific methods we need
+          if (module.name === 'BBB_DB') {
+            const methods = ['getCourses', 'getCourseNames', 'getCourseRatings', 'calculateDifferential'];
+            methods.forEach(method => {
+              if (typeof module.obj[method] === 'function') {
+                status += `  ✓ ${method}: Available\n`;
+              } else {
+                status += `  ✗ ${method}: Missing\n`;
+              }
+            });
+          }
+        } else {
+          status += `✗ ${module.name}: NOT FOUND\n`;
+        }
+      });
+      
+      debugLog('module-status', status);
+    }
+    
+    function testCourseData() {
+      let result = 'COURSE DATA TEST:\n\n';
+      
+      try {
+        // Test 1: Check if BBB_DB exists
+        if (typeof BBB_DB === 'undefined') {
+          result += '✗ BBB_DB not found\n';
+          debugLog('course-data', result, 'error');
+          return;
+        }
+        
+        // Test 2: Check if getCourses method exists
+        if (typeof BBB_DB.getCourses !== 'function') {
+          result += '✗ BBB_DB.getCourses method not found\n';
+          debugLog('course-data', result, 'error');
+          return;
+        }
+        
+        // Test 3: Try to get courses
+        const courses = BBB_DB.getCourses();
+        result += `✓ BBB_DB.getCourses() returned: ${typeof courses}\n`;
+        
+        if (courses && typeof courses === 'object') {
+          const courseNames = Object.keys(courses);
+          result += `✓ Found ${courseNames.length} courses:\n`;
+          
+          courseNames.forEach(name => {
+            result += `  - ${name}\n`;
+            
+            // Check if course has tees data
+            if (courses[name] && courses[name].tees) {
+              const tees = Object.keys(courses[name].tees);
+              result += `    Tees: ${tees.join(', ')}\n`;
+              
+              // Check first tee for ratings
+              if (tees.length > 0) {
+                const firstTee = courses[name].tees[tees[0]];
+                if (firstTee.courseRating && firstTee.slopeRating) {
+                  result += `    ${tees[0]}: CR=${firstTee.courseRating}, SR=${firstTee.slopeRating}\n`;
+                } else {
+                  result += `    ${tees[0]}: Missing ratings!\n`;
+                }
+              }
+            } else {
+              result += `    ✗ No tees data found!\n`;
+            }
+          });
+        } else {
+          result += '✗ getCourses() did not return a valid object\n';
+        }
+        
+        debugLog('course-data', result, courseNames.length > 0 ? 'success' : 'error');
+        
+      } catch (error) {
+        result += `✗ Error: ${error.message}\n`;
+        debugLog('course-data', result, 'error');
+      }
+    }
+    
+    function testRatingLookup() {
+      const courseName = document.getElementById('test-course').value;
+      const teeColor = document.getElementById('test-tee').value;
+      
+      let result = `RATING LOOKUP TEST:\n\n`;
+      result += `Course: "${courseName}"\n`;
+      result += `Tee: "${teeColor}"\n\n`;
+      
+      if (!courseName || !teeColor) {
+        result += '✗ Please select both course and tee\n';
+        debugLog('rating-result', result, 'error');
+        return;
+      }
+      
+      try {
+        // Test BBB_DB.getCourseRatings
+        if (typeof BBB_DB === 'undefined') {
+          result += '✗ BBB_DB not available\n';
+          debugLog('rating-result', result, 'error');
+          return;
+        }
+        
+        if (typeof BBB_DB.getCourseRatings !== 'function') {
+          result += '✗ BBB_DB.getCourseRatings method not found\n';
+          debugLog('rating-result', result, 'error');
+          return;
+        }
+        
+        const ratings = BBB_DB.getCourseRatings(courseName, teeColor);
+        result += `BBB_DB.getCourseRatings() returned:\n`;
+        result += `Type: ${typeof ratings}\n`;
+        result += `Value: ${JSON.stringify(ratings, null, 2)}\n\n`;
+        
+        if (ratings && ratings.courseRating && ratings.slopeRating) {
+          result += `✓ SUCCESS!\n`;
+          result += `Course Rating: ${ratings.courseRating}\n`;
+          result += `Slope Rating: ${ratings.slopeRating}\n`;
+          debugLog('rating-result', result, 'success');
+        } else {
+          result += `✗ Invalid ratings data returned\n`;
+          
+          // Try direct lookup to see what's in the data
+          const courses = BBB_DB.getCourses();
+          if (courses && courses[courseName]) {
+            result += `\nDirect lookup in courses data:\n`;
+            result += `Course exists: ✓\n`;
+            
+            if (courses[courseName].tees) {
+              result += `Tees data exists: ✓\n`;
+              result += `Available tees: ${Object.keys(courses[courseName].tees).join(', ')}\n`;
+              
+              if (courses[courseName].tees[teeColor]) {
+                result += `Tee "${teeColor}" exists: ✓\n`;
+                result += `Tee data: ${JSON.stringify(courses[courseName].tees[teeColor], null, 2)}\n`;
+              } else {
+                result += `Tee "${teeColor}" does not exist: ✗\n`;
+              }
+            } else {
+              result += `Tees data missing: ✗\n`;
+            }
+          } else {
+            result += `\nCourse "${courseName}" not found in data\n`;
+          }
+          
+          debugLog('rating-result', result, 'error');
+        }
+        
+      } catch (error) {
+        result += `✗ Error: ${error.message}\n`;
+        result += `Stack: ${error.stack}\n`;
+        debugLog('rating-result', result, 'error');
+      }
+    }
+    
+    function testDifferentialCalc() {
+      const courseName = document.getElementById('test-course').value;
+      const teeColor = document.getElementById('test-tee').value;
+      const score = parseFloat(document.getElementById('test-score').value);
+      
+      let result = `DIFFERENTIAL CALCULATION TEST:\n\n`;
+      result += `Course: "${courseName}"\n`;
+      result += `Tee: "${teeColor}"\n`;
+      result += `Score: ${score}\n\n`;
+      
+      if (!courseName || !teeColor || !score) {
+        result += '✗ Please fill in all fields\n';
+        debugLog('differential-result', result, 'error');
+        return;
+      }
+      
+      try {
+        // Test BBB_DB.calculateDifferential
+        if (typeof BBB_DB !== 'undefined' && typeof BBB_DB.calculateDifferential === 'function') {
+          const differential = BBB_DB.calculateDifferential(score, courseName, teeColor);
+          result += `BBB_DB.calculateDifferential() returned: ${differential}\n\n`;
+          
+          if (differential !== null && !isNaN(differential)) {
+            result += `✓ SUCCESS! Differential: ${differential}\n`;
+            debugLog('differential-result', result, 'success');
+          } else {
+            result += `✗ Invalid differential returned\n`;
+            debugLog('differential-result', result, 'error');
+          }
+        } else {
+          result += '✗ BBB_DB.calculateDifferential method not available\n';
+          
+          // Try manual calculation
+          const ratings = BBB_DB.getCourseRatings(courseName, teeColor);
+          if (ratings && ratings.courseRating && ratings.slopeRating) {
+            const differential = ((score - ratings.courseRating) * 113) / ratings.slopeRating;
+            result += `\nManual calculation:\n`;
+            result += `Formula: (${score} - ${ratings.courseRating}) * 113 / ${ratings.slopeRating}\n`;
+            result += `Result: ${differential.toFixed(1)}\n`;
+            debugLog('differential-result', result, 'success');
+          } else {
+            result += '\n✗ Could not get ratings for manual calculation\n';
+            debugLog('differential-result', result, 'error');
+          }
+        }
+        
+      } catch (error) {
+        result += `✗ Error: ${error.message}\n`;
+        debugLog('differential-result', result, 'error');
+      }
+    }
+    
+    function inspectRawData() {
+      let result = 'RAW COURSE DATA INSPECTION:\n\n';
+      
+      try {
+        if (typeof BBB_DB === 'undefined') {
+          result += '✗ BBB_DB not available\n';
+          debugLog('raw-data', result, 'error');
+          return;
+        }
+        
+        // Check if courseData property exists
+        if (BBB_DB.courseData) {
+          result += '✓ BBB_DB.courseData exists\n';
+          result += `Type: ${typeof BBB_DB.courseData}\n`;
+          result += `Keys: ${Object.keys(BBB_DB.courseData).join(', ')}\n\n`;
+          
+          // Inspect first course in detail
+          const firstCourse = Object.keys(BBB_DB.courseData)[0];
+          if (firstCourse) {
+            result += `Detailed inspection of "${firstCourse}":\n`;
+            result += JSON.stringify(BBB_DB.courseData[firstCourse], null, 2);
+          }
+        } else {
+          result += '✗ BBB_DB.courseData not found\n';
+          
+          // Check what properties BBB_DB has
+          result += '\nBBB_DB properties:\n';
+          Object.keys(BBB_DB).forEach(key => {
+            result += `- ${key}: ${typeof BBB_DB[key]}\n`;
+          });
+        }
+        
+        debugLog('raw-data', result);
+        
+      } catch (error) {
+        result += `✗ Error: ${error.message}\n`;
+        debugLog('raw-data', result, 'error');
+      }
+    }
+    
+    // Auto-run module check when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      setTimeout(checkModules, 500);
+    });
+  </script>
+</body>
+</html>
