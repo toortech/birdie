@@ -1,0 +1,1733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Birdie Bush Bandits – Handicap Calculator</title>
+  <meta name="description" content="Calculate your golf handicap using the World Handicap System standard.">
+  <link rel="icon" type="image/svg+xml" href="bbb-logo.svg">
+  
+  <!-- Add Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Global CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  
+  <!-- Core Modules (loaded in specific order) -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/db.js"></script>
+  <script src="js/ui.js"></script>
+
+  <style>
+    /* Enhanced CSS Variables - Same as about.html */
+    :root {
+      --bbb-primary: #004d00;
+      --bbb-secondary: #0046ad;
+      --bbb-gold: #ffd700;
+      --bbb-light-green: #e8f5e8;
+      --bbb-background: #f5f5f5;
+      --bbb-text: #212529;
+      --bbb-text-muted: #6c757d;
+      --bbb-border: #dee2e6;
+      --font-family-base: 'Inter', sans-serif;
+      --font-family-accent: 'Montserrat', serif;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: var(--font-family-base);
+      line-height: 1.6;
+      color: var(--bbb-text);
+      background: linear-gradient(135deg, var(--bbb-light-green) 0%, var(--bbb-background) 100%);
+      min-height: 100vh;
+    }
+
+    /* Header with Logo - Same as about.html */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 1rem 2rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
+
+    .header-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header-logo {
+      height: 50px;
+      width: auto;
+      transition: transform 0.3s ease;
+    }
+
+    .header-logo:hover {
+      transform: scale(1.05);
+    }
+
+    .header-title {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-left: 1rem;
+      text-decoration: none;
+    }
+
+    .header-title:hover {
+      color: var(--bbb-secondary);
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .founded-badge-header {
+      display: inline-block;
+      background: var(--bbb-gold);
+      color: var(--bbb-primary);
+      padding: 0.25rem 0.75rem;
+      border-radius: 15px;
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-left: 1rem;
+      box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    }
+
+    /* User info and auth controls */
+    .user-info {
+      color: var(--bbb-primary);
+      font-weight: 500;
+      font-size: 0.9rem;
+    }
+
+    .logout-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.3s;
+    }
+
+    .logout-btn:hover {
+      background: #c82333;
+    }
+
+    .home-btn {
+      background: var(--bbb-secondary);
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.3s;
+    }
+
+    .home-btn:hover {
+      background: var(--bbb-primary);
+    }
+
+    /* Calculator Hero Section */
+    .calculator-hero {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 50%, #dee2e6 100%);
+      color: var(--bbb-text);
+      text-align: center;
+      padding: 4rem 2rem 3rem 2rem;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 3px solid #dee2e6;
+      margin-top: 90px; /* Account for fixed header */
+    }
+
+    .calculator-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 77, 0, 0.03) 0%, transparent 70%);
+      animation: rotate 30s linear infinite;
+    }
+
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    .calculator-hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .calculator-hero h1 {
+      font-family: var(--font-family-accent);
+      font-size: clamp(2rem, 4vw, 3.5rem);
+      font-weight: 700;
+      color: var(--bbb-primary);
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+      animation: fadeInUp 1s ease-out;
+      margin: 0 0 1rem 0;
+    }
+
+    .calculator-hero .tagline {
+      font-size: clamp(1rem, 2vw, 1.3rem);
+      color: var(--bbb-text-muted);
+      max-width: 600px;
+      margin: 0 auto;
+      animation: fadeInUp 1s ease-out 0.3s both;
+      font-weight: 500;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .calculator-main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2rem;
+    }
+
+    /* Golf-specific decorative elements */
+    .golf-ball {
+      width: 20px;
+      height: 20px;
+      background: white;
+      border-radius: 50%;
+      position: relative;
+      display: inline-block;
+      margin: 0 10px;
+      box-shadow: inset -3px -3px 5px rgba(0,0,0,0.2);
+    }
+
+    .golf-ball::before {
+      content: '';
+      position: absolute;
+      width: 2px;
+      height: 2px;
+      background: #ccc;
+      border-radius: 50%;
+      top: 4px;
+      left: 6px;
+      box-shadow: 4px 0 #ccc, 8px 0 #ccc, 2px 4px #ccc, 6px 4px #ccc, 10px 4px #ccc, 4px 8px #ccc, 8px 8px #ccc;
+    }
+
+    /* Calculator Container */
+    .calculator {
+      background: white;
+      padding: 3rem;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      margin: 4rem 0;
+      border: 3px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .calculator:hover {
+      border-color: var(--bbb-gold);
+      transform: translateY(-5px);
+      box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+
+    /* Member Selection Section */
+    .member-selection-section {
+      background: linear-gradient(135deg, var(--bbb-light-green), rgba(255, 215, 0, 0.1));
+      padding: 2rem;
+      border-radius: 15px;
+      margin-bottom: 2rem;
+      border-left: 4px solid var(--bbb-gold);
+      transition: transform 0.3s ease;
+    }
+
+    .member-selection-section:hover {
+      transform: translateX(10px);
+    }
+
+    .member-selection-section label {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .member-select {
+      width: 100%;
+      max-width: 300px;
+      padding: 0.75rem;
+      border: 2px solid var(--bbb-border);
+      border-radius: 8px;
+      font-size: 1rem;
+      background: white;
+      font-family: var(--font-family-base);
+      transition: border-color 0.3s ease;
+    }
+
+    .member-select:focus {
+      outline: none;
+      border-color: var(--bbb-secondary);
+      box-shadow: 0 0 0 3px rgba(0, 70, 173, 0.1);
+    }
+
+    .admin-message {
+      color: var(--bbb-text-muted);
+      font-style: italic;
+      margin-top: 0.5rem;
+      font-family: var(--font-family-base);
+    }
+
+    /* Loading state for member dropdown */
+    .member-select.loading {
+      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="%23666" stroke-width="2" fill="none" stroke-dasharray="31.416" stroke-dashoffset="31.416"><animate attributeName="stroke-dashoffset" dur="2s" values="31.416;0;31.416" repeatCount="indefinite"/></circle></svg>');
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px;
+    }
+
+    /* Help Section */
+    .help-section {
+      background: linear-gradient(135deg, #e3f2fd, #f8f9fa);
+      padding: 2rem;
+      border-radius: 15px;
+      margin-bottom: 2rem;
+      border: 2px solid #bbdefb;
+      display: none;
+    }
+
+    .help-section h3 {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      margin-bottom: 1rem;
+      font-size: 1.3rem;
+    }
+
+    .help-section ol {
+      padding-left: 1.5rem;
+      font-family: var(--font-family-base);
+    }
+
+    .help-section li {
+      margin-bottom: 0.5rem;
+      line-height: 1.6;
+    }
+
+    /* Buttons */
+    .btn {
+      background: var(--bbb-secondary);
+      color: white;
+      border: none;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      font-family: var(--font-family-accent);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0, 70, 173, 0.2);
+      text-decoration: none;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .btn:hover {
+      background: var(--bbb-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 70, 173, 0.3);
+    }
+
+    .btn:disabled {
+      background: #6c757d;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .btn.help-toggle {
+      background: var(--bbb-gold);
+      color: var(--bbb-primary);
+      margin-bottom: 1.5rem;
+    }
+
+    .btn.help-toggle:hover {
+      background: #e6c200;
+      color: var(--bbb-primary);
+    }
+
+    /* Button Group */
+    .button-group {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin: 2rem 0;
+    }
+
+    /* Table Styles */
+    .rounds-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 2rem 0;
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+
+    .rounds-table th {
+      background: linear-gradient(135deg, var(--bbb-primary), var(--bbb-secondary));
+      color: white;
+      padding: 1rem 0.75rem;
+      font-family: var(--font-family-accent);
+      font-weight: 600;
+      text-align: left;
+      border: none;
+    }
+
+    .rounds-table td {
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--bbb-border);
+      background: white;
+    }
+
+    .rounds-table tr:hover td {
+      background: var(--bbb-light-green);
+    }
+
+    .rounds-table input,
+    .rounds-table select {
+      width: 100%;
+      padding: 0.5rem;
+      border: 1px solid var(--bbb-border);
+      border-radius: 6px;
+      font-family: var(--font-family-base);
+      transition: border-color 0.3s ease;
+    }
+
+    .rounds-table input:focus,
+    .rounds-table select:focus {
+      outline: none;
+      border-color: var(--bbb-secondary);
+      box-shadow: 0 0 0 2px rgba(0, 70, 173, 0.1);
+    }
+
+    .rounds-table .score-input,
+    .rounds-table .cr-input,
+    .rounds-table .sr-input {
+      max-width: 80px;
+    }
+
+    .remove-btn {
+      background: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+
+    .remove-btn:hover {
+      background: #c82333;
+    }
+
+    /* Result Display */
+    .handicap-result-inner {
+      background: linear-gradient(135deg, #d4edda, #e8f5e9);
+      color: #155724;
+      padding: 2rem;
+      border-radius: 15px;
+      text-align: center;
+      margin: 2rem 0;
+      border: 2px solid #c3e6cb;
+      box-shadow: 0 5px 20px rgba(21, 87, 36, 0.1);
+    }
+
+    .handicap-result-inner h3 {
+      font-family: var(--font-family-accent);
+      margin-bottom: 1rem;
+      font-size: 1.5rem;
+    }
+
+    .handicap-value {
+      font-size: 3rem;
+      font-weight: bold;
+      font-family: var(--font-family-accent);
+      margin: 1rem 0;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+    }
+
+    .handicap-info {
+      font-size: 1rem;
+      opacity: 0.8;
+      font-family: var(--font-family-base);
+    }
+
+    /* History Section */
+    .history-section {
+      background: white;
+      padding: 2rem;
+      border-radius: 15px;
+      margin-top: 2rem;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      border: 2px solid var(--bbb-border);
+    }
+
+    .history-section h3 {
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      margin-bottom: 1.5rem;
+      font-size: 1.5rem;
+    }
+
+    .history-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .history-card {
+      background: linear-gradient(135deg, var(--bbb-light-green), white);
+      padding: 1.5rem;
+      border-radius: 12px;
+      border: 2px solid var(--bbb-border);
+      transition: all 0.3s ease;
+    }
+
+    .history-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      border-color: var(--bbb-gold);
+    }
+
+    .history-index {
+      font-size: 1.3rem;
+      font-weight: bold;
+      font-family: var(--font-family-accent);
+      color: var(--bbb-primary);
+      margin-bottom: 0.5rem;
+    }
+
+    .history-date,
+    .history-rounds {
+      font-size: 0.95rem;
+      color: var(--bbb-text-muted);
+      margin-bottom: 0.25rem;
+      font-family: var(--font-family-base);
+    }
+
+    /* Status Messages */
+    #status-message {
+      padding: 1rem 1.5rem;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+      text-align: center;
+      display: none;
+      font-family: var(--font-family-base);
+      font-weight: 500;
+    }
+
+    .success {
+      background: linear-gradient(135deg, #d4edda, #e8f5e9);
+      color: #155724;
+      border: 2px solid #c3e6cb;
+    }
+
+    .error {
+      background: linear-gradient(135deg, #f8d7da, #ffebee);
+      color: #721c24;
+      border: 2px solid #f5c6cb;
+    }
+
+    .warning {
+      background: linear-gradient(135deg, #fff3cd, #fffde7);
+      color: #856404;
+      border: 2px solid #ffeeba;
+    }
+
+    .info {
+      background: linear-gradient(135deg, #d1ecf1, #e3f2fd);
+      color: #0c5460;
+      border: 2px solid #bee5eb;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .header {
+        padding: 0.75rem 1rem;
+      }
+
+      .header-logo {
+        height: 40px;
+      }
+
+      .header-title {
+        font-size: 1.2rem;
+        margin-left: 0.5rem;
+      }
+
+      .header-content {
+        flex-wrap: wrap;
+      }
+
+      .header-right {
+        margin-top: 0.5rem;
+      }
+
+      .founded-badge-header {
+        margin-left: 0.5rem;
+        font-size: 0.7rem;
+        padding: 0.2rem 0.5rem;
+      }
+
+      .calculator-hero {
+        padding: 2rem 1rem 1.5rem 1rem;
+        margin-top: 120px;
+      }
+
+      .calculator-hero h1 {
+        font-size: 2rem;
+        line-height: 1.2;
+      }
+
+      .calculator-hero .tagline {
+        font-size: 1rem;
+        padding: 0 1rem;
+      }
+
+      .calculator-main {
+        padding: 0 1rem;
+      }
+
+      .calculator {
+        padding: 1.5rem;
+        margin: 2rem 0;
+      }
+
+      .button-group {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+      }
+
+      .rounds-table {
+        font-size: 0.9rem;
+        overflow-x: auto;
+        display: block;
+        white-space: nowrap;
+      }
+
+      .rounds-table th,
+      .rounds-table td {
+        padding: 0.5rem;
+      }
+
+      .handicap-value {
+        font-size: 2rem;
+      }
+
+      .history-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .calculator-hero {
+        padding: 1.5rem 0.75rem 1rem 0.75rem;
+      }
+
+      .calculator-hero h1 {
+        font-size: 1.75rem;
+      }
+
+      .calculator-hero .tagline {
+        font-size: 0.95rem;
+      }
+
+      .calculator-main {
+        padding: 0 0.75rem;
+      }
+
+      .calculator {
+        padding: 1.25rem;
+      }
+
+      .member-selection-section,
+      .help-section {
+        padding: 1.25rem;
+      }
+
+      .handicap-value {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <!-- Fixed Header with Logo - Same as about.html -->
+  <header class="header">
+    <div class="header-content">
+      <div class="header-left">
+        <a href="index.html">
+          <img src="birdie.png" alt="Birdie Bush Bandits Logo" class="header-logo">
+        </a>
+        <a href="index.html" class="header-title">Birdie Bush Bandits</a>
+        <div class="founded-badge-header">
+          🏌️ Founded August 2020
+        </div>
+      </div>
+      <div class="header-right">
+        <!-- Auth controls will be added here by JavaScript -->
+        <a href="index.html" class="home-btn" id="home-link">Home</a>
+      </div>
+    </div>
+  </header>
+  
+  <main id="main">
+    <!-- Hero Section -->
+    <section class="calculator-hero">
+      <div class="calculator-hero-content">
+        <h1>Handicap Calculator <span class="golf-ball"></span></h1>
+        <p class="tagline">Calculate your official handicap using the World Handicap System</p>
+      </div>
+    </section>
+
+    <!-- Main Calculator Content -->
+    <div class="calculator-main">
+      <div id="status-message"></div>
+      
+      <div id="handicap-calculator" class="calculator">
+        <!-- Member selection -->
+        <div class="member-selection-section">
+          <label for="member-select">Calculate Handicap For:</label>
+          <select id="member-select" class="member-select loading">
+            <option value="">Loading members...</option>
+          </select>
+          <div id="admin-message" class="admin-message" style="display: none;">
+            <small>As an admin, you can calculate and save handicaps for any member.</small>
+          </div>
+        </div>
+        
+        <!-- Help section toggle -->
+        <button id="help-toggle" class="btn help-toggle">Show Help</button>
+        
+        <!-- Help section content -->
+        <div id="help-section" class="help-section">
+          <h3>How to Use the Handicap Calculator</h3>
+          <ol>
+            <li>Select the member whose handicap you want to calculate.</li>
+            <li>Enter details for at least 3 rounds of golf (up to 20).</li>
+            <li>For each round, select the course and tee color played.</li>
+            <li>Enter the gross score for the round.</li>
+            <li>The course rating and slope rating will be filled automatically.</li>
+            <li>Your score differential will be calculated automatically.</li>
+            <li>Click "Calculate Handicap" to get the handicap index.</li>
+            <li>Click "Save Handicap" to save it to the member's profile.</li>
+          </ol>
+          <p>The handicap index is calculated using the World Handicap System (WHS) formula.</p>
+        </div>
+        
+        <!-- Result display -->
+        <div id="handicap-result" class="result" style="display: none;"></div>
+        
+        <!-- Instructions -->
+        <p style="text-align: center; margin: 1.5rem 0; font-family: var(--font-family-base); color: var(--bbb-text-muted);">
+          Enter up to 20 rounds. Minimum 3 to calculate.
+        </p>
+        
+        <!-- Rounds table -->
+        <table id="rounds-table" class="rounds-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Course</th>
+              <th>Tee</th>
+              <th>Score</th>
+              <th>Course Rating</th>
+              <th>Slope Rating</th>
+              <th>Differential</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="rounds-tbody">
+            <!-- Round rows will be added by JavaScript -->
+          </tbody>
+        </table>
+        
+        <!-- Buttons -->
+        <div class="button-group">
+          <button id="add-round" class="btn">Add Round</button>
+          <button id="calculate" class="btn">Calculate Handicap</button>
+          <button id="reset" class="btn">Reset</button>
+          <button id="save" class="btn" disabled>Save Handicap</button>
+          <button id="export" class="btn">Export to CSV</button>
+        </div>
+        
+        <!-- Handicap history section -->
+        <div id="handicap-history" class="history-section" style="display: none;"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Enhanced Member Loading Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("DOM content loaded, initializing calculator...");
+      
+      // Wait for config to load if it's not ready yet
+      function waitForConfig(callback, maxAttempts = 10, attempt = 1) {
+        if (typeof BBB_CONFIG !== 'undefined') {
+          console.log("BBB_CONFIG loaded, proceeding with initialization");
+          callback();
+        } else if (attempt < maxAttempts) {
+          console.log(`Waiting for BBB_CONFIG... attempt ${attempt}/${maxAttempts}`);
+          setTimeout(() => waitForConfig(callback, maxAttempts, attempt + 1), 100);
+        } else {
+          console.error("BBB_CONFIG failed to load after", maxAttempts, "attempts");
+          callback(); // Proceed anyway with fallbacks
+        }
+      }
+      
+      // Initialize auth and DB if available
+      function initializeModules() {
+        if (typeof BBB_AUTH !== 'undefined') {
+          BBB_AUTH.init({
+            cloudflareEnabled: typeof BBB_CONFIG !== 'undefined' ? BBB_CONFIG.cloudflareEnabled : false
+          });
+          console.log("Auth initialized, authenticated:", BBB_AUTH.isAuthenticated);
+        }
+        
+        if (typeof BBB_DB !== 'undefined') {
+          BBB_DB.init({
+            useCloudflare: typeof BBB_CONFIG !== 'undefined' ? BBB_CONFIG.cloudflareEnabled : false,
+            localStoragePrefix: 'bbb_'
+          });
+          console.log("Database initialized");
+        }
+      }
+      
+      // Initialize with config check
+      waitForConfig(() => {
+        initializeModules();
+        checkPageAuthentication();
+        initializePage();
+      });
+      
+      // Get DOM elements
+      const memberSelect = document.getElementById('member-select');
+      const adminMessage = document.getElementById('admin-message');
+      const helpToggle = document.getElementById('help-toggle');
+      const helpSection = document.getElementById('help-section');
+      const resultDisplay = document.getElementById('handicap-result');
+      const roundsTable = document.getElementById('rounds-table');
+      const roundsTbody = document.getElementById('rounds-tbody');
+      const addButton = document.getElementById('add-round');
+      const calculateButton = document.getElementById('calculate');
+      const resetButton = document.getElementById('reset');
+      const saveButton = document.getElementById('save');
+      const exportButton = document.getElementById('export');
+      const historySection = document.getElementById('handicap-history');
+      
+      // Authentication functions (same as about.html)
+      function checkPageAuthentication() {
+        console.log('Checking page authentication...');
+        
+        const hasStoredAuth = restoreAuthSession();
+        
+        if (hasStoredAuth) {
+          console.log('Restored authentication from storage');
+          initializeAuthenticatedPage();
+        } else {
+          console.log('No stored authentication, checking current auth state...');
+          
+          if (BBB_AUTH && BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+            console.log('User already authenticated in current session');
+            initializeAuthenticatedPage();
+          } else {
+            console.log('User not authenticated, showing public page');
+            initializePublicPage();
+          }
+        }
+      }
+
+      function restoreAuthSession() {
+        try {
+          const storedAuth = localStorage.getItem('bbb_auth_session');
+          const storedUser = localStorage.getItem('bbb_current_user');
+          
+          if (storedAuth && storedUser) {
+            console.log('Found stored authentication data');
+            
+            const authData = JSON.parse(storedAuth);
+            const userData = JSON.parse(storedUser);
+            
+            if (authData.expiresAt && new Date(authData.expiresAt) > new Date()) {
+              console.log('Restoring valid session for user:', userData.id);
+              
+              BBB_AUTH.currentUser = userData;
+              BBB_AUTH.isAuthenticated = true;
+              
+              return true;
+            } else {
+              console.log('Session expired, clearing stored data');
+              clearAuthSession();
+            }
+          }
+          
+          return false;
+        } catch (error) {
+          console.error('Error restoring auth session:', error);
+          clearAuthSession();
+          return false;
+        }
+      }
+
+      function clearAuthSession() {
+        localStorage.removeItem('bbb_auth_session');
+        localStorage.removeItem('bbb_current_user');
+        if (BBB_AUTH) {
+          BBB_AUTH.currentUser = null;
+          BBB_AUTH.isAuthenticated = false;
+        }
+      }
+
+      function initializeAuthenticatedPage() {
+        console.log('Initializing authenticated page for user:', BBB_AUTH.currentUser?.id);
+        addLogoutFunctionality();
+        showUserInfo();
+        startSessionMonitoring();
+      }
+
+      function initializePublicPage() {
+        console.log('Initializing public page');
+        const homeLink = document.getElementById('home-link');
+        if (homeLink) {
+          homeLink.style.display = 'inline-block';
+        }
+      }
+
+      function addLogoutFunctionality() {
+        const headerRight = document.querySelector('.header-right');
+        if (headerRight && BBB_AUTH && BBB_AUTH.isAuthenticated) {
+          if (headerRight.querySelector('.logout-btn')) return;
+          
+          const logoutBtn = document.createElement('button');
+          logoutBtn.className = 'logout-btn';
+          logoutBtn.textContent = 'Logout';
+          
+          logoutBtn.onclick = function() {
+            if (confirm('Are you sure you want to logout?')) {
+              performLogout();
+            }
+          };
+          
+          headerRight.appendChild(logoutBtn);
+        }
+      }
+
+      function showUserInfo() {
+        if (BBB_AUTH && BBB_AUTH.isAuthenticated && BBB_AUTH.currentUser) {
+          const headerRight = document.querySelector('.header-right');
+          if (headerRight) {
+            if (headerRight.querySelector('.user-info')) return;
+            
+            const userInfo = document.createElement('span');
+            userInfo.className = 'user-info';
+            userInfo.textContent = `Welcome, ${BBB_AUTH.currentUser.id}`;
+            
+            const logoutBtn = headerRight.querySelector('.logout-btn');
+            if (logoutBtn) {
+              headerRight.insertBefore(userInfo, logoutBtn);
+            } else {
+              headerRight.appendChild(userInfo);
+            }
+          }
+        }
+      }
+
+      function performLogout() {
+        console.log('Logging out user...');
+        clearAuthSession();
+        window.location.reload();
+      }
+
+      function startSessionMonitoring() {
+        const sessionCheck = setInterval(() => {
+          const storedAuth = localStorage.getItem('bbb_auth_session');
+          
+          if (storedAuth) {
+            try {
+              const authData = JSON.parse(storedAuth);
+              
+              if (authData.expiresAt && new Date(authData.expiresAt) <= new Date()) {
+                console.log('Session expired, logging out...');
+                clearInterval(sessionCheck);
+                performLogout();
+              }
+            } catch (error) {
+              console.error('Error checking session:', error);
+              clearInterval(sessionCheck);
+              performLogout();
+            }
+          } else if (BBB_AUTH && BBB_AUTH.isAuthenticated) {
+            console.log('Session cleared externally, logging out...');
+            clearInterval(sessionCheck);
+            performLogout();
+          }
+        }, 5 * 60 * 1000);
+        
+        window.bbbSessionMonitor = sessionCheck;
+      }
+      
+      // ENHANCED: Populate members dropdown with multiple fallback strategies
+      async function populateMembersDropdown() {
+        console.log("Starting member population...");
+        
+        // Show loading state
+        memberSelect.classList.add('loading');
+        memberSelect.innerHTML = '<option value="">Loading members...</option>';
+        
+        let members = [];
+        let source = 'unknown';
+        
+        try {
+          // Strategy 1: Try dynamic member loading if configured
+          if (typeof BBB_CONFIG !== 'undefined' && 
+              BBB_CONFIG.features && 
+              BBB_CONFIG.features.members && 
+              BBB_CONFIG.features.members.dynamicLoading && 
+              BBB_CONFIG.memberUtils) {
+            
+            console.log("Attempting dynamic member loading...");
+            
+            try {
+              members = await BBB_CONFIG.memberUtils.getAllMembers();
+              source = 'dynamic';
+              console.log("Loaded", members.length, "members dynamically");
+            } catch (error) {
+              console.warn("Dynamic member loading failed:", error);
+              // Fall through to next strategy
+            }
+          }
+          
+          // Strategy 2: Try BBB_CONFIG.members (original member array)
+          if (members.length === 0 && typeof BBB_CONFIG !== 'undefined' && BBB_CONFIG.members && Array.isArray(BBB_CONFIG.members)) {
+            console.log("Using BBB_CONFIG.members array");
+            members = BBB_CONFIG.members.map(name => ({
+              id: name.toLowerCase(),
+              display_name: name,
+              username: name.toLowerCase(),
+              source: 'static'
+            }));
+            source = 'config';
+            console.log("Loaded", members.length, "members from config");
+          }
+          
+          // Strategy 3: Try BBB_CONFIG.staticMembers
+          if (members.length === 0 && typeof BBB_CONFIG !== 'undefined' && BBB_CONFIG.staticMembers && Array.isArray(BBB_CONFIG.staticMembers)) {
+            console.log("Using BBB_CONFIG.staticMembers array");
+            members = BBB_CONFIG.staticMembers.map(name => ({
+              id: name.toLowerCase(),
+              display_name: name,
+              username: name.toLowerCase(),
+              source: 'static'
+            }));
+            source = 'static';
+            console.log("Loaded", members.length, "members from staticMembers");
+          }
+          
+          // Strategy 4: Last resort fallback
+          if (members.length === 0) {
+            console.warn("All member loading strategies failed, using hardcoded fallback");
+            const fallbackMembers = [
+              "Amrit", "Kam", "Vish", "Ravi", "Bal", "Vick", 
+              "Michael", "Justy", "Phuperjee", "Indy", "Maj", "Sama"
+            ];
+            
+            members = fallbackMembers.map(name => ({
+              id: name.toLowerCase(),
+              display_name: name,
+              username: name.toLowerCase(),
+              source: 'fallback'
+            }));
+            source = 'fallback';
+            console.log("Using fallback members:", members.length);
+          }
+          
+        } catch (error) {
+          console.error("Error in member loading:", error);
+          // Use absolute fallback
+          members = [
+            { id: 'amrit', display_name: 'Amrit', username: 'amrit', source: 'emergency' },
+            { id: 'kam', display_name: 'Kam', username: 'kam', source: 'emergency' },
+            { id: 'vish', display_name: 'Vish', username: 'vish', source: 'emergency' }
+          ];
+          source = 'emergency';
+        }
+        
+        // Populate the dropdown
+        try {
+          memberSelect.classList.remove('loading');
+          memberSelect.innerHTML = '<option value="">-- Select Member --</option>';
+          
+          members.forEach(member => {
+            const option = document.createElement('option');
+            option.value = member.id || member.username || member.display_name.toLowerCase();
+            option.textContent = member.display_name || member.username || member.id;
+            
+            // If logged in user matches this member, select it by default
+            if (typeof BBB_AUTH !== 'undefined' && BBB_AUTH.isAuthenticated && 
+                BBB_AUTH.currentUser && BBB_AUTH.currentUser.id === option.value) {
+              option.selected = true;
+            }
+            
+            memberSelect.appendChild(option);
+          });
+          
+          console.log(`Successfully populated ${members.length} members from ${source} source`);
+          
+          // If we have a default selection, load its handicap data
+          if (memberSelect.value) {
+            loadSavedHandicap(memberSelect.value);
+          }
+          
+        } catch (error) {
+          console.error("Error populating dropdown:", error);
+          memberSelect.innerHTML = '<option value="">Error loading members</option>';
+        }
+      }
+      
+      // Check if user is admin
+      function checkAdminStatus() {
+        if (typeof BBB_AUTH !== 'undefined' && BBB_AUTH.isAuthenticated && BBB_AUTH.hasRole && BBB_AUTH.hasRole('admin')) {
+          adminMessage.style.display = 'block';
+          console.log("User is admin, showing admin message");
+        } else {
+          adminMessage.style.display = 'none';
+        }
+      }
+      
+      // Add a new round input row
+      function addRoundInput() {
+        const roundIndex = roundsTbody.children.length;
+        if (roundIndex >= 20) {
+          showMessage('Maximum 20 rounds allowed.', 'warning');
+          return;
+        }
+        
+        const row = document.createElement('tr');
+        row.id = `round-${roundIndex}`;
+        row.className = 'round-row';
+        
+        // Round number
+        const numCell = document.createElement('td');
+        numCell.textContent = roundIndex + 1;
+        
+        // Course selection
+        const courseCell = document.createElement('td');
+        const courseSelect = document.createElement('select');
+        courseSelect.className = 'course-select';
+        courseSelect.id = `course-${roundIndex}`;
+        
+        // Add course options from config
+        if (typeof BBB_CONFIG !== 'undefined' && BBB_CONFIG.courses) {
+          for (const courseName in BBB_CONFIG.courses) {
+            const option = document.createElement('option');
+            option.value = courseName;
+            option.textContent = courseName;
+            courseSelect.appendChild(option);
+          }
+        } else {
+          // Default courses if BBB_CONFIG not available
+          const defaultCourses = ["Richings Park", "Thorney Park", "Sample Course"];
+          defaultCourses.forEach(course => {
+            const option = document.createElement('option');
+            option.value = course;
+            option.textContent = course;
+            courseSelect.appendChild(option);
+          });
+        }
+        
+        courseCell.appendChild(courseSelect);
+        
+        // Tee selection
+        const teeCell = document.createElement('td');
+        const teeSelect = document.createElement('select');
+        teeSelect.className = 'tee-select';
+        teeSelect.id = `tee-${roundIndex}`;
+        
+        // Add tee options
+        const teeColors = typeof BBB_CONFIG !== 'undefined' && BBB_CONFIG.teeColors ? 
+                          BBB_CONFIG.teeColors : 
+                          { white: "White", yellow: "Yellow", red: "Red" };
+        
+        for (const teeValue in teeColors) {
+          const option = document.createElement('option');
+          option.value = teeValue;
+          option.textContent = teeColors[teeValue];
+          teeSelect.appendChild(option);
+        }
+        
+        teeCell.appendChild(teeSelect);
+        
+        // Score input
+        const scoreCell = document.createElement('td');
+        const scoreInput = document.createElement('input');
+        scoreInput.type = 'number';
+        scoreInput.min = '0';
+        scoreInput.className = 'score-input';
+        scoreInput.id = `score-${roundIndex}`;
+        scoreCell.appendChild(scoreInput);
+        
+        // Course Rating display
+        const crCell = document.createElement('td');
+        const crInput = document.createElement('input');
+        crInput.type = 'number';
+        crInput.step = '0.1';
+        crInput.className = 'cr-input';
+        crInput.id = `cr-${roundIndex}`;
+        crCell.appendChild(crInput);
+        
+        // Slope Rating display
+        const srCell = document.createElement('td');
+        const srInput = document.createElement('input');
+        srInput.type = 'number';
+        srInput.min = '55';
+        srInput.max = '155';
+        srInput.className = 'sr-input';
+        srInput.id = `sr-${roundIndex}`;
+        srCell.appendChild(srInput);
+        
+        // Differential display
+        const diffCell = document.createElement('td');
+        const diffSpan = document.createElement('span');
+        diffSpan.className = 'differential';
+        diffSpan.id = `diff-${roundIndex}`;
+        diffCell.appendChild(diffSpan);
+        
+        // Remove button
+        const actionCell = document.createElement('td');
+        const removeButton = document.createElement('button');
+        removeButton.className = 'remove-btn';
+        removeButton.textContent = '✕';
+        removeButton.onclick = function() {
+          if (roundsTbody.children.length > 3) {
+            row.remove();
+            // Renumber rows
+            Array.from(roundsTbody.children).forEach((row, idx) => {
+              row.querySelector('td:first-child').textContent = idx + 1;
+              row.id = `round-${idx}`;
+            });
+          } else {
+            showMessage('Minimum 3 rounds required.', 'warning');
+          }
+        };
+        actionCell.appendChild(removeButton);
+        
+        // Add all cells to row
+        row.appendChild(numCell);
+        row.appendChild(courseCell);
+        row.appendChild(teeCell);
+        row.appendChild(scoreCell);
+        row.appendChild(crCell);
+        row.appendChild(srCell);
+        row.appendChild(diffCell);
+        row.appendChild(actionCell);
+        
+        // Add row to table
+        roundsTbody.appendChild(row);
+        
+        // Set up event handlers to update ratings and differential
+        function updateRatings() {
+          const selectedCourse = courseSelect.value;
+          const selectedTee = teeSelect.value;
+          
+          // Get ratings from config
+          if (typeof BBB_CONFIG !== 'undefined' && 
+              BBB_CONFIG.courses && 
+              BBB_CONFIG.courses[selectedCourse] && 
+              BBB_CONFIG.courses[selectedCourse].tees && 
+              BBB_CONFIG.courses[selectedCourse].tees[selectedTee]) {
+            crInput.value = BBB_CONFIG.courses[selectedCourse].tees[selectedTee].courseRating;
+            srInput.value = BBB_CONFIG.courses[selectedCourse].tees[selectedTee].slopeRating;
+            
+            console.log(`Updated ratings for ${selectedCourse}, ${selectedTee}`);
+          } else {
+            // Default values if not found in config
+            crInput.value = "72.0";
+            srInput.value = "113";
+            
+            console.log("Using default ratings (config not found)");
+          }
+          
+          updateDifferential(roundIndex);
+        }
+        
+        // Add event listeners
+        courseSelect.addEventListener('change', updateRatings);
+        teeSelect.addEventListener('change', updateRatings);
+        scoreInput.addEventListener('input', function() { updateDifferential(roundIndex); });
+        crInput.addEventListener('input', function() { updateDifferential(roundIndex); });
+        srInput.addEventListener('input', function() { updateDifferential(roundIndex); });
+        
+        // Initial update
+        updateRatings();
+        
+        console.log(`Added round ${roundIndex + 1}`);
+      }
+      
+      // Update differential for a specific round
+      function updateDifferential(index) {
+        const scoreInput = document.getElementById(`score-${index}`);
+        const crInput = document.getElementById(`cr-${index}`);
+        const srInput = document.getElementById(`sr-${index}`);
+        const diffSpan = document.getElementById(`diff-${index}`);
+        
+        const score = parseFloat(scoreInput.value);
+        const courseRating = parseFloat(crInput.value);
+        const slopeRating = parseFloat(srInput.value);
+        
+        if (!isNaN(score) && !isNaN(courseRating) && !isNaN(slopeRating)) {
+          // Calculate differential using formula: (Score - CR) * (113 / SR)
+          const differential = ((score - courseRating) * 113 / slopeRating).toFixed(1);
+          diffSpan.textContent = differential;
+          diffSpan.dataset.value = differential; // Store for calculation
+          
+          console.log(`Updated differential for round ${index + 1}: ${differential}`);
+        } else {
+          diffSpan.textContent = '';
+          diffSpan.dataset.value = '';
+        }
+      }
+      
+      // Update all differentials
+      function updateAllDifferentials() {
+        Array.from(roundsTbody.children).forEach((row, idx) => {
+          updateDifferential(idx);
+        });
+      }
+      
+      // Calculate handicap
+      function calculateHandicap() {
+        const differentials = [];
+        
+        // Collect all differentials
+        Array.from(roundsTbody.children).forEach(row => {
+          const diffSpan = row.querySelector('.differential');
+          const diffValue = parseFloat(diffSpan.dataset.value);
+          
+          if (!isNaN(diffValue)) {
+            differentials.push(diffValue);
+          }
+        });
+        
+        // Check if we have enough differentials
+        if (differentials.length < 3) {
+          showMessage('Please enter at least 3 complete rounds.', 'error');
+          return;
+        }
+        
+        // Get selected member
+        const selectedMember = memberSelect.options[memberSelect.selectedIndex].text;
+        
+        // Calculate handicap using BBB_UTILS if available
+        let handicapIndex;
+        if (typeof BBB_UTILS !== 'undefined' && typeof BBB_UTILS.calculateHandicapIndex === 'function') {
+          handicapIndex = BBB_UTILS.calculateHandicapIndex(differentials);
+          console.log("Used BBB_UTILS to calculate handicap:", handicapIndex);
+        } else {
+          // Directly calculate if not available
+          differentials.sort((a, b) => a - b);
+          
+          // Determine how many scores to use based on the number of differentials
+          let countToUse;
+          if (differentials.length <= 3) countToUse = 1;
+          else if (differentials.length <= 6) countToUse = 2;
+          else if (differentials.length <= 8) countToUse = 3;
+          else if (differentials.length <= 11) countToUse = 4;
+          else if (differentials.length <= 14) countToUse = 5;
+          else if (differentials.length <= 16) countToUse = 6;
+          else if (differentials.length <= 18) countToUse = 7;
+          else if (differentials.length <= 19) countToUse = 8;
+          else countToUse = 10;
+          
+          // Calculate average of best differentials
+          const bestDifferentials = differentials.slice(0, countToUse);
+          const average = bestDifferentials.reduce((sum, diff) => sum + diff, 0) / countToUse;
+          
+          // Apply 0.96 multiplier
+          handicapIndex = (average * 0.96).toFixed(1);
+          
+          console.log("Calculated handicap directly:", handicapIndex);
+        }
+        
+        // Display result
+        resultDisplay.innerHTML = `
+          <div class="handicap-result-inner">
+            <h3>${selectedMember}'s Handicap Index is</h3>
+            <div class="handicap-value">${handicapIndex}</div>
+            <div class="handicap-info">Calculated using ${differentials.length} rounds</div>
+          </div>
+        `;
+        resultDisplay.style.display = 'block';
+        
+        // Enable save button if user is authenticated and member is selected
+        if (typeof BBB_AUTH !== 'undefined' && BBB_AUTH.isAuthenticated && memberSelect.value) {
+          saveButton.disabled = false;
+        }
+        
+        // Store for later saving
+        resultDisplay.dataset.value = handicapIndex;
+        
+        showMessage('Handicap calculated successfully!', 'success');
+      }
+      
+      // Reset calculator
+      function resetCalculator() {
+        if (confirm('Are you sure you want to reset the calculator? This will clear all rounds.')) {
+          // Clear existing rounds
+          roundsTbody.innerHTML = '';
+          
+          // Add 3 initial rounds
+          for (let i = 0; i < 3; i++) {
+            addRoundInput();
+          }
+          
+          // Clear result
+          resultDisplay.innerHTML = '';
+          resultDisplay.style.display = 'none';
+          delete resultDisplay.dataset.value;
+          
+          // Disable save button
+          saveButton.disabled = true;
+          
+          showMessage('Calculator has been reset.', 'success');
+        }
+      }
+      
+      // Save handicap to user profile
+      function saveHandicap() {
+        if (typeof BBB_AUTH === 'undefined' || !BBB_AUTH.isAuthenticated) {
+          showMessage('Please log in to save handicap.', 'error');
+          return;
+        }
+        
+        const handicapIndex = resultDisplay.dataset.value;
+        
+        if (!handicapIndex) {
+          showMessage('Please calculate handicap first.', 'error');
+          return;
+        }
+        
+        // Get selected member
+        const selectedMemberId = memberSelect.value;
+        
+        if (!selectedMemberId) {
+          showMessage('Please select a member.', 'error');
+          return;
+        }
+        
+        // Check permissions for saving to other members' profiles
+        if (selectedMemberId !== BBB_AUTH.currentUser.id && (!BBB_AUTH.hasRole || !BBB_AUTH.hasRole('admin'))) {
+          showMessage('You can only save handicaps to your own profile unless you are an admin.', 'error');
+          return;
+        }
+        
+        // Collect differentials
+        const differentials = [];
+        
+        Array.from(roundsTbody.children).forEach(row => {
+          const diffSpan = row.querySelector('.differential');
+          const diffValue = parseFloat(diffSpan.dataset.value);
+          
+          if (!isNaN(diffValue)) {
+            differentials.push(diffValue);
+          }
+        });
+        
+        // Create handicap data
+        const handicapData = {
+          index: handicapIndex,
+          calculatedAt: new Date().toISOString(),
+          rounds: differentials.length,
+          differentials: differentials
+        };
+        
+        // Save to database
+        if (typeof BBB_DB !== 'undefined' && typeof BBB_DB.saveMemberHandicap === 'function') {
+          BBB_DB.saveMemberHandicap(selectedMemberId, handicapData)
+            .then(() => {
+              showMessage('Handicap saved successfully!', 'success');
+              loadSavedHandicap(selectedMemberId);
+              console.log("Saved handicap to BBB_DB");
+            })
+            .catch(err => {
+              console.error('Error saving handicap:', err);
+              showMessage('Error saving handicap.', 'error');
+            });
+        } else {
+          // Fallback to localStorage
+          try {
+            const savedHandicaps = JSON.parse(localStorage.getItem('handicap_history') || '[]');
+            savedHandicaps.push({
+              ...handicapData,
+              savedAt: new Date().toISOString(),
+              id: `hcp_${Date.now()}`,
+              memberId: selectedMemberId
+            });
+            localStorage.setItem('handicap_history', JSON.stringify(savedHandicaps));
+            showMessage('Handicap saved to browser storage!', 'success');
+            loadSavedHandicap(selectedMemberId);
+            console.log("Saved handicap to localStorage (fallback)");
+          } catch (error) {
+            console.error('Error saving to localStorage:', error);
+            showMessage('Error saving handicap.', 'error');
+          }
+        }
+      }
+      
+      // Load saved handicap data for a specific member
+      function loadSavedHandicap(memberId) {
+        if (!memberId) return;
+        
+        console.log("Loading saved handicap for member ID:", memberId);
+        
+        if (typeof BBB_DB !== 'undefined' && typeof BBB_DB.getMemberHandicap === 'function') {
+          BBB_DB.getMemberHandicap(memberId)
+            .then(data => {
+              if (data) {
+                displayHandicapHistory([data], memberId);
+                console.log("Loaded handicap from BBB_DB");
+              } else {
+                // If no data found, clear history
+                historySection.innerHTML = '';
+                historySection.style.display = 'none';
+                console.log("No handicap data found in BBB_DB");
+              }
+            })
+            .catch(err => {
+              console.error('Error loading handicap history:', err);
+              historySection.innerHTML = '';
+              historySection.style.display = 'none';
+            });
+        } else {
+          // Fallback to localStorage
+          try {
+            const savedHandicaps = JSON.parse(localStorage.getItem('handicap_history') || '[]');
+            const memberHandicaps = savedHandicaps.filter(h => h.memberId === memberId);
+            
+            if (memberHandicaps.length > 0) {
+              displayHandicapHistory(memberHandicaps, memberId);
+              console.log("Loaded handicap from localStorage");
+            } else {
+              // If no data found, clear history
+              historySection.innerHTML = '';
+              historySection.style.display = 'none';
+              console.log("No handicap data found in localStorage");
+            }
+          } catch (error) {
+            console.error('Error loading from localStorage:', error);
+            historySection.innerHTML = '';
+            historySection.style.display = 'none';
+          }
+        }
+      }
+      
+      // Display handicap history
+      function displayHandicapHistory(handicapData, memberId) {
+        if (!handicapData || handicapData.length === 0) return;
+        
+        const memberName = Array.from(memberSelect.options).find(opt => opt.value === memberId)?.text || 'Selected Member';
+        
+        historySection.innerHTML = '';
+        historySection.style.display = 'block';
+        
+        // Create heading
+        const heading = document.createElement('h3');
+        heading.textContent = `${memberName}'s Handicap History`;
+        historySection.appendChild(heading);
+        
+        // Create history cards container
+        const cardsContainer = document.createElement('div');
+        cardsContainer.className = 'history-cards';
+        
+        // Add cards for each handicap calculation
+        handicapData.forEach(item => {
+          const card = document.createElement('div');
+          card.className = 'history-card';
+          
+          const indexValue = document.createElement('div');
+          indexValue.className = 'history-index';
+          indexValue.textContent = `Index: ${item.index}`;
+          
+          const dateValue = document.createElement('div');
+          dateValue.className = 'history-date';
+          dateValue.textContent = `Calculated: ${new Date(item.calculatedAt).toLocaleDateString()}`;
+          
+          const roundsValue = document.createElement('div');
+          roundsValue.className = 'history-rounds';
+          roundsValue.textContent = `Rounds used: ${item.rounds || item.differentials?.length || 'Unknown'}`;
+          
+          card.appendChild(indexValue);
+          card.appendChild(dateValue);
+          card.appendChild(roundsValue);
+          
+          cardsContainer.appendChild(card);
+        });
+        
+        historySection.appendChild(cardsContainer);
+        
+        console.log(`Displayed ${handicapData.length} handicap records for ${memberName}`);
+      }
+      
+      // Export data to CSV
+      function exportToCSV() {
+        if (roundsTbody.children.length === 0) {
+          showMessage('No rounds to export.', 'error');
+          return;
+        }
+        
+        // Get selected member
+        const selectedMember = memberSelect.options[memberSelect.selectedIndex].text;
+        
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += `Handicap Data for ${selectedMember}\n`;
+        csvContent += "Course,Tee,Score,Course Rating,Slope Rating,Differential\n";
+        
+        Array.from(roundsTbody.children).forEach(row => {
+          const course = row.querySelector('.course-select').value;
+          const tee = row.querySelector('.tee-select').value;
+          const score = row.querySelector('.score-input').value;
+          const cr = row.querySelector('.cr-input').value;
+          const sr = row.querySelector('.sr-input').value;
+          const diff = row.querySelector('.differential').textContent;
+          
+          csvContent += `${course},${tee},${score},${cr},${sr},${diff}\n`;
+        });
+        
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `${selectedMember.replace(/\s+/g, '_')}_handicap_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        showMessage('Exported to CSV file.', 'success');
+        console.log("Exported CSV file");
+      }
+      
+      // Show status message
+      function showMessage(message, type) {
+        // Use BBB_UTILS if available, otherwise show a basic alert
+        if (typeof BBB_UTILS !== 'undefined' && typeof BBB_UTILS.showMessage === 'function') {
+          BBB_UTILS.showMessage(message, type);
+        } else {
+          const statusMessage = document.getElementById('status-message');
+          if (statusMessage) {
+            statusMessage.textContent = message;
+            statusMessage.className = type;
+            statusMessage.style.display = 'block';
+            
+            setTimeout(() => {
+              statusMessage.style.display = 'none';
+            }, 3000);
+          } else {
+            // Last resort: use alert
+            alert(message);
+          }
+        }
+        
+        console.log(`[${type}] ${message}`);
+      }
+      
+      // Initialize page
+      async function initializePage() {
+        console.log("Initializing page...");
+        
+        // Set up event handlers
+        helpToggle.addEventListener('click', function() {
+          if (helpSection.style.display === 'none') {
+            helpSection.style.display = 'block';
+            helpToggle.textContent = 'Hide Help';
+          } else {
+            helpSection.style.display = 'none';
+            helpToggle.textContent = 'Show Help';
+          }
+        });
+        
+        memberSelect.addEventListener('change', function() {
+          loadSavedHandicap(this.value);
+        });
+        
+        addButton.addEventListener('click', addRoundInput);
+        calculateButton.addEventListener('click', calculateHandicap);
+        resetButton.addEventListener('click', resetCalculator);
+        saveButton.addEventListener('click', saveHandicap);
+        exportButton.addEventListener('click', exportToCSV);
+        
+        // Initial setup
+        await populateMembersDropdown();
+        checkAdminStatus();
+        
+        // Add initial rounds
+        for (let i = 0; i < 3; i++) {
+          addRoundInput();
+        }
+        
+        // Load saved handicap data for current selection
+        if (memberSelect.value) {
+          loadSavedHandicap(memberSelect.value);
+        }
+        
+        console.log("Page initialization complete");
+      }
+    });
+  </script>
+</body>
+</html>
